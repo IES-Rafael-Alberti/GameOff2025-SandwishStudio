@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="enemyRes" load_steps=3 format=3 uid="uid://ywdlvck2e5yw"]
+
+[ext_resource type="Script" uid="uid://bd1qpluesymyw" path="res://scripts/enemy_res.gd" id="1_hxl6u"]
+[ext_resource type="Texture2D" uid="uid://bc53pxg4hm60e" path="res://assets/Tiny Swords (Free Pack)/Units/Blue Units/Warrior/Warrior_Icon.png" id="2_xjl0f"]
+
+[resource]
+script = ExtResource("1_hxl6u")
+sprite = ExtResource("2_xjl0f")
+health = 15
+damage = 3
+metadata/_custom_type_script = "uid://bd1qpluesymyw"
