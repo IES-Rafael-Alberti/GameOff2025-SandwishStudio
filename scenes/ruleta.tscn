@@ -1,0 +1,28 @@
+[gd_scene load_steps=3 format=3 uid="uid://cfyr763mwbq0y"]
+
+[ext_resource type="Texture2D" uid="uid://d1mlijsssb3uc" path="res://assets/ruleta.png" id="1_g185a"]
+[ext_resource type="Texture2D" uid="uid://cke6unb6dfjoq" path="res://assets/manilla.png" id="2_nxfo3"]
+
+[node name="ruleta" type="Area2D"]
+
+[node name="ruletaImg" type="Sprite2D" parent="."]
+position = Vector2(589, 315)
+scale = Vector2(0.78099173, 0.8151815)
+texture = ExtResource("1_g185a")
+
+[node name="manilla" type="Sprite2D" parent="."]
+texture = ExtResource("2_nxfo3")
+
+[node name="Timer" type="Timer" parent="."]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="LineEdit" type="LineEdit" parent="CanvasLayer"]
+offset_right = 68.5625
+offset_bottom = 31.0
+metadata/_edit_use_anchors_ = true
+
+[node name="Button" type="Button" parent="CanvasLayer"]
+offset_right = 8.0
+offset_bottom = 8.0
+metadata/_edit_use_anchors_ = true
