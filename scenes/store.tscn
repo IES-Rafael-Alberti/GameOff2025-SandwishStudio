@@ -1,69 +1,88 @@
-[gd_scene load_steps=2 format=3 uid="uid://bwh1obe7043i"]
+[gd_scene load_steps=15 format=3 uid="uid://bwh1obe7043i"]
 
+[ext_resource type="Script" uid="uid://boom6onvffdah" path="res://scripts/store.gd" id="1_atuvt"]
 [ext_resource type="Texture2D" uid="uid://dthf2y24tgfel" path="res://icon.svg" id="1_jmp1n"]
+[ext_resource type="PackedScene" uid="uid://d1bt4bqhrnuj8" path="res://scenes/pieces/piece_1.tscn" id="2_tmp5q"]
+[ext_resource type="PackedScene" uid="uid://baqex7wccficm" path="res://scenes/pieces/piece_2.tscn" id="3_phafb"]
+[ext_resource type="PackedScene" uid="uid://bu7uh8mcooml7" path="res://scenes/pieces/piece_3.tscn" id="4_q788m"]
+[ext_resource type="PackedScene" uid="uid://dehbq2hmio0eo" path="res://scenes/pieces/piece_4.tscn" id="5_ipyd8"]
+[ext_resource type="PackedScene" uid="uid://cv5vorovyvj02" path="res://scenes/pieces/piece_5.tscn" id="6_3n2kn"]
+[ext_resource type="PackedScene" uid="uid://dnhcsy755ovc7" path="res://scenes/pieces/piece_6.tscn" id="7_fygda"]
+[ext_resource type="PackedScene" uid="uid://vt1ujwlyvws6" path="res://scenes/passives/passive_1.tscn" id="8_qmdad"]
+[ext_resource type="PackedScene" uid="uid://xcqvdpxnqfj2" path="res://scenes/passives/passive_2.tscn" id="9_2k66j"]
+[ext_resource type="PackedScene" uid="uid://cpms3s4rgy3c1" path="res://scenes/passives/passive_3.tscn" id="10_n3io3"]
+[ext_resource type="PackedScene" uid="uid://cmmsfforkbdbc" path="res://scenes/passives/passive_4.tscn" id="11_abbvk"]
+[ext_resource type="PackedScene" uid="uid://ctf4j5eeghmkd" path="res://scenes/passives/passive_5.tscn" id="12_3ro5p"]
+[ext_resource type="PackedScene" uid="uid://d0x2e7yi6xfwr" path="res://scenes/passives/passive_6.tscn" id="13_klwl8"]
 
 [node name="Store" type="Control"]
 layout_mode = 3
 anchors_preset = 0
+script = ExtResource("1_atuvt")
+piece_origins = Array[PackedScene]([ExtResource("2_tmp5q"), ExtResource("3_phafb"), ExtResource("4_q788m"), ExtResource("5_ipyd8"), ExtResource("6_3n2kn"), ExtResource("7_fygda")])
+passive_origins = Array[PackedScene]([ExtResource("8_qmdad"), ExtResource("9_2k66j"), ExtResource("10_n3io3"), ExtResource("11_abbvk"), ExtResource("12_3ro5p"), ExtResource("13_klwl8")])
 
 [node name="background" type="TextureRect" parent="."]
 layout_mode = 0
 offset_right = 1174.0
-offset_bottom = 780.0
+offset_bottom = 852.0
 texture = ExtResource("1_jmp1n")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 0
-offset_left = 10.0
-offset_top = -3.0
-offset_right = 1152.0
-offset_bottom = 757.0
+offset_left = 15.0
+offset_top = 18.0
+offset_right = 1157.0
+offset_bottom = 812.0
 theme_override_constants/separation = 49
 alignment = 1
 
-[node name="Label" type="Label" parent="VBoxContainer"]
+[node name="piece_label" type="Label" parent="VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "Piezas"
 horizontal_alignment = 1
 
-[node name="passive_zone" type="HBoxContainer" parent="VBoxContainer"]
+[node name="piece_zone" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_constants/separation = 100
+theme_override_constants/separation = 200
 
-[node name="passive_button" type="TextureButton" parent="VBoxContainer/passive_zone"]
-layout_mode = 2
-texture_normal = ExtResource("1_jmp1n")
-
-[node name="passive_button2" type="TextureButton" parent="VBoxContainer/passive_zone"]
-layout_mode = 2
-texture_normal = ExtResource("1_jmp1n")
-
-[node name="passive_button3" type="TextureButton" parent="VBoxContainer/passive_zone"]
-layout_mode = 2
-texture_normal = ExtResource("1_jmp1n")
-
-[node name="Label2" type="Label" parent="VBoxContainer"]
+[node name="passive_label" type="Label" parent="VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "Pasivas"
 horizontal_alignment = 1
 
-[node name="piece_zone" type="HBoxContainer" parent="VBoxContainer"]
+[node name="passive_zone" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_stretch_ratio = 0.85
-theme_override_constants/separation = 100
+theme_override_constants/separation = 200
 
-[node name="piece_button" type="TextureButton" parent="VBoxContainer/piece_zone"]
+[node name="Options" type="Label" parent="VBoxContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "Options"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 700
+
+[node name="Exit" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
 texture_normal = ExtResource("1_jmp1n")
 
-[node name="piece_button2" type="TextureButton" parent="VBoxContainer/piece_zone"]
+[node name="Reroll" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 4
 texture_normal = ExtResource("1_jmp1n")
 
-[node name="piece_button3" type="TextureButton" parent="VBoxContainer/piece_zone"]
-layout_mode = 2
-texture_normal = ExtResource("1_jmp1n")
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(666, 454)
+zoom = Vector2(0.5, 0.5)
+
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/Reroll" to="." method="generate"]
