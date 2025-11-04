@@ -1,9 +1,0 @@
-[gd_scene load_steps=3 format=3 uid="uid://d0x2e7yi6xfwr"]
-
-[ext_resource type="PackedScene" uid="uid://2716vy10ip3y" path="res://scenes/passive.tscn" id="1_d123x"]
-[ext_resource type="Texture2D" uid="uid://ykld66tx2edm" path="res://assets/passive_6.jpg" id="2_umbu5"]
-
-[node name="Passive" instance=ExtResource("1_d123x")]
-
-[node name="Sprite2D" parent="." index="0"]
-texture = ExtResource("2_umbu5")
