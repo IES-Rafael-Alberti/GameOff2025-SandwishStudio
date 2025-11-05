@@ -1,14 +1,27 @@
-[gd_scene load_steps=3 format=3 uid="uid://cfyr763mwbq0y"]
+[gd_scene load_steps=4 format=3 uid="uid://cfyr763mwbq0y"]
 
-[ext_resource type="Texture2D" uid="uid://d1mlijsssb3uc" path="res://assets/ruleta.png" id="1_g185a"]
+[ext_resource type="Texture2D" uid="uid://dgunflwflieu" path="res://assets/ruletaVacia.png" id="1_cd13u"]
+[ext_resource type="PackedScene" uid="uid://drbmwv42dfyy0" path="res://scenes/slot_roulette.tscn" id="2_cd13u"]
 [ext_resource type="Texture2D" uid="uid://cke6unb6dfjoq" path="res://assets/manilla.png" id="2_nxfo3"]
 
 [node name="ruleta" type="Area2D"]
 
 [node name="ruletaImg" type="Sprite2D" parent="."]
-position = Vector2(589, 315)
-scale = Vector2(0.78099173, 0.8151815)
-texture = ExtResource("1_g185a")
+position = Vector2(313.00003, 243.00002)
+scale = Vector2(1.5268227, 1.2021451)
+texture = ExtResource("1_cd13u")
+
+[node name="SlotRoulette" parent="ruletaImg" instance=ExtResource("2_cd13u")]
+position = Vector2(-19.648666, -61.556625)
+scale = Vector2(0.65495485, 0.8318463)
+
+[node name="SlotRoulette2" parent="ruletaImg" instance=ExtResource("2_cd13u")]
+position = Vector2(-47.81172, -32.442017)
+scale = Vector2(0.65495485, 0.8318463)
+
+[node name="SlotRoulette3" parent="ruletaImg" instance=ExtResource("2_cd13u")]
+position = Vector2(17.028809, -57.3974)
+scale = Vector2(0.65495485, 0.8318463)
 
 [node name="manilla" type="Sprite2D" parent="."]
 texture = ExtResource("2_nxfo3")
