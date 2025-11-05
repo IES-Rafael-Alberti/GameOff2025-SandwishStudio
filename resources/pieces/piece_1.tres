@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="PieceData" load_steps=3 format=3 uid="uid://dateynk6k5fui"]
+
+[ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="1_ef00e"]
+[ext_resource type="Texture2D" uid="uid://cq7w8ni3xtem7" path="res://assets/piece_1.jpg" id="1_ycaiq"]
+
+[resource]
+script = ExtResource("1_ef00e")
+icon = ExtResource("1_ycaiq")
+metadata/_custom_type_script = "uid://8urlsjkkl8pw"
