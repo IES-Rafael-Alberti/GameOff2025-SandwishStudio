@@ -167,33 +167,73 @@ func _on_item_selected_from_slot(data: Resource) -> void:
 """
 Elimina UNA unidad de un item (Pieza o Pasivo) del inventario.
 """
-func remove_item(data: Resource) -> bool:
-	if not data:
-		push_error("remove_item: Se intentó eliminar un item NULO.")
-		return false
+# En Inventory.gd
+
+## ------------------------------------------------------------------
+## Funciones Privadas (Nueva función de compactado)
+## ------------------------------------------------------------------
+
+# ... (tus funciones _find_empty_slot y _get_item_id) ...
+
+
+"""
+Compacta los slots de pasivos.
+Busca el primer slot vacío y mueve el siguiente item disponible
+a ese hueco. Repite hasta que no queden huecos.
+"""
+func _compact_passive_slots() -> void:
+	print("--- Compactando slots de pasivos... ---")
+	
+	for i in range(passive_slots.size() - 1):
+		var current_slot: Node = passive_slots[i]
 		
-	print("--- remove_item() llamado con: %s ---" % data.resource_name)
+		if not current_slot.is_empty():
+			continue
+			
+		var next_item_slot: Node = null
+		var next_item_index = -1
+		
+		for j in range(i + 1, passive_slots.size()):
+			if not passive_slots[j].is_empty():
+				next_item_slot = passive_slots[j]
+				next_item_index = j
+				break
+		
+		if next_item_slot:
+			print("... Moviendo item del slot %d al slot %d" % [next_item_index, i])
+			
+			var item_data_to_move: Resource = next_item_slot.item_data
+			var item_count: int = next_item_slot.current_count
+			
+			current_slot.set_item(item_data_to_move)
+			current_slot.update_count(item_count)
+			
+			next_item_slot.clear_slot()
+			
+			var id = _get_item_id(item_data_to_move)
+			if passive_counts.has(id):
+				passive_counts[id]["slot_node"] = current_slot
+			else:
+				push_warning("Compactar: El item movido no estaba en passive_counts.")
+				
+		else:
+			print("... No se encontraron más items. Compactado finalizado.")
+			break
+
+func remove_item(data: Resource) -> bool:
+	
 
 	var inventory_map: Dictionary
-	var id: String = _get_item_id(data) # Usamos la misma ID que en add_item
+	var id: String = _get_item_id(data)
+	
+	var is_passive_item: bool = false
+	# --------------------
 
-	# 1. Determinar qué diccionario usar
 	if data is PieceData:
 		inventory_map = piece_counts
 	elif data is PassiveData:
 		inventory_map = passive_counts
-	else:
-		push_error("remove_item: Tipo de dato no reconocido.")
-		return false
-
-	# 2. Comprobar si tenemos ese item
-	if not inventory_map.has(id):
-		# Esto podría pasar si el drag-and-drop es incorrecto,
-		# pero es bueno tener la comprobación.
-		push_warning("remove_item: Se intentó eliminar un item que no está en el inventario: %s" % id)
-		return false
-
-	# 3. Obtener la entrada y reducir el contador
+		is_passive_item = true 
 	var entry = inventory_map[id]
 	entry["count"] -= 1
 	
@@ -201,22 +241,22 @@ func remove_item(data: Resource) -> bool:
 
 	var slot_node: Node = entry["slot_node"]
 
-	# 4. Decidir si actualizar el contador o limpiar el slot
 	if entry["count"] > 0:
-		# Aún quedan items, solo actualizar el contador visual
 		if slot_node and slot_node.has_method("update_count"):
 			slot_node.update_count(entry["count"])
 		else:
 			push_error("remove_item: El slot_node es inválido o no tiene update_count().")
 	else:
-		# Se acabó el stack (contador a 0), limpiar el slot y borrar la entrada
 		if slot_node and slot_node.has_method("clear_slot"):
 			slot_node.clear_slot()
 		else:
 			push_error("remove_item: El slot_node es inválido o no tiene clear_slot().")
 		
-		# Elimina la entrada del diccionario
 		inventory_map.erase(id)
 		print("... Contador a cero. Eliminando item del diccionario.")
+		
+		if is_passive_item:
+			_compact_passive_slots()
+		# -----------------------------------
 
 	return true
