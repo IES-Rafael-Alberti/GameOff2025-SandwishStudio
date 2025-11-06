@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://drbmwv42dfyy0"]
-
-[ext_resource type="Script" uid="uid://d1uk5d0rqlvqx" path="res://scripts/drop_queso.gd" id="1_hqfal"]
-
-[node name="SlotRoulette" type="Marker2D" groups=["dropable"]]
-script = ExtResource("1_hqfal")

@@ -1,58 +1,87 @@
-extends Control
+extends Node2D
 
-@export_multiline var description: String
-@export var piece_origin: PackedScene
-@onready var sprite_2d: Sprite2D = $Sprite2D
+var dragging: bool = false
+var offset: Vector2 = Vector2.ZERO
+var original_parent: Node
+var original_index: int
+var original_position: Vector2
 
-var draggable = false
-var is_inside_dropable = false
-var body_ref
+@onready var area: Area2D = $Area2D
+@onready var drag_layer: Node = $"../DragLayer"
+var overlapped_slots: Array[Area2D] = []
 
-func _ready() -> void:
-	if piece_origin:
-		var piece_instanced = piece_origin.instantiate()
-		var sprite_in_piece = piece_instanced.find_child("Sprite2D", true, false)
+func _ready():
+    area.input_pickable = true
+    area.connect("input_event", _on_input_event)
+    area.connect("area_entered", _on_area_entered)
+    area.connect("area_exited", _on_area_exited)
 
-		if sprite_in_piece and sprite_in_piece.texture:
-			sprite_2d.texture = sprite_in_piece.texture
+func _on_input_event(_viewport, event, _shape_idx):
+    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+        if event.pressed:
+            _start_drag()
+        else:
+            _stop_drag()
 
-		piece_instanced.queue_free()
-		
-func _process(delta):
-	if draggable:
-		if Input.is_action_just_pressed("click"):
-			initialPos = global_position
-			offset = get_global_mouse_position() - global_position
-			global.is_dragging = true
-		if Input.is_action_just_pressed("click"):
-			global_position = get_global_mouse_position() - offset
-		elif Input.is_action_just_pressed("click"):
-			global.is_dragging = false
-			var tween = get_tree().create_tween()
-			if is_inside_dropable:
-				tween.tween_property(self, "position", body_ref.position,0.2).set_case(Tween.EASE_OUT)
-			else:
-				tween.tween_property(self, "position", body_ref.position,0.2).set_case(Tween.EASE_OUT)
-		
-func _on_area_2d_mouse_entered(area):
-	if not global.is_dragging:
-		draggable = true
-		scale= Vector2(1.05, 1.05)
+func _unhandled_input(event):
+    if dragging and event is InputEventMouseButton and not event.pressed:
+        _stop_drag()
 
-func _on_area_2d_area_exited(area):
-	if not global.is_dragging:
-		draggable = false
-		scale= Vector2(1, 1)
-		
-func _on_area_2d_body_entered(body):
-	if body.is_in_group('dropable'):
-		is_inside_dropable = true
-		body.modulate = Color(Color.REBECCA_PURPLE, 1)
-		body_ref = body
-	
+func _input(event):
+    if dragging and event is InputEventMouseMotion:
+        global_position = global_position.lerp(event.global_position - offset, 0.5)
 
-func _on_area_2d_body_exited(body):
-	if body.is_in_group('dropable'):
-		is_inside_dropable = false
-		body.modulate = Color(Color.MEDIUM_PURPLE, 0.7)
-	
+func _start_drag():
+    dragging = true
+    original_position = global_position
+    offset = get_global_mouse_position() - global_position
+    original_parent = get_parent()
+    original_index = get_index()
+    original_parent.remove_child(self)
+    drag_layer.add_child(self)
+
+func _stop_drag():
+    dragging = false
+    var slot = _get_best_slot()
+
+    if slot:
+        drag_layer.remove_child(self)
+        slot.add_child(self)
+
+        var t = create_tween()
+        t.tween_property(self, "global_position", slot.global_position, 0.15).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+        t.tween_property(self, "scale", Vector2(1.2, 1.2), 0.1)
+        t.tween_property(self, "scale", Vector2(1,1), 0.1).set_delay(0.1)
+    else:
+        drag_layer.remove_child(self)
+        original_parent.add_child(self)
+        original_parent.move_child(self, original_index)
+
+        create_tween().tween_property(self, "global_position", original_position, 0.15).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+func _on_area_entered(slot: Area2D):
+    if not overlapped_slots.has(slot):
+        overlapped_slots.append(slot)
+        _highlight_slot(slot, true)
+
+func _on_area_exited(slot: Area2D):
+    overlapped_slots.erase(slot)
+    _highlight_slot(slot, false)
+
+func _get_best_slot() -> Area2D:
+    if overlapped_slots.is_empty():
+        return null
+    var closest_slot: Area2D
+    var closest_dist = INF
+    for slot in overlapped_slots:
+        var dist = global_position.distance_to(slot.global_position)
+        if dist < closest_dist:
+            closest_dist = dist
+            closest_slot = slot
+    return closest_slot
+
+func _highlight_slot(slot: Area2D, enter: bool):
+    if not slot:
+        return
+    var target_scale = Vector2(1.2, 1.2) if enter else Vector2(1, 1)
+  

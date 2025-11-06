@@ -1,0 +1,139 @@
+[gd_scene load_steps=8 format=3 uid="uid://c2wj1k0bbhih8"]
+
+[ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_d8q6m"]
+[ext_resource type="Texture2D" uid="uid://dgunflwflieu" path="res://assets/ruletaVacia.png" id="2_mmedl"]
+[ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="3_rleqp"]
+[ext_resource type="Texture2D" uid="uid://cke6unb6dfjoq" path="res://assets/manilla.png" id="4_jwrv3"]
+[ext_resource type="PackedScene" uid="uid://ckj0vt4dlrkx0" path="res://scenes/piece.tscn" id="5_bwak5"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nqo7r"]
+size = Vector2(20.00003, 20)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_t1x4v"]
+height = 92.0
+
+[node name="RuletaScene" type="Node2D" groups=["roulette"]]
+script = ExtResource("1_d8q6m")
+
+[node name="SpriteRuleta" type="Sprite2D" parent="."]
+position = Vector2(519, 341)
+scale = Vector2(2.5, 2.5)
+texture = ExtResource("2_mmedl")
+
+[node name="Segmentos10" type="Area2D" parent="SpriteRuleta"]
+position = Vector2(-225.59999, -66.400024)
+scale = Vector2(0.9999996, 0.9999996)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Segmentos10"]
+position = Vector2(118.8, 59.200005)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos9" type="Area2D" parent="SpriteRuleta"]
+position = Vector2(-149.2, 35.199966)
+scale = Vector2(0.99999976, 0.99999976)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Segmentos9"]
+position = Vector2(118.8, 59.200005)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos8" type="Area2D" parent="SpriteRuleta"]
+position = Vector2(-56.39998, -173.99997)
+scale = Vector2(0.99999976, 0.99999976)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Segmentos8"]
+position = Vector2(-23.199993, 114.000015)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos7" type="Area2D" parent="SpriteRuleta"]
+position = Vector2(-0.8000032, 27.599993)
+scale = Vector2(0.99999976, 0.99999976)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Segmentos7"]
+position = Vector2(105.20002, -30.800007)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos6" type="Area2D" parent="SpriteRuleta"]
+position = Vector2(-58.399994, -170.40002)
+scale = Vector2(0.99999976, 0.99999976)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Segmentos6"]
+position = Vector2(86, 268.4)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos4" type="Area2D" parent="SpriteRuleta"]
+position = Vector2(-37.59999, -115.99999)
+scale = Vector2(0.99999976, 0.99999976)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Segmentos4"]
+position = Vector2(118.8, 59.200005)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos5" type="Area2D" parent="SpriteRuleta"]
+position = Vector2(-50.399994, -120.8)
+scale = Vector2(0.9999998, 0.9999998)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Segmentos5"]
+position = Vector2(-40.79999, 177.59999)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos" type="Area2D" parent="SpriteRuleta"]
+position = Vector2(-18.800003, -58.000008)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Segmentos"]
+position = Vector2(102, 120.79999)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos2" type="Area2D" parent="SpriteRuleta"]
+position = Vector2(-18.800003, -58.000008)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Segmentos2"]
+position = Vector2(50.4, -35.200005)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos3" type="Area2D" parent="SpriteRuleta"]
+position = Vector2(-31.600002, -62.800014)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Segmentos3"]
+position = Vector2(-7.1999936, -36.400005)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="SlotPiece" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
+offset_left = 36.4
+offset_top = 25.200003
+offset_right = 75.4
+offset_bottom = 62.200005
+
+[node name="Manecilla" type="Area2D" parent="."]
+position = Vector2(489, 6)
+
+[node name="SpriteManecilla" type="Sprite2D" parent="Manecilla"]
+position = Vector2(12.999979, 8.027407)
+scale = Vector2(0.5063292, 0.43751958)
+texture = ExtResource("4_jwrv3")
+offset = Vector2(0, 80)
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Manecilla"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Manecilla"]
+position = Vector2(14, 42)
+shape = SubResource("CapsuleShape2D_t1x4v")
+
+[node name="Timer" type="Timer" parent="."]
+
+[node name="piece" parent="." instance=ExtResource("5_bwak5")]
+position = Vector2(84, 116)
+
+[node name="DragLayer" type="CanvasLayer" parent="."]
+
+[node name="piece2" parent="." instance=ExtResource("5_bwak5")]
+position = Vector2(202, 116)
+
+[node name="piece3" parent="." instance=ExtResource("5_bwak5")]
+position = Vector2(103, 394)
+
+[node name="piece4" parent="." instance=ExtResource("5_bwak5")]
+position = Vector2(172, 136)
+scale = Vector2(0.7199992, 1)
+
+[connection signal="area_entered" from="Manecilla" to="." method="_on_AreaManecilla_area_entered"]
+[connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
