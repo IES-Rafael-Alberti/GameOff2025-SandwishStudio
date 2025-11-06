@@ -1,0 +1,40 @@
+[gd_scene load_steps=2 format=3 uid="uid://0dvayl6271no"]
+
+[ext_resource type="Script" uid="uid://bw0d7s71m5dov" path="res://scripts/combat_scene.gd" id="1_ivkwx"]
+
+[node name="combat_scene" type="Node2D"]
+script = ExtResource("1_ivkwx")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(576, 320)
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Control" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="BoxContainer" type="BoxContainer" parent="UI/Control"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 224.0
+offset_right = 704.0
+offset_bottom = 624.0
+
+[node name="BtnAlly" type="Button" parent="UI/Control/BoxContainer"]
+layout_mode = 2
+size_flags_vertical = 8
+text = "Generate Ally"
+
+[node name="BtnEnemy" type="Button" parent="UI/Control/BoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+text = "Generate Enemy"
+
+[node name="BtnStart" type="Button" parent="UI/Control/BoxContainer"]
+layout_mode = 2
+size_flags_vertical = 8
+text = "Start Battle"

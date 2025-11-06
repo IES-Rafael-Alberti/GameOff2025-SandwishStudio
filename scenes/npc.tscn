@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=3 uid="uid://bekys0sh7i1sf"]
+
+[ext_resource type="SpriteFrames" uid="uid://rjwlxoj38qir" path="res://resourses/warrior/red_warrior_animation.tres" id="2_abqhh"]
+[ext_resource type="Script" uid="uid://dkh16s35ytd1p" path="res://scripts/npc.gd" id="2_rv78h"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_abqhh"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_abqhh"]
+bg_color = Color(0.39513198, 0.8288472, 0.40690893, 1)
+
+[node name="npc" type="AnimatedSprite2D"]
+sprite_frames = SubResource("SpriteFrames_abqhh")
+script = ExtResource("2_rv78h")
+
+[node name="healthBar" type="ProgressBar" parent="."]
+custom_minimum_size = Vector2(50, 4)
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -136.0
+offset_top = -88.0
+offset_right = -56.0
+offset_bottom = -61.0
+grow_horizontal = 2
+theme_override_styles/fill = SubResource("StyleBoxFlat_abqhh")
+show_percentage = false
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+visible = false
+sprite_frames = ExtResource("2_abqhh")
+animation = &"idle"
+frame_progress = 0.5354015
