@@ -1,131 +1,222 @@
 extends Control
 
+## ------------------------------------------------------------------
+## Nodos y Exportaciones
+## ------------------------------------------------------------------
 @onready var piece_inventory: GridContainer = $piece_inventory
 @onready var passive_inventory: GridContainer = $passive_inventory
-@export  var font_size := 30
 
 @export var max_pieces: int = 6
 @export var max_passives: int = 30
 
+@export var inventory_slot_scene: PackedScene 
+
+## ------------------------------------------------------------------
+## Datos del Inventario
+## ------------------------------------------------------------------
 var piece_counts: Dictionary = {}
 var passive_counts: Dictionary = {}
 
-func add_item(data):
+var piece_slots: Array[Node] = []
+var passive_slots: Array[Node] = []
+
+## ------------------------------------------------------------------
+## Funciones de Godot
+## ------------------------------------------------------------------
+
+func _ready() -> void:
+	
+	# 1. Asegurarnos de que la escena del slot fue asignada
+	if not inventory_slot_scene:
+		push_error("¡La variable 'Inventory Slot Scene' no está asignada en el script Inventory.gd!")
+		return
+
+	# 2. Generar los slots de piezas
+	for i in range(max_pieces):
+		var new_slot = inventory_slot_scene.instantiate()
+		piece_inventory.add_child(new_slot) # Añadirlo al GridContainer
+		
+		piece_slots.append(new_slot) 
+		if new_slot.has_signal("item_selected"):
+			new_slot.item_selected.connect(_on_item_selected_from_slot)
+
+
+	# 3. Generar los slots de pasivos
+	for i in range(max_passives):
+		var new_slot = inventory_slot_scene.instantiate()
+		passive_inventory.add_child(new_slot)
+		
+		passive_slots.append(new_slot)
+		if new_slot.has_signal("item_selected"):
+			new_slot.item_selected.connect(_on_item_selected_from_slot)
+
+	# 4. Imprimir la confirmación (el "Chivato" de antes)
+	print("Inventory _ready: Generados %d slots de piezas y %d slots de pasivos." % [piece_slots.size(), passive_slots.size()])
+
+
+## ------------------------------------------------------------------
+## Funciones Públicas 
+## ------------------------------------------------------------------
+
+"""
+Comprueba si se puede añadir un item al inventario correspondiente.
+"""
+func can_add_item(data: Resource) -> bool:
+	var inventory_map: Dictionary
+	var slot_array: Array
+	var id: String = _get_item_id(data)
+
+	if data is PieceData:
+		inventory_map = piece_counts
+		slot_array = piece_slots
+	elif data is PassiveData:
+		inventory_map = passive_counts
+		slot_array = passive_slots
+	else:
+		return false 
+
+	var can_stack = inventory_map.has(id)
+	var has_empty_slot = _find_empty_slot(slot_array) != null
+	
+	return can_stack or has_empty_slot
+
+
+"""
+Añade un item (Pieza o Pasivo) al inventario.
+"""
+func add_item(data: Resource) -> bool:
+	if not data:
+		push_error("add_item: Se intentó añadir un item NULO.")
+		return false
+		
+	print("--- add_item() llamado con: %s ---" % data.resource_name)
+
 	if not can_add_item(data):
-		print("❌ No hay espacio en el inventario para", data)
+		print("... FALLO: can_add_item devolvió false. Inventario probablemente lleno.")
 		return false
 
-	# --- PIEZAS ---
+	var inventory_map: Dictionary
+	var slot_array: Array
+	var id: String = _get_item_id(data)
+
 	if data is PieceData:
-		var id = _get_piece_id(data)
-
-		if piece_counts.has(id):
-			piece_counts[id]["count"] += 1
-			_update_piece_label(id)
-			return true
-
-		var button_container := VBoxContainer.new()
-		button_container.alignment = BoxContainer.ALIGNMENT_CENTER
-		button_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-		var button := TextureButton.new()
-		button.texture_normal = data.icon
-		button.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
-		button.set_meta("data", data)
-		button.pressed.connect(_on_item_pressed.bind(button))
-
-
-		var uses_label := Label.new()
-		uses_label.text = "Usos: %d" % data.uses
-		uses_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		uses_label.add_theme_font_size_override("font_size", font_size)
-
-		var count_label := Label.new()
-		count_label.text = "x1"
-		count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		count_label.add_theme_font_size_override("font_size", font_size)
-
-		button_container.add_child(button)
-		button_container.add_child(uses_label)
-		button_container.add_child(count_label)
-		piece_inventory.add_child(button_container)
-
-		piece_counts[id] = {
-			"button_container": button_container,
-			"button": button,
-			"count_label": count_label,
-			"uses_label": uses_label,
-			"count": 1,
-			"data": data
-		}
-
-	# --- PASIVOS ---
+		inventory_map = piece_counts
+		slot_array = piece_slots
 	elif data is PassiveData:
-		var id = _get_piece_id(data)
+		inventory_map = passive_counts
+		slot_array = passive_slots
+	else:
+		return false
 
-		if passive_counts.has(id):
-			passive_counts[id]["count"] += 1
-			_update_passive_label(id)
-			return true
+	# Lógica de Apilamiento (Stacking)
+	if inventory_map.has(id):
+		print("... Item ya existe. Apilando.")
+		var entry = inventory_map[id]
+		entry["count"] += 1
+		var slot_node: Node = entry["slot_node"]
+		if slot_node and slot_node.has_method("update_count"):
+			slot_node.update_count(entry["count"])
+		return true
 
-		var button_container := VBoxContainer.new()
-		button_container.alignment = BoxContainer.ALIGNMENT_CENTER
-		button_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# Lógica de Nuevo Item (en un slot vacío)
+	var empty_slot: Node = _find_empty_slot(slot_array)
+	
+	if empty_slot:
+		print("... Item nuevo. Slot vacío encontrado. Asignando item.")
+		if empty_slot.has_method("set_item"):
+			empty_slot.set_item(data)
 
-		var button := TextureButton.new()
-		button.texture_normal = data.icon
-		button.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
-		button.set_meta("data", data)
-		button.pressed.connect(_on_item_pressed.bind(button))
-
-		var count_label := Label.new()
-		count_label.text = "x1"
-		count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		count_label.add_theme_font_size_override("font_size", font_size)
-
-		button_container.add_child(button)
-		button_container.add_child(count_label)
-		passive_inventory.add_child(button_container)
-
-		passive_counts[id] = {
-			"button_container": button_container,
-			"button": button,
-			"count_label": count_label,
+		var new_entry = {
 			"count": 1,
-			"data": data
+			"data": data,
+			"slot_node": empty_slot 
 		}
-	return true
+		inventory_map[id] = new_entry
+		return true
+
+	print("... FALLO INESPERADO: No se pudo apilar ni encontrar slot vacío.")
+	return false 
 
 
-func can_add_item(data) -> bool:
-	if data is PieceData:
-		return piece_inventory.get_child_count() < max_pieces or piece_counts.has(_get_piece_id(data))
-	elif data is PassiveData:
-		return passive_inventory.get_child_count() < max_passives or passive_counts.has(_get_piece_id(data))
-	return false
+## ------------------------------------------------------------------
+## Funciones Privadas 
+## ------------------------------------------------------------------
+
+func _find_empty_slot(slot_array: Array) -> Node:
+	for slot in slot_array:
+		if slot.has_method("is_empty") and slot.is_empty():
+			return slot
+	return null 
 
 
-func _on_item_pressed(button: TextureButton) -> void:
-	var data = button.get_meta("data")
-	if data:
-		print("Has seleccionado:", data.type)
-
-
-func _update_piece_label(id: String) -> void:
-	if not piece_counts.has(id):
-		return
-	var entry = piece_counts[id]
-	entry["count_label"].text = "x%d" % entry["count"]
-
-
-func _update_passive_label(id: String) -> void:
-	if not passive_counts.has(id):
-		return
-	var entry = passive_counts[id]
-	entry["count_label"].text = "x%d" % entry["count"]
-
-
-func _get_piece_id(data: Resource) -> String:
-	if typeof(data) == TYPE_OBJECT and data.resource_path != "":
+func _get_item_id(data: Resource) -> String:
+	if data.resource_path.is_empty() == false:
 		return data.resource_path
 	return "%s_%d" % [data.get_class(), data.get_instance_id()]
+
+
+## ------------------------------------------------------------------
+## Conexiones de Señales
+## ------------------------------------------------------------------
+
+func _on_item_selected_from_slot(data: Resource) -> void:
+	if data:
+		print("Has seleccionado el item: ", data.resource_name)
+		
+
+"""
+Elimina UNA unidad de un item (Pieza o Pasivo) del inventario.
+"""
+func remove_item(data: Resource) -> bool:
+	if not data:
+		push_error("remove_item: Se intentó eliminar un item NULO.")
+		return false
+		
+	print("--- remove_item() llamado con: %s ---" % data.resource_name)
+
+	var inventory_map: Dictionary
+	var id: String = _get_item_id(data) # Usamos la misma ID que en add_item
+
+	# 1. Determinar qué diccionario usar
+	if data is PieceData:
+		inventory_map = piece_counts
+	elif data is PassiveData:
+		inventory_map = passive_counts
+	else:
+		push_error("remove_item: Tipo de dato no reconocido.")
+		return false
+
+	# 2. Comprobar si tenemos ese item
+	if not inventory_map.has(id):
+		# Esto podría pasar si el drag-and-drop es incorrecto,
+		# pero es bueno tener la comprobación.
+		push_warning("remove_item: Se intentó eliminar un item que no está en el inventario: %s" % id)
+		return false
+
+	# 3. Obtener la entrada y reducir el contador
+	var entry = inventory_map[id]
+	entry["count"] -= 1
+	
+	print("... Item encontrado. Reduciendo contador a: %d" % entry["count"])
+
+	var slot_node: Node = entry["slot_node"]
+
+	# 4. Decidir si actualizar el contador o limpiar el slot
+	if entry["count"] > 0:
+		# Aún quedan items, solo actualizar el contador visual
+		if slot_node and slot_node.has_method("update_count"):
+			slot_node.update_count(entry["count"])
+		else:
+			push_error("remove_item: El slot_node es inválido o no tiene update_count().")
+	else:
+		# Se acabó el stack (contador a 0), limpiar el slot y borrar la entrada
+		if slot_node and slot_node.has_method("clear_slot"):
+			slot_node.clear_slot()
+		else:
+			push_error("remove_item: El slot_node es inválido o no tiene clear_slot().")
+		
+		# Elimina la entrada del diccionario
+		inventory_map.erase(id)
+		print("... Contador a cero. Eliminando item del diccionario.")
+
+	return true
