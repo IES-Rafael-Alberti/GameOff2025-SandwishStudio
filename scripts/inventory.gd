@@ -2,12 +2,11 @@ extends Control
 
 @onready var piece_inventory: GridContainer = $piece_inventory
 @onready var passive_inventory: GridContainer = $passive_inventory
-@export  var font_size := 20
+@export  var font_size := 30
 
 @export var max_pieces: int = 6
 @export var max_passives: int = 30
 
-# Diccionarios para registrar lo comprado
 var piece_counts: Dictionary = {}
 var passive_counts: Dictionary = {}
 
@@ -35,15 +34,12 @@ func add_item(data):
 		button.set_meta("data", data)
 		button.pressed.connect(_on_item_pressed.bind(button))
 
-		# Fuente grande
 
-		# Label de usos
 		var uses_label := Label.new()
 		uses_label.text = "Usos: %d" % data.uses
 		uses_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		uses_label.add_theme_font_size_override("font_size", font_size)
 
-		# Label de cantidad
 		var count_label := Label.new()
 		count_label.text = "x1"
 		count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -81,9 +77,6 @@ func add_item(data):
 		button.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
 		button.set_meta("data", data)
 		button.pressed.connect(_on_item_pressed.bind(button))
-
-		# 💪 compensar el scale 0.5 (36px = se verá como 18px)
-		var font_size := 36
 
 		var count_label := Label.new()
 		count_label.text = "x1"
