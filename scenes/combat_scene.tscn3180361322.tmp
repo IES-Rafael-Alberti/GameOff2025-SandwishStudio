@@ -43,19 +43,19 @@ texture = ExtResource("2_ofoda")
 position = Vector2(-375, -5)
 
 [node name="AllySpawn1" type="Marker2D" parent="."]
-position = Vector2(238, -17)
+position = Vector2(321, 44)
 
 [node name="AllySpawn2" type="Marker2D" parent="."]
-position = Vector2(122, 140)
+position = Vector2(319, -6)
 
 [node name="AllySpawn3" type="Marker2D" parent="."]
-position = Vector2(350, -95)
+position = Vector2(323, 164)
 
 [node name="AllySpawn4" type="Marker2D" parent="."]
-position = Vector2(-1, -8)
+position = Vector2(324, -128)
 
 [node name="AllySpawn5" type="Marker2D" parent="."]
-position = Vector2(299, 112)
+position = Vector2(327, 102)
 
 [node name="AllySpawn6" type="Marker2D" parent="."]
-position = Vector2(106, -83)
+position = Vector2(318, -63)

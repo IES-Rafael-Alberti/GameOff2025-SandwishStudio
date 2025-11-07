@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://htgfpif7ey68"]
+
+[ext_resource type="Script" uid="uid://b31agultlt6fo" path="res://scripts/slot.gd" id="1_maf36"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_omn3e"]
+
+[node name="SlotPiece" type="Control" groups=["slot"]]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 39.0
+offset_bottom = 37.0
+scale = Vector2(0.29054677, 0.30135566)
+
+[node name="Area2D" type="Area2D" parent="." groups=["slot"]]
+script = ExtResource("1_maf36")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(21, 16)
+shape = SubResource("CapsuleShape2D_omn3e")
