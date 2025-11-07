@@ -6,3 +6,4 @@ class_name PieceData
 @export var icon: Texture2D
 @export var uses: int = 1
 @export var type: String 
+@export var price: int

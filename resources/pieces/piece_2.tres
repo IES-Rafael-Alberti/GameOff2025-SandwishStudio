@@ -6,4 +6,5 @@
 [resource]
 script = ExtResource("1_0p6gr")
 icon = ExtResource("1_cpcbl")
+price = 344
 metadata/_custom_type_script = "uid://8urlsjkkl8pw"

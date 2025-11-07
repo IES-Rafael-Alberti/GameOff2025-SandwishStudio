@@ -8,6 +8,7 @@ extends Control
 @onready var piece_zone: HBoxContainer = $VBoxContainer/piece_zone
 @onready var passive_zone: HBoxContainer = $VBoxContainer/passive_zone
 @onready var reroll_button: TextureButton = $VBoxContainer/HBoxContainer/Reroll
+@onready var game = get_parent()
 
 
 func _ready() -> void:
@@ -56,9 +57,25 @@ func _on_button_pressed(button: TextureButton) -> void:
 	var data = button.get_meta("data")
 	if data == null:
 		return
+
+	var price: int = 0
+	if "price" in data:
+		price = data.price
+	# Verificar si el jugador tiene suficiente oro
+	if not game.has_enough_currency(price):
+		print("No tienes suficiente oro para comprar %s. Precio: %d" % [data.resource_name, price])
+		return
+
+	# Verificar si el inventario puede aceptar el ítem
 	if not inventory.can_add_item(data):
 		print("Inventario lleno, no se puede comprar")
-		return  
-	inventory.add_item(data)
-	button.disabled = true
-	button.modulate = Color(0.25, 0.25, 0.25, 1.0)
+		return
+
+	# Gastar el oro y añadir al inventario
+	if game.spend_currency(price):
+		inventory.add_item(data)
+		button.disabled = true
+		button.modulate = Color(0.25, 0.25, 0.25, 1.0)
+		print("Compraste %s por %d oro." % [data.resource_name, price])
+	else:
+		print("Error: No se pudo gastar el oro (verifica el saldo o lógica).")

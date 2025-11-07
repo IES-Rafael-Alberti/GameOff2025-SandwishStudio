@@ -1,8 +1,9 @@
 [gd_resource type="Resource" script_class="PassiveData" load_steps=3 format=3 uid="uid://dyqha0iqhcdfr"]
 
 [ext_resource type="Texture2D" uid="uid://bvd7udoxyyimj" path="res://assets/passive_5.jpg" id="1_c2a1e"]
-[ext_resource type="Script" path="res://scripts/passive_data.gd" id="1_h7bwq"]
+[ext_resource type="Script" uid="uid://berngf3tq220v" path="res://scripts/passive_data.gd" id="1_h7bwq"]
 
 [resource]
 script = ExtResource("1_h7bwq")
 icon = ExtResource("1_c2a1e")
+price = 89
