@@ -1,0 +1,178 @@
+[gd_scene load_steps=8 format=3 uid="uid://c2wj1k0bbhih8"]
+
+[ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_d8q6m"]
+[ext_resource type="Texture2D" uid="uid://c7v236m8d4la2" path="res://assets/ruletaVacia.png" id="2_mmedl"]
+[ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="3_rleqp"]
+[ext_resource type="Texture2D" uid="uid://c4mdm2k1ac7r0" path="res://assets/ManillaRoca.png" id="4_d8q6m"]
+[ext_resource type="PackedScene" uid="uid://ckj0vt4dlrkx0" path="res://scenes/piece.tscn" id="5_bwak5"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nqo7r"]
+size = Vector2(558.49255, 459.97455)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_t1x4v"]
+height = 92.0
+
+[node name="RuletaScene" type="Node2D" groups=["roulette"]]
+script = ExtResource("1_d8q6m")
+
+[node name="SpriteRuleta" type="Sprite2D" parent="."]
+position = Vector2(511, 307)
+scale = Vector2(0.08956653, 0.090222344)
+texture = ExtResource("2_mmedl")
+
+[node name="Segmentos10" type="Area2D" parent="SpriteRuleta"]
+position = Vector2(837.3663, 2283.2485)
+scale = Vector2(0.9999996, 0.9999996)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Segmentos10"]
+position = Vector2(189.6792, -146.85986)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="SlotPiece" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
+offset_left = -1551.919
+offset_top = -166.25592
+offset_right = 6286.536
+offset_bottom = 1125.4463
+rotation = -1.773972
+scale = Vector2(13, 13.442)
+
+[node name="SlotPiece2" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
+offset_left = 424.2657
+offset_top = 1440.8846
+offset_right = 8262.72
+offset_bottom = 2732.587
+rotation = -3.4716861
+scale = Vector2(13, 13.442)
+
+[node name="SlotPiece3" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
+offset_left = -949.01514
+offset_top = 1097.2891
+offset_right = 6889.44
+offset_bottom = 2388.9912
+rotation = -2.6152165
+scale = Vector2(13, 13.442)
+
+[node name="SlotPiece4" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
+offset_left = -859.69604
+offset_top = -1363.2986
+offset_right = 6978.759
+offset_bottom = -71.596436
+rotation = -0.7564782
+scale = Vector2(13, 13.442)
+
+[node name="SlotPiece5" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
+offset_left = 1551.9192
+offset_top = -786.9447
+offset_right = 9390.374
+offset_bottom = 504.75745
+rotation = 1.0613331
+scale = Vector2(13, 13.442)
+
+[node name="SlotPiece6" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
+offset_left = 457.7604
+offset_top = -1629.3081
+offset_right = 8296.216
+offset_bottom = -337.60596
+rotation = 0.09187405
+scale = Vector2(13, 13.442)
+
+[node name="SlotPiece7" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
+offset_left = 1484.9298
+offset_top = 598.52136
+offset_right = 9323.386
+offset_bottom = 1890.2235
+rotation = -4.392827
+scale = Vector2(13, 13.442)
+
+[node name="Segmentos11" type="Area2D" parent="SpriteRuleta"]
+position = Vector2(-1395.6108, 1995.0717)
+rotation = 0.1440925
+scale = Vector2(0.9999996, 0.9999996)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Segmentos11"]
+position = Vector2(189.6792, -146.85986)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos12" type="Area2D" parent="SpriteRuleta"]
+position = Vector2(2210.647, 831.2798)
+scale = Vector2(0.9999996, 0.9999996)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Segmentos12"]
+position = Vector2(189.6792, -146.85986)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos13" type="Area2D" parent="SpriteRuleta"]
+position = Vector2(-1808.7117, -1729.0619)
+scale = Vector2(0.9999996, 0.9999996)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Segmentos13"]
+position = Vector2(189.6792, -146.85986)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos14" type="Area2D" parent="SpriteRuleta"]
+position = Vector2(-2623.748, 177.33961)
+rotation = 0.1440925
+scale = Vector2(0.9999996, 0.9999996)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Segmentos14"]
+position = Vector2(189.6792, -146.85986)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos15" type="Area2D" parent="SpriteRuleta"]
+position = Vector2(1909.1954, -1252.4614)
+scale = Vector2(0.9999996, 0.9999996)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Segmentos15"]
+position = Vector2(189.6792, -146.85986)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos16" type="Area2D" parent="SpriteRuleta"]
+position = Vector2(-11.165005, -2394.0852)
+scale = Vector2(0.9999996, 0.9999996)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Segmentos16"]
+position = Vector2(189.6792, -146.85986)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Manecilla" type="Area2D" parent="."]
+position = Vector2(489, 6)
+
+[node name="SpriteManecilla" type="Sprite2D" parent="Manecilla"]
+position = Vector2(18.999977, 42.999996)
+scale = Vector2(0.04791314, 0.05122983)
+texture = ExtResource("4_d8q6m")
+offset = Vector2(0, 80)
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Manecilla"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Manecilla"]
+position = Vector2(14, 42)
+shape = SubResource("CapsuleShape2D_t1x4v")
+
+[node name="Timer" type="Timer" parent="."]
+
+[node name="DragLayer" type="CanvasLayer" parent="."]
+
+[node name="piece2" parent="." instance=ExtResource("5_bwak5")]
+position = Vector2(202, 116)
+base_scale = null
+grab_scale = null
+
+[node name="piece3" parent="." instance=ExtResource("5_bwak5")]
+position = Vector2(103, 394)
+base_scale = null
+grab_scale = null
+
+[node name="piece4" parent="." instance=ExtResource("5_bwak5")]
+position = Vector2(172, 136)
+scale = Vector2(0.7199992, 1)
+base_scale = null
+grab_scale = null
+
+[node name="piece" parent="." instance=ExtResource("5_bwak5")]
+position = Vector2(84, 116)
+base_scale = null
+grab_scale = null
+
+[connection signal="area_entered" from="Manecilla" to="." method="_on_AreaManecilla_area_entered"]
+[connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]

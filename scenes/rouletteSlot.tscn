@@ -3,12 +3,9 @@
 [ext_resource type="Script" uid="uid://b31agultlt6fo" path="res://scripts/slot.gd" id="1_maf36"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_omn3e"]
+radius = 13.417868
 
-[node name="SlotPiece" type="Control" groups=["slot"]]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 39.0
-offset_bottom = 37.0
+[node name="SlotPiece" type="Node2D" groups=["slot"]]
 scale = Vector2(0.29054677, 0.30135566)
 
 [node name="Area2D" type="Area2D" parent="." groups=["slot"]]
