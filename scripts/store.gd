@@ -2,10 +2,9 @@ extends Control
 
 @onready var piece_scene: PackedScene = preload("res://scenes/piece.tscn")
 @onready var passive_scene: PackedScene = preload("res://scenes/passive.tscn")
-
 @export var piece_origins: Array[PieceData]
 @export var passive_origins: Array[PassiveData]
-
+@onready var inventory: Control = $"../inventory"
 @onready var piece_zone: HBoxContainer = $VBoxContainer/piece_zone
 @onready var passive_zone: HBoxContainer = $VBoxContainer/passive_zone
 @onready var reroll_button: TextureButton = $VBoxContainer/HBoxContainer/Reroll
@@ -46,6 +45,7 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 			var button = TextureButton.new()
 			button.texture_normal = texture_to_use
 			button.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
+			button.set_meta("data", origin_data)
 			target_zone.add_child(button)
 			button.pressed.connect(_on_button_pressed.bind(button))
 
@@ -53,5 +53,12 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 
 
 func _on_button_pressed(button: TextureButton) -> void:
+	var data = button.get_meta("data")
+	if data == null:
+		return
+	if not inventory.can_add_item(data):
+		print("Inventario lleno, no se puede comprar")
+		return  
+	inventory.add_item(data)
 	button.disabled = true
 	button.modulate = Color(0.25, 0.25, 0.25, 1.0)
