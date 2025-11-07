@@ -10,63 +10,91 @@ var original_position: Vector2
 @onready var drag_layer: Node = $"../DragLayer"
 var overlapped_slots: Array[Area2D] = []
 
+@export var base_scale: Vector2 = Vector2(0.6, 0.6)
+@export var grab_scale: Vector2 = Vector2(0.8, 0.8)
+@export var roulette: Node = null  # arrastrar la ruleta en el editor
+
+static var piece_being_dragged: Node = null
+
 func _ready():
     area.input_pickable = true
     area.connect("input_event", _on_input_event)
     area.connect("area_entered", _on_area_entered)
     area.connect("area_exited", _on_area_exited)
+    scale = base_scale
 
 func _on_input_event(_viewport, event, _shape_idx):
+    if roulette != null and roulette.state == roulette.State.SPINNING:
+        return
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
         if event.pressed:
-            _start_drag()
+            if not dragging and piece_being_dragged == null:
+                _start_drag()
         else:
-            _stop_drag()
+            if dragging:
+                _stop_drag()
 
 func _unhandled_input(event):
+    if roulette != null and roulette.state == roulette.State.SPINNING:
+        return
     if dragging and event is InputEventMouseButton and not event.pressed:
         _stop_drag()
 
 func _input(event):
-    if dragging and event is InputEventMouseMotion:
-        global_position = global_position.lerp(event.global_position - offset, 0.5)
+    if dragging:
+        if roulette != null and roulette.state == roulette.State.SPINNING:
+            return
+        if event is InputEventMouseMotion:
+            global_position = global_position.lerp(event.global_position - offset, 0.5)
 
 func _start_drag():
+    if roulette != null and roulette.state == roulette.State.SPINNING:
+        return
     dragging = true
+    piece_being_dragged = self
     original_position = global_position
     offset = get_global_mouse_position() - global_position
     original_parent = get_parent()
     original_index = get_index()
+    var gpos = global_position
     original_parent.remove_child(self)
     drag_layer.add_child(self)
+    global_position = gpos
+    create_tween().tween_property(self, "scale", grab_scale, 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 func _stop_drag():
+    if roulette != null and roulette.state == roulette.State.SPINNING:
+        return
+    if not dragging:
+        return
     dragging = false
+    piece_being_dragged = null
     var slot = _get_best_slot()
-
-    if slot:
+    if slot != null and not slot.occupied:
         drag_layer.remove_child(self)
         slot.add_child(self)
-
+        slot.occupied = true
         var t = create_tween()
         t.tween_property(self, "global_position", slot.global_position, 0.15).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-        t.tween_property(self, "scale", Vector2(1.2, 1.2), 0.1)
-        t.tween_property(self, "scale", Vector2(1,1), 0.1).set_delay(0.1)
+        t.tween_property(self, "scale", base_scale, 0.15).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
     else:
         drag_layer.remove_child(self)
         original_parent.add_child(self)
         original_parent.move_child(self, original_index)
-
         create_tween().tween_property(self, "global_position", original_position, 0.15).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+        create_tween().tween_property(self, "scale", base_scale, 0.15).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+    overlapped_slots.clear()
 
-func _on_area_entered(slot: Area2D):
-    if not overlapped_slots.has(slot):
-        overlapped_slots.append(slot)
-        _highlight_slot(slot, true)
+func _on_area_entered(area: Area2D):
+    if roulette != null and roulette.state == roulette.State.SPINNING:
+        return
+    if not overlapped_slots.has(area):
+        overlapped_slots.append(area)
 
-func _on_area_exited(slot: Area2D):
-    overlapped_slots.erase(slot)
-    _highlight_slot(slot, false)
+func _on_area_exited(area: Area2D):
+    if roulette != null and roulette.state == roulette.State.SPINNING:
+        return
+    overlapped_slots.erase(area)
 
 func _get_best_slot() -> Area2D:
     if overlapped_slots.is_empty():
@@ -79,9 +107,3 @@ func _get_best_slot() -> Area2D:
             closest_dist = dist
             closest_slot = slot
     return closest_slot
-
-func _highlight_slot(slot: Area2D, enter: bool):
-    if not slot:
-        return
-    var target_scale = Vector2(1.2, 1.2) if enter else Vector2(1, 1)
-  

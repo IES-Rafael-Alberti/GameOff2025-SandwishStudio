@@ -97,91 +97,65 @@ position = Vector2(-31.600002, -62.800014)
 position = Vector2(-7.1999936, -36.400005)
 shape = SubResource("RectangleShape2D_nqo7r")
 
+[node name="SlotPiece2" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
+offset_left = 32.8
+offset_top = -30.800001
+offset_right = 71.8
+offset_bottom = 6.199999
+
 [node name="SlotPiece" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
-offset_left = 39.199997
-offset_top = 22.000008
-offset_right = 78.2
-offset_bottom = 59.000008
+offset_left = 10.800003
+offset_top = 45.6
+offset_right = 49.800003
+offset_bottom = 82.6
 
-[node name="Slot" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
-offset_left = 47.600002
-offset_top = 41.999985
-offset_right = 87.600006
-offset_bottom = 81.999985
-rotation = -4.0365734
-scale = Vector2(0.27965212, 0.45782742)
+[node name="SlotPiece3" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
+offset_left = -43.2
+offset_top = -34.4
+offset_right = -4.200001
+offset_bottom = 2.5999985
 
-[node name="Slot8" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
-offset_left = 27.199995
+[node name="SlotPiece4" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
+offset_left = 36.800003
+offset_top = 22.799995
+offset_right = 75.8
+offset_bottom = 59.799995
+
+[node name="SlotPiece5" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
+offset_left = -38.0
+offset_top = 20.800001
+offset_right = 1.0
+offset_bottom = 57.800003
+
+[node name="SlotPiece6" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
+offset_left = 42.000004
+offset_top = -6.800003
+offset_right = 81.0
+offset_bottom = 30.199997
+
+[node name="SlotPiece7" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
+offset_left = -54.800003
+offset_top = -9.200001
+offset_right = -15.800003
+offset_bottom = 27.8
+
+[node name="SlotPiece8" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
+offset_left = -19.999996
+offset_top = 44.4
+offset_right = 19.000004
+offset_bottom = 81.4
+
+[node name="SlotPiece9" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
+offset_left = 8.8
+offset_top = -45.600014
+offset_right = 47.8
+offset_bottom = -8.600014
+
+[node name="SlotPiece10" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
+offset_left = -19.599997
 offset_top = -54.800003
-offset_right = 67.2
-offset_bottom = -14.800003
-rotation = -5.6841216
-scale = Vector2(0.2920403, 0.37033483)
-
-[node name="Slot2" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
-offset_left = 62.800003
-offset_top = 4.3999825
-offset_right = 102.79999
-offset_bottom = 43.77232
-rotation = -4.4572783
-scale = Vector2(0.27965212, 0.45782742)
-
-[node name="Slot3" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
-offset_left = 14.000002
-offset_top = 53.59997
-offset_right = 54.0
-offset_bottom = 93.599976
-rotation = -3.4299707
-scale = Vector2(0.27965212, 0.45782742)
-
-[node name="Slot4" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
-offset_left = -21.599998
-offset_top = 54.799988
-offset_right = 18.400002
-offset_bottom = 94.79999
-rotation = -2.941208
-scale = Vector2(0.27965212, 0.45782742)
-
-[node name="Slot7" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
-offset_left = 55.599995
-offset_top = -29.999998
-offset_right = 95.59999
-offset_bottom = 10.000002
-rotation = -4.997912
-scale = Vector2(0.2920403, 0.37033483)
-
-[node name="Slot9" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
-offset_left = -11.599996
-offset_top = -55.2
-offset_right = 28.400005
-offset_bottom = -15.200001
-rotation = -6.432405
-scale = Vector2(0.2920403, 0.37033483)
-
-[node name="Slot10" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
-offset_left = -41.6
-offset_top = -40.4
-offset_right = -1.5999985
-offset_bottom = -0.40000153
-rotation = -6.914295
-scale = Vector2(0.2920403, 0.37033483)
-
-[node name="Slot11" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
-offset_left = -59.2
-offset_top = -9.6
-offset_right = -19.2
-offset_bottom = 30.4
-rotation = -7.3913813
-scale = Vector2(0.2920403, 0.37033483)
-
-[node name="Slot12" parent="SpriteRuleta" instance=ExtResource("3_rleqp")]
-offset_left = -49.600002
-offset_top = 29.2
-offset_right = -9.600002
-offset_bottom = 69.2
-rotation = -8.18732
-scale = Vector2(0.2920403, 0.37033483)
+offset_right = 19.400003
+offset_bottom = -17.800003
 
 [node name="Manecilla" type="Area2D" parent="."]
 position = Vector2(489, 6)
