@@ -1,38 +1,25 @@
+# game.gd
+# (El que extiende Node2D)
 extends Node2D
 
-@export var initial_currency: int = 1000
-var current_currency: int
 @onready var gold_label: Label = $gold_label
 @onready var store: Control = $Store
+@onready var inventory: Control = $inventory
 
 func _ready():
-	current_currency = initial_currency
-	_update_gold_label() 
-	store.generate() 
-# --------------------------------------------------
-# 🔹 Funciones públicas de manejo de oro
-# --------------------------------------------------
-
-func has_enough_currency(amount: int) -> bool:
-	return current_currency >= amount
-
-func spend_currency(amount: int) -> bool:
-	if has_enough_currency(amount):
-		current_currency -= amount
-		print("Has gastado %d de oro. Oro restante: %d" % [amount, current_currency])
-		_update_gold_label()
-		return true
+	
+	PlayerData.currency_changed.connect(_on_PlayerData_currency_changed)
+	if inventory.has_signal("item_sold"):
+		inventory.item_sold.connect(PlayerData.add_currency)
 	else:
-		push_warning("No tienes suficiente oro. Te faltan %d" % [amount - current_currency])
-		return false
+		push_warning("game.gd: El nodo de inventario no tiene la señal 'item_sold'.")
+			
+	_on_PlayerData_currency_changed(PlayerData.get_current_currency())
+	store.generate()
 
-func add_currency(amount: int) -> void:
-	current_currency += amount
-	print("Has ganado %d de oro. Oro total: %d" % [amount, current_currency])
-	_update_gold_label()
-	if store:
-		store._update_all_label_colors()
+# --- Funciones de Señales ---
 
-func _update_gold_label() -> void:
+## Esta función se llama AUTOMÁTICAMENTE cuando PlayerData emite 'currency_changed'
+func _on_PlayerData_currency_changed(new_amount: int) -> void:
 	if gold_label:
-		gold_label.text = str(current_currency) + "€"
+		gold_label.text = str(new_amount) + "€"

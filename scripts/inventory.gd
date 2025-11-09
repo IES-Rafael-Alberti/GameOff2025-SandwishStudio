@@ -1,4 +1,7 @@
+# inventory.gd
 extends Control
+
+signal item_sold(refund_amount: int)
 
 ## ------------------------------------------------------------------
 ## Nodos y Exportaciones
@@ -8,7 +11,6 @@ extends Control
 @onready var refund_percent: int = 50
 @export var max_pieces: int = 6
 @export var max_passives: int = 30
-@onready var game = get_parent()
 @export var inventory_slot_scene: PackedScene 
 
 ## ------------------------------------------------------------------
@@ -50,7 +52,7 @@ func _ready() -> void:
 		if new_slot.has_signal("item_selected"):
 			new_slot.item_selected.connect(_on_item_selected_from_slot)
 
-	# 4. Imprimir la confirmación (el "Chivato" de antes)
+	# 4. Imprimir la confirmación
 	print("Inventory _ready: Generados %d slots de piezas y %d slots de pasivos." % [piece_slots.size(), passive_slots.size()])
 
 
@@ -58,9 +60,6 @@ func _ready() -> void:
 ## Funciones Públicas 
 ## ------------------------------------------------------------------
 
-"""
-Comprueba si se puede añadir un item al inventario correspondiente.
-"""
 func can_add_item(data: Resource) -> bool:
 	var inventory_map: Dictionary
 	var slot_array: Array
@@ -81,9 +80,6 @@ func can_add_item(data: Resource) -> bool:
 	return can_stack or has_empty_slot
 
 
-"""
-Añade un item (Pieza o Pasivo) al inventario.
-"""
 func add_item(data: Resource) -> bool:
 	if not data:
 		push_error("add_item: Se intentó añadir un item NULO.")
@@ -155,28 +151,6 @@ func _get_item_id(data: Resource) -> String:
 	return "%s_%d" % [data.get_class(), data.get_instance_id()]
 
 
-## ------------------------------------------------------------------
-## Conexiones de Señales
-## ------------------------------------------------------------------
-
-func _on_item_selected_from_slot(data: Resource) -> void:
-	if data:
-		print("Has seleccionado el item: ", data.resource_name)
-		
-
-"""
-Elimina UNA unidad de un item (Pieza o Pasivo) del inventario.
-"""
-
-## ------------------------------------------------------------------
-## Funciones Privadas (Nueva función de compactado)
-## ------------------------------------------------------------------
-
-"""
-Compacta los slots de pasivos.
-Busca el primer slot vacío y mueve el siguiente item disponible
-a ese hueco. Repite hasta que no queden huecos.
-"""
 func _compact_passive_slots() -> void:
 	print("--- Compactando slots de pasivos... ---")
 	
@@ -216,6 +190,9 @@ func _compact_passive_slots() -> void:
 			print("... No se encontraron más items. Compactado finalizado.")
 			break
 
+## ------------------------------------------------------------------
+## Funciones Públicas (Venta)
+## ------------------------------------------------------------------
 
 func remove_item(data: Resource) -> bool:
 	
@@ -244,14 +221,12 @@ func remove_item(data: Resource) -> bool:
 	
 	print("... Item encontrado. Reduciendo contador a: %d" % entry["count"])
 
+	# --- 💰 LÓGICA DE REEMBOLSO  ---
 	if "price" in data and data.price > 0:
 		var refund_amount = int(data.price * (refund_percent / 100.0))
+		item_sold.emit(refund_amount)
 		
-		if game:
-			game.add_currency(refund_amount)
-			print("... Reembolsados %d de oro (%d%% de %d)" % [refund_amount, refund_percent, data.price])
-		else:
-			push_error("Inventory.gd: No se encontró el nodo 'game' para dar el reembolso.")
+		print("... Reembolsados %d de oro (%d%% de %d)" % [refund_amount, refund_percent, data.price])
 
 	var slot_node: Node = entry["slot_node"]
 
@@ -268,8 +243,18 @@ func remove_item(data: Resource) -> bool:
 		
 		inventory_map.erase(id)
 		print("... Contador a cero. Eliminando item del diccionario.")
+		
 		if is_passive_item:
 			_compact_passive_slots()
 		# -----------------------------------
 
 	return true
+
+## ------------------------------------------------------------------
+## Conexiones de Señales
+## ------------------------------------------------------------------
+
+func _on_item_selected_from_slot(data: Resource) -> void:
+	if data:
+		print("Has seleccionado el item: ", data.resource_name)
+		remove_item(data)

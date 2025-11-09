@@ -1,3 +1,4 @@
+# Store.gd
 extends Control
 
 @onready var piece_scene: PackedScene = preload("res://scenes/piece.tscn")
@@ -8,16 +9,17 @@ extends Control
 @onready var piece_zone: HBoxContainer = $VBoxContainer/piece_zone
 @onready var passive_zone: HBoxContainer = $VBoxContainer/passive_zone
 @onready var reroll_button: TextureButton = $VBoxContainer/HBoxContainer/Reroll
-@onready var game = get_parent()
 var current_shop_styles: Array = []
-@export var COLOR_NORMAL_BG = Color(0, 0, 0, 0.6) # Negro translúcido
-@export var COLOR_UNAFFORD_BG = Color(1.0, 0, 0, 0.6) # Rojo translúcido
+@export var COLOR_NORMAL_BG = Color(0, 0, 0, 0.6) 
+@export var COLOR_UNAFFORD_BG = Color(1.0, 0, 0, 0.6) 
+
 func _ready() -> void:
-	pass
+	PlayerData.currency_changed.connect(_update_all_label_colors)
+
 
 func generate():
 	current_shop_styles.clear()
-	_update_all_label_colors()
+	
 	for child in piece_zone.get_children():
 		child.queue_free()
 	for child in passive_zone.get_children():
@@ -25,6 +27,9 @@ func generate():
 
 	_generate_buttons(piece_origins, piece_zone, piece_scene)
 	_generate_buttons(passive_origins, passive_zone, passive_scene)
+	
+	_update_all_label_colors()
+
 
 func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_scene: PackedScene) -> void:
 	if origin_array.is_empty():
@@ -49,19 +54,18 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 			item_container.alignment = VBoxContainer.ALIGNMENT_CENTER
 
 			if "price" in origin_data:
-				var price: int = origin_data.price # Obtenemos el precio
+				var price: int = origin_data.price
 				var price_label = Label.new()
 				price_label.text = str(price) + "€"
 				price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 				
 				var style_box = StyleBoxFlat.new()
 				
-				# --- LÓGICA DE COLOR INICIAL (MODIFICADO) ---
-				if game.has_enough_currency(price):
+				# --- LÓGICA DE COLOR ---
+				if PlayerData.has_enough_currency(price):
 					style_box.bg_color = COLOR_NORMAL_BG
 				else:
 					style_box.bg_color = COLOR_UNAFFORD_BG
-				# --- FIN LÓGICA DE COLOR ---
 
 				style_box.content_margin_left = 6
 				style_box.content_margin_right = 6
@@ -76,7 +80,6 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 				
 				item_container.add_child(price_label)
 				
-				# --- NUEVA LÍNEA ---
 				# Guardamos el estilo y su precio para actualizarlo después
 				current_shop_styles.append({"style": style_box, "price": price})
 
@@ -92,6 +95,8 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 			target_zone.add_child(item_container)
 
 		origin_instance.queue_free()
+
+
 func _on_button_pressed(button: TextureButton) -> void:
 	var data = button.get_meta("data")
 	if data == null:
@@ -100,32 +105,37 @@ func _on_button_pressed(button: TextureButton) -> void:
 	var price: int = 0
 	if "price" in data:
 		price = data.price
-	# Verificar si el jugador tiene suficiente oro
-	if not game.has_enough_currency(price):
+		
+	if not PlayerData.has_enough_currency(price):
 		print("No tienes suficiente oro para comprar %s. Precio: %d" % [data.resource_name, price])
 		return
 
-	# Verificar si el inventario puede aceptar el ítem
 	if not inventory.can_add_item(data):
 		print("Inventario lleno, no se puede comprar")
 		return
 
-	# Gastar el oro y añadir al inventario
-	if game.spend_currency(price):
-		_update_all_label_colors()
+	# --- GASTAR Y AÑADIR ---
+	if PlayerData.spend_currency(price):
+		
 		inventory.add_item(data)
 		button.disabled = true
 		button.modulate = Color(0.25, 0.25, 0.25, 1.0)
 		print("Compraste %s por %d oro." % [data.resource_name, price])
 	else:
 		print("Error: No se pudo gastar el oro (verifica el saldo o lógica).")
-func _update_all_label_colors() -> void:
+
+
+func _update_all_label_colors(_new_amount: int = 0) -> void:
+
+	if current_shop_styles.is_empty():
+		return
+
 	print("Actualizando colores de la tienda...")
 	for item in current_shop_styles:
 		var style_box: StyleBoxFlat = item.style
 		var price: int = item.price
 		
-		if game.has_enough_currency(price):
+		if PlayerData.has_enough_currency(price):
 			style_box.bg_color = COLOR_NORMAL_BG
 		else:
 			style_box.bg_color = COLOR_UNAFFORD_BG
