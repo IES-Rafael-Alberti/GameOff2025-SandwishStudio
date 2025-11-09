@@ -55,11 +55,11 @@ jobs:
           # OJO: Como dice el artículo, ¡revisa la URL de tu perfil!
           # Si tu usuario es "mi_juego", la URL podría ser "mi-juego.itch.io"
           # Usa el nombre de la URL (ej. "mi-juego")
-          itch_user: tu-usuario-itch
+          itch_user: sandwish-studio.itch.io/
           
           # El nombre de tu juego en Itch.io (de la URL)
           # ej: "https://tu-usuario-itch.itch.io/mi-juego-genial"
-          itch_game: mi-juego-genial
+          itch_game: https://sandwish-studio.itch.io/those-who-are-about-to-spin
           
           # La versión (usa el nombre de la rama, ej: "master")
           version: ${{ github.ref_name }}
@@ -67,4 +67,4 @@ jobs:
           # La ruta al archivo .zip que se creó en el paso 2
           # Reemplaza "nombre-del-preset.zip" con el nombre que le diste
           # a tu preset en Godot (ej: "mi-juego-web.zip")
-          files: "${{ steps.export.outputs.archive_directory }}/mi-juego-web.zip"
+          files: "${{ steps.export.outputs.archive_directory }}/build.zip"
