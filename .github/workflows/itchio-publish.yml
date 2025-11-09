@@ -24,9 +24,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      # --- ¡¡NUEVO PASO!! ---
-      # Copiamos el .zip desde la carpeta del host al workspace
-      # para que el contenedor de Docker pueda encontrarlo.
       - name: Copy export to workspace
         run: cp ${{ steps.export.outputs.archive_directory }}/build.zip ./build.zip
 
@@ -38,7 +35,4 @@ jobs:
           ITCH_GAME: those-who-are-about-to-spin
           CHANNEL: html5
           VERSION: ${{ github.ref_name }}
-          # --- ¡¡CAMBIO AQUÍ!! ---
-          # Ahora apuntamos al archivo que acabamos de copiar 
-          # a la raíz del workspace.
           PACKAGE: "build.zip"
