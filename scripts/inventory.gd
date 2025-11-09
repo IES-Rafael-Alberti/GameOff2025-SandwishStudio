@@ -5,10 +5,10 @@ extends Control
 ## ------------------------------------------------------------------
 @onready var piece_inventory: GridContainer = $piece_inventory
 @onready var passive_inventory: GridContainer = $passive_inventory
-
+@onready var refund_percent: int = 50
 @export var max_pieces: int = 6
 @export var max_passives: int = 30
-
+@onready var game = get_parent()
 @export var inventory_slot_scene: PackedScene 
 
 ## ------------------------------------------------------------------
@@ -167,14 +167,10 @@ func _on_item_selected_from_slot(data: Resource) -> void:
 """
 Elimina UNA unidad de un item (Pieza o Pasivo) del inventario.
 """
-# En Inventory.gd
 
 ## ------------------------------------------------------------------
 ## Funciones Privadas (Nueva función de compactado)
 ## ------------------------------------------------------------------
-
-# ... (tus funciones _find_empty_slot y _get_item_id) ...
-
 
 """
 Compacta los slots de pasivos.
@@ -220,9 +216,9 @@ func _compact_passive_slots() -> void:
 			print("... No se encontraron más items. Compactado finalizado.")
 			break
 
+
 func remove_item(data: Resource) -> bool:
 	
-
 	var inventory_map: Dictionary
 	var id: String = _get_item_id(data)
 	
@@ -233,11 +229,29 @@ func remove_item(data: Resource) -> bool:
 		inventory_map = piece_counts
 	elif data is PassiveData:
 		inventory_map = passive_counts
-		is_passive_item = true 
+		is_passive_item = true
+	else:
+		push_warning("remove_item: Tipo de data no reconocido.")
+		return false # Item no es ni Pieza ni Pasivo
+
+	# Comprobar si realmente tenemos ese item antes de intentar restarlo
+	if not inventory_map.has(id):
+		push_error("remove_item: Se intentó eliminar un item ('%s') que no está en el inventario." % id)
+		return false
+
 	var entry = inventory_map[id]
 	entry["count"] -= 1
 	
 	print("... Item encontrado. Reduciendo contador a: %d" % entry["count"])
+
+	if "price" in data and data.price > 0:
+		var refund_amount = int(data.price * (refund_percent / 100.0))
+		
+		if game:
+			game.add_currency(refund_amount)
+			print("... Reembolsados %d de oro (%d%% de %d)" % [refund_amount, refund_percent, data.price])
+		else:
+			push_error("Inventory.gd: No se encontró el nodo 'game' para dar el reembolso.")
 
 	var slot_node: Node = entry["slot_node"]
 
@@ -254,7 +268,6 @@ func remove_item(data: Resource) -> bool:
 		
 		inventory_map.erase(id)
 		print("... Contador a cero. Eliminando item del diccionario.")
-		
 		if is_passive_item:
 			_compact_passive_slots()
 		# -----------------------------------

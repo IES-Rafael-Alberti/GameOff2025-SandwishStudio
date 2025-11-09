@@ -3,11 +3,12 @@ extends Node2D
 @export var initial_currency: int = 1000
 var current_currency: int
 @onready var gold_label: Label = $gold_label
+@onready var store: Control = $Store
 
 func _ready():
 	current_currency = initial_currency
-	_update_gold_label()
-
+	_update_gold_label() 
+	store.generate() 
 # --------------------------------------------------
 # 🔹 Funciones públicas de manejo de oro
 # --------------------------------------------------
@@ -29,6 +30,8 @@ func add_currency(amount: int) -> void:
 	current_currency += amount
 	print("Has ganado %d de oro. Oro total: %d" % [amount, current_currency])
 	_update_gold_label()
+	if store:
+		store._update_all_label_colors()
 
 func _update_gold_label() -> void:
 	if gold_label:
