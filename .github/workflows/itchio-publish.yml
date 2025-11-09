@@ -32,4 +32,4 @@ jobs:
           ITCH_GAME: those-who-are-about-to-spin
           CHANNEL: html5
           VERSION: ${{ github.ref_name }}
-          PACKAGE: "${{ steps.export.outputs.archive_directory }}/${{ steps.export.outputs.archive_name }}"
+          PACKAGE: "${{ steps.export.outputs.archive_directory }}/build.zip"
