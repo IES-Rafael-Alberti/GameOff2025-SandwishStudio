@@ -42,29 +42,25 @@ jobs:
           # Pasamos el token de GitHub que guardamos en los secretos
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      # 3. Sube el juego a Itch.io usando la acción de Butler
+# 3. Sube el juego a Itch.io (VERSIÓN NUEVA)
       - name: Publish to Itch
-        uses: Ayowel/butler-to-itch@v1.0.0
+        uses: yeslayla/butler-publish-itchio-action@v1
         with:
-          # Pasamos la clave API de Itch.io que guardamos
-          butler_key: ${{ secrets.ITCHIO_TOKEN }}
+          # La clave API (el nombre del secreto es el mismo)
+          butler-api-key: ${{ secrets.ITCHIO_TOKEN }}
           
-          # --- ¡IMPORTANTE! Edita estas líneas ---
-          
-          # Tu nombre de usuario de Itch.io
-          # OJO: Como dice el artículo, ¡revisa la URL de tu perfil!
-          # Si tu usuario es "mi_juego", la URL podría ser "mi-juego.itch.io"
-          # Usa el nombre de la URL (ej. "mi-juego")
-          itch_user: sandwish-studio.itch.io/
-          
-          # El nombre de tu juego en Itch.io (de la URL)
-          # ej: "https://tu-usuario-itch.itch.io/mi-juego-genial"
-          itch_game: https://sandwish-studio.itch.io/those-who-are-about-to-spin
-          
-          # La versión (usa el nombre de la rama, ej: "master")
+          # Tu usuario y juego (¡recuerda editarlos!)
+          itch-user: tu-usuario-itch
+          itch-game: mi-juego-genial
+
+          # ¡Esta es la parte importante!
+          # En lugar de adivinar por el nombre del archivo,
+          # le decimos a qué canal subirlo. Para HTML5, usa 'html5' o 'web'.
+          itch-channel: html5
+
+          # La versión (igual que antes)
           version: ${{ github.ref_name }}
-          
-          # La ruta al archivo .zip que se creó en el paso 2
-          # Reemplaza "nombre-del-preset.zip" con el nombre que le diste
-          # a tu preset en Godot (ej: "mi-juego-web.zip")
-          files: "${{ steps.export.outputs.archive_directory }}/build.zip"
+
+          # La ruta al archivo .zip (igual que antes)
+          # (¡Recuerda editar 'mi-juego-web.zip'!)
+          package-path: "${{ steps.export.outputs.archive_directory }}/mi-juego-web.zip"
