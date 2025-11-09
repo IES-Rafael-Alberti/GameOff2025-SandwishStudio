@@ -44,7 +44,7 @@ jobs:
 
 # 3. Sube el juego a Itch.io (VERSIÓN NUEVA)
       - name: Publish to Itch
-        uses: yeslayla/butler-publish-itchio-action@v1
+        uses: josephbmanley/butler-publish-itchio-action@master
         with:
           # La clave API (el nombre del secreto es el mismo)
           butler-api-key: ${{ secrets.ITCHIO_TOKEN }}
