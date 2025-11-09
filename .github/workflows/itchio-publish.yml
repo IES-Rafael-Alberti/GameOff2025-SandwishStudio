@@ -63,4 +63,4 @@ jobs:
 
           # La ruta al archivo .zip (igual que antes)
           # (¡Recuerda editar 'mi-juego-web.zip'!)
-          package-path: "${{ steps.export.outputs.archive_directory }}/mi-juego-web.zip"
+          package-path: "${{ steps.export.outputs.archive_directory }}/build.zip"
