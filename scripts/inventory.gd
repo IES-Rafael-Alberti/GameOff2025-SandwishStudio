@@ -36,6 +36,7 @@ func _ready() -> void:
 	# 2. Generar los slots de piezas
 	for i in range(max_pieces):
 		var new_slot = inventory_slot_scene.instantiate()
+		new_slot.sell_percentage = self.refund_percent
 		piece_inventory.add_child(new_slot) # Añadirlo al GridContainer
 		
 		piece_slots.append(new_slot) 
@@ -257,4 +258,3 @@ func remove_item(data: Resource) -> bool:
 func _on_item_selected_from_slot(data: Resource) -> void:
 	if data:
 		print("Has seleccionado el item: ", data.resource_name)
-		remove_item(data)
