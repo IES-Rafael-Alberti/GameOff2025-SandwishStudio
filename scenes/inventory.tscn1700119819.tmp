@@ -1,0 +1,62 @@
+[gd_scene load_steps=3 format=3 uid="uid://hbcgudcjh0wn"]
+
+[ext_resource type="Script" uid="uid://cmqqk0nk7sejg" path="res://scripts/inventory.gd" id="1_hj2ta"]
+[ext_resource type="Texture2D" uid="uid://dthf2y24tgfel" path="res://icon.svg" id="1_qw0r6"]
+
+[node name="inventory" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -482.0
+offset_bottom = 400.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_hj2ta")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 90.0
+offset_top = -19.0
+offset_right = 590.0
+offset_bottom = 1067.0
+texture = ExtResource("1_qw0r6")
+
+[node name="piece_label" type="Label" parent="."]
+layout_mode = 0
+offset_left = 276.0
+offset_top = 6.0
+offset_right = 403.0
+offset_bottom = 64.0
+theme_override_font_sizes/font_size = 42
+text = "Pieces"
+
+[node name="piece_inventory" type="GridContainer" parent="."]
+layout_mode = 0
+offset_left = 152.0
+offset_top = 71.0
+offset_right = 508.0
+offset_bottom = 635.0
+theme_override_constants/h_separation = 100
+theme_override_constants/v_separation = 10
+columns = 2
+
+[node name="passive_label" type="Label" parent="."]
+layout_mode = 0
+offset_left = 255.0
+offset_top = 672.0
+offset_right = 425.0
+offset_bottom = 730.0
+theme_override_font_sizes/font_size = 42
+text = "Passives"
+
+[node name="passive_inventory" type="GridContainer" parent="."]
+layout_mode = 0
+offset_left = 145.0
+offset_top = 757.0
+offset_right = 913.0
+offset_bottom = 1217.0
+scale = Vector2(0.5, 0.5)
+theme_override_constants/h_separation = 0
+theme_override_constants/v_separation = 0
+columns = 6

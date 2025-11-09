@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://d858e65vbs6c"]
+
+[ext_resource type="PackedScene" uid="uid://bwh1obe7043i" path="res://scenes/store.tscn" id="1_rlb21"]
+[ext_resource type="PackedScene" uid="uid://hbcgudcjh0wn" path="res://scenes/inventory.tscn" id="2_t3p6g"]
+
+[node name="puchasing_phase" type="Node2D"]
+
+[node name="Store" parent="." instance=ExtResource("1_rlb21")]
+offset_left = 186.0
+offset_top = 90.0
+offset_right = 186.0
+offset_bottom = 90.0
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(1153, 736)
+zoom = Vector2(0.5, 0.5)
+
+[node name="inventory" parent="." instance=ExtResource("2_t3p6g")]
+offset_left = 1269.0
+offset_top = 129.0
+offset_right = 1269.0
+offset_bottom = 262.0

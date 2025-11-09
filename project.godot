@@ -11,13 +11,18 @@ config_version=5
 [application]
 
 config/name="Those_who_are_about_to_spin"
+run/main_scene="uid://dd8wqmfs2cj1j"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 config/icon="res://icon.svg"
 
-[editor]
+[autoload]
 
-version_control/plugin_name="GitPlugin"
-version_control/autoload_on_startup=true
+PlayerData="*res://scripts/PlayerData.gd"
+
+[display]
+
+window/size/viewport_width=1800
+window/size/viewport_height=1000
 
 [rendering]
 

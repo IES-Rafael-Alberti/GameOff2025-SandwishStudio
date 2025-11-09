@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="npcRes" load_steps=3 format=3 uid="uid://b6dek55tm2no8"]
+
+[ext_resource type="Script" uid="uid://bd1qpluesymyw" path="res://scripts/npc_res.gd" id="1_1vcq3"]
+[ext_resource type="SpriteFrames" uid="uid://c7jd0vdx5p4th" path="res://resourses/warrior/blue_warrior_animation.tres" id="1_v8p1v"]
+
+[resource]
+script = ExtResource("1_1vcq3")
+frames = ExtResource("1_v8p1v")
+max_health = 25.0
+health = 25.0
+damage = 3.0
+atack_speed = 2.0
+critical_chance = 20
+critical_damage = 1.25
+metadata/_custom_type_script = "uid://bd1qpluesymyw"
