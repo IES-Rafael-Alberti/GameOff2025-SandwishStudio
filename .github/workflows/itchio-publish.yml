@@ -43,23 +43,27 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
 # 3. Sube el juego a Itch.io (VERSIÓN NUEVA)
+# 3. Sube el juego a Itch.io (VERSIÓN CORREGIDA)
       - name: Butler Push
         uses: yeslayla/butler-publish-itchio-action@v1.0.3
-        with:
-          # La clave API (el nombre del secreto es el mismo)
-          butler-api-key: ${{ secrets.ITCHIO_TOKEN }}
+        env:
+          # Corregido: El nombre del secreto va a 'BUTLER_CREDENTIALS'
+          BUTLER_CREDENTIALS: ${{ secrets.ITCHIO_TOKEN }}
           
-          # Tu usuario y juego (¡recuerda editarlos!)
-          itch-user: tu-usuario-itch
-          itch-game: mi-juego-genial
-
-          # ¡Esta es la parte importante!
-          # En lugar de adivinar por el nombre del archivo,
-          # le decimos a qué canal subirlo. Para HTML5, usa 'html5' o 'web'.
-          itch-channel: html5
-
-          # La versión (igual que antes)
-          version: ${{ github.ref_name }}
+          # Corregido: 'itch-user' es 'ITCH_USER' (en mayúsculas)
+          ITCH_USER: sandwish-studio
+          
+          # Corregido: 'itch-game' es 'ITCH_GAME' (en mayúsculas)
+          ITCH_GAME: those-who-are-about-to-spin
+          
+          # Corregido: 'itch-channel' es 'CHANNEL'
+          CHANNEL: html5
+          
+          # Corregido: 'version' es 'VERSION' (en mayúsculas)
+          VERSION: ${{ github.ref_name }}
+          
+          # Corregido: 'package-path' es 'PACKAGE'
+          PACKAGE: "${{ steps.export.outputs.archive_directory }}/build.zip"
 
           # La ruta al archivo .zip (igual que antes)
           # (¡Recuerda editar 'mi-juego-web.zip'!)
