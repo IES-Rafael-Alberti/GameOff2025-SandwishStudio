@@ -25,13 +25,15 @@ jobs:
         with:
           # --- URLs para Godot 4.5 (como menciona el artículo) ---
           godot_executable_download_url: https://github.com/godotengine/godot/releases/download/4.5-stable/Godot_v4.5-stable_linux.x86_64.zip
-          
-          # NOTA: El artículo tenía un pequeño error de formato aquí.
-          # Este es el parámetro correcto para las plantillas de exportación:
           godot_export_templates_download_url: https://github.com/godotengine/godot/releases/download/4.5-stable/Godot_v4.5-stable_export_templates.tpz
 
           # Ruta a la carpeta de tu proyecto (si está en la raíz, es ./)
           relative_project_path: ./
+          
+          # ¡¡AQUÍ ESTÁ LA SOLUCIÓN!!
+          # Añade esta línea para decirle qué preset usar.
+          # El nombre "build" lo saco de tu [preset.0] name="build"
+          export_preset_name: "build"
           
           # Comprime la salida en un .zip (¡perfecto para Itch.io!)
           archive_output: true
