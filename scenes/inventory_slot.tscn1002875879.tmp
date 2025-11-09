@@ -61,7 +61,3 @@ vertical_alignment = 1
 [node name="Tooltip" parent="." instance=ExtResource("4_bbig2")]
 layout_mode = 0
 anchors_preset = 0
-anchor_right = 0.0
-anchor_bottom = 0.0
-grow_horizontal = 1
-grow_vertical = 1

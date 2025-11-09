@@ -6,13 +6,25 @@ signal item_selected(data: Resource)
 @onready var button: TextureButton = $TextureButton
 @onready var count_label: Label = $CountLabel
 @onready var uses_label: Label = $UsesLabel
+@onready var tooltip: PanelContainer = $Tooltip
 
 
 var item_data: Resource = null
 var current_count: int = 0
 
+# --- NUEVA VARIABLE ---
+# 'inventory.gd' nos dirá qué valor poner aquí
+var sell_percentage: int = 50
+
+
 func _ready() -> void:
 	button.pressed.connect(_on_button_pressed)
+	
+	# --- NUEVAS LÍNEAS ---
+	# Conectamos las señales del ratón del botón a nuestras nuevas funciones
+	button.mouse_entered.connect(_on_button_mouse_entered)
+	button.mouse_exited.connect(_on_button_mouse_exited)
+	
 	clear_slot()
 
 func set_item(data: Resource) -> void:
@@ -22,13 +34,16 @@ func set_item(data: Resource) -> void:
 	button.texture_normal = data.icon
 	button.disabled = false
 	button.set_meta("data", data) 
-
+	
+	# --- ¡ARREGLO! ---
+	# Esta línea es VITAL para que el script del botón 
+	# (el que maneja el drag-and-drop) sepa qué ítem tiene.
 	button.item_data = data 
 	
 	update_count(current_count)
 	_update_uses(data)
 	
-	show() 
+	show()
 
 ## Actualiza el contador de stack (apilamiento)
 func update_count(count: int) -> void:
@@ -48,6 +63,11 @@ func clear_slot() -> void:
 	button.set_meta("data", null)
 	count_label.hide()
 	uses_label.hide()
+	
+	# --- NUEVA LÍNEA ---
+	# Nos aseguramos de ocultar el tooltip si el slot se vacía
+	# mientras el ratón está encima.
+	tooltip.hide_tooltip()
 
 func is_empty() -> bool:
 	return item_data == null
@@ -62,3 +82,21 @@ func _update_uses(data: Resource) -> void:
 func _on_button_pressed() -> void:
 	if item_data:
 		item_selected.emit(item_data)
+		
+		# --- NUEVA LÍNEA ---
+		# Al vender el ítem, ocultamos el tooltip
+		tooltip.hide_tooltip()
+
+
+# --- FUNCIONES TOTALMENTE NUEVAS PARA EL TOOLTIP ---
+
+## Se llama cuando el ratón entra en el TextureButton
+func _on_button_mouse_entered() -> void:
+	if item_data:
+		# ¡Llamamos al Autoload 'Tooltip' que creamos!
+		tooltip.show_tooltip(item_data, sell_percentage)
+
+## Se llama cuando el ratón sale del TextureButton
+func _on_button_mouse_exited() -> void:
+	# ¡Llamamos al Autoload 'Tooltip' que creamos!
+	tooltip.hide_tooltip()
