@@ -1,7 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://dd8wqmfs2cj1j"]
-
-[ext_resource type="PackedScene" uid="uid://c2wj1k0bbhih8" path="res://scenes/rouletteScene.tscn" id="1_21or3"]
-
-[node name="Node2D" type="Node2D"]
-
-[node name="RuletaScene" parent="." instance=ExtResource("1_21or3")]

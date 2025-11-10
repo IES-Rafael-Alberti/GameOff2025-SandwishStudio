@@ -1,7 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://c2wj1k0bbhih8"]
+[gd_scene load_steps=8 format=3 uid="uid://cbys4jpmm128b"]
 
-[ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_d8q6m"]
-[ext_resource type="Texture2D" uid="uid://c7v236m8d4la2" path="res://assets/RuletaVacia.png" id="2_mmedl"]
+[ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/roulette.gd" id="1_d8q6m"]
+[ext_resource type="Texture2D" uid="uid://dyswdki2qfudj" path="res://assets/RuletaVacia.png" id="2_mmedl"]
 [ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="3_rleqp"]
 [ext_resource type="Texture2D" uid="uid://c4mdm2k1ac7r0" path="res://assets/ManillaRoca.png" id="4_d8q6m"]
 [ext_resource type="PackedScene" uid="uid://ckj0vt4dlrkx0" path="res://scenes/piece.tscn" id="5_bwak5"]
@@ -23,10 +23,9 @@ scale = Vector2(0.5, 0.7)
 position = Vector2(256, 136)
 scale = Vector2(0.5, 0.7)
 
-[node name="piece4" parent="." node_paths=PackedStringArray("roulette") instance=ExtResource("5_bwak5")]
+[node name="piece4" parent="." instance=ExtResource("5_bwak5")]
 position = Vector2(100, 378)
 scale = Vector2(0.5, 0.7)
-roulette = NodePath("..")
 
 [node name="piece" parent="." instance=ExtResource("5_bwak5")]
 position = Vector2(204, 364)
