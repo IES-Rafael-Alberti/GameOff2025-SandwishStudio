@@ -1,0 +1,86 @@
+[gd_scene load_steps=4 format=3 uid="uid://dd8wqmfs2cj1j"]
+
+[ext_resource type="PackedScene" uid="uid://ckj0vt4dlrkx0" path="res://scenes/piece.tscn" id="1_lnu2h"]
+[ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="2_lbhrr"]
+[ext_resource type="PackedScene" uid="uid://c2wj1k0bbhih8" path="res://scenes/roulette.tscn" id="3_iywne"]
+
+[node name="Game" type="Node2D"]
+
+[node name="DragLayer" type="Node2D" parent="."]
+
+[node name="PiecesContainer" type="Node2D" parent="."]
+
+[node name="piece" parent="PiecesContainer" instance=ExtResource("1_lnu2h")]
+position = Vector2(273, 522)
+
+[node name="piece2" parent="PiecesContainer" instance=ExtResource("1_lnu2h")]
+position = Vector2(179, 542)
+
+[node name="piece3" parent="PiecesContainer" instance=ExtResource("1_lnu2h")]
+position = Vector2(82, 520)
+
+[node name="piece4" parent="PiecesContainer" instance=ExtResource("1_lnu2h")]
+position = Vector2(214, 306)
+
+[node name="piece5" parent="PiecesContainer" instance=ExtResource("1_lnu2h")]
+position = Vector2(94, 290)
+
+[node name="piece6" parent="PiecesContainer" instance=ExtResource("1_lnu2h")]
+position = Vector2(218, 97)
+
+[node name="piece7" parent="PiecesContainer" instance=ExtResource("1_lnu2h")]
+position = Vector2(94, 117)
+
+[node name="SlotsContainer" type="Node2D" parent="."]
+position = Vector2(-5705.256, -3402.7043)
+scale = Vector2(11.164885, 11.083728)
+
+[node name="SlotPiece" parent="SlotsContainer" instance=ExtResource("2_lbhrr")]
+position = Vector2(434, 405.00006)
+rotation = 3.6006496
+scale = Vector2(1, 1)
+skew = 0.0052865744
+
+[node name="SlotPiece2" parent="SlotsContainer" instance=ExtResource("2_lbhrr")]
+position = Vector2(567.4268, 327.02933)
+rotation = 1.0512271
+scale = Vector2(0.1, 0.1)
+
+[node name="SlotPiece3" parent="SlotsContainer" instance=ExtResource("2_lbhrr")]
+position = Vector2(570.74084, 335.05914)
+rotation = -4.4636273
+scale = Vector2(0.1, 0.1)
+
+[node name="SlotPiece4" parent="SlotsContainer" instance=ExtResource("2_lbhrr")]
+position = Vector2(564.29205, 345.1641)
+rotation = 2.8070135
+scale = Vector2(0.1, 0.1)
+
+[node name="SlotPiece5" parent="SlotsContainer" instance=ExtResource("2_lbhrr")]
+position = Vector2(552, 169.99998)
+rotation = 0.084089845
+scale = Vector2(1, 1)
+
+[node name="SlotPiece6" parent="SlotsContainer" instance=ExtResource("2_lbhrr")]
+position = Vector2(431.00003, 184)
+rotation = -0.75672114
+scale = Vector2(1, 1)
+
+[node name="SlotPiece7" parent="SlotsContainer" instance=ExtResource("2_lbhrr")]
+position = Vector2(383, 292)
+rotation = -1.7749316
+scale = Vector2(1, 1)
+
+[node name="Roulette" parent="." instance=ExtResource("3_iywne")]
+position = Vector2(0, -8)
+
+[node name="Particles" type="CPUParticles2D" parent="."]
+position = Vector2(-5705.256, -3402.7043)
+scale = Vector2(11.164885, 11.083728)
+
+[node name="TickSound" type="AudioStreamPlayer2D" parent="."]
+
+[node name="SoundWin" type="AudioStreamPlayer2D" parent="."]
+position = Vector2(203, 267)
+
+[node name="Timer" type="Timer" parent="."]

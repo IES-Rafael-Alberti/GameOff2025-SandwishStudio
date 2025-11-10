@@ -13,7 +13,6 @@ config_version=5
 config/name="Those_who_are_about_to_spin"
 run/main_scene="uid://c2wj1k0bbhih8"
 config/features=PackedStringArray("4.5", "GL Compatibility")
-config/icon="res://icon.svg"
 
 [autoload]
 
@@ -27,6 +26,7 @@ version_control/autoload_on_startup=true
 [global_group]
 
 dropable=""
+slot=""
 
 [input]
 

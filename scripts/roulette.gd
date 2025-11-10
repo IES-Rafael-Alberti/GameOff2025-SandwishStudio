@@ -28,9 +28,11 @@ func _process(delta):
 func _input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
 		if event.pressed and state == State.IDLE:
+			# ❌ Bloquear giro si hay slots vacíos
 			for s in slots:
 				if not s.occupied:
-					return  
+					print("No se puede girar: hay slots vacíos")
+					return
 			state = State.DRAGGING
 			last_mouse_angle = rad_to_deg((get_global_mouse_position()-$SpriteRuleta.global_position).angle())
 			emit_signal("start_spin")
@@ -38,7 +40,6 @@ func _input(event):
 			state = State.SPINNING
 			if abs(inertia)<0.2: inertia=3.0*randf_range(0.8,1.4)
 			_selected_area = null
-
 
 func _drag():
 	var mouse = get_global_mouse_position()
