@@ -1,10 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://c2wj1k0bbhih8"]
+[gd_scene load_steps=7 format=3 uid="uid://c2wj1k0bbhih8"]
 
 [ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_jyskt"]
 [ext_resource type="Texture2D" uid="uid://dyswdki2qfudj" path="res://assets/ruletaVacia.png" id="2_iqt6o"]
 [ext_resource type="Texture2D" uid="uid://c4mdm2k1ac7r0" path="res://assets/ManillaRoca.png" id="3_dnls6"]
 [ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="4_k6evh"]
-[ext_resource type="Texture2D" uid="uid://dthf2y24tgfel" path="res://icon.svg" id="6_iqt6o"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nqo7r"]
 size = Vector2(558.49255, 459.97455)
@@ -32,42 +31,62 @@ scale = Vector2(11.164885, 11.083728)
 [node name="SoundWin" type="AudioStreamPlayer2D" parent="SpriteRuleta"]
 
 [node name="SlotsContainer" type="Node2D" parent="SpriteRuleta"]
-position = Vector2(-5705.256, -3402.7043)
+position = Vector2(-5660.5967, -3469.207)
 scale = Vector2(11.164885, 11.083728)
 
 [node name="Slot" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-position = Vector2(434, 405.00006)
+offset_left = 431.00003
+offset_top = 497.00012
+offset_right = 431.00003
+offset_bottom = 497.00012
 rotation = 3.6006496
 scale = Vector2(1, 1)
-skew = 0.0052865744
 
 [node name="Slot2" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-position = Vector2(650.00006, 238.99997)
+offset_left = 783.00006
+offset_top = 242.00009
+offset_right = 783.00006
+offset_bottom = 242.00009
 rotation = 1.0512271
 scale = Vector2(1, 1)
 
 [node name="Slot3" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-position = Vector2(645, 357)
+offset_left = 612.00006
+offset_top = 278.00006
+offset_right = 612.00006
+offset_bottom = 278.00006
 rotation = -4.4636273
 scale = Vector2(1, 1)
 
 [node name="Slot4" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-position = Vector2(546, 436.00006)
+offset_left = 602.0
+offset_top = 491.00003
+offset_right = 602.0
+offset_bottom = 491.00003
 rotation = 2.8070135
 scale = Vector2(1, 1)
 
 [node name="Slot5" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-position = Vector2(552, 169.99998)
+offset_left = 523.0001
+offset_top = 100.00002
+offset_right = 523.0001
+offset_bottom = 100.00002
 rotation = 0.084089845
 scale = Vector2(1, 1)
 
 [node name="Slot6" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-position = Vector2(431.00003, 184)
+offset_left = 360.00006
+offset_top = 172.00006
+offset_right = 360.00006
+offset_bottom = 172.00006
 rotation = -0.75672114
 scale = Vector2(1, 1)
 
 [node name="Slot7" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-position = Vector2(383, 292)
+offset_left = 311.00003
+offset_top = 358.00006
+offset_right = 311.00003
+offset_bottom = 358.00006
 rotation = -1.7749316
 scale = Vector2(1, 1)
 
@@ -147,14 +166,6 @@ position = Vector2(14, 42)
 shape = SubResource("CapsuleShape2D_t1x4v")
 
 [node name="Timer" type="Timer" parent="."]
-
-[node name="TextureRect" type="TextureRect" parent="."]
-z_index = -1
-offset_left = 183.0
-offset_top = 3.0
-offset_right = 854.0
-offset_bottom = 592.0
-texture = ExtResource("6_iqt6o")
 
 [connection signal="area_entered" from="Manecilla" to="." method="_on_AreaManecilla_area_entered"]
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]

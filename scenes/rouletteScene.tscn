@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://dyswdki2qfudj" path="res://assets/ruletaVacia.png" id="2_mmedl"]
 [ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="3_rleqp"]
 [ext_resource type="Texture2D" uid="uid://cke6unb6dfjoq" path="res://assets/manilla.png" id="4_jwrv3"]
-[ext_resource type="PackedScene" uid="uid://ckj0vt4dlrkx0" path="res://scenes/piece.tscn" id="5_bwak5"]
+[ext_resource type="PackedScene" uid="uid://ckj0vt4dlrkx0" path="res://scenes/piece1.tscn" id="5_bwak5"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nqo7r"]
 size = Vector2(20.00003, 20)

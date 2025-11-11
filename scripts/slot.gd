@@ -1,4 +1,4 @@
-extends Area2D
+extends Panel
 
 @export var max_glow_alpha := 0.7
 @export var max_scale := 1.0
@@ -10,7 +10,8 @@ var glow_sprite: Sprite2D
 var particles: CPUParticles2D
 var piece_over: Node = null
 var occupied := false
-
+const inventory = preload("uid://hbcgudcjh0wn")
+var inventory_manager = inventory.instantiate()
 func _ready():
 	if not has_node("Highlight"):
 		var h = Node2D.new()
@@ -44,10 +45,13 @@ func _process(delta):
 		glow_sprite.modulate.a = lerp(float(glow_sprite.modulate.a), 0.0, delta * highlight_speed)
 		glow_sprite.scale = glow_sprite.scale.lerp(Vector2(min_scale, min_scale), delta * highlight_speed)
 		particles.emitting = false
+		
+func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+	return data is Resource
 
-func piece_enter(piece: Node):
-	piece_over = piece
+func _drop_data(_at_position: Vector2, data: Variant) -> void:
 
-func piece_exit(piece: Node):
-	if piece_over == piece:
-		piece_over = null
+	if inventory_manager and inventory_manager.has_method("remove_item"):
+		inventory_manager.remove_item(data)
+	else:
+		push_error("DeleteArea: ¡No se pudo llamar a 'remove_item' en el padre!")
