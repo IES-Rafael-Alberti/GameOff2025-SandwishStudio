@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://htgfpif7ey68"]
+[gd_scene load_steps=2 format=3 uid="uid://htgfpif7ey68"]
 
 [ext_resource type="Script" uid="uid://b31agultlt6fo" path="res://scripts/slot.gd" id="1_maf36"]
-[ext_resource type="Texture2D" uid="uid://boul6livclehs" path="res://assets/unnamed (1).jpg" id="2_rg7d1"]
 
 [node name="SlotPiece" type="Control" groups=["slot"]]
 layout_mode = 3
@@ -13,14 +12,17 @@ offset_bottom = -17.932217
 scale = Vector2(0.29054677, 0.30135566)
 
 [node name="delete" type="Panel" parent="."]
-custom_minimum_size = Vector2(100, 100)
 layout_mode = 0
 offset_left = -146.37009
-offset_top = 69.46016
-offset_right = -46.370087
-offset_bottom = 169.46016
+offset_top = 39.595127
+offset_right = -77.534355
+offset_bottom = 109.28024
 script = ExtResource("1_maf36")
 
-[node name="Sprite2D" type="Sprite2D" parent="delete"]
-position = Vector2(48.184956, 49.775047)
-texture = ExtResource("2_rg7d1")
+[node name="PieceTextureRect" type="TextureRect" parent="delete"]
+layout_mode = 0
+offset_left = 3.4417868
+offset_right = 71.29883
+offset_bottom = 65.57382
+scale = Vector2(0.96370167, 1.0120925)
+expand_mode = 1

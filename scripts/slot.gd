@@ -1,3 +1,4 @@
+# Supongamos que este script se llama RouletteSlot.gd
 extends Panel
 
 @export var max_glow_alpha := 0.7
@@ -10,8 +11,16 @@ var glow_sprite: Sprite2D
 var particles: CPUParticles2D
 var piece_over: Node = null
 var occupied := false
+var current_piece_data: Resource = null # Para guardar los datos de la pieza
+
+# ¡NUEVO! Necesitamos un nodo para mostrar la imagen de la pieza
+@onready var piece_texture_rect: TextureRect = $PieceTextureRect
+
+# La instancia de inventario aquí parece un poco extraña,
+# pero la dejaremos como está ya que no afecta al drag-and-drop.
 const inventory = preload("uid://hbcgudcjh0wn")
 var inventory_manager = inventory.instantiate()
+
 func _ready():
 	if not has_node("Highlight"):
 		var h = Node2D.new()
@@ -32,7 +41,15 @@ func _ready():
 		glow_sprite = get_node("Highlight/Glow")
 		particles = get_node("Highlight/Particles")
 
+	# ¡NUEVO! Asegurarnos de que el nodo TextureRect existe
+	if not piece_texture_rect:
+		push_error("RouletteSlot: ¡No se encontró el nodo hijo 'PieceTextureRect'!")
+	else:
+		piece_texture_rect.visible = false # Empezar oculto
+
+
 func _process(delta):
+	# ... (tu código de _process para el brillo no cambia) ...
 	if piece_over:
 		var dist = piece_over.global_position.distance_to(global_position)
 		var factor = clamp(1.0 - float(dist) / float(attraction_radius), 0.0, 1.0)
@@ -45,13 +62,50 @@ func _process(delta):
 		glow_sprite.modulate.a = lerp(float(glow_sprite.modulate.a), 0.0, delta * highlight_speed)
 		glow_sprite.scale = glow_sprite.scale.lerp(Vector2(min_scale, min_scale), delta * highlight_speed)
 		particles.emitting = false
+
 		
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
-	return data is Resource
+	# 1. Rechazar si el slot ya está ocupado
+	if occupied:
+		return false
+		
+	return data is PieceData
+
+
+# En tu script de Slot de Ruleta (slot.gd)
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
-
-	if inventory_manager and inventory_manager.has_method("remove_item"):
-		inventory_manager.remove_item(data)
+	
+	# 1. Marcar como ocupado y guardar los datos
+	occupied = true
+	current_piece_data = data
+	
+	# 2. Mostrar la imagen
+	
+	# -----------------------------------------------------------------
+	# ✅ LÍNEAS CORREGIDAS:
+	#    Usamos "icon" (el nombre de tu variable en PieceData.gd)
+	#    en lugar de "texture".
+	# -----------------------------------------------------------------
+	if current_piece_data and "icon" in current_piece_data:
+		
+		# Asegurarnos de que la textura no sea nula
+		if current_piece_data.icon:
+			piece_texture_rect.texture = current_piece_data.icon
+			piece_texture_rect.visible = true
+		else:
+			push_warning("RouletteSlot: La propiedad 'icon' está vacía (null).")
+			
 	else:
-		push_error("DeleteArea: ¡No se pudo llamar a 'remove_item' en el padre!")
+		# Este mensaje de advertencia también lo actualizamos
+		push_warning("RouletteSlot: El Resource soltado no tiene la propiedad 'icon'. No se puede mostrar la imagen.")
+
+	# 3. Emitir la señal para que el Inventario elimine la pieza
+	GlobalSignals.item_attached.emit(data)
+
+# ¡NUEVO! Una función para limpiar el slot
+func clear_slot():
+	occupied = false
+	current_piece_data = null
+	if piece_texture_rect:
+		piece_texture_rect.visible = false

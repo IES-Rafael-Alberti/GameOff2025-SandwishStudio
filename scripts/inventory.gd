@@ -28,7 +28,8 @@ var passive_slots: Array[Node] = []
 ## ------------------------------------------------------------------
 
 func _ready() -> void:
-	
+	GlobalSignals.item_deleted.connect(remove_item)
+	GlobalSignals.item_attached.connect(remove_item)
 	# 1. Asegurarnos de que la escena del slot fue asignada
 	if not inventory_slot_scene:
 		push_error("¡La variable 'Inventory Slot Scene' no está asignada en el script Inventory.gd!")
@@ -252,17 +253,17 @@ func add_to_roulette(data: Resource):
 	return true
 
 
-func remove_item(data: Resource) -> bool:
-	
+func remove_item(item_data: Resource):
+		
 	var inventory_map: Dictionary
-	var id: String = _get_item_id(data)
+	var id: String = _get_item_id(item_data)
 	
 	var is_passive_item: bool = false
 	# --------------------
 
-	if data is PieceData:
+	if item_data is PieceData:
 		inventory_map = piece_counts
-	elif data is PassiveData:
+	elif item_data is PassiveData:
 		inventory_map = passive_counts
 		is_passive_item = true
 	else:
@@ -280,11 +281,11 @@ func remove_item(data: Resource) -> bool:
 	print("... Item encontrado. Reduciendo contador a: %d" % entry["count"])
 
 	# --- 💰 LÓGICA DE REEMBOLSO  ---
-	if "price" in data and data.price > 0:
-		var refund_amount = int(data.price * (refund_percent / 100.0))
+	if "price" in item_data and item_data.price > 0:
+		var refund_amount = int(item_data.price * (refund_percent / 100.0))
 		item_sold.emit(refund_amount)
 		
-		print("... Reembolsados %d de oro (%d%% de %d)" % [refund_amount, refund_percent, data.price])
+		print("... Reembolsados %d de oro (%d%% de %d)" % [refund_amount, refund_percent, item_data.price])
 
 	var slot_node: Node = entry["slot_node"]
 

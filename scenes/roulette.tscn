@@ -35,59 +35,59 @@ position = Vector2(-5660.5967, -3469.207)
 scale = Vector2(11.164885, 11.083728)
 
 [node name="Slot" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 431.00003
-offset_top = 497.00012
-offset_right = 431.00003
-offset_bottom = 497.00012
+offset_left = 514.00006
+offset_top = 227.00006
+offset_right = 514.00006
+offset_bottom = 227.00006
 rotation = 3.6006496
 scale = Vector2(1, 1)
 
 [node name="Slot2" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 783.00006
-offset_top = 242.00009
-offset_right = 783.00006
-offset_bottom = 242.00009
-rotation = 1.0512271
+offset_left = 640.0001
+offset_top = 224.00005
+offset_right = 640.0001
+offset_bottom = 224.00005
+rotation = -1.2993246
 scale = Vector2(1, 1)
 
 [node name="Slot3" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 612.00006
-offset_top = 278.00006
-offset_right = 612.00006
-offset_bottom = 278.00006
-rotation = -4.4636273
+offset_left = 502.00006
+offset_top = 568.00006
+offset_right = 502.00006
+offset_bottom = 568.00006
+rotation = -3.5538087
 scale = Vector2(1, 1)
 
 [node name="Slot4" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 602.0
-offset_top = 491.00003
-offset_right = 602.0
-offset_bottom = 491.00003
-rotation = 2.8070135
+offset_left = 449.00003
+offset_top = 579.00006
+offset_right = 449.00003
+offset_bottom = 579.00006
+rotation = 2.0638041
 scale = Vector2(1, 1)
 
 [node name="Slot5" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 523.0001
-offset_top = 100.00002
-offset_right = 523.0001
-offset_bottom = 100.00002
-rotation = 0.084089845
+offset_left = 444.0
+offset_top = 221.00003
+offset_right = 444.0
+offset_bottom = 221.00003
+rotation = -0.2132161
 scale = Vector2(1, 1)
 
 [node name="Slot6" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 360.00006
-offset_top = 172.00006
-offset_right = 360.00006
-offset_bottom = 172.00006
+offset_left = 422.00003
+offset_top = 54.99998
+offset_right = 422.00003
+offset_bottom = 54.99998
 rotation = -0.75672114
 scale = Vector2(1, 1)
 
 [node name="Slot7" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 311.00003
-offset_top = 358.00006
-offset_right = 311.00003
-offset_bottom = 358.00006
-rotation = -1.7749316
+offset_left = 447.00006
+offset_top = 38.000004
+offset_right = 447.00006
+offset_bottom = 38.000004
+rotation = -1.6030102
 scale = Vector2(1, 1)
 
 [node name="Topes" type="Node2D" parent="SpriteRuleta"]
