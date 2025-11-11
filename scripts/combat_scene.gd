@@ -25,7 +25,19 @@ const ENEMY_LIMIT := 1  # max enemies on field (1 warrior)
 @onready var btn_start: Button = $BtnStart
 @onready var btn_enemy: Button = $BtnEnemy
 @onready var btn_ally: Button = $BtnAlly
+@onready var round_message: Label = $RoundMessage
 @onready var inventory = get_node("/root/game/inventory")
+
+# Log 
+@onready var panel_container: PanelContainer = $PanelContainer
+@onready var box_container: VBoxContainer = $PanelContainer/BoxContainer
+@onready var h_box_container: HBoxContainer = $PanelContainer/BoxContainer/HBoxContainer
+@onready var label: Label = $PanelContainer/BoxContainer/HBoxContainer/Label
+@onready var scroll_container: ScrollContainer = $PanelContainer/BoxContainer/ScrollContainer
+@onready var rich_text_label: RichTextLabel = $PanelContainer/BoxContainer/ScrollContainer/RichTextLabel
+@onready var btn_clear_log: Button = $PanelContainer/BoxContainer/HBoxContainer.get_node_or_null("BtnClearLog") as Button
+
+const MAX_LOG_LINES := 200 
 
 # Ally spawn points (6)
 @onready var ally_spawns: Array[Marker2D] = [
@@ -57,6 +69,22 @@ func _ready() -> void:
 	start_timer.timeout.connect(_begin_combat)
 
 	_update_start_btn_state()
+	# --- Log setup ---
+	if rich_text_label:
+		# No dependemos de BBCode; autowrap para que el texto no se salga.
+		rich_text_label.bbcode_enabled = false
+		rich_text_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+		rich_text_label.fit_content = true
+		rich_text_label.text = ""
+		# Smoke test: si esto no se ve, el problema es de layout/visibilidad.
+		rich_text_label.append_text("⟶ Log inicial OK\n")
+
+	if btn_clear_log:
+		btn_clear_log.pressed.connect(_clear_log)
+
+	# Mensaje de bienvenida
+	_log_line("Battle log ready", Color.DIM_GRAY)
+
 
 # Spawn allies using the inventory, up to available AllySpawn markers
 func spawn_allies_from_inventory() -> void:
@@ -103,6 +131,7 @@ func spawn_allies_from_inventory() -> void:
 		var a := _spawn_npc(npc.Team.ALLY, m.position, gob_res)
 		if a:
 			ally_npcs.append(a)
+			_log_line("ALLY spawned at %s -> %s" % [m.name, _who(a)], Color.SEA_GREEN)
 
 	# Disable button if we filled all ally slots
 	btn_ally.disabled = ally_npcs.size() >= ally_spawns.size()
@@ -121,6 +150,7 @@ func spawn_enemy_one() -> void:
 	if e:
 		enemy_npcs.append(e)
 		print("Enemy spawned at BeastSpawn -> %s" % war_res.resource_path.get_file().get_basename())
+		_log_line("ENEMY spawned at BeastSpawn -> %s" % _who(e), Color.SALMON)
 
 	# Disable button when at limit
 	btn_enemy.disabled = enemy_npcs.size() >= ENEMY_LIMIT
@@ -149,11 +179,13 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 
 # Pay full remaining gold if the enemy (warrior) dies
 func _on_npc_died(n: npc) -> void:
+	_log_line("%s died -> %s" % [("ENEMY" if n.team == npc.Team.ENEMY else "ALLY"), _who(n)], Color.ORANGE_RED)
 	if n.team == npc.Team.ENEMY:
 		var amount: int = int(max(0, n.gold_pool))
 		if amount > 0:
 			PlayerData.add_currency(amount)
 			print("Reward (death): +", amount, " gold (remaining pool paid).")
+			_log_line("Reward (death): +%d gold (remaining pool paid)." % amount, Color.GOLD)
 		n.gold_pool = 0
 
 func _on_npc_exited(n: npc) -> void:
@@ -184,10 +216,12 @@ func _on_start_pressed() -> void:
 	btn_enemy.disabled = true
 
 	print("Battle starts in 3 seconds")
+	_log_line("[b]Battle starts in 3 seconds[/b]", Color.DODGER_BLUE)
 	start_timer.start(3.0)
 
 func _begin_combat() -> void:
 	print("Battle begins")
+	_log_line("[b]Battle begins[/b]", Color.DODGER_BLUE)
 	# Estado inicial de la ronda para el warrior (si existe)
 	if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 		var w: npc = enemy_npcs[0]
@@ -248,6 +282,22 @@ func _make_attack_timer(attacker: npc, defender: Variant) -> Timer:
 	t.start()
 	return t
 
+func _show_round_message() -> void:
+	if round_message:
+		round_message.text = "¡Ronda superada!"
+		round_message.visible = true
+		
+		var msg_timer := Timer.new()
+		msg_timer.one_shot = true
+		msg_timer.wait_time = 2.5
+		add_child(msg_timer)
+		msg_timer.timeout.connect(func ():
+			if is_instance_valid(round_message):
+				round_message.visible = false
+			msg_timer.queue_free()
+		)
+		msg_timer.start()
+
 # Pretty-print helper (2 decimals)
 func _num(x: float, d: int = 2) -> String:
 	return String.num(x, d)
@@ -294,26 +344,31 @@ func _do_attack(attacker: npc, defender: npc) -> void:
 		" | target HP ", _num(before_hp), " -> ", _num(after_hp), "/", _num(defender.max_health)
 	)
 
+	# Además, escribirlo en el panel de log
+	_log_hit(attacker, defender, base, dmg, crit, before_hp, after_hp)
+
 func _stop_combat() -> void:
-	# Si termina la ronda porque murieron los aliados y el warrior sigue vivo,
-	# paga el % de oro equivalente al % de vida perdido SOLO en esta ronda.
+	# if round ends because all allys dies and the warrior is alive,
+	# player gain monney % to the damage deal in the round only if they loose 
 	if enemy_npcs.size() > 0 and ally_npcs.is_empty():
 		var w: npc = enemy_npcs[0]
 		if is_instance_valid(w) and w.health > 0.0:
 			var hp_lost: float = max(0.0, enemy_hp_round_start - w.health)
 			var damage_frac: float = clamp(hp_lost / w.max_health, 0.0, 1.0)
 
-			# Oro base de esta ronda = el pool que tenía al comenzar la ronda
+			# base gold in this round = pool they have in the begin of the round
 			var base_gold: int = enemy_gold_round_start
 			var payout: int = int(floor(base_gold * damage_frac))
 
-			# No pagues más de lo que queda en el pool actual
+			# avoid paying more than what is left in the current pool
 			payout = clamp(payout, 0, int(w.gold_pool))
 
 			if payout > 0:
 				PlayerData.add_currency(payout)
 				w.gold_pool = int(w.gold_pool) - payout
 				print("Round reward: +", payout, " gold (", int(damage_frac * 100), "% dmg this round). Remaining pool=", w.gold_pool)
+				_log_line("Round reward: +%d gold (%d%% dmg this round). Remaining pool=%d"
+					% [payout, int(damage_frac * 100), w.gold_pool], Color.GOLD)
 	for t in ally_timers:
 		if is_instance_valid(t):
 			t.stop()
@@ -327,14 +382,76 @@ func _stop_combat() -> void:
 	enemy_timers.clear()
 
 	combat_running = false
-
+	# Clean the wave
+	for a in ally_npcs:
+		if is_instance_valid(a):
+			a.queue_free()
+	# Clean array before tree_exited
+	ally_npcs.clear()
+	
 	# Re-enable spawn buttons if there is room
 	btn_ally.disabled = ally_npcs.size() >= ally_spawns.size()
 	btn_enemy.disabled = enemy_npcs.size() >= ENEMY_LIMIT
 
 	_update_start_btn_state()
 	print("Battle stopped")
+	_log_line("[b]Battle stopped[/b]", Color.DIM_GRAY)
+		# msg -> Round complete
+	if enemy_npcs.size() > 0 and ally_npcs.is_empty():
+		_show_round_message()
+
 
 func _update_start_btn_state() -> void:
 	# Start is enabled only when we have at least 1 ally and 1 enemy and no battle is running
 	btn_start.disabled = combat_running or ally_npcs.is_empty() or enemy_npcs.is_empty()
+
+func _color_to_hex(c: Color) -> String:
+	return "#%02x%02x%02x" % [int(c.r * 255.0), int(c.g * 255.0), int(c.b * 255.0)]
+
+func _log_line(text: String, color: Color = Color.WHITE) -> void:
+	if not is_instance_valid(rich_text_label):
+		print(text)
+		return
+
+	# --- recorte si hay demasiadas líneas ---
+	var lines: PackedStringArray = rich_text_label.text.split("\n")
+	if lines.size() > MAX_LOG_LINES:
+		var keep_from: int = int(MAX_LOG_LINES * 0.6)  # conserva ~60%
+		var start: int = max(0, lines.size() - keep_from)
+		var trimmed: PackedStringArray = lines.slice(start)
+		rich_text_label.text = "\n".join(trimmed)
+
+	# escribir línea nueva (sin BBCode para evitar más variables)
+	rich_text_label.push_color(color)
+	rich_text_label.append_text(text + "\n")
+	rich_text_label.pop()
+
+	# autoscroll al final (seguro aunque la escena esté saliendo del árbol)
+	var tree := get_tree()
+	if tree != null:
+		await tree.process_frame
+
+	if is_instance_valid(scroll_container):
+		var sb := scroll_container.get_v_scroll_bar()
+		if sb != null:
+			sb.value = sb.max_value
+
+
+func _who(n: npc) -> String:
+	return n.npc_res.resource_path.get_file().get_basename() if (n and n.npc_res) else "???"
+
+func _log_hit(attacker: npc, defender: npc, base: float, final_dmg: float, crit: bool, before_hp: float, after_hp: float) -> void:
+	var side_a := ("ALLY" if attacker.team == npc.Team.ALLY else "ENEMY")
+	var side_d := ("ALLY" if defender.team == npc.Team.ALLY else "ENEMY")
+	var crit_txt := " [b]CRIT[/b]" if crit else ""
+	var txt := "%s(%s) -> %s(%s) | base=%.2f%s | final=%.2f | %s HP %.2f -> %.2f / %.2f" % [
+		side_a, _who(attacker),
+		side_d, _who(defender),
+		base, crit_txt, final_dmg,
+		side_d, before_hp, after_hp, defender.max_health
+	]
+	_log_line(txt, Color.YELLOW if crit else Color.WHITE)
+
+func _clear_log() -> void:
+	if rich_text_label:
+		rich_text_label.text = ""
