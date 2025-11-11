@@ -36,132 +36,132 @@ position = Vector2(-5660.5967, -3469.207)
 scale = Vector2(11.164885, 11.083728)
 
 [node name="Slot1" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 697.00006
-offset_top = 217.00005
-offset_right = 697.00006
-offset_bottom = 217.00005
-rotation = 2.5852685
+offset_left = 514.00006
+offset_top = 227.00006
+offset_right = 514.00006
+offset_bottom = 227.00006
+rotation = 3.6006496
 scale = Vector2(1, 1)
 
 [node name="Slot2" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 647.0
-offset_top = 380.0
-offset_right = 647.0
-offset_bottom = 380.0
+offset_left = 640.0001
+offset_top = 224.00005
+offset_right = 640.0001
+offset_bottom = 224.00005
 rotation = -1.2993246
 scale = Vector2(1, 1)
 
 [node name="Slot3" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 614.00006
-offset_top = 479.0
-offset_right = 614.00006
-offset_bottom = 479.0
+offset_left = 502.00006
+offset_top = 568.00006
+offset_right = 502.00006
+offset_bottom = 568.00006
 rotation = -3.5538087
 scale = Vector2(1, 1)
 
 [node name="Slot4" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 472.00006
-offset_top = 441.00003
-offset_right = 472.00006
-offset_bottom = 441.00003
+offset_left = 449.00003
+offset_top = 579.00006
+offset_right = 449.00003
+offset_bottom = 579.00006
 rotation = 2.0638041
 scale = Vector2(1, 1)
 
 [node name="Slot5" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 305.0
-offset_top = 311.00003
-offset_right = 305.0
-offset_bottom = 311.00003
+offset_left = 444.0
+offset_top = 221.00003
+offset_right = 444.0
+offset_bottom = 221.00003
 rotation = -0.2132161
 scale = Vector2(1, 1)
 
 [node name="Slot6" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 346.00003
-offset_top = 191.00005
-offset_right = 346.00003
-offset_bottom = 191.00005
+offset_left = 422.00003
+offset_top = 54.99998
+offset_right = 422.00003
+offset_bottom = 54.99998
 rotation = -0.75672114
 scale = Vector2(1, 1)
 
 [node name="Slot7" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 497.0
-offset_top = 166.00002
-offset_right = 497.0
-offset_bottom = 166.00002
+offset_left = 447.00006
+offset_top = 38.000004
+offset_right = 447.00006
+offset_bottom = 38.000004
 rotation = -1.6030102
 scale = Vector2(1, 1)
 
 [node name="Topes" type="Node2D" parent="SpriteRuleta"]
 
 [node name="Segmentos1" type="Area2D" parent="SpriteRuleta/Topes"]
-position = Vector2(1350.9514, -2272.1643)
+position = Vector2(859.6965, 2249.9966)
 scale = Vector2(0.99999946, 0.9999994)
 script = ExtResource("4_jyskt")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Topes/Segmentos1"]
-position = Vector2(200.96817, -210.59113)
+position = Vector2(480.0904, -4455.6616)
 shape = SubResource("RectangleShape2D_nqo7r")
 
 [node name="Segmentos2" type="Area2D" parent="SpriteRuleta/Topes"]
-position = Vector2(2500.9346, -410.09814)
+position = Vector2(2210.6475, 831.27954)
 scale = Vector2(0.9999995, 0.99999946)
 script = ExtResource("4_jyskt")
 slot_index = 1
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Topes/Segmentos2"]
-position = Vector2(290.28723, -22.167582)
+position = Vector2(301.45212, -1341.132)
 shape = SubResource("RectangleShape2D_nqo7r")
 
 [node name="Segmentos3" type="Area2D" parent="SpriteRuleta/Topes"]
-position = Vector2(1875.7004, 1551.722)
+position = Vector2(-1808.7114, -1729.0616)
 scale = Vector2(0.9999995, 0.99999946)
 script = ExtResource("4_jyskt")
 slot_index = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Topes/Segmentos3"]
-position = Vector2(267.9576, 299.26086)
+position = Vector2(3729.0735, 3280.7854)
 shape = SubResource("RectangleShape2D_nqo7r")
 
 [node name="Segmentos4" type="Area2D" parent="SpriteRuleta/Topes"]
-position = Vector2(-89.31909, 2349.7505)
+position = Vector2(-2623.7478, 177.33984)
 rotation = 0.1440925
 scale = Vector2(0.99999946, 0.99999934)
 script = ExtResource("4_jyskt")
 slot_index = 3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Topes/Segmentos4"]
-position = Vector2(-28.006058, 351.25726)
+position = Vector2(2826.3857, 1751.4585)
 shape = SubResource("RectangleShape2D_nqo7r")
 
 [node name="Segmentos5" type="Area2D" parent="SpriteRuleta/Topes"]
-position = Vector2(-1942.69, 1307.8801)
+position = Vector2(1909.1953, -1252.4612)
 scale = Vector2(0.9999995, 0.99999946)
 script = ExtResource("4_jyskt")
 slot_index = 4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Topes/Segmentos5"]
-position = Vector2(-279.12213, 110.83746)
+position = Vector2(-3807.2275, 2538.175)
 shape = SubResource("RectangleShape2D_nqo7r")
 
 [node name="Segmentos6" type="Area2D" parent="SpriteRuleta/Topes"]
-position = Vector2(-2221.812, -875.6145)
+position = Vector2(-11.164551, -2394.085)
 scale = Vector2(0.9999995, 0.99999946)
 script = ExtResource("4_jyskt")
 slot_index = 5
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Topes/Segmentos6"]
-position = Vector2(-379.60632, -133.00476)
+position = Vector2(-2255.3083, 1463.0524)
 shape = SubResource("RectangleShape2D_nqo7r")
 
 [node name="Segmentos7" type="Area2D" parent="SpriteRuleta/Topes"]
-position = Vector2(-759.21216, -2482.7551)
+position = Vector2(-1395.6104, 1995.072)
 rotation = 0.1440925
 scale = Vector2(0.99999946, 0.99999934)
 script = ExtResource("4_jyskt")
 slot_index = 6
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Topes/Segmentos7"]
-position = Vector2(-185.01987, -264.34903)
+position = Vector2(-28.920105, -4475.726)
 shape = SubResource("RectangleShape2D_nqo7r")
 
 [node name="Manecilla" type="Area2D" parent="."]

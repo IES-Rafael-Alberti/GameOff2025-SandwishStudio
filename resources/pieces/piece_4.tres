@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1_ctpaf")
+piece_name = "Caballero"
 icon = ExtResource("1_m3s22")
 price = 233
 metadata/_custom_type_script = "uid://8urlsjkkl8pw"

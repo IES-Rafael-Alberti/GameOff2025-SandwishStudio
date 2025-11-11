@@ -6,19 +6,13 @@ extends Panel
 @export var min_scale := 0.6
 @export var attraction_radius := 120.0
 @export var highlight_speed := 10.0
-@export var ruleta: Node
 var glow_sprite: Sprite2D
 var particles: CPUParticles2D
 var piece_over: Node = null
 var occupied := false
-var current_piece_data: Resource = null # Para guardar los datos de la pieza
-
-# ¡NUEVO! Necesitamos un nodo para mostrar la imagen de la pieza
+var current_piece_data: Resource = null 
+@onready var ruleta: Node = get_parent().get_parent().get_parent().get_parent()
 @onready var piece_texture_rect: TextureRect = $PieceTextureRect
-
-# La instancia de inventario aquí parece un poco extraña,
-# pero la dejaremos como está ya que no afecta al drag-and-drop.
-
 
 func _ready():
 	if not has_node("Highlight"):
@@ -40,7 +34,6 @@ func _ready():
 		glow_sprite = get_node("Highlight/Glow")
 		particles = get_node("Highlight/Particles")
 
-	# ¡NUEVO! Asegurarnos de que el nodo TextureRect existe
 	if not piece_texture_rect:
 		push_error("RouletteSlot: ¡No se encontró el nodo hijo 'PieceTextureRect'!")
 	else:
@@ -48,7 +41,6 @@ func _ready():
 	self.gui_input.connect(_on_gui_input)
 
 func _process(delta):
-	# ... (tu código de _process para el brillo no cambia) ...
 	if piece_over:
 		var dist = piece_over.global_position.distance_to(global_position)
 		var factor = clamp(1.0 - float(dist) / float(attraction_radius), 0.0, 1.0)
@@ -64,7 +56,11 @@ func _process(delta):
 
 		
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
-	# 1. Rechazar si el slot ya está ocupado
+	
+	if ruleta and ruleta.has_method("is_moving"):
+		if ruleta.is_moving():
+			return false
+	
 	if occupied:
 		return false
 		
@@ -79,13 +75,7 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 	occupied = true
 	current_piece_data = data
 	
-	# 2. Mostrar la imagen
-	
-	# -----------------------------------------------------------------
-	# ✅ LÍNEAS CORREGIDAS:
-	#    Usamos "icon" (el nombre de tu variable en PieceData.gd)
-	#    en lugar de "texture".
-	# -----------------------------------------------------------------
+
 	if current_piece_data and "icon" in current_piece_data:
 		
 		# Asegurarnos de que la textura no sea nula
@@ -102,7 +92,6 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 	# 3. Emitir la señal para que el Inventario elimine la pieza
 	GlobalSignals.item_attached.emit(data)
 
-# ¡NUEVO! Una función para limpiar el slot
 func clear_slot():
 	occupied = false
 	current_piece_data = null

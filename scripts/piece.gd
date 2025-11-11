@@ -2,6 +2,7 @@ extends Control
 
 @export_multiline var description: String
 @export var piece_origin: PackedScene
+@export var piece_name: String
 @export var price: int
 @onready var sprite_2d: Sprite2D = $Sprite2D
 

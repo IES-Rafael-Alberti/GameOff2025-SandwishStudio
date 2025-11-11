@@ -19,8 +19,6 @@ var bouncing = false
 
 func is_moving(): return state != State.IDLE
 
-func _ready():
-	GlobalSignals.item_attached.connect(attach_item)
 
 
 func _process(delta):
