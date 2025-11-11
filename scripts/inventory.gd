@@ -30,6 +30,7 @@ var passive_slots: Array[Node] = []
 func _ready() -> void:
 	GlobalSignals.item_deleted.connect(remove_item)
 	GlobalSignals.item_attached.connect(remove_item)
+	GlobalSignals.item_return_to_inventory_requested.connect(_on_item_return_requested)
 	# 1. Asegurarnos de que la escena del slot fue asignada
 	if not inventory_slot_scene:
 		push_error("¡La variable 'Inventory Slot Scene' no está asignada en el script Inventory.gd!")
@@ -316,3 +317,12 @@ func remove_item(item_data: Resource):
 func _on_item_selected_from_slot(data: Resource) -> void:
 	if data:
 		print("Has seleccionado el item: ", data.resource_name)
+func _on_item_return_requested(item_data: Resource, on_complete_callback: Callable):
+	# 1. Intentamos añadir el ítem usando tu lógica existente.
+	var success: bool = add_item(item_data)
+	
+	# 2. Comprobamos si el "callback" que nos pasaron es válido.
+	if on_complete_callback.is_valid():
+		# 3. "Llamamos de vuelta" a la función que nos pasaron,
+		#    enviándole el resultado (true si se añadió, false si no).
+		on_complete_callback.call(success)

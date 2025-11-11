@@ -6,7 +6,7 @@ extends Panel
 @export var min_scale := 0.6
 @export var attraction_radius := 120.0
 @export var highlight_speed := 10.0
-
+@export var ruleta: Node
 var glow_sprite: Sprite2D
 var particles: CPUParticles2D
 var piece_over: Node = null
@@ -18,8 +18,7 @@ var current_piece_data: Resource = null # Para guardar los datos de la pieza
 
 # La instancia de inventario aquí parece un poco extraña,
 # pero la dejaremos como está ya que no afecta al drag-and-drop.
-const inventory = preload("uid://hbcgudcjh0wn")
-var inventory_manager = inventory.instantiate()
+
 
 func _ready():
 	if not has_node("Highlight"):
@@ -46,7 +45,7 @@ func _ready():
 		push_error("RouletteSlot: ¡No se encontró el nodo hijo 'PieceTextureRect'!")
 	else:
 		piece_texture_rect.visible = false # Empezar oculto
-
+	self.gui_input.connect(_on_gui_input)
 
 func _process(delta):
 	# ... (tu código de _process para el brillo no cambia) ...
@@ -109,3 +108,34 @@ func clear_slot():
 	current_piece_data = null
 	if piece_texture_rect:
 		piece_texture_rect.visible = false
+func _on_gui_input(event: InputEvent) -> void:
+	# 1. Salir si no es un clic izquierdo
+	if not (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed):
+		return
+
+	# 2. Salir si el slot está vacío
+	if not occupied:
+		return
+		
+	# 3. Comprobar que la ruleta no esté girando
+	if ruleta and ruleta.has_method("is_moving") and ruleta.is_moving():
+		print("No se puede devolver la pieza: ¡La ruleta está girando!")
+		return
+
+	# 4. Crear un "callback" (una Callable) que apunte
+	#    a nuestra nueva función local "_on_return_attempt_finished"
+	var callback = Callable(self, "_on_return_attempt_finished")
+	
+	# 5. Emitir la señal global, pasando los datos Y el callback
+	GlobalSignals.item_return_to_inventory_requested.emit(current_piece_data, callback)
+
+
+
+func _on_return_attempt_finished(success: bool):
+	if success:
+		# 6. Si el inventario la aceptó (no estaba lleno),
+		#    limpiamos este slot.
+		clear_slot()
+	else:
+		# 7. Si el inventario falló (está lleno)
+		print("No se puede devolver la pieza: ¡El inventario está lleno!")
