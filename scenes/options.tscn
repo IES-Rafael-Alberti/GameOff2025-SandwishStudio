@@ -37,10 +37,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -87.0
-offset_top = -65.0
-offset_right = 113.0
-offset_bottom = 74.0
+offset_left = -88.0
+offset_top = -32.0
+offset_right = 112.0
+offset_bottom = 107.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -76,13 +76,30 @@ offset_bottom = 248.0
 tick_count = 50
 script = ExtResource("2_yjkok")
 
+[node name="AudioControl2" type="HSlider" parent="."]
+layout_mode = 0
+offset_left = 554.0
+offset_top = 257.0
+offset_right = 691.0
+offset_bottom = 273.0
+tick_count = 50
+script = ExtResource("2_yjkok")
+
 [node name="Label2" type="Label" parent="."]
 layout_mode = 0
-offset_left = 495.0
-offset_top = 230.0
-offset_right = 540.0
-offset_bottom = 253.0
+offset_left = 493.0
+offset_top = 231.0
+offset_right = 538.0
+offset_bottom = 254.0
 text = "Audio"
+
+[node name="Label3" type="Label" parent="."]
+layout_mode = 0
+offset_left = 495.0
+offset_top = 257.0
+offset_right = 540.0
+offset_bottom = 280.0
+text = "sfx"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 autoplay = true
