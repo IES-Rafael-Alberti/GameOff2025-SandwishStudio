@@ -2,21 +2,26 @@ extends Node2D
 
 const NPC_SCENE := preload("res://scenes/npc.tscn")
 
-# Allies pool: only warriors
+# Allies pool: only goblings
 const RES_LIST := [
-	preload("res://resourses/warrior/black_warrior.tres"),
-	preload("res://resourses/warrior/blue_warrior.tres"),
-	preload("res://resourses/warrior/red_warrior.tres"),
-	preload("res://resourses/warrior/yellow_warrior.tres")
+	preload("res://resources/gobling/blue_gobling.tres"),
+	preload("res://resources/gobling/red_gobling.tres"),
+	preload("res://resources/gobling/yellow_gobling.tres"),
+	preload("res://resources/gobling/purple_gobling.tres")
 ]
 
-# Enemy pool: always red goblin
-const ENEMY_RES := preload("res://resourses/gobling/red_gobling.tres")
+# Enemy pool: only warriors
+const ENEMY_RES := [
+	preload("res://resources/warrior/black_warrior.tres"),
+	preload("res://resources/warrior/blue_warrior.tres"),
+	preload("res://resources/warrior/red_warrior.tres"),
+	preload("res://resources/warrior/yellow_warrior.tres")
+]
 
-const ENEMY_LIMIT := 1  # max enemies on field 
+const ENEMY_LIMIT := 1  # max enemies on field (1 warrior)
 # Ally limit is implicitly the number of AllySpawn markers (6)
 
-@onready var enemy_spawn: Marker2D = $EnemySpawn
+@onready var enemy_spawn: Marker2D = $BeastSpawn
 @onready var btn_start: Button = $BtnStart
 @onready var btn_enemy: Button = $BtnEnemy
 @onready var btn_ally: Button = $BtnAlly
@@ -24,17 +29,20 @@ const ENEMY_LIMIT := 1  # max enemies on field
 
 # Ally spawn points (6)
 @onready var ally_spawns: Array[Marker2D] = [
-	$AllySpawn1, $AllySpawn2, $AllySpawn3,
-	$AllySpawn4, $AllySpawn5, $AllySpawn6
+	$WarriorSpawn1, $WarriorSpawn2, $WarriorSpawn3,
+	$WarriorSpawn4, $WarriorSpawn5, $WarriorSpawn6
 ]
 
-var ally_npcs: Array[npc] = []    # active allies
-var enemy_npcs: Array[npc] = []   # active enemies
+var ally_npcs: Array[npc] = []    # active allies (goblins)
+var enemy_npcs: Array[npc] = []   # active enemies (1 warrior)
 
 var combat_running := false
 var start_timer: Timer
 var ally_timers: Array[Timer] = []
 var enemy_timers: Array[Timer] = []
+var enemy_hp_round_start: float = 0.0
+var enemy_gold_round_start: int = 0
+
 
 func _ready() -> void:
 	randomize()
@@ -49,7 +57,6 @@ func _ready() -> void:
 	start_timer.timeout.connect(_begin_combat)
 
 	_update_start_btn_state()
-
 
 # Spawn allies using the inventory, up to available AllySpawn markers
 func spawn_allies_from_inventory() -> void:
@@ -84,15 +91,18 @@ func spawn_allies_from_inventory() -> void:
 		print("No troops in inventory.")
 		return
 
+	# up to 6 goblins, limited by inventory and spawn points
 	var max_allies: int = min(total_pieces, ally_spawns.size())
 	print("Spawning %d allies from inventory (total=%d)" % [max_allies, total_pieces])
 
 	for i in range(max_allies):
 		var m: Marker2D = ally_spawns[i]
-		if m:
-			var a := _spawn_npc(npc.Team.ALLY, m.position)  # uses warrior pool
-			if a:
-				ally_npcs.append(a)
+		if not m:
+			continue
+		var gob_res: npcRes = RES_LIST[randi() % RES_LIST.size()]
+		var a := _spawn_npc(npc.Team.ALLY, m.position, gob_res)
+		if a:
+			ally_npcs.append(a)
 
 	# Disable button if we filled all ally slots
 	btn_ally.disabled = ally_npcs.size() >= ally_spawns.size()
@@ -104,55 +114,62 @@ func spawn_enemy_one() -> void:
 		print("Enemy limit reached (%d)." % ENEMY_LIMIT)
 		return
 
-	var positions := _enemy_positions(enemy_spawn.position)
-	var idx := enemy_npcs.size()
-	var pos := positions[idx]
-	var e := _spawn_npc(npc.Team.ENEMY, pos, ENEMY_RES)
+	# single warrior at BeastSpawn
+	var pos := enemy_spawn.position
+	var war_res: npcRes = ENEMY_RES[randi() % ENEMY_RES.size()]
+	var e := _spawn_npc(npc.Team.ENEMY, pos, war_res)
 	if e:
 		enemy_npcs.append(e)
+		print("Enemy spawned at BeastSpawn -> %s" % war_res.resource_path.get_file().get_basename())
 
 	# Disable button when at limit
 	btn_enemy.disabled = enemy_npcs.size() >= ENEMY_LIMIT
 	_update_start_btn_state()
 
-# Simple helper to arrange up to 3 enemies around the spawn point
-func _enemy_positions(origin: Vector2) -> Array[Vector2]:
-	return [
-		origin,
-		origin + Vector2( 60, -24),
-		origin + Vector2( 60,  24),
-	]
-
-# Optional resource override lets us force a specific npcRes (used for enemies)
+# Optional resource override lets us force a specific npcRes (used here for both sides)
 func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 	var n: npc = NPC_SCENE.instantiate()
 	n.team = team
 	n.position = pos
-
-	# Allies → random warrior from RES_LIST. Enemies → ENEMY_RES override.
 	if res_override != null:
 		n.npc_res = res_override
 	else:
+		# fallback: allies use goblin pool by default
 		n.npc_res = RES_LIST[randi() % RES_LIST.size()]
-
 	add_child(n)
+	
+	# if is ENEMY (warrior), the gold pool is = to resource
+	if team == npc.Team.ENEMY:
+		n.gold_pool = int(n.npc_res.gold)
 
-	n.tree_exited.connect(func ():
-		if team == npc.Team.ALLY:
-			ally_npcs.erase(n)
-			# Re-enable ally button if we now have free slots
-			btn_ally.disabled = ally_npcs.size() >= ally_spawns.size()
-		else:
-			enemy_npcs.erase(n)
-			# Re-enable enemy button if below limit
-			btn_enemy.disabled = enemy_npcs.size() >= ENEMY_LIMIT
-
-		# Stop combat if one side is empty
-		if combat_running and (ally_npcs.is_empty() or enemy_npcs.is_empty()):
-			_stop_combat()
-		_update_start_btn_state()
-	)
+	# connect gold handling on death and slot freeing on exit
+	n.died.connect(_on_npc_died)
+	n.tree_exited.connect(_on_npc_exited.bind(n))
 	return n
+
+# Pay full remaining gold if the enemy (warrior) dies
+func _on_npc_died(n: npc) -> void:
+	if n.team == npc.Team.ENEMY:
+		var amount: int = int(max(0, n.gold_pool))
+		if amount > 0:
+			PlayerData.add_currency(amount)
+			print("Reward (death): +", amount, " gold (remaining pool paid).")
+		n.gold_pool = 0
+
+func _on_npc_exited(n: npc) -> void:
+	if n.team == npc.Team.ALLY:
+		ally_npcs.erase(n)
+		# Re-enable ally button if we now have free slots
+		btn_ally.disabled = ally_npcs.size() >= ally_spawns.size()
+	else:
+		enemy_npcs.erase(n)
+		# Re-enable enemy button if below limit
+		btn_enemy.disabled = enemy_npcs.size() >= ENEMY_LIMIT
+
+	# Stop combat if one side is empty
+	if combat_running and ( ally_npcs.is_empty() or enemy_npcs.is_empty() ):
+		_stop_combat()
+	_update_start_btn_state()
 
 func _on_start_pressed() -> void:
 	if combat_running:
@@ -171,6 +188,11 @@ func _on_start_pressed() -> void:
 
 func _begin_combat() -> void:
 	print("Battle begins")
+	# Estado inicial de la ronda para el warrior (si existe)
+	if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
+		var w: npc = enemy_npcs[0]
+		enemy_hp_round_start = w.health
+		enemy_gold_round_start = int(w.gold_pool)
 
 	# One timer per ally hitting a random alive enemy
 	for a in ally_npcs:
@@ -181,10 +203,9 @@ func _begin_combat() -> void:
 	# One timer per enemy hitting a random alive ally
 	for e in enemy_npcs:
 		if is_instance_valid(e):
-			var t := _make_attack_timer(e, ally_npcs)   # pass the list of allies
+			var t := _make_attack_timer(e, ally_npcs)
 			enemy_timers.append(t)
 
-# 'defender' can be an npc or an Array[npc]
 func _make_attack_timer(attacker: npc, defender: Variant) -> Timer:
 	var t := Timer.new()
 	t.one_shot = false
@@ -198,22 +219,28 @@ func _make_attack_timer(attacker: npc, defender: Variant) -> Timer:
 
 	t.timeout.connect(func () -> void:
 		if not is_instance_valid(attacker):
-			_stop_combat()
+			t.stop()
+			t.queue_free()
 			return
 
 		var target: Variant = defender
 		if target is Array:
+			# filters alive from the defending side
 			var alive: Array = []
 			for d in target:
 				if is_instance_valid(d):
 					alive.append(d)
+
+			# If there are no living objectives on that side -> the combat is over
 			if alive.is_empty():
 				_stop_combat()
 				return
+
+			# Choose one alive objetive
 			target = alive[randi() % alive.size()]
 
+		# If the objetive is invalid ignore
 		if not is_instance_valid(target):
-			_stop_combat()
 			return
 
 		_do_attack(attacker, target)
@@ -266,8 +293,27 @@ func _do_attack(attacker: npc, defender: npc) -> void:
 		" | final=", _num(dmg),
 		" | target HP ", _num(before_hp), " -> ", _num(after_hp), "/", _num(defender.max_health)
 	)
-	
+
 func _stop_combat() -> void:
+	# Si termina la ronda porque murieron los aliados y el warrior sigue vivo,
+	# paga el % de oro equivalente al % de vida perdido SOLO en esta ronda.
+	if enemy_npcs.size() > 0 and ally_npcs.is_empty():
+		var w: npc = enemy_npcs[0]
+		if is_instance_valid(w) and w.health > 0.0:
+			var hp_lost: float = max(0.0, enemy_hp_round_start - w.health)
+			var damage_frac: float = clamp(hp_lost / w.max_health, 0.0, 1.0)
+
+			# Oro base de esta ronda = el pool que tenía al comenzar la ronda
+			var base_gold: int = enemy_gold_round_start
+			var payout: int = int(floor(base_gold * damage_frac))
+
+			# No pagues más de lo que queda en el pool actual
+			payout = clamp(payout, 0, int(w.gold_pool))
+
+			if payout > 0:
+				PlayerData.add_currency(payout)
+				w.gold_pool = int(w.gold_pool) - payout
+				print("Round reward: +", payout, " gold (", int(damage_frac * 100), "% dmg this round). Remaining pool=", w.gold_pool)
 	for t in ally_timers:
 		if is_instance_valid(t):
 			t.stop()

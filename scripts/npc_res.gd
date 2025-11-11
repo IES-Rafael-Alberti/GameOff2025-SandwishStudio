@@ -10,3 +10,6 @@ class_name npcRes
 @export var critical_chance: int
 @export var critical_damage: float
 @export var description: String
+@export var raza: String
+@export var rareza: String
+@export var gold: int
