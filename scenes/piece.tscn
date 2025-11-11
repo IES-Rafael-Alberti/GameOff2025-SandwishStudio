@@ -1,12 +1,23 @@
 [gd_scene load_steps=3 format=3 uid="uid://ckj0vt4dlrkx0"]
 
-[ext_resource type="Script" uid="uid://cf5se3pebkywk" path="res://scripts/piece.gd" id="1_s58gp"]
-[ext_resource type="Texture2D" uid="uid://dthf2y24tgfel" path="res://icon.svg" id="2_h2rng"]
+[ext_resource type="Script" uid="uid://cbn2dsy6lxarj" path="res://scripts/piece1.gd" id="1_s58gp"]
 
-[node name="piece" type="Control"]
-layout_mode = 3
-anchors_preset = 0
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_s58gp"]
+size = Vector2(49.156612, 20)
+
+[node name="piece" type="Node2D"]
+scale = Vector2(0.5, 1)
 script = ExtResource("1_s58gp")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("2_h2rng")
+position = Vector2(-1, -1)
+
+[node name="Area2D" type="Area2D" parent="."]
+position = Vector2(-1, -1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(61.799988, 7)
+scale = Vector2(6.6400023, 8.24)
+shape = SubResource("RectangleShape2D_s58gp")
+
+[connection signal="input_event" from="Area2D" to="." method="_on_area_2d_input_event"]

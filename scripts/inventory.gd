@@ -12,7 +12,7 @@ signal item_sold(refund_amount: int)
 @export var max_pieces: int = 6
 @export var max_passives: int = 30
 @export var inventory_slot_scene: PackedScene 
-
+@export var piece_scene: PackedScene # Arrastra tu escena piece.tscn aquí
 ## ------------------------------------------------------------------
 ## Datos del Inventario
 ## ------------------------------------------------------------------

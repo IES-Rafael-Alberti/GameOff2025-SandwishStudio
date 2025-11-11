@@ -80,9 +80,9 @@ func _on_AreaManecilla_area_entered(area: Area2D) -> void:
 		return
 	_selected_area = area
 	_bounce()
-	if $TickSound:
-		$TickSound.play()
-	$SpriteRuleta.rotation_degrees += randf_range(-2.0, 2.0)
+	#if $TickSound:
+	#	$TickSound.play()
+	#$SpriteRuleta.rotation_degrees += randf_range(-2.0, 2.0)
 
 
 func _bounce():

@@ -1,0 +1,160 @@
+[gd_scene load_steps=8 format=3 uid="uid://c2wj1k0bbhih8"]
+
+[ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_jyskt"]
+[ext_resource type="Texture2D" uid="uid://dyswdki2qfudj" path="res://assets/ruletaVacia.png" id="2_iqt6o"]
+[ext_resource type="Texture2D" uid="uid://c4mdm2k1ac7r0" path="res://assets/ManillaRoca.png" id="3_dnls6"]
+[ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="4_k6evh"]
+[ext_resource type="Texture2D" uid="uid://dthf2y24tgfel" path="res://icon.svg" id="6_iqt6o"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nqo7r"]
+size = Vector2(558.49255, 459.97455)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_t1x4v"]
+height = 92.0
+
+[node name="Roulette" type="Node2D"]
+script = ExtResource("1_jyskt")
+
+[node name="DragLayer" type="CanvasLayer" parent="."]
+
+[node name="SpriteRuleta" type="Sprite2D" parent="."]
+position = Vector2(511, 307)
+scale = Vector2(0.08956653, 0.090222344)
+texture = ExtResource("2_iqt6o")
+
+[node name="Particles" type="CPUParticles2D" parent="SpriteRuleta"]
+visible = false
+position = Vector2(-5705.256, -3402.7043)
+scale = Vector2(11.164885, 11.083728)
+
+[node name="TickSound" type="AudioStreamPlayer2D" parent="SpriteRuleta"]
+
+[node name="SoundWin" type="AudioStreamPlayer2D" parent="SpriteRuleta"]
+
+[node name="SlotsContainer" type="Node2D" parent="SpriteRuleta"]
+position = Vector2(-5705.256, -3402.7043)
+scale = Vector2(11.164885, 11.083728)
+
+[node name="Slot" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
+position = Vector2(434, 405.00006)
+rotation = 3.6006496
+scale = Vector2(1, 1)
+skew = 0.0052865744
+
+[node name="Slot2" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
+position = Vector2(650.00006, 238.99997)
+rotation = 1.0512271
+scale = Vector2(1, 1)
+
+[node name="Slot3" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
+position = Vector2(645, 357)
+rotation = -4.4636273
+scale = Vector2(1, 1)
+
+[node name="Slot4" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
+position = Vector2(546, 436.00006)
+rotation = 2.8070135
+scale = Vector2(1, 1)
+
+[node name="Slot5" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
+position = Vector2(552, 169.99998)
+rotation = 0.084089845
+scale = Vector2(1, 1)
+
+[node name="Slot6" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
+position = Vector2(431.00003, 184)
+rotation = -0.75672114
+scale = Vector2(1, 1)
+
+[node name="Slot7" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
+position = Vector2(383, 292)
+rotation = -1.7749316
+scale = Vector2(1, 1)
+
+[node name="Topes" type="Node2D" parent="SpriteRuleta"]
+
+[node name="Segmentos10" type="Area2D" parent="SpriteRuleta/Topes"]
+position = Vector2(837.3667, 2283.2478)
+scale = Vector2(0.99999946, 0.9999994)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Topes/Segmentos10"]
+position = Vector2(189.6792, -146.85986)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos12" type="Area2D" parent="SpriteRuleta/Topes"]
+position = Vector2(2210.6475, 831.27954)
+scale = Vector2(0.9999995, 0.99999946)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Topes/Segmentos12"]
+position = Vector2(189.6792, -146.85986)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos13" type="Area2D" parent="SpriteRuleta/Topes"]
+position = Vector2(-1808.7114, -1729.0616)
+scale = Vector2(0.9999995, 0.99999946)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Topes/Segmentos13"]
+position = Vector2(189.6792, -146.85986)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos14" type="Area2D" parent="SpriteRuleta/Topes"]
+position = Vector2(-2623.7478, 177.33984)
+rotation = 0.1440925
+scale = Vector2(0.99999946, 0.99999934)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Topes/Segmentos14"]
+position = Vector2(189.6792, -146.85986)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos15" type="Area2D" parent="SpriteRuleta/Topes"]
+position = Vector2(1909.1953, -1252.4612)
+scale = Vector2(0.9999995, 0.99999946)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Topes/Segmentos15"]
+position = Vector2(189.6792, -146.85986)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos16" type="Area2D" parent="SpriteRuleta/Topes"]
+position = Vector2(-11.164551, -2394.085)
+scale = Vector2(0.9999995, 0.99999946)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Topes/Segmentos16"]
+position = Vector2(189.6792, -146.85986)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Segmentos11" type="Area2D" parent="SpriteRuleta/Topes"]
+position = Vector2(-1395.6104, 1995.072)
+rotation = 0.1440925
+scale = Vector2(0.99999946, 0.99999934)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpriteRuleta/Topes/Segmentos11"]
+position = Vector2(189.6792, -146.85986)
+shape = SubResource("RectangleShape2D_nqo7r")
+
+[node name="Manecilla" type="Area2D" parent="."]
+position = Vector2(489, 6)
+
+[node name="SpriteManecilla" type="Sprite2D" parent="Manecilla"]
+position = Vector2(18.999977, 42.999996)
+scale = Vector2(0.04791314, 0.05122983)
+texture = ExtResource("3_dnls6")
+offset = Vector2(0, 80)
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Manecilla"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Manecilla"]
+position = Vector2(14, 42)
+shape = SubResource("CapsuleShape2D_t1x4v")
+
+[node name="Timer" type="Timer" parent="."]
+
+[node name="TextureRect" type="TextureRect" parent="."]
+z_index = -1
+offset_left = 170.0
+offset_top = -16.0
+offset_right = 841.0
+offset_bottom = 573.0
+texture = ExtResource("6_iqt6o")
+
+[connection signal="area_entered" from="Manecilla" to="." method="_on_AreaManecilla_area_entered"]
+[connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
