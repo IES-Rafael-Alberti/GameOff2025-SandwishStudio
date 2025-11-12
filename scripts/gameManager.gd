@@ -6,6 +6,11 @@ extends Node2D
 @onready var store: Control = $Store
 @onready var inventory: Control = $inventory
 @onready var roulette: Node2D = $Roulette
+var pause_scene = preload("res://scenes/pause.tscn")
+
+func _process(delta: float) -> void:
+	if Input.is_action_just_pressed("pause"):
+		pausar()
 
 func _ready():
 	
@@ -33,3 +38,10 @@ func change_mode() -> void:
 	else:
 		store.visible = true
 		roulette.visible = false
+		
+func pausar():
+	var pause_instance = pause_scene.instantiate()
+
+	add_child(pause_instance)
+	
+	get_tree().paused = true
