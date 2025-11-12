@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="PieceData" load_steps=3 format=3 uid="uid://cd2vljit13au2"]
+
+[ext_resource type="Texture2D" uid="uid://ckgynmbeosdws" path="res://assets/piece_5.jpg" id="1_0pqbc"]
+[ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="1_cyoop"]
+
+[resource]
+script = ExtResource("1_cyoop")
+piece_name = "Mago"
+icon = ExtResource("1_0pqbc")
+price = 112
+metadata/_custom_type_script = "uid://8urlsjkkl8pw"

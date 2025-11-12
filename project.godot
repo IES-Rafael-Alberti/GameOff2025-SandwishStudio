@@ -11,17 +11,22 @@ config_version=5
 [application]
 
 config/name="Those_who_are_about_to_spin"
-run/main_scene="uid://bcbwubibdy7an"
+
 config/features=PackedStringArray("4.5", "GL Compatibility")
 
 [display]
 
 window/stretch/mode="canvas_items"
 
-[editor]
+[autoload]
 
-version_control/plugin_name="GitPlugin"
-version_control/autoload_on_startup=true
+PlayerData="*res://scripts/PlayerData.gd"
+GlobalSignals="*res://scripts/GlobalSignals.gd"
+
+[display]
+
+window/size/viewport_width=1800
+window/size/viewport_height=1000
 
 [rendering]
 
