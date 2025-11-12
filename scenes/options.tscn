@@ -1,8 +1,10 @@
-[gd_scene load_steps=4 format=3 uid="uid://bcbwubibdy7an"]
+[gd_scene load_steps=6 format=3 uid="uid://bcbwubibdy7an"]
 
 [ext_resource type="Script" uid="uid://fxaw6plqdeiu" path="res://scripts/options.gd" id="1_2iy26"]
 [ext_resource type="Script" uid="uid://cotw2hfwqwl24" path="res://scripts/check_button.gd" id="1_c2u1v"]
 [ext_resource type="Script" uid="uid://0pff7ugxf2r7" path="res://audio_control.gd" id="2_yjkok"]
+[ext_resource type="Script" uid="uid://ciwosb514mrs5" path="res://scripts/sfx_control.gd" id="4_1sggn"]
+[ext_resource type="AudioStream" uid="uid://ch0hnly1m0mxu" path="res://scenes/casino-lottery-casino-gambling-music-406445.mp3" id="4_kv8mn"]
 
 [node name="Menu" type="Control"]
 layout_mode = 3
@@ -73,17 +75,23 @@ offset_left = 553.0
 offset_top = 232.0
 offset_right = 690.0
 offset_bottom = 248.0
+max_value = 1.0
+step = 0.05
+value = 1.0
 tick_count = 50
 script = ExtResource("2_yjkok")
 
-[node name="AudioControl2" type="HSlider" parent="."]
+[node name="SfxControl" type="HSlider" parent="."]
 layout_mode = 0
 offset_left = 554.0
 offset_top = 257.0
 offset_right = 691.0
 offset_bottom = 273.0
+max_value = 1.0
+step = 0.05
+value = 1.0
 tick_count = 50
-script = ExtResource("2_yjkok")
+script = ExtResource("4_1sggn")
 
 [node name="Label2" type="Label" parent="."]
 layout_mode = 0
@@ -102,11 +110,16 @@ offset_bottom = 280.0
 text = "sfx"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_kv8mn")
 autoplay = true
+bus = &"Music"
+
+[node name="SfxStreamPlayer" type="AudioStreamPlayer" parent="."]
+bus = &"SFX"
 
 [connection signal="toggled" from="VBoxContainer/CheckButton" to="VBoxContainer/CheckButton" method="_on_toggled"]
 [connection signal="pressed" from="VBoxContainer/Back" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="VBoxContainer/Exit" to="." method="_on_exit_pressed"]
-[connection signal="changed" from="AudioControl" to="VBoxContainer/CheckButton" method="_on_audio_control_changed"]
 [connection signal="ready" from="AudioControl" to="VBoxContainer/CheckButton" method="_on_audio_control_ready"]
-[connection signal="value_changed" from="AudioControl" to="VBoxContainer/CheckButton" method="_on_audio_control_value_changed"]
+[connection signal="value_changed" from="AudioControl" to="AudioControl" method="_on_value_changed"]
+[connection signal="value_changed" from="SfxControl" to="SfxControl" method="_on_value_changed"]
