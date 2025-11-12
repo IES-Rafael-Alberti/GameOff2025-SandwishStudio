@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://bcbwubibdy7an"]
+[gd_scene load_steps=7 format=3 uid="uid://bcbwubibdy7an"]
 
 [ext_resource type="Script" uid="uid://fxaw6plqdeiu" path="res://scripts/options.gd" id="1_2iy26"]
 [ext_resource type="Script" uid="uid://cotw2hfwqwl24" path="res://scripts/check_button.gd" id="1_c2u1v"]
-[ext_resource type="Script" uid="uid://0pff7ugxf2r7" path="res://audio_control.gd" id="2_yjkok"]
+[ext_resource type="Script" uid="uid://0pff7ugxf2r7" path="res://scripts/audio_control.gd" id="2_yjkok"]
+[ext_resource type="Script" uid="uid://bvhtd27y4o53o" path="res://scripts/option_button.gd" id="3_e6vpq"]
 [ext_resource type="Script" uid="uid://ciwosb514mrs5" path="res://scripts/sfx_control.gd" id="4_1sggn"]
-[ext_resource type="AudioStream" uid="uid://ch0hnly1m0mxu" path="res://scenes/casino-lottery-casino-gambling-music-406445.mp3" id="4_kv8mn"]
+[ext_resource type="AudioStream" uid="uid://ch0hnly1m0mxu" path="res://music/casino-lottery-casino-gambling-music-406445.mp3" id="4_kv8mn"]
 
 [node name="Menu" type="Control"]
 layout_mode = 3
@@ -55,6 +56,19 @@ size_flags_vertical = 4
 layout_mode = 2
 text = "FullScreen"
 script = ExtResource("1_c2u1v")
+
+[node name="OptionButton" type="OptionButton" parent="VBoxContainer"]
+layout_mode = 2
+item_count = 4
+popup/item_0/text = "100%"
+popup/item_0/id = 0
+popup/item_1/text = "75%"
+popup/item_1/id = 1
+popup/item_2/text = "50%"
+popup/item_2/id = 2
+popup/item_3/text = "25%"
+popup/item_3/id = 3
+script = ExtResource("3_e6vpq")
 
 [node name="Back" type="Button" parent="VBoxContainer"]
 layout_mode = 2
@@ -118,6 +132,7 @@ bus = &"Music"
 bus = &"SFX"
 
 [connection signal="toggled" from="VBoxContainer/CheckButton" to="VBoxContainer/CheckButton" method="_on_toggled"]
+[connection signal="item_selected" from="VBoxContainer/OptionButton" to="VBoxContainer/OptionButton" method="_on_item_selected"]
 [connection signal="pressed" from="VBoxContainer/Back" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="VBoxContainer/Exit" to="." method="_on_exit_pressed"]
 [connection signal="ready" from="AudioControl" to="VBoxContainer/CheckButton" method="_on_audio_control_ready"]
