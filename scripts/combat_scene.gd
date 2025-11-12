@@ -223,8 +223,8 @@ func _make_attack_timer(attacker: npc, defender: Variant) -> Timer:
 
 	# atack_speed = attacks per second
 	var aps := 1.0
-	if is_instance_valid(attacker) and attacker.npc_res:
-		aps = max(0.01, attacker.npc_res.atack_speed)
+	if is_instance_valid(attacker):
+		aps = max(0.01, attacker.get_attack_speed())
 	t.wait_time = 1.0 / aps
 	add_child(t)
 
@@ -304,27 +304,39 @@ func _cleanup_allies_and_reset() -> void:
 func _do_attack(attacker: npc, defender: npc) -> void:
 	if not attacker.can_damage(defender):
 		return
-	var res := attacker.npc_res
-	if res == null:
+	if attacker.npc_res == null:
 		return
 
-	# Gather base data
-	var base: float = res.damage
-	var dmg: float = base
-	var before_hp: float = defender.health
+	attacker.notify_before_attack(defender)
 
-	# Crit check
-	var crit := randf() < float(res.critical_chance) / 100.0
-	var mult := 1.0
-	if crit:
-		mult = res.critical_damage if res.critical_damage > 0.0 else 1.25
-		dmg *= mult
+	var base := attacker.get_damage(defender)
+	var dmg := base
 
-	# Apply damage
-	defender.take_damage(dmg)
-	var after_hp: float = defender.health
+	# Crit
+	var crit_chance := float(attacker.get_crit_chance(defender))
+	var crit := randf() < (crit_chance / 100.0)
+	var mult := attacker.get_crit_mult(defender) if crit else 1.0
+	dmg *= mult
 
-	# Build log text
+	var before_hp := defender.health
+	# (opcional) guarda también nombre/HP máx para logs ANTES del daño
+	var target_max_hp := defender.max_health
+	var target_name := _who(defender)
+	
+	defender.take_damage(dmg, attacker)
+	
+	# tras el daño, puede haberse liberado:
+	var after_hp := 0.0
+	if is_instance_valid(defender):
+		after_hp = defender.health
+	
+	attacker.notify_after_attack(defender, dmg, crit)
+	
+	# si ya no existe o quedó a 0 => cuenta kill
+	if (not is_instance_valid(defender)) or after_hp <= 0.0:
+		attacker.notify_kill(defender)
+	
+	# print seguro usando valores guardados
 	var crit_text := " (no crit)"
 	if crit:
 		crit_text = " CRIT x" + _num(mult)
@@ -333,8 +345,9 @@ func _do_attack(attacker: npc, defender: npc) -> void:
 		"[HIT] ", _team_to_str(attacker.team), " -> ", _team_to_str(defender.team),
 		" | base=", _num(base), crit_text,
 		" | final=", _num(dmg),
-		" | target HP ", _num(before_hp), " -> ", _num(after_hp), "/", _num(defender.max_health)
-	)
+		" | target HP ", _num(before_hp), " -> ", _num(after_hp), "/", _num(target_max_hp),
+		" | target=", target_name
+)
 
 func _stop_combat() -> void:
 	# if round ends because all allys dies and the warrior is alive,
@@ -420,3 +433,14 @@ func _stop_combat() -> void:
 func _update_start_btn_state() -> void:
 	# Start is enabled only when we have at least 1 ally and 1 enemy and no battle is running
 	btn_start.disabled = combat_running or ally_npcs.is_empty() or enemy_npcs.is_empty()
+
+func _who(n: npc) -> String:
+	if not is_instance_valid(n):
+		return "[null]"
+	var res_name := ""
+	if n.npc_res and n.npc_res.resource_path != "":
+		res_name = n.npc_res.resource_path.get_file().get_basename()
+	else:
+		res_name = "Unknown"
+
+	return "%s (%s)" % [res_name, _team_to_str(n.team)]

@@ -2,6 +2,8 @@ extends Resource
 
 class_name npcRes
 
+enum UnitType { GLADIATOR, PIECE }
+
 @export var frames: SpriteFrames
 @export var max_health: float
 @export var health: float
@@ -13,3 +15,5 @@ class_name npcRes
 @export var raza: String
 @export var rareza: String
 @export var gold: int
+
+@export var Unit_type: UnitType = UnitType.PIECE
