@@ -1,6 +1,6 @@
 [gd_resource type="SpriteFrames" load_steps=9 format=3 uid="uid://c35jndy078d6s"]
 
-[ext_resource type="Texture2D" uid="uid://drd1yll707iam" path="res://assets/Tiny Swords (Free Pack)/Units/Torch_Red.png" id="1_r622t"]
+[ext_resource type="Texture2D" uid="uid://drd1yll707iam" path="res://assets/Tiny Swords (Free Pack)/Units/gobling_colors/Torch_Red.png" id="1_r622t"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_3urtn"]
 atlas = ExtResource("1_r622t")

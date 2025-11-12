@@ -1,0 +1,65 @@
+[gd_resource type="SpriteFrames" load_steps=9 format=3 uid="uid://q41drnmox2bh"]
+
+[ext_resource type="Texture2D" uid="uid://dy5iqt1edkata" path="res://assets/Tiny Swords (Free Pack)/Units/gobling_colors/Torch_Yellow.png" id="1_jvmtf"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5lhb8"]
+atlas = ExtResource("1_jvmtf")
+region = Rect2(0, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jtkdi"]
+atlas = ExtResource("1_jvmtf")
+region = Rect2(192, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i2vm0"]
+atlas = ExtResource("1_jvmtf")
+region = Rect2(384, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d7kxv"]
+atlas = ExtResource("1_jvmtf")
+region = Rect2(576, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_t8b5u"]
+atlas = ExtResource("1_jvmtf")
+region = Rect2(768, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k2qy1"]
+atlas = ExtResource("1_jvmtf")
+region = Rect2(960, 0, 192, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_la3q6"]
+atlas = ExtResource("1_jvmtf")
+region = Rect2(1152, 0, 192, 192)
+
+[resource]
+animations = [{
+"frames": [],
+"loop": true,
+"name": &"atack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5lhb8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jtkdi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i2vm0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d7kxv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_t8b5u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k2qy1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_la3q6")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 10.0
+}]

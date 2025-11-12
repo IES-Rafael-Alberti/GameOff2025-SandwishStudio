@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="npcRes" load_steps=3 format=3 uid="uid://coeqcim3vx1w7"]
+
+[ext_resource type="SpriteFrames" uid="uid://rjwlxoj38qir" path="res://resources/warrior/red_warrior_animation.tres" id="1_05mma"]
+[ext_resource type="Script" uid="uid://bd1qpluesymyw" path="res://scripts/npc_res.gd" id="2_lexq0"]
+
+[resource]
+script = ExtResource("2_lexq0")
+frames = ExtResource("1_05mma")
+max_health = 200.0
+health = 200.0
+damage = 3.0
+atack_speed = 2.0
+critical_chance = 20
+critical_damage = 1.25
+raza = "Europeas"
+gold = 350
+metadata/_custom_type_script = "uid://bd1qpluesymyw"

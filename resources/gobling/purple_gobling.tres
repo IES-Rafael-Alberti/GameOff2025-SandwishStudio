@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="npcRes" load_steps=3 format=3 uid="uid://j4m1ndt3mbet"]
+
+[ext_resource type="SpriteFrames" uid="uid://cewmuwhwk3mp3" path="res://resources/gobling/purple_gobling_animation.tres" id="1_2pk6y"]
+[ext_resource type="Script" uid="uid://bd1qpluesymyw" path="res://scripts/npc_res.gd" id="2_iptxk"]
+
+[resource]
+script = ExtResource("2_iptxk")
+frames = ExtResource("1_2pk6y")
+max_health = 30.0
+health = 30.0
+damage = 3.0
+atack_speed = 0.6
+critical_chance = 20
+critical_damage = 1.25
+description = "The gobling master of fire"
+gold = 300
+metadata/_custom_type_script = "uid://bd1qpluesymyw"

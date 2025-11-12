@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://drd1yll707iam"
-path="res://.godot/imported/Torch_Red.png-a5c4683d3fc1ab41bb7a5dea8a63ca44.ctex"
+uid="uid://cvpyn413mf21w"
+path="res://.godot/imported/Torch_Purple.png-3736638e10a3b2eeed4ee8f70fc65712.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Tiny Swords (Free Pack)/Units/Torch_Red.png"
-dest_files=["res://.godot/imported/Torch_Red.png-a5c4683d3fc1ab41bb7a5dea8a63ca44.ctex"]
+source_file="res://assets/Tiny Swords (Free Pack)/Units/gobling_colors/Torch_Purple.png"
+dest_files=["res://.godot/imported/Torch_Purple.png-3736638e10a3b2eeed4ee8f70fc65712.ctex"]
 
 [params]
 

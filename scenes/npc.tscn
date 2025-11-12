@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://bekys0sh7i1sf"]
+[gd_scene load_steps=7 format=3 uid="uid://bekys0sh7i1sf"]
 
-[ext_resource type="SpriteFrames" uid="uid://rjwlxoj38qir" path="res://resourses/warrior/red_warrior_animation.tres" id="2_abqhh"]
+[ext_resource type="SpriteFrames" uid="uid://rjwlxoj38qir" path="res://resources/warrior/red_warrior_animation.tres" id="2_abqhh"]
 [ext_resource type="Script" uid="uid://dkh16s35ytd1p" path="res://scripts/npc.gd" id="2_rv78h"]
-[ext_resource type="SpriteFrames" uid="uid://c35jndy078d6s" path="res://resourses/gobling/red_gobling_animation.tres" id="3_rv78h"]
+[ext_resource type="SpriteFrames" uid="uid://c35jndy078d6s" path="res://resources/gobling/red_gobling_animation.tres" id="3_rv78h"]
+[ext_resource type="SpriteFrames" uid="uid://cewmuwhwk3mp3" path="res://resources/gobling/purple_gobling_animation.tres" id="4_7n8xq"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_abqhh"]
 
@@ -26,14 +27,32 @@ grow_horizontal = 2
 theme_override_styles/fill = SubResource("StyleBoxFlat_abqhh")
 show_percentage = false
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+[node name="red_warrior" type="AnimatedSprite2D" parent="."]
 visible = false
 sprite_frames = ExtResource("2_abqhh")
 animation = &"idle"
 frame_progress = 0.5354015
 
-[node name="AnimatedSprite2D2" type="AnimatedSprite2D" parent="."]
+[node name="red_gobling" type="AnimatedSprite2D" parent="."]
 visible = false
 sprite_frames = ExtResource("3_rv78h")
 animation = &"idle"
 frame_progress = 0.4441046
+
+[node name="blue_gobling" type="AnimatedSprite2D" parent="."]
+visible = false
+sprite_frames = ExtResource("4_7n8xq")
+animation = &"idle"
+autoplay = "idle"
+
+[node name="yellow_gobling" type="AnimatedSprite2D" parent="."]
+visible = false
+sprite_frames = ExtResource("4_7n8xq")
+animation = &"idle"
+frame_progress = 0.9010832
+
+[node name="purple_gobling" type="AnimatedSprite2D" parent="."]
+visible = false
+sprite_frames = ExtResource("4_7n8xq")
+animation = &"idle"
+autoplay = "idle"
