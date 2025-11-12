@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://di6l8arc2wa6y"]
+
+[ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_7ngc2"]
+[ext_resource type="Resource" uid="uid://c6ysg4fyrnuyf" path="res://resources/Nordica/Jotun_scaling.tres" id="1_k7e38"]
+
+[resource]
+script = ExtResource("1_7ngc2")
+id = "nordica.jotun"
+display_name = "Jotun"
+race = 0
+rarity = 3
+role = "Mega Tanque"
+base_max_health = 400.0
+base_damage = 15.0
+members_per_piece = 1
+scaling_profile = ExtResource("1_k7e38")
+metadata/_custom_type_script = "uid://cxyfaki7gjiby"

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://bofvibofokgrl"]
+
+[ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_1f5fn"]
+[ext_resource type="Resource" uid="uid://bx2yrgu7yf4cx" path="res://resources/Europea/Duende_scaling.tres" id="1_c8iob"]
+
+[resource]
+script = ExtResource("1_1f5fn")
+id = "europea.duende"
+display_name = "Duendes"
+role = "Ráfaga Rápida"
+base_max_health = 70.0
+base_damage = 1.0
+critical_chance = 15
+critical_damage = 1.7
+members_per_piece = 8
+scaling_profile = ExtResource("1_c8iob")
+metadata/_custom_type_script = "uid://cxyfaki7gjiby"

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://dka8rkml1e0dr"]
+
+[ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_brl1e"]
+[ext_resource type="Resource" uid="uid://dkpa3o6v1l3kk" path="res://resources/Nordica/Nornas_scaling.tres" id="1_lo3au"]
+
+[resource]
+script = ExtResource("1_brl1e")
+id = "nordica.nornas"
+display_name = "Nornas"
+race = 0
+rarity = 2
+role = "Soporte Único"
+base_max_health = 130.0
+base_damage = 5.0
+members_per_piece = 2
+scaling_profile = ExtResource("1_lo3au")
+metadata/_custom_type_script = "uid://cxyfaki7gjiby"

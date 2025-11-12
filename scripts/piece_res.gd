@@ -1,23 +1,26 @@
 extends Resource
 class_name PieceRes
 
-# Nombres únicos para evitar choque con otros enums/vars
 enum PieceRace { NORDICA, JAPONESA, EUROPEA }
-enum PieceTier { COMUN, INUSUAL, RARO, EPICO }
+enum PiecePowerTier { BRONCE, PLATA, ORO }
+enum PieceRarity { COMUN, RARO, EPICO, LEGENDARIO }
 
 @export var id: String = ""
 @export var display_name: String = ""
-@export var race: PieceRace = PieceRace.NORDICA
-@export var tier: PieceTier = PieceTier.COMUN
+@export var race: PieceRace = PieceRace.EUROPEA
+@export var power_tier: PiecePowerTier = PiecePowerTier.BRONCE   # afecta al combate
+@export var rarity: PieceRarity = PieceRarity.COMUN              # para tienda/probabilidades
 @export var role: String = ""
 
-@export_range(1, 20, 1) var members_per_piece: int = 6
-
+# Stats base (referencia, p.ej. pensados para BRONCE)
+@export var base_max_health := 100.0
+@export var base_damage := 10.0
+@export var base_attack_speed := 1.0
+@export var critical_chance := 5
+@export var critical_damage := 1.5
 @export var frames: SpriteFrames
-@export var max_health: float = 100.0
-@export var health: float = 100.0
-@export var damage: float = 10.0
-@export var attack_speed: float = 1.0
-@export var critical_chance: int = 5
-@export var critical_damage: float = 1.5
-@export var gold_per_enemy: int = 0
+@export var gold_per_enemy := 0
+@export var members_per_piece := 6  # valor por defecto si el perfil no lo sobreescribe
+
+# NUEVO: perfil opcional de escalado por pieza
+@export var scaling_profile: PieceScalingProfile
