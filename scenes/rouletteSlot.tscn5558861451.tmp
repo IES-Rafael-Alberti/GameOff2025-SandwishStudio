@@ -4,27 +4,25 @@
 
 [node name="SlotPiece" type="Control" groups=["slot"]]
 layout_mode = 3
-anchor_left = 0.006
-anchor_top = 0.004
-anchor_right = 0.006
-anchor_bottom = 0.004
-offset_left = -10.799998
-offset_top = -2.000002
-offset_right = 54.593937
-offset_bottom = 54.41175
+anchors_preset = 0
+offset_left = 43.527355
+offset_top = -17.932217
+offset_right = 43.527355
+offset_bottom = -17.932217
 scale = Vector2(0.29054677, 0.30135566)
 
-[node name="slot" type="Panel" parent="."]
+[node name="delete" type="Panel" parent="."]
 layout_mode = 0
-offset_top = -10.179945
-offset_right = 68.83572
-offset_bottom = 59.505173
+offset_left = -146.37009
+offset_top = 39.595127
+offset_right = -77.534355
+offset_bottom = 109.28024
 script = ExtResource("1_maf36")
 
-[node name="PieceTextureRect" type="TextureRect" parent="slot"]
+[node name="PieceTextureRect" type="TextureRect" parent="delete"]
 layout_mode = 0
-offset_left = 3.4418335
-offset_right = 71.298874
+offset_left = 3.4417868
+offset_right = 71.29883
 offset_bottom = 65.57382
 scale = Vector2(0.96370167, 1.0120925)
 expand_mode = 1

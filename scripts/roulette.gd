@@ -19,6 +19,8 @@ var bouncing = false
 
 func is_moving(): return state != State.IDLE
 
+
+
 func _process(delta):
 	match state:
 		State.DRAGGING: _drag()

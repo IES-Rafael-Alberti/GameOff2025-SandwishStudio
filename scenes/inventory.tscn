@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://cmqqk0nk7sejg" path="res://scripts/inventory.gd" id="1_hj2ta"]
 [ext_resource type="Texture2D" uid="uid://dthf2y24tgfel" path="res://icon.svg" id="1_qw0r6"]
 [ext_resource type="PackedScene" uid="uid://n7qqfs70w4b" path="res://scenes/inventory_slot.tscn" id="2_ty45s"]
-[ext_resource type="PackedScene" uid="uid://ckj0vt4dlrkx0" path="res://scenes/piece.tscn" id="3_uae8j"]
+[ext_resource type="PackedScene" uid="uid://7erbtxd030w2" path="res://scenes/piece.tscn" id="3_uae8j"]
 [ext_resource type="Texture2D" uid="uid://boul6livclehs" path="res://assets/unnamed (1).jpg" id="4_53g1v"]
 [ext_resource type="Script" uid="uid://cm67y0q4u1ot5" path="res://scripts/DeleteArea.gd" id="4_yyk2a"]
 
@@ -70,10 +70,10 @@ columns = 6
 [node name="delete" type="Panel" parent="."]
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 0
-offset_left = 285.0
-offset_top = 1004.0
-offset_right = 385.0
-offset_bottom = 1104.0
+offset_left = 287.0
+offset_top = 1005.0
+offset_right = 387.0
+offset_bottom = 1105.0
 script = ExtResource("4_yyk2a")
 
 [node name="Sprite2D" type="Sprite2D" parent="delete"]

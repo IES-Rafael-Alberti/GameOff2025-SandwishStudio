@@ -13,6 +13,7 @@ signal item_sold(refund_amount: int)
 @export var max_passives: int = 30
 @export var inventory_slot_scene: PackedScene 
 @export var piece_scene: PackedScene # Arrastra tu escena piece.tscn aquí
+
 ## ------------------------------------------------------------------
 ## Datos del Inventario
 ## ------------------------------------------------------------------
@@ -27,7 +28,9 @@ var passive_slots: Array[Node] = []
 ## ------------------------------------------------------------------
 
 func _ready() -> void:
-	
+	GlobalSignals.item_deleted.connect(remove_item)
+	GlobalSignals.item_attached.connect(remove_item_no_money)
+	GlobalSignals.item_return_to_inventory_requested.connect(_on_item_return_requested)
 	# 1. Asegurarnos de que la escena del slot fue asignada
 	if not inventory_slot_scene:
 		push_error("¡La variable 'Inventory Slot Scene' no está asignada en el script Inventory.gd!")
@@ -194,8 +197,7 @@ func _compact_passive_slots() -> void:
 ## ------------------------------------------------------------------
 ## Funciones Públicas (Venta)
 ## ------------------------------------------------------------------
-
-func remove_item(data: Resource) -> bool:
+func add_to_roulette(data: Resource):
 	
 	var inventory_map: Dictionary
 	var id: String = _get_item_id(data)
@@ -223,12 +225,6 @@ func remove_item(data: Resource) -> bool:
 	print("... Item encontrado. Reduciendo contador a: %d" % entry["count"])
 
 	# --- 💰 LÓGICA DE REEMBOLSO  ---
-	if "price" in data and data.price > 0:
-		var refund_amount = int(data.price * (refund_percent / 100.0))
-		item_sold.emit(refund_amount)
-		
-		print("... Reembolsados %d de oro (%d%% de %d)" % [refund_amount, refund_percent, data.price])
-
 	var slot_node: Node = entry["slot_node"]
 
 	if entry["count"] > 0:
@@ -251,6 +247,110 @@ func remove_item(data: Resource) -> bool:
 
 	return true
 
+
+func remove_item(item_data: Resource):
+		
+	var inventory_map: Dictionary
+	var id: String = _get_item_id(item_data)
+	
+	var is_passive_item: bool = false
+	# --------------------
+
+	if item_data is PieceData:
+		inventory_map = piece_counts
+	elif item_data is PassiveData:
+		inventory_map = passive_counts
+		is_passive_item = true
+	else:
+		push_warning("remove_item: Tipo de data no reconocido.")
+		return false # Item no es ni Pieza ni Pasivo
+
+	# Comprobar si realmente tenemos ese item antes de intentar restarlo
+	if not inventory_map.has(id):
+		push_error("remove_item: Se intentó eliminar un item ('%s') que no está en el inventario." % id)
+		return false
+
+	var entry = inventory_map[id]
+	entry["count"] -= 1
+	
+	print("... Item encontrado. Reduciendo contador a: %d" % entry["count"])
+
+	# --- 💰 LÓGICA DE REEMBOLSO  ---
+	if "price" in item_data and item_data.price > 0:
+		var refund_amount = int(item_data.price * (refund_percent / 100.0))
+		item_sold.emit(refund_amount)
+		
+		print("... Reembolsados %d de oro (%d%% de %d)" % [refund_amount, refund_percent, item_data.price])
+
+	var slot_node: Node = entry["slot_node"]
+
+	if entry["count"] > 0:
+		if slot_node and slot_node.has_method("update_count"):
+			slot_node.update_count(entry["count"])
+		else:
+			push_error("remove_item: El slot_node es inválido o no tiene update_count().")
+	else:
+		if slot_node and slot_node.has_method("clear_slot"):
+			slot_node.clear_slot()
+		else:
+			push_error("remove_item: El slot_node es inválido o no tiene clear_slot().")
+		
+		inventory_map.erase(id)
+		print("... Contador a cero. Eliminando item del diccionario.")
+		
+		if is_passive_item:
+			_compact_passive_slots()
+		# -----------------------------------
+
+	return true
+func remove_item_no_money(item_data: Resource):
+		
+	var inventory_map: Dictionary
+	var id: String = _get_item_id(item_data)
+	
+	var is_passive_item: bool = false
+	# --------------------
+
+	if item_data is PieceData:
+		inventory_map = piece_counts
+	elif item_data is PassiveData:
+		inventory_map = passive_counts
+		is_passive_item = true
+	else:
+		push_warning("remove_item: Tipo de data no reconocido.")
+		return false # Item no es ni Pieza ni Pasivo
+
+	# Comprobar si realmente tenemos ese item antes de intentar restarlo
+	if not inventory_map.has(id):
+		push_error("remove_item: Se intentó eliminar un item ('%s') que no está en el inventario." % id)
+		return false
+
+	var entry = inventory_map[id]
+	entry["count"] -= 1
+	
+	print("... Item encontrado. Reduciendo contador a: %d" % entry["count"])
+
+	var slot_node: Node = entry["slot_node"]
+
+	if entry["count"] > 0:
+		if slot_node and slot_node.has_method("update_count"):
+			slot_node.update_count(entry["count"])
+		else:
+			push_error("remove_item: El slot_node es inválido o no tiene update_count().")
+	else:
+		if slot_node and slot_node.has_method("clear_slot"):
+			slot_node.clear_slot()
+		else:
+			push_error("remove_item: El slot_node es inválido o no tiene clear_slot().")
+		
+		inventory_map.erase(id)
+		print("... Contador a cero. Eliminando item del diccionario.")
+		
+		if is_passive_item:
+			_compact_passive_slots()
+		# -----------------------------------
+
+	return true
 ## ------------------------------------------------------------------
 ## Conexiones de Señales
 ## ------------------------------------------------------------------
@@ -258,3 +358,12 @@ func remove_item(data: Resource) -> bool:
 func _on_item_selected_from_slot(data: Resource) -> void:
 	if data:
 		print("Has seleccionado el item: ", data.resource_name)
+func _on_item_return_requested(item_data: Resource, on_complete_callback: Callable):
+	# 1. Intentamos añadir el ítem usando tu lógica existente.
+	var success: bool = add_item(item_data)
+	
+	# 2. Comprobamos si el "callback" que nos pasaron es válido.
+	if on_complete_callback.is_valid():
+		# 3. "Llamamos de vuelta" a la función que nos pasaron,
+		#    enviándole el resultado (true si se añadió, false si no).
+		on_complete_callback.call(success)
