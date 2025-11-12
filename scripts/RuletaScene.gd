@@ -4,7 +4,8 @@ extends Node2D
 @export var bounce_angle := 12.0
 @export var bounce_time := 0.08
 @export var enemy_manager: Node
-
+@export var min_impulse_force := 10.0
+@export var min_impulse_random_range := Vector2(1.5, 4)
 @onready var slots: Node2D = $SpriteRuleta/SlotsContainer
 
 enum State { IDLE, DRAGGING, SPINNING, SNAP}
@@ -33,18 +34,20 @@ func _input(event):
 			state = State.DRAGGING
 			last_mouse_angle = rad_to_deg((get_global_mouse_position() - $SpriteRuleta.global_position).angle())
 		
+		
 		elif not event.pressed and state == State.DRAGGING:
 			state = State.SPINNING
 			
-			var dir = 1.0
-			if inertia != 0.0:
-				dir = inertia / abs(inertia) 
+			# Calculamos el impulso mínimo aleatorio
+			var min_boost = min_impulse_force * randf_range(min_impulse_random_range.x, min_impulse_random_range.y)
 			
-			if abs(inertia)<0.2:
-				inertia = -3.0 * randf_range(0.8,1.4) * dir
+			# --- CAMBIO PRINCIPAL ---
+			# Ahora, SIEMPRE sumamos el impulso mínimo a la inercia
+			# que se generó con el arrastre (sea grande o pequeña).
+			inertia += min_boost
 			
 			_selected_area = null
-
+		# ---------------------------------
 
 func _drag():
 	var mouse = get_global_mouse_position()
@@ -53,7 +56,10 @@ func _drag():
 	var diff = fmod((angle_deg-last_mouse_angle+540),360)-180
 	last_mouse_angle = angle_deg
 	
-	if diff > 0.0:
+	# --- CAMBIO AQUÍ: Invertida la condición > por < ---
+	# Esto solo permite que la 'diff' (diferencia) sea positiva,
+	# invirtiendo la dirección del giro.
+	if diff < 0.0:
 		diff = 0.0
 	
 	inertia = diff*1.2
@@ -148,7 +154,7 @@ func _reward():
 	
 	if actual_slot_node and "current_piece_data" in actual_slot_node:
 		
-		var piece = actual_slot_node.current_piece_data 
+		var piece = actual_slot_node.current_piece_data
 		
 		if piece:
 			print("¡El slot (Índice %d) tiene la pieza: %s!" % [index, piece.piece_name])
