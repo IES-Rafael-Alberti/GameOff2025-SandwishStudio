@@ -61,19 +61,17 @@ func can_add_item(data: Resource) -> bool:
 	return can_stack or has_empty_slot
 
 
-func add_item(data: Resource) -> bool:
+func add_item(data: Resource, amount: int = 1) -> bool:
 	if not data:
 		push_error("add_item: Se intentó añadir un item NULO.")
 		return false
 		
-	print("--- add_item() llamado con: %s ---" % data.resource_name)
+	# ¡CAMBIO! Actualizamos el print
+	print("--- add_item() llamado con: %s (Cantidad: %d) ---" % [data.resource_name, amount])
 
 	var context = _get_inventory_context(data)
-	if not context:
-		push_error("add_item: Tipo de item no reconocido.")
-		return false
 
-	if not can_add_item(data):
+	if not can_add_item(data): # can_add_item no necesita cambiar
 		print("... FALLO: can_add_item devolvió false. Inventario probablemente lleno.")
 		return false
 
@@ -84,7 +82,7 @@ func add_item(data: Resource) -> bool:
 	if inventory_map.has(id):
 		print("... Item ya existe. Apilando.")
 		var entry = inventory_map[id]
-		entry["count"] += 1
+		entry["count"] += amount # <-- ¡CAMBIO! Sumamos la cantidad recibida
 		var slot_node: Node = entry["slot_node"]
 		if slot_node and slot_node.has_method("update_count"):
 			slot_node.update_count(entry["count"])
@@ -96,10 +94,14 @@ func add_item(data: Resource) -> bool:
 	if empty_slot:
 		print("... Item nuevo. Slot vacío encontrado. Asignando item.")
 		if empty_slot.has_method("set_item"):
-			empty_slot.set_item(data)
+			empty_slot.set_item(data) # set_item lo pone a 1
+
+		# ¡CAMBIO! Pero lo actualizamos a la cantidad correcta
+		if empty_slot.has_method("update_count"):
+			empty_slot.update_count(amount)
 
 		var new_entry = {
-			"count": 1,
+			"count": amount, # <-- ¡CAMBIO! Usamos la cantidad recibida
 			"data": data,
 			"slot_node": empty_slot 
 		}
@@ -107,7 +109,7 @@ func add_item(data: Resource) -> bool:
 		return true
 
 	print("... FALLO INESPERADO: No se pudo apilar ni encontrar slot vacío.")
-	return false 
+	return false
 
 ## ------------------------------------------------------------------
 ## Funciones de Eliminación de Items
@@ -297,12 +299,24 @@ func _on_item_selected_from_slot(data: Resource) -> void:
 	if data:
 		print("Has seleccionado el item: ", data.resource_name)
 
-func _on_item_return_requested(item_data: Resource, on_complete_callback: Callable):
-	# 1. Intentamos añadir el ítem usando tu lógica existente.
-	var success: bool = add_item(item_data)
+func _on_item_return_requested(item_data_packet: Variant, on_complete_callback: Callable):
 	
-	# 2. Comprobamos si el "callback" que nos pasaron es válido.
+	# 1. Comprobar si recibimos el paquete de datos (diccionario)
+	if not (item_data_packet is Dictionary and "data" in item_data_packet and "count" in item_data_packet):
+		push_error("item_return_requested: Se recibieron datos inválidos.")
+		if on_complete_callback.is_valid():
+			on_complete_callback.call(false) # Informamos del fallo
+		return
+
+	# 2. Extraemos los datos y la cantidad
+	var item_data: Resource = item_data_packet.data
+	var item_count: int = item_data_packet.count
+	
+	# 3. Intentamos añadir el ítem usando tu lógica existente Y la cantidad.
+	var success: bool = add_item(item_data, item_count)
+	
+	# 4. Comprobamos si el "callback" que nos pasaron es válido.
 	if on_complete_callback.is_valid():
-		# 3. "Llamamos de vuelta" a la función que nos pasaron,
+		# 5. "Llamamos de vuelta" a la función que nos pasaron,
 		#    enviándole el resultado (true si se añadió, false si no).
 		on_complete_callback.call(success)
