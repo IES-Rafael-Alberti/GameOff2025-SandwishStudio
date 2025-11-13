@@ -247,7 +247,9 @@ func add_to_roulette(data: Resource):
 
 	return true
 
-
+# ------------------------------------------------------------------
+# --------------------- ¡FUNCIÓN MODIFICADA! ---------------------
+# ------------------------------------------------------------------
 func remove_item(item_data: Resource):
 		
 	var inventory_map: Dictionary
@@ -271,38 +273,41 @@ func remove_item(item_data: Resource):
 		return false
 
 	var entry = inventory_map[id]
-	entry["count"] -= 1
+	# *** ¡CAMBIO! *** Obtenemos el contador total
+	var total_count = entry["count"]
 	
-	print("... Item encontrado. Reduciendo contador a: %d" % entry["count"])
+	print("... Item encontrado. Eliminando %d copias." % total_count)
 
-	# --- 💰 LÓGICA DE REEMBOLSO  ---
+	# --- 💰 LÓGICA DE REEMBOLSO (MODIFICADA) ---
 	if "price" in item_data and item_data.price > 0:
-		var refund_amount = int(item_data.price * (refund_percent / 100.0))
+		# *** ¡CAMBIO! *** Calculamos el reembolso basado en el total_count
+		var refund_amount = (int(item_data.price * (refund_percent / 100.0)) * total_count)
 		item_sold.emit(refund_amount)
 		
-		print("... Reembolsados %d de oro (%d%% de %d)" % [refund_amount, refund_percent, item_data.price])
+		print("... Reembolsados %d de oro (%d%% de %d x %d copias)" % [refund_amount, refund_percent, item_data.price, total_count])
 
 	var slot_node: Node = entry["slot_node"]
 
-	if entry["count"] > 0:
-		if slot_node and slot_node.has_method("update_count"):
-			slot_node.update_count(entry["count"])
-		else:
-			push_error("remove_item: El slot_node es inválido o no tiene update_count().")
+	# *** ¡CAMBIO! *** Eliminamos la lógica "if entry["count"] > 0"
+	# Siempre borramos el slot y el diccionario
+	
+	if slot_node and slot_node.has_method("clear_slot"):
+		slot_node.clear_slot()
 	else:
-		if slot_node and slot_node.has_method("clear_slot"):
-			slot_node.clear_slot()
-		else:
-			push_error("remove_item: El slot_node es inválido o no tiene clear_slot().")
-		
-		inventory_map.erase(id)
-		print("... Contador a cero. Eliminando item del diccionario.")
-		
-		if is_passive_item:
-			_compact_passive_slots()
-		# -----------------------------------
+		push_error("remove_item: El slot_node es inválido o no tiene clear_slot().")
+	
+	inventory_map.erase(id)
+	print("... Contador a cero. Eliminando item del diccionario.")
+	
+	if is_passive_item:
+		_compact_passive_slots()
+	# -----------------------------------
 
 	return true
+
+# ------------------------------------------------------------------
+# --------------------- ¡FUNCIÓN MODIFICADA! ---------------------
+# ------------------------------------------------------------------
 func remove_item_no_money(item_data: Resource):
 		
 	var inventory_map: Dictionary
@@ -326,31 +331,30 @@ func remove_item_no_money(item_data: Resource):
 		return false
 
 	var entry = inventory_map[id]
-	entry["count"] -= 1
+	# *** ¡CAMBIO! *** Obtenemos el contador total (para el log)
+	var total_count = entry["count"]
 	
-	print("... Item encontrado. Reduciendo contador a: %d" % entry["count"])
+	print("... Item encontrado. Eliminando %d copias (sin reembolso)." % total_count)
 
 	var slot_node: Node = entry["slot_node"]
 
-	if entry["count"] > 0:
-		if slot_node and slot_node.has_method("update_count"):
-			slot_node.update_count(entry["count"])
-		else:
-			push_error("remove_item: El slot_node es inválido o no tiene update_count().")
+	# *** ¡CAMBIO! *** Eliminamos la lógica "if entry["count"] > 0"
+	# Siempre borramos el slot y el diccionario
+
+	if slot_node and slot_node.has_method("clear_slot"):
+		slot_node.clear_slot()
 	else:
-		if slot_node and slot_node.has_method("clear_slot"):
-			slot_node.clear_slot()
-		else:
-			push_error("remove_item: El slot_node es inválido o no tiene clear_slot().")
-		
-		inventory_map.erase(id)
-		print("... Contador a cero. Eliminando item del diccionario.")
-		
-		if is_passive_item:
-			_compact_passive_slots()
-		# -----------------------------------
+		push_error("remove_item: El slot_node es inválido o no tiene clear_slot().") 
+	
+	inventory_map.erase(id)
+	print("... Contador a cero. Eliminando item del diccionario.")
+	
+	if is_passive_item:
+		_compact_passive_slots()
+	# -----------------------------------
 
 	return true
+
 ## ------------------------------------------------------------------
 ## Conexiones de Señales
 ## ------------------------------------------------------------------
@@ -358,6 +362,7 @@ func remove_item_no_money(item_data: Resource):
 func _on_item_selected_from_slot(data: Resource) -> void:
 	if data:
 		print("Has seleccionado el item: ", data.resource_name)
+
 func _on_item_return_requested(item_data: Resource, on_complete_callback: Callable):
 	# 1. Intentamos añadir el ítem usando tu lógica existente.
 	var success: bool = add_item(item_data)

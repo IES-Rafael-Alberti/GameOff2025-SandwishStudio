@@ -41,9 +41,6 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 	if sprite:
 		sprite.modulate = normal_color
 
-	# ¡Aquí está la magia!
-	# En lugar de llamar a un método del padre, emitimos la señal global.
-	# El InventoryManager (o quien sea) estará escuchando.
 	GlobalSignals.item_deleted.emit(data)
 
 
