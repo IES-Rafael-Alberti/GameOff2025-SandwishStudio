@@ -35,12 +35,10 @@ func set_item(data: Resource) -> void:
 	button.disabled = false
 	button.set_meta("data", data) 
 	
-	# --- ¡ARREGLO! ---
-	# Esta línea es VITAL para que el script del botón 
-	# (el que maneja el drag-and-drop) sepa qué ítem tiene.
 	button.item_data = data 
+	button.item_count = current_count # <-- ¡NUEVA LÍNEA! (Añadida)
 	
-	update_count(current_count)
+	update_count(current_count) # update_count se encargará de actualizar el botón si es > 1
 	_update_uses(data)
 	
 	show()
@@ -53,6 +51,9 @@ func update_count(count: int) -> void:
 		count_label.show()
 	else:
 		count_label.hide()
+		
+	# ¡NUEVA LÍNEA! Actualizamos el botón para el drag-and-drop
+	button.item_count = current_count
 
 ## Limpia el slot para que parezca vacío
 func clear_slot() -> void:
@@ -61,12 +62,12 @@ func clear_slot() -> void:
 	button.texture_normal = null 
 	button.disabled = true
 	button.set_meta("data", null)
+	
+	button.item_data = null # <-- ¡NUEVA LÍNEA! (Añadida)
+	button.item_count = 0  # <-- ¡NUEVA LÍNEA! (Añadida)
+	
 	count_label.hide()
 	uses_label.hide()
-	
-	# --- NUEVA LÍNEA ---
-	# Nos aseguramos de ocultar el tooltip si el slot se vacía
-	# mientras el ratón está encima.
 	tooltip.hide_tooltip()
 
 func is_empty() -> bool:
