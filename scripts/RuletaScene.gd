@@ -159,6 +159,7 @@ func _reward():
 		if piece:
 			print("¡El slot (Índice %d) tiene la pieza: %s!" % [index, piece.piece_name])
 			print(piece.get_instance_id())
+			print(piece.piece_origin.display_name)
 		else:
 			print("¡El slot ganador (Índice %d) estaba vacío!" % index)
 	else:
