@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d1mlijsssb3uc"
-path="res://.godot/imported/ruleta.png-007c80a32f9250e7e8b2a65a0a28269e.ctex"
+uid="uid://go30fno5akpc"
+path="res://.godot/imported/Ruleta.png-80193e6ec42068b51b8649fd41f4fc21.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ruleta.png"
-dest_files=["res://.godot/imported/ruleta.png-007c80a32f9250e7e8b2a65a0a28269e.ctex"]
+source_file="res://assets/Ruleta.png"
+dest_files=["res://.godot/imported/Ruleta.png-80193e6ec42068b51b8649fd41f4fc21.ctex"]
 
 [params]
 
