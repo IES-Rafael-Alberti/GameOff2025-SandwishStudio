@@ -1,7 +1,7 @@
 extends Node2D
 
 const NPC_SCENE := preload("res://scenes/npc.tscn")
-
+const PieceAdapter := preload("res://scripts/piece_adapter.gd")
 # Allies pool: only goblings
 const RES_LIST := [
 	preload("res://resources/gobling/blue_gobling.tres"),
@@ -80,7 +80,6 @@ func spawn_allies_from_inventory() -> void:
 		push_error("Inventory node not found at /root/game/inventory")
 		return
 
-	# Try to read a Dictionary with piece counts
 	var piece_counts_dict: Dictionary = {}
 	if "piece_counts" in inventory:
 		piece_counts_dict = inventory.piece_counts
@@ -90,33 +89,51 @@ func spawn_allies_from_inventory() -> void:
 		push_error("Inventory does not expose 'piece_counts' or 'get_piece_counts()'.")
 		return
 
-	# Sum total pieces
+	var free_slots := ally_spawns.size() - ally_npcs.size()
+	if free_slots <= 0:
+		print("No free ally slots.")
+		return
+
 	var total_pieces := 0
-	for key in piece_counts_dict.keys():
-		var entry = piece_counts_dict[key]
+	for id in piece_counts_dict.keys():
+		var entry = piece_counts_dict[id]
 		if typeof(entry) == TYPE_DICTIONARY and entry.has("count"):
 			total_pieces += int(entry["count"])
 		elif typeof(entry) == TYPE_INT:
-			total_pieces += entry
-
+			total_pieces += int(entry)
+	
 	if total_pieces <= 0:
-		print("No troops in inventory.")
+		print("Inventory has no pieces (piece_counts is emply)")
 		return
+	# Invocar tantos aliados como huecos libres
+	var to_spawn : int = min(total_pieces, free_slots)
+	print("Inventory pieces =", total_pieces, " -> forcing spawn of ", to_spawn, " allies.")
+	
+	#Forzar spawn
+	for i in range(to_spawn):
+		var piece: PieceRes = Piece_Registry.get_random_piece()
+		if piece:
+			spawn_piece(npc.Team.ALLY, piece)
+		else:
+			push_error("PieceRegistry.get_random_piece() returned null")
+	
+	# Recorremos el inventario por IDs (deben existir en Piece_Registry)
+	#for id in piece_counts_dict.keys():
+	#	if free_slots <= 0:
+	#		break
+	#	var entry = piece_counts_dict[id]
+	#	var count: int = int(entry["count"]) if (typeof(entry) == TYPE_DICTIONARY and entry.has("count")) else int(entry)
 
-	# up to 6 goblins, limited by inventory and spawn points
-	var max_allies: int = min(total_pieces, ally_spawns.size())
-	print("Spawning %d allies from inventory (total=%d)" % [max_allies, total_pieces])
+	#	while count > 0 and free_slots > 0:
+	#		var piece: PieceRes = Piece_Registry.get_piece(id)  # <--- AUTLOAD CON TU NOMBRE
+	#		if piece:
+	#			spawn_piece(npc.Team.ALLY, piece)
+	#			free_slots = ally_spawns.size() - ally_npcs.size()
+	#		else:
+	#			push_warning("Piece id not found in Piece_Registry: " + str(id))
+	#		count -= 1
 
-	for i in range(max_allies):
-		var m: Marker2D = ally_spawns[i]
-		if not m:
-			continue
-		var gob_res: npcRes = RES_LIST[randi() % RES_LIST.size()]
-		var a := _spawn_npc(npc.Team.ALLY, m.position, gob_res)
-		if a:
-			ally_npcs.append(a)
-
-	# Disable button if we filled all ally slots
+	# Botón deshabilitado si llenamos
 	btn_ally.disabled = ally_npcs.size() >= ally_spawns.size()
 	_update_start_btn_state()
 
@@ -157,6 +174,46 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 	n.died.connect(_on_npc_died)
 	n.tree_exited.connect(_on_npc_exited.bind(n))
 	return n
+
+func spawn_piece(team: int, piece: PieceRes) -> void:
+	if piece == null:
+		return
+
+	var pack: Dictionary = PieceAdapter.to_npc_res(piece)
+	var npc_template: npcRes = pack["res"]
+	var members: int = int(pack["members"])
+
+	var spawn_points: Array[Marker2D]
+	if team == npc.Team.ALLY:
+		# Construimos una lista de markers libres (no ocupados por aliados)
+		spawn_points = []
+		for m in ally_spawns:
+			var occupied := false
+			for a in ally_npcs:
+				if is_instance_valid(a) and a.position == m.position:
+					occupied = true
+					break
+			if not occupied:
+				spawn_points.append(m)
+	else:
+		# Enemigos: todos al BeastSpawn
+		spawn_points = [enemy_spawn]
+
+	# No más unidades que puntos de spawn disponibles
+	var room: int = min(members, spawn_points.size())
+
+	for i in range(room):
+		var pos: Vector2 = spawn_points[i].position
+		var n: npc = _spawn_npc(team, pos, npc_template)
+		if n:
+			if piece.display_name != "":
+				n.set_display_name(piece.display_name)
+			if team == npc.Team.ALLY:
+				ally_npcs.append(n)
+			else:
+				enemy_npcs.append(n)
+
+	_update_start_btn_state()
 
 # Pay full remaining gold if the enemy (warrior) dies
 func _on_npc_died(n: npc) -> void:
