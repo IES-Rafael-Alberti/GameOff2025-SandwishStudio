@@ -1,10 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://c2wj1k0bbhih8"]
+[gd_scene load_steps=7 format=3 uid="uid://c2wj1k0bbhih8"]
 
 [ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_d8q6m"]
-[ext_resource type="Texture2D" uid="uid://go30fno5akpc" path="res://assets/Ruleta.png" id="2_d8q6m"]
+[ext_resource type="Texture2D" uid="uid://go30fno5akpc" path="res://assets/ruleta.png" id="2_d8q6m"]
 [ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="3_rleqp"]
 [ext_resource type="Texture2D" uid="uid://qmthj5xqadhq" path="res://assets/Manilla (1).png" id="4_d8q6m"]
-[ext_resource type="PackedScene" uid="uid://7erbtxd030w2" path="res://scenes/piece.tscn" id="5_bwak5"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nqo7r"]
 size = Vector2(356.01318, 356.99)
@@ -171,16 +170,7 @@ shape = SubResource("CapsuleShape2D_t1x4v")
 
 [node name="Timer" type="Timer" parent="."]
 
-[node name="piece" parent="." instance=ExtResource("5_bwak5")]
-
 [node name="DragLayer" type="CanvasLayer" parent="."]
-
-[node name="piece2" parent="." instance=ExtResource("5_bwak5")]
-
-[node name="piece3" parent="." instance=ExtResource("5_bwak5")]
-
-[node name="piece4" parent="." instance=ExtResource("5_bwak5")]
-scale = Vector2(0.7199992, 1)
 
 [connection signal="area_entered" from="Manecilla" to="." method="_on_AreaManecilla_area_entered"]
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
