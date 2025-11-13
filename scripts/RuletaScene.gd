@@ -7,7 +7,6 @@ extends Node2D
 @export var min_impulse_force := 10.0
 @export var min_impulse_random_range := Vector2(1.5, 4)
 @onready var slots: Node2D = $SpriteRuleta/SlotsContainer
-
 enum State { IDLE, DRAGGING, SPINNING, SNAP}
 var state := State.IDLE
 var last_mouse_angle := 0.0
@@ -136,39 +135,39 @@ func _reward():
 
 	if not _selected_area or not "slot_index" in _selected_area:
 		push_error("Ruleta _reward(): El Area2D ganadora ('%s') no tiene la variable 'slot_index'." % _selected_area.name)
+		_reset()
 		return
+
 	var index: int = _selected_area.slot_index
-	
-	print("El segmento ganador es el que tiene el slot_index: %d" % index)
-	
+
 	if index < 0 or index >= slots.get_child_count():
 		push_error("Ruleta _reward(): El 'slot_index' (%d) del área '%s' está fuera del rango de hijos de 'SlotsContainer' (cantidad %d)." % [index, _selected_area.name, slots.get_child_count()])
+		_reset()
 		return
 
 	var winning_slot_root = slots.get_child(index)
-
 	var actual_slot_node = null
 
 	if winning_slot_root and winning_slot_root.has_node("slot"):
 		actual_slot_node = winning_slot_root.get_node("slot")
-	
+
 	if actual_slot_node and "current_piece_data" in actual_slot_node:
 		
-		var piece = actual_slot_node.current_piece_data
+		var piece = actual_slot_node.current_piece_data 
 		
-		if piece:
+		# Asumiendo que piece.piece_origin es un PieceRes
+		if piece and piece.piece_origin:
 			print("¡El slot (Índice %d) tiene la pieza: %s!" % [index, piece.piece_name])
-			print(piece.get_instance_id())
-			print(piece.piece_origin.display_name)
+			
+			# --- ¡CAMBIO CLAVE! ---
+			# Emitimos la señal a través del Autoload GlobalSignals
+			GlobalSignals.emit_signal("combat_requested", piece.piece_origin)
+			
 		else:
-			print("¡El slot ganador (Índice %d) estaba vacío!" % index)
+			print("¡El slot ganador (Índice %d) estaba vacío o 'piece_origin' es nulo!" % index)
 	else:
 		push_error("Ruleta _reward(): El nodo 'SlotPiece' (índice %d) o su hijo 'slot' no son válidos o no tienen el script." % index)
 
-	if enemy_manager and "enemy_id" in _selected_area:
-		if not _selected_area.enemy_id.is_empty():
-			enemy_manager.spawn(_selected_area.enemy_id)
-	
 	_reset()
 func _reset():
 	_selected_area = null
