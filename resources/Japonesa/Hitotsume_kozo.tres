@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://cvsjailwqkvlf"]
+
+[ext_resource type="Resource" uid="uid://bndvn583ic3mq" path="res://resources/Japonesa/Hitotsume_kozo_scaling.tres" id="1_1ohcj"]
+[ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_ui1fk"]
+
+[resource]
+script = ExtResource("1_ui1fk")
+id = "japonesa.hitotsume_kozo"
+display_name = "Hitotsume Kozo"
+race = 1
+rarity = 1
+role = "Asesino de criticos"
+base_max_health = 80.0
+base_damage = 4.67
+critical_chance = 20
+critical_damage = 1.8
+members_per_piece = 3
+scaling_profile = ExtResource("1_1ohcj")
+metadata/_custom_type_script = "uid://cxyfaki7gjiby"

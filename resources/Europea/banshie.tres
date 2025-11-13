@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://cbu5pjmpj8vj2"]
+
+[ext_resource type="Resource" uid="uid://cq41mk55y45ml" path="res://resources/Europea/banshie_scaling.tres" id="1_55f7c"]
+[ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_ngv5d"]
+
+[resource]
+script = ExtResource("1_ngv5d")
+id = "europea.banshie"
+display_name = "Banshie"
+rarity = 1
+role = "DPS Mágico"
+base_max_health = 85.0
+base_damage = 4.5
+members_per_piece = 4
+scaling_profile = ExtResource("1_55f7c")
+metadata/_custom_type_script = "uid://cxyfaki7gjiby"

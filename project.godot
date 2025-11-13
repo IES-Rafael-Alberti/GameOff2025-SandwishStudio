@@ -18,6 +18,7 @@ config/features=PackedStringArray("4.5", "GL Compatibility")
 
 PlayerData="*res://scripts/PlayerData.gd"
 GlobalSignals="*res://scripts/GlobalSignals.gd"
+Piece_Registry="*res://scripts/piece_Registry.gd"
 
 [display]
 
