@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1_sk70u")
+mode = 1
 tiers = {
 "BRONCE": {
 "aps": 1.0,
@@ -17,7 +18,7 @@ tiers = {
 "aps": 1.0,
 "crit_chance": 22,
 "crit_mult": 1.95,
-"dmg": 1.1400000000000001,
+"dmg": 1.14,
 "hp": 140.0,
 "members": 14
 },

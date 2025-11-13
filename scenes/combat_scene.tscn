@@ -7,35 +7,6 @@
 position = Vector2(0, 4)
 script = ExtResource("1_ivkwx")
 
-[node name="BtnStart" type="Button" parent="."]
-offset_left = -128.0
-offset_top = 224.0
-offset_right = -32.0
-offset_bottom = 255.0
-size_flags_vertical = 8
-text = "Start Battle"
-metadata/_edit_use_anchors_ = true
-
-[node name="BtnEnemy" type="Button" parent="."]
-offset_left = -427.0
-offset_top = 224.0
-offset_right = -290.0
-offset_bottom = 255.0
-size_flags_horizontal = 8
-size_flags_vertical = 8
-text = "Generate Enemy"
-metadata/_edit_use_anchors_ = true
-
-[node name="BtnAlly" type="Button" parent="."]
-z_index = 5
-offset_left = -269.0
-offset_top = 224.0
-offset_right = -149.0
-offset_bottom = 255.0
-size_flags_vertical = 8
-text = "Generate Allys"
-metadata/_edit_use_anchors_ = true
-
 [node name="TextureRect" type="TextureRect" parent="."]
 offset_left = -474.0
 offset_top = -188.0

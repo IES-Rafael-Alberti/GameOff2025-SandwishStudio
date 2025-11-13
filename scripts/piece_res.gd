@@ -8,8 +8,8 @@ enum PieceRarity { COMUN, RARO, EPICO, LEGENDARIO }
 @export var id: String = ""
 @export var display_name: String = ""
 @export var race: PieceRace = PieceRace.EUROPEA
-@export var power_tier: PiecePowerTier = PiecePowerTier.BRONCE   # afecta al combate
-@export var rarity: PieceRarity = PieceRarity.COMUN              # para tienda/probabilidades
+@export var power_tier: PiecePowerTier = PiecePowerTier.BRONCE
+@export var rarity: PieceRarity = PieceRarity.COMUN
 @export var role: String = ""
 
 # Stats base (referencia, p.ej. pensados para BRONCE)
