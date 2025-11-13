@@ -29,10 +29,10 @@ position = Vector2(902, 590)
 zoom = Vector2(0.7, 0.7)
 
 [node name="gold_label" type="Label" parent="."]
-offset_left = 1085.0
-offset_top = 466.0
-offset_right = 1125.0
-offset_bottom = 505.0
+offset_left = 1099.0
+offset_top = 340.0
+offset_right = 1139.0
+offset_bottom = 379.0
 theme_override_font_sizes/font_size = 28
 
 [node name="Button" type="Button" parent="."]
@@ -44,6 +44,6 @@ text = "Tienda/Ruleta"
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
 visible = false
-position = Vector2(593, 551)
+position = Vector2(414, 316)
 
 [connection signal="pressed" from="Button" to="." method="change_mode"]

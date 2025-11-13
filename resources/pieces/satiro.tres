@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="PieceData" load_steps=4 format=3 uid="uid://btl7owx64bo4s"]
+
+[ext_resource type="Texture2D" uid="uid://w7xwwwwwlbq1" path="res://assets/unnamed (3).jpg" id="1_6x4qf"]
+[ext_resource type="Resource" uid="uid://cy77sggbt1g0n" path="res://resources/Europea/Satiro.tres" id="2_1ddhv"]
+[ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="3_58fsx"]
+
+[resource]
+script = ExtResource("3_58fsx")
+piece_name = "satiro"
+piece_origin = ExtResource("2_1ddhv")
+icon = ExtResource("1_6x4qf")
+price = 233
+metadata/_custom_type_script = "uid://8urlsjkkl8pw"
