@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://hbcgudcjh0wn" path="res://scenes/inventory.tscn" id="2_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://bwh1obe7043i" path="res://scenes/store.tscn" id="3_iywne"]
 [ext_resource type="PackedScene" uid="uid://0dvayl6271no" path="res://scenes/combat_scene.tscn" id="3_lnu2h"]
-[ext_resource type="PackedScene" uid="uid://bv3r20c0gu33v" path="res://scenes/roulette.tscn" id="5_iywne"]
+[ext_resource type="PackedScene" uid="uid://c2wj1k0bbhih8" path="res://scenes/roulette.tscn" id="5_iywne"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_iywne"]
 size = Vector2(107, 515)
@@ -34,10 +34,10 @@ position = Vector2(902, 590)
 zoom = Vector2(0.7, 0.7)
 
 [node name="gold_label" type="Label" parent="."]
-offset_left = 1099.0
-offset_top = 340.0
-offset_right = 1139.0
-offset_bottom = 379.0
+offset_left = 141.0
+offset_top = 423.0
+offset_right = 179.0
+offset_bottom = 462.0
 theme_override_font_sizes/font_size = 28
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
