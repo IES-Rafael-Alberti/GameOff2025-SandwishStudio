@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_jyskt"]
 [ext_resource type="Texture2D" uid="uid://go30fno5akpc" path="res://assets/ruleta.png" id="2_jyskt"]
-[ext_resource type="Script" uid="uid://d1s3pk6cls46q" path="res://scripts/RouletteSlice.gd" id="4_jyskt"]
+[ext_resource type="Script" path="res://scripts/RouletteSlice.gd" id="4_jyskt"]
 [ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="4_k6evh"]
 [ext_resource type="Texture2D" uid="uid://qmthj5xqadhq" path="res://assets/Manilla (1).png" id="5_jyskt"]
 
@@ -39,82 +39,82 @@ position = Vector2(-5660.5967, -3469.207)
 scale = Vector2(11.164885, 11.083728)
 
 [node name="Slot1" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 667.49677
-offset_top = 316.92328
-offset_right = 667.49677
-offset_bottom = 316.92328
+offset_left = 682.4034
+offset_top = 330.2323
+offset_right = 682.4034
+offset_bottom = 330.2323
 rotation = 2.5852685
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot2" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 558.1462
-offset_top = 433.55643
-offset_right = 558.1462
-offset_bottom = 433.55643
+offset_left = 571.49634
+offset_top = 430.4748
+offset_right = 571.49634
+offset_bottom = 430.4748
 rotation = -1.2993246
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot3" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 541.323
-offset_top = 449.88507
-offset_right = 541.323
-offset_bottom = 449.88507
+offset_left = 556.579
+offset_top = 450.9191
+offset_right = 556.579
+offset_bottom = 450.9191
 rotation = -3.5538087
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot4" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 445.73682
-offset_top = 400.8991
-offset_right = 445.73682
-offset_bottom = 400.8991
+offset_left = 467.7236
+offset_top = 402.11673
+offset_right = 467.7236
+offset_bottom = 402.11673
 rotation = 2.0638041
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot5" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 322.6217
-offset_top = 327.03152
-offset_right = 322.6217
-offset_bottom = 327.03152
+offset_left = 334.1162
+offset_top = 330.2323
+offset_right = 334.1162
+offset_bottom = 330.2323
 rotation = -0.2132161
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot6" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 316.50415
-offset_top = 252.38638
-offset_right = 316.50415
-offset_bottom = 252.38638
+offset_left = 343.19632
+offset_top = 258.34784
+offset_right = 343.19632
+offset_bottom = 258.34784
 rotation = -0.75672114
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot7" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 409.7964
-offset_top = 217.39645
-offset_right = 409.7964
-offset_bottom = 217.39645
+offset_left = 424.26874
+offset_top = 220.75693
+offset_right = 424.26874
+offset_bottom = 220.75693
 rotation = -1.6030102
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot8" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 587.2043
-offset_top = 250.83124
-offset_right = 587.2043
-offset_bottom = 250.83124
+offset_left = 596.7909
+offset_top = 266.26175
+offset_right = 596.7909
+offset_bottom = 266.26175
 rotation = -1.6030102
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot9" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 503.85315
-offset_top = 209.62091
-offset_right = 503.85315
-offset_bottom = 209.62091
+offset_left = 516.36707
+offset_top = 208.88606
+offset_right = 516.36707
+offset_bottom = 208.88606
 rotation = -1.6030102
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true

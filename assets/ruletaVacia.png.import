@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dyswdki2qfudj"
-path="res://.godot/imported/RuletaVacia.png-74304a48092f43d7650856c8add9e8aa.ctex"
+path="res://.godot/imported/ruletaVacia.png-246cd23f023a537012367f7d12cd69e4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/RuletaVacia.png"
-dest_files=["res://.godot/imported/RuletaVacia.png-74304a48092f43d7650856c8add9e8aa.ctex"]
+source_file="res://assets/ruletaVacia.png"
+dest_files=["res://.godot/imported/ruletaVacia.png-246cd23f023a537012367f7d12cd69e4.ctex"]
 
 [params]
 
