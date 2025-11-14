@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://drk6kcqcj2alx"]
+
+[ext_resource type="Resource" uid="uid://cymtriiksm3rb" path="res://resources/Japonesa/Kappa_scaling.tres" id="1_03by8"]
+[ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_vrrwg"]
+
+[resource]
+script = ExtResource("1_vrrwg")
+id = "japonesa.kappa"
+display_name = "kappa"
+race = 1
+role = "Tanque/Control"
+base_max_health = 120.0
+base_damage = 2.0
+scaling_profile = ExtResource("1_03by8")
+metadata/_custom_type_script = "uid://cxyfaki7gjiby"

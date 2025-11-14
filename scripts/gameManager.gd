@@ -5,6 +5,12 @@ extends Node2D
 @onready var gold_label: Label = $gold_label
 @onready var store: Control = $Store
 @onready var inventory: Control = $inventory
+@onready var roulette: Node2D = $Roulette
+var pause_scene = preload("res://scenes/pause.tscn")
+
+func _process(delta: float) -> void:
+	if Input.is_action_just_pressed("pause"):
+		pausar()
 
 func _ready():
 	
@@ -23,3 +29,19 @@ func _ready():
 func _on_PlayerData_currency_changed(new_amount: int) -> void:
 	if gold_label:
 		gold_label.text = str(new_amount) + "€"
+
+
+func change_mode() -> void:
+	if store.visible == true:
+		store.visible = false
+		roulette.visible = true
+	else:
+		store.visible = true
+		roulette.visible = false
+		
+func pausar():
+	var pause_instance = pause_scene.instantiate()
+
+	add_child(pause_instance)
+	
+	get_tree().paused = true

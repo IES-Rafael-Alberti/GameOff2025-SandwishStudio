@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://ix02fceb4nh1"]
+
+[ext_resource type="Resource" uid="uid://cv4ofxgg8ajo0" path="res://resources/Nordica/valkirias_scaling.tres" id="1_tf6qj"]
+[ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_wtwdx"]
+
+[resource]
+script = ExtResource("1_wtwdx")
+id = "nordica.valkiria"
+display_name = "Valkiria"
+rarity = 1
+role = "Hibrido"
+base_max_health = 110.0
+base_damage = 5.33
+critical_chance = 10
+critical_damage = 1.65
+members_per_piece = 3
+scaling_profile = ExtResource("1_tf6qj")
+metadata/_custom_type_script = "uid://cxyfaki7gjiby"

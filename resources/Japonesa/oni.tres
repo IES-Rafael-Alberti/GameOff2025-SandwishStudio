@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://d2fw815a8jk0d"]
+
+[ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_1t85r"]
+[ext_resource type="Resource" uid="uid://b1v3qnl050ipw" path="res://resources/Japonesa/oni_scaling.tres" id="1_3wukw"]
+
+[resource]
+script = ExtResource("1_1t85r")
+id = "japonesa.oni"
+display_name = "Oni"
+race = 1
+rarity = 3
+role = "Berserker/ Alto Riesgo"
+base_max_health = 300.0
+base_damage = 25.0
+critical_chance = 20
+critical_damage = 2.0
+members_per_piece = 1
+scaling_profile = ExtResource("1_3wukw")
+metadata/_custom_type_script = "uid://cxyfaki7gjiby"

@@ -1,6 +1,5 @@
+# DeleteArea.gd
 extends Panel
-
-var inventory_manager: Node
 
 @onready var sprite: Sprite2D = $Sprite2D 
 
@@ -8,25 +7,22 @@ var normal_color = Color.WHITE
 var hover_color = Color(1.0, 1.0, 1.0, 0.7)
 
 func _ready() -> void:
-	inventory_manager = get_parent()
-	
-	if not inventory_manager:
-		push_error("DeleteArea: ¡No se pudo encontrar el nodo padre (Inventory)!")
-	elif not inventory_manager.has_method("remove_item"):
-		push_error("DeleteArea: El padre 'Inventory' no tiene el método 'remove_item'!")
+	# Ya no necesitamos una referencia al 'inventory_manager'.
+	# ¡Este script ahora es totalmente independiente!
 	
 	if not sprite:
 		push_warning("DeleteArea: No se encontró el nodo hijo 'Sprite2D'. El efecto de color no funcionará.")
 	
-	sprite.modulate = normal_color
+	if sprite:
+		sprite.modulate = normal_color
 	
 	self.mouse_exited.connect(_on_mouse_exited)
 
 
 func _notification(what: int) -> void:
-
 	if what == NOTIFICATION_DRAG_END:
-		sprite.modulate = normal_color
+		if sprite:
+			sprite.modulate = normal_color
 
 
 ## ------------------------------------------------------------------
@@ -34,18 +30,44 @@ func _notification(what: int) -> void:
 ## ------------------------------------------------------------------
 
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
-	sprite.modulate = hover_color
+	if sprite:
+		sprite.modulate = hover_color
+		
+	# ¡CAMBIO!
+	# Ahora comprobamos si es nuestro 'paquete' (diccionario)
+	# y si DENTRO de él hay un Resource válido.
+	if data is Dictionary and "data" in data:
+		return data.data is Resource # Acepta si tiene datos válidos dentro
+	
+	# Fallback por si acaso (aunque todo debería usar el paquete)
 	return data is Resource
 
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
-	sprite.modulate = normal_color
+	if sprite:
+		sprite.modulate = normal_color
 
-	if inventory_manager and inventory_manager.has_method("remove_item"):
-		inventory_manager.remove_item(data)
+	# ¡CAMBIO CLAVE!
+	# Tenemos que decidir qué emitir basado en qué recibimos.
+	
+	var item_to_delete: Resource = null
+	
+	if data is Dictionary and "data" in data:
+		# Es nuestro nuevo 'paquete'. Extraemos el Resource.
+		item_to_delete = data.data
+	elif data is Resource:
+		# Es un Resource simple (como un pasivo, o un
+		# ítem de una fuente que no usa el 'paquete')
+		item_to_delete = data
+		
+	if item_to_delete:
+		# Emitimos solo el Resource, que es lo que
+		# 'inventory.gd' (remove_item) espera recibir.
+		GlobalSignals.item_deleted.emit(item_to_delete)
 	else:
-		push_error("DeleteArea: ¡No se pudo llamar a 'remove_item' en el padre!")
+		push_warning("DeleteArea: Se soltaron datos en un formato inesperado.")
 
 
 func _on_mouse_exited() -> void:
-	sprite.modulate = normal_color
+	if sprite:
+		sprite.modulate = normal_color

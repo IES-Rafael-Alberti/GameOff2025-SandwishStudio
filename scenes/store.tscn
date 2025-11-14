@@ -1,27 +1,33 @@
-[gd_scene load_steps=17 format=3 uid="uid://bwh1obe7043i"]
+[gd_scene load_steps=23 format=3 uid="uid://bwh1obe7043i"]
 
 [ext_resource type="Script" uid="uid://boom6onvffdah" path="res://scripts/store.gd" id="1_atuvt"]
 [ext_resource type="Texture2D" uid="uid://dthf2y24tgfel" path="res://icon.svg" id="1_jmp1n"]
 [ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="2_n3io3"]
-[ext_resource type="Resource" uid="uid://dateynk6k5fui" path="res://resources/pieces/piece_1.tres" id="3_abbvk"]
-[ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/piece_2.tres" id="4_3ro5p"]
-[ext_resource type="Resource" uid="uid://6rli8qlo7wmd" path="res://resources/pieces/piece_3.tres" id="5_klwl8"]
-[ext_resource type="Resource" uid="uid://btl7owx64bo4s" path="res://resources/pieces/piece_4.tres" id="6_h7duq"]
-[ext_resource type="Resource" uid="uid://cd2vljit13au2" path="res://resources/pieces/piece_5.tres" id="7_burfl"]
-[ext_resource type="Resource" uid="uid://bjcjwt742by0m" path="res://resources/pieces/piece_6.tres" id="8_5xsmt"]
+[ext_resource type="Resource" uid="uid://dateynk6k5fui" path="res://resources/pieces/oni.tres" id="3_abbvk"]
+[ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/jotun.tres" id="4_3ro5p"]
+[ext_resource type="Resource" uid="uid://6rli8qlo7wmd" path="res://resources/pieces/duende.tres" id="5_klwl8"]
+[ext_resource type="Resource" uid="uid://7qmqgai1xu80" path="res://resources/pieces/tengu.tres" id="6_5xsmt"]
+[ext_resource type="Resource" uid="uid://btl7owx64bo4s" path="res://resources/pieces/satiro.tres" id="6_h7duq"]
+[ext_resource type="Resource" uid="uid://cd2vljit13au2" path="res://resources/pieces/dragon.tres" id="7_burfl"]
+[ext_resource type="Resource" uid="uid://bjcjwt742by0m" path="res://resources/pieces/kappa.tres" id="8_5xsmt"]
 [ext_resource type="Script" uid="uid://berngf3tq220v" path="res://scripts/passive_data.gd" id="9_n3io3"]
+[ext_resource type="Resource" uid="uid://c6idh0tpgb7sa" path="res://resources/pieces/nornas.tres" id="9_wk1we"]
 [ext_resource type="Resource" uid="uid://dxkanog0fnw57" path="res://resources/passives/passive_1.tres" id="10_abbvk"]
 [ext_resource type="Resource" uid="uid://bqmnhrov7qvu7" path="res://resources/passives/passive_2.tres" id="11_3ro5p"]
+[ext_resource type="Resource" uid="uid://b065ie430glv1" path="res://resources/pieces/banshie.tres" id="11_ht5i3"]
+[ext_resource type="Resource" uid="uid://bbdpgtkgsv6an" path="res://resources/pieces/hitotsume.tres" id="12_816qq"]
 [ext_resource type="Resource" uid="uid://dfo807y07xegd" path="res://resources/passives/passive_3.tres" id="12_klwl8"]
+[ext_resource type="Resource" uid="uid://cxbloivuqkrwe" path="res://resources/pieces/valkirias.tres" id="13_7pi7j"]
 [ext_resource type="Resource" uid="uid://cjfr4hn8wgopn" path="res://resources/passives/passive_4.tres" id="13_h7duq"]
 [ext_resource type="Resource" uid="uid://dyqha0iqhcdfr" path="res://resources/passives/passive_5.tres" id="14_burfl"]
+[ext_resource type="Resource" uid="uid://57d6mtngeb8t" path="res://resources/pieces/draugr.tres" id="14_ttn3v"]
 [ext_resource type="Resource" uid="uid://nytgdhu2kh46" path="res://resources/passives/passive_6.tres" id="15_5xsmt"]
 
 [node name="Store" type="Control"]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_atuvt")
-piece_origins = Array[ExtResource("2_n3io3")]([ExtResource("3_abbvk"), ExtResource("4_3ro5p"), ExtResource("5_klwl8"), ExtResource("6_h7duq"), ExtResource("7_burfl"), ExtResource("8_5xsmt")])
+piece_origins = Array[ExtResource("2_n3io3")]([ExtResource("3_abbvk"), ExtResource("4_3ro5p"), ExtResource("8_5xsmt"), ExtResource("6_5xsmt"), ExtResource("7_burfl"), ExtResource("5_klwl8"), ExtResource("9_wk1we"), ExtResource("6_h7duq"), ExtResource("11_ht5i3"), ExtResource("12_816qq"), ExtResource("13_7pi7j"), ExtResource("14_ttn3v")])
 passive_origins = Array[ExtResource("9_n3io3")]([ExtResource("10_abbvk"), ExtResource("11_3ro5p"), ExtResource("12_klwl8"), ExtResource("13_h7duq"), ExtResource("14_burfl"), ExtResource("15_5xsmt")])
 
 [node name="background" type="TextureRect" parent="."]

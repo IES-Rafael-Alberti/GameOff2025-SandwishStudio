@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="PieceScalingProfile" load_steps=2 format=3 uid="uid://c0vedbt6qwqtc"]
+
+[ext_resource type="Script" uid="uid://depoux64wfo1o" path="res://scripts/piece_scaling.gd" id="1_isf6n"]
+
+[resource]
+script = ExtResource("1_isf6n")
+mode = 1
+tiers = {
+"BRONCE": {
+"aps": 1.0,
+"crit_chance": 15,
+"crit_mult": 1.7,
+"dmg": 9.0,
+"hp": 100.0,
+"members": 2
+},
+"ORO": {
+"aps": 1.0,
+"crit_chance": 25,
+"crit_mult": 2.1,
+"dmg": 7.2,
+"hp": 200.0,
+"members": 5
+},
+"PLATA": {
+"aps": 1.0,
+"crit_chance": 20,
+"crit_mult": 1.9,
+"dmg": 9.0,
+"hp": 150.0,
+"members": 3
+}
+}
+metadata/_custom_type_script = "uid://depoux64wfo1o"

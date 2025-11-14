@@ -1,19 +1,30 @@
-[gd_scene load_steps=3 format=3 uid="uid://htgfpif7ey68"]
+[gd_scene load_steps=2 format=3 uid="uid://htgfpif7ey68"]
 
 [ext_resource type="Script" uid="uid://b31agultlt6fo" path="res://scripts/slot.gd" id="1_maf36"]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_omn3e"]
-
 [node name="SlotPiece" type="Control" groups=["slot"]]
 layout_mode = 3
-anchors_preset = 0
-offset_right = 39.0
-offset_bottom = 37.0
+anchor_left = 0.006
+anchor_top = 0.004
+anchor_right = 0.006
+anchor_bottom = 0.004
+offset_left = -10.799998
+offset_top = -2.000002
+offset_right = 54.593937
+offset_bottom = 54.41175
 scale = Vector2(0.29054677, 0.30135566)
 
-[node name="Area2D" type="Area2D" parent="." groups=["slot"]]
+[node name="slot" type="Panel" parent="."]
+layout_mode = 0
+offset_top = -10.179945
+offset_right = 68.83572
+offset_bottom = 59.505173
 script = ExtResource("1_maf36")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
-position = Vector2(21, 16)
-shape = SubResource("CapsuleShape2D_omn3e")
+[node name="PieceTextureRect" type="TextureRect" parent="slot"]
+layout_mode = 0
+offset_left = 3.4418335
+offset_right = 71.298874
+offset_bottom = 65.57382
+scale = Vector2(0.96370167, 1.0120925)
+expand_mode = 1

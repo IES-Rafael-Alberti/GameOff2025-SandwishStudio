@@ -1,6 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://ckj0vt4dlrkx0"]
+[gd_scene load_steps=3 format=3 uid="uid://7erbtxd030w2"]
 
-[ext_resource type="Script" uid="uid://cf5se3pebkywk" path="res://scripts/piece.gd" id="1_s58gp"]
+[ext_resource type="Script" uid="uid://c7glv6kdrp280" path="res://scripts/piece.gd" id="1_s58gp"]
 [ext_resource type="Texture2D" uid="uid://dthf2y24tgfel" path="res://icon.svg" id="2_h2rng"]
 
 [node name="piece" type="Control"]
