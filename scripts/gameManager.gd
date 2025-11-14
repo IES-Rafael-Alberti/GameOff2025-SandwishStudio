@@ -65,6 +65,7 @@ func toggle_roll():
 
 func _on_store_hidden():
 	store.visible = false
+	gold_label.visible = false
 	roulette.visible = true
 
 func start_unroll():

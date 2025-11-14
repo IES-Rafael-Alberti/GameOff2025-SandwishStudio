@@ -13,16 +13,16 @@ size = Vector2(1048.2444, 6922.222)
 script = ExtResource("1_lbhrr")
 
 [node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
-offset_left = -72.0
-offset_top = -9.0
-offset_right = -72.0
-offset_bottom = 391.0
+offset_left = -277.0
+offset_top = -62.0
+offset_right = -277.0
+offset_bottom = 338.0
 
 [node name="Store" parent="." instance=ExtResource("3_iywne")]
-offset_left = 528.0
-offset_top = 394.0
-offset_right = 528.0
-offset_bottom = 394.0
+offset_left = 403.0
+offset_top = 405.0
+offset_right = 403.0
+offset_bottom = 405.0
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
 position = Vector2(1013, 119)
