@@ -4,6 +4,7 @@
 
 [resource]
 script = ExtResource("1_8px1q")
+mode = 1
 tiers = {
 "BRONCE": {
 "aps": 1.0,

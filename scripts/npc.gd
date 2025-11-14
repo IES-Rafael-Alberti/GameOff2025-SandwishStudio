@@ -17,7 +17,8 @@ var max_health: float = 1.0
 var health: float = 1.0
 # Gold pool that unit can drop
 var gold_pool: int = 0
-
+var display_name: String = ""
+@onready var name_label: Label = $NameLabel
 @onready var health_bar: ProgressBar = $healthBar
 
 func _ready() -> void:
@@ -46,6 +47,16 @@ func _ready() -> void:
 	# Hook: spawn
 	for ab in abilities:
 		if ab: ab.on_spwan(self)
+
+func set_display_name(text: String) -> void:
+	display_name = text
+	_update_name_label()
+
+func _update_name_label() -> void:
+	if not is_instance_valid(name_label):
+		return
+	name_label.text = display_name
+	name_label.visible = display_name != ""
 
 func _update_healthbar() -> void:
 	if not is_instance_valid(health_bar): return

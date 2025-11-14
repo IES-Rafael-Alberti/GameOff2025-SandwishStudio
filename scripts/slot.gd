@@ -11,6 +11,7 @@ var particles: CPUParticles2D
 var piece_over: Node = null
 var occupied := false
 var current_piece_data: Resource = null 
+var current_piece_count: int = 0 # <-- ¡NUEVA VARIABLE!
 @onready var ruleta: Node = get_parent().get_parent().get_parent().get_parent()
 @onready var piece_texture_rect: TextureRect = $PieceTextureRect
 
@@ -64,21 +65,23 @@ func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 	if occupied:
 		return false
 		
-	return data is PieceData
+	# ¡CAMBIO! Comprobamos si 'data' es nuestro nuevo diccionario
+	if data is Dictionary and "data" in data and "count" in data:
+		return data.data is PieceData # Comprobamos el 'PieceData' dentro del diccionario
 
-
+	return false # Si no es el diccionario, lo rechazamos
 # En tu script de Slot de Ruleta (slot.gd)
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
 	
 	# 1. Marcar como ocupado y guardar los datos
 	occupied = true
-	current_piece_data = data
+	current_piece_data = data.data   # <-- ¡CAMBIO! Extraemos los datos
+	current_piece_count = data.count # <-- ¡NUEVA LÍNEA! Guardamos la cantidad
 	
 
 	if current_piece_data and "icon" in current_piece_data:
 		
-		# Asegurarnos de que la textura no sea nula
 		if current_piece_data.icon:
 			piece_texture_rect.texture = current_piece_data.icon
 			piece_texture_rect.visible = true
@@ -86,15 +89,16 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 			push_warning("RouletteSlot: La propiedad 'icon' está vacía (null).")
 			
 	else:
-		# Este mensaje de advertencia también lo actualizamos
 		push_warning("RouletteSlot: El Resource soltado no tiene la propiedad 'icon'. No se puede mostrar la imagen.")
 
 	# 3. Emitir la señal para que el Inventario elimine la pieza
-	GlobalSignals.item_attached.emit(data)
-
+	#    Le pasamos solo el 'data.data' (el Resource), que es lo que
+	#    'remove_item_no_money' espera recibir.
+	GlobalSignals.item_attached.emit(data.data)
 func clear_slot():
 	occupied = false
 	current_piece_data = null
+	current_piece_count = 0 # <-- ¡NUEVA LÍNEA!
 	if piece_texture_rect:
 		piece_texture_rect.visible = false
 func _on_gui_input(event: InputEvent) -> void:
@@ -111,12 +115,18 @@ func _on_gui_input(event: InputEvent) -> void:
 		print("No se puede devolver la pieza: ¡La ruleta está girando!")
 		return
 
-	# 4. Crear un "callback" (una Callable) que apunte
-	#    a nuestra nueva función local "_on_return_attempt_finished"
+# 4. Crear un "callback" ...
 	var callback = Callable(self, "_on_return_attempt_finished")
 	
-	# 5. Emitir la señal global, pasando los datos Y el callback
-	GlobalSignals.item_return_to_inventory_requested.emit(current_piece_data, callback)
+	# 5. ¡CAMBIO CLAVE! Creamos el "paquete de datos" para DEVOLVER
+	var return_data_packet = {
+		"data": current_piece_data,
+		"count": current_piece_count # Usamos la cantidad que guardamos
+	}
+	
+	# 5. Emitir la señal global, pasando el PAQUETE de datos Y el callback
+	GlobalSignals.item_return_to_inventory_requested.emit(return_data_packet, callback)
+
 
 
 

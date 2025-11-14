@@ -32,19 +32,15 @@ position = Vector2(902, 590)
 zoom = Vector2(0.7, 0.7)
 
 [node name="gold_label" type="Label" parent="."]
-offset_left = 1085.0
-offset_top = 466.0
-offset_right = 1125.0
-offset_bottom = 505.0
+offset_left = 1099.0
+offset_top = 340.0
+offset_right = 1139.0
+offset_bottom = 379.0
 theme_override_font_sizes/font_size = 28
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
 visible = false
-position = Vector2(522, 340)
-
-[node name="Area2D" type="Area2D" parent="."]
-position = Vector2(1773, 373.99997)
-scale = Vector2(1299.6001, 0.09)
+position = Vector2(402, 420)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 position = Vector2(0.2539243, 4555.5557)

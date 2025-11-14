@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://cbys4jpmm128b"]
+[gd_scene load_steps=8 format=3 uid="uid://cbys4jpmm128b"]
 
 [ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_d8q6m"]
 [ext_resource type="Texture2D" uid="uid://go30fno5akpc" path="res://assets/ruleta.png" id="2_d8q6m"]

@@ -19,3 +19,14 @@ var _map := {
 func get_piece(id: String) -> PieceRes:
 	var p := _map.get(id, "") as String
 	return load(p) if p != "" else null
+
+# Funcion temporal para hacer pruebas
+func get_random_piece() -> PieceRes:
+	var ids: Array = _map.keys()
+	if ids.is_empty():
+		return null
+
+	var index: int = randi() % ids.size()
+	var id: String = String(ids[index])
+
+	return get_piece(id)
