@@ -2,7 +2,7 @@
 # (El que extiende Node2D)
 extends Node2D
 
-@onready var carpet_area = $Area2D
+@onready var carpet_area = $ButtonShop
 @onready var mat =  $Store/Sprite2D.material
 @onready var anim =  $Store/AnimationPlayer
 @onready var gold_label: Label = $gold_label
@@ -25,7 +25,6 @@ func _ready():
 			original_positions[child] = child.position
 			child.modulate.a = 1.0
 	anim.connect("animation_finished", Callable(self, "_on_animation_finished"))
-	carpet_area.input_pickable = true
 	carpet_area.connect("input_event", Callable(self, "_on_area_input"))
 	PlayerData.currency_changed.connect(_on_PlayerData_currency_changed)
 	if inventory.has_signal("item_sold"):
