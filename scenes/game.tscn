@@ -1,25 +1,28 @@
-[gd_scene load_steps=6 format=3 uid="uid://dd8wqmfs2cj1j"]
+[gd_scene load_steps=7 format=3 uid="uid://dd8wqmfs2cj1j"]
 
 [ext_resource type="Script" uid="uid://bpnxk43sopml" path="res://scripts/gameManager.gd" id="1_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://hbcgudcjh0wn" path="res://scenes/inventory.tscn" id="2_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://bwh1obe7043i" path="res://scenes/store.tscn" id="3_iywne"]
 [ext_resource type="PackedScene" uid="uid://0dvayl6271no" path="res://scenes/combat_scene.tscn" id="3_lnu2h"]
-[ext_resource type="PackedScene" uid="uid://c2wj1k0bbhih8" path="res://scenes/roulette.tscn" id="5_iywne"]
+[ext_resource type="PackedScene" uid="uid://bv3r20c0gu33v" path="res://scenes/roulette.tscn" id="5_iywne"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_iywne"]
+size = Vector2(1048.2444, 6922.222)
 
 [node name="game" type="Node2D"]
 script = ExtResource("1_lbhrr")
 
 [node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
-offset_left = -72.0
-offset_top = -9.0
-offset_right = -72.0
-offset_bottom = 391.0
+offset_left = -277.0
+offset_top = -62.0
+offset_right = -277.0
+offset_bottom = 338.0
 
 [node name="Store" parent="." instance=ExtResource("3_iywne")]
-offset_left = 528.0
-offset_top = 394.0
-offset_right = 528.0
-offset_bottom = 394.0
+offset_left = 403.0
+offset_top = 405.0
+offset_right = 403.0
+offset_bottom = 405.0
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
 position = Vector2(1013, 119)
@@ -35,15 +38,11 @@ offset_right = 1139.0
 offset_bottom = 379.0
 theme_override_font_sizes/font_size = 28
 
-[node name="Button" type="Button" parent="."]
-offset_left = 1842.0
-offset_top = 753.0
-offset_right = 1974.0
-offset_bottom = 806.0
-text = "Tienda/Ruleta"
-
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
 visible = false
 position = Vector2(402, 420)
 
-[connection signal="pressed" from="Button" to="." method="change_mode"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(0.2539243, 4555.5557)
+scale = Vector2(8.771928e-05, 1)
+shape = SubResource("RectangleShape2D_iywne")

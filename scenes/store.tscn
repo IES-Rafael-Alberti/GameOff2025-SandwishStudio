@@ -22,26 +22,92 @@
 [ext_resource type="Resource" uid="uid://dyqha0iqhcdfr" path="res://resources/passives/passive_5.tres" id="14_burfl"]
 [ext_resource type="Resource" uid="uid://57d6mtngeb8t" path="res://resources/pieces/draugr.tres" id="14_ttn3v"]
 [ext_resource type="Resource" uid="uid://nytgdhu2kh46" path="res://resources/passives/passive_6.tres" id="15_5xsmt"]
+[ext_resource type="Shader" uid="uid://0gvrjar422gt" path="res://shaders/store.gdshader" id="16_3ro5p"]
+[ext_resource type="Texture2D" uid="uid://bht4fapjev55r" path="res://assets/Tienda.png" id="16_abbvk"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_3ro5p"]
+shader = ExtResource("16_3ro5p")
+shader_parameter/roll_amount = 0.0
+shader_parameter/radius = 50.0
+
+[sub_resource type="Animation" id="Animation_klwl8"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0.114, 0.09)]
+}
+
+[sub_resource type="Animation" id="Animation_abbvk"]
+resource_name = "roll"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0.114, 0.09), Vector2(1e-05, 0.09)]
+}
+
+[sub_resource type="Animation" id="Animation_3ro5p"]
+resource_name = "unroll"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(1e-05, 0.09), Vector2(0.114, 0.09)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_h7duq"]
+_data = {
+&"RESET": SubResource("Animation_klwl8"),
+&"roll": SubResource("Animation_abbvk"),
+&"unroll": SubResource("Animation_3ro5p")
+}
 
 [node name="Store" type="Control"]
 layout_mode = 3
 anchors_preset = 0
+mouse_filter = 2
 script = ExtResource("1_atuvt")
 piece_origins = Array[ExtResource("2_n3io3")]([ExtResource("3_abbvk"), ExtResource("4_3ro5p"), ExtResource("8_5xsmt"), ExtResource("6_5xsmt"), ExtResource("7_burfl"), ExtResource("5_klwl8"), ExtResource("9_wk1we"), ExtResource("6_h7duq"), ExtResource("11_ht5i3"), ExtResource("12_816qq"), ExtResource("13_7pi7j"), ExtResource("14_ttn3v")])
 passive_origins = Array[ExtResource("9_n3io3")]([ExtResource("10_abbvk"), ExtResource("11_3ro5p"), ExtResource("12_klwl8"), ExtResource("13_h7duq"), ExtResource("14_burfl"), ExtResource("15_5xsmt")])
 
-[node name="background" type="TextureRect" parent="."]
-layout_mode = 0
-offset_right = 1174.0
-offset_bottom = 852.0
-texture = ExtResource("1_jmp1n")
+[node name="Sprite2D" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_3ro5p")
+position = Vector2(1773, 390.62555)
+scale = Vector2(0.114, 0.09)
+texture = ExtResource("16_abbvk")
+offset = Vector2(-7887.7275, 421.19434)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_h7duq")
+}
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 0
-offset_left = 15.0
-offset_top = 18.0
-offset_right = 1157.0
-offset_bottom = 812.0
+offset_left = 222.0
+offset_top = 69.0
+offset_right = 1364.0
+offset_bottom = 863.0
 theme_override_constants/separation = 49
 alignment = 1
 

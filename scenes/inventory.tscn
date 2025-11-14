@@ -1,10 +1,10 @@
 [gd_scene load_steps=7 format=3 uid="uid://hbcgudcjh0wn"]
 
 [ext_resource type="Script" uid="uid://cmqqk0nk7sejg" path="res://scripts/inventory.gd" id="1_hj2ta"]
-[ext_resource type="Texture2D" uid="uid://dthf2y24tgfel" path="res://icon.svg" id="1_qw0r6"]
 [ext_resource type="PackedScene" uid="uid://n7qqfs70w4b" path="res://scenes/inventory_slot.tscn" id="2_ty45s"]
 [ext_resource type="PackedScene" uid="uid://7erbtxd030w2" path="res://scenes/piece.tscn" id="3_uae8j"]
 [ext_resource type="Texture2D" uid="uid://boul6livclehs" path="res://assets/unnamed (1).jpg" id="4_53g1v"]
+[ext_resource type="Texture2D" uid="uid://b4bl7jr41p7bk" path="res://assets/Inventario.png" id="4_uae8j"]
 [ext_resource type="Script" uid="uid://cm67y0q4u1ot5" path="res://scripts/DeleteArea.gd" id="4_yyk2a"]
 
 [node name="inventory" type="Control"]
@@ -22,11 +22,11 @@ piece_scene = ExtResource("3_uae8j")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 90.0
-offset_top = -19.0
-offset_right = 590.0
-offset_bottom = 1185.0
-texture = ExtResource("1_qw0r6")
+offset_left = -20.0
+offset_right = 3291.0
+offset_bottom = 8000.0
+scale = Vector2(0.21767324, 0.20484227)
+texture = ExtResource("4_uae8j")
 
 [node name="piece_label" type="Label" parent="."]
 layout_mode = 0
