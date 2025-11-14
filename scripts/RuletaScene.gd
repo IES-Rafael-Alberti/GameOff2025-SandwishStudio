@@ -6,7 +6,8 @@ extends Node2D
 @export var enemy_manager: Node
 @export var min_impulse_force := 10.0
 @export var min_impulse_random_range := Vector2(1.5, 4)
-@onready var slots: Node2D = $SpriteRuleta/SlotsContainer
+@onready var SlotsContainer: Node2D = $SpriteRuleta/SlotsContainer
+
 enum State { IDLE, DRAGGING, SPINNING, SNAP}
 var state := State.IDLE
 var last_mouse_angle := 0.0
@@ -140,12 +141,12 @@ func _reward():
 
 	var index: int = _selected_area.slot_index
 
-	if index < 0 or index >= slots.get_child_count():
-		push_error("Ruleta _reward(): El 'slot_index' (%d) del área '%s' está fuera del rango de hijos de 'SlotsContainer' (cantidad %d)." % [index, _selected_area.name, slots.get_child_count()])
+	if index < 0 or index >= SlotsContainer.get_child_count():
+		push_error("Ruleta _reward(): El 'slot_index' (%d) del área '%s' está fuera del rango de hijos de 'SlotsContainer' (cantidad %d)." % [index, _selected_area.name, SlotsContainer.get_child_count()])
 		_reset()
 		return
 
-	var winning_slot_root = slots.get_child(index)
+	var winning_slot_root = SlotsContainer.get_child(index)
 	var actual_slot_node = null
 
 	if winning_slot_root and winning_slot_root.has_node("slot"):

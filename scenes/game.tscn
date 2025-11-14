@@ -44,6 +44,6 @@ text = "Tienda/Ruleta"
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
 visible = false
-position = Vector2(414, 316)
+position = Vector2(402, 420)
 
 [connection signal="pressed" from="Button" to="." method="change_mode"]

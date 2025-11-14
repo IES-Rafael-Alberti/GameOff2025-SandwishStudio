@@ -1,7 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://c2wj1k0bbhih8"]
+[gd_scene load_steps=8 format=3 uid="uid://cbys4jpmm128b"]
 
 [ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_d8q6m"]
-[ext_resource type="Texture2D" uid="uid://go30fno5akpc" path="res://assets/Ruleta.png" id="2_d8q6m"]
+[ext_resource type="Texture2D" uid="uid://go30fno5akpc" path="res://assets/ruleta.png" id="2_d8q6m"]
 [ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="3_rleqp"]
 [ext_resource type="Texture2D" uid="uid://qmthj5xqadhq" path="res://assets/Manilla (1).png" id="4_d8q6m"]
 [ext_resource type="PackedScene" uid="uid://7erbtxd030w2" path="res://scenes/piece.tscn" id="5_bwak5"]
