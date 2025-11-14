@@ -1,8 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://bv3r20c0gu33v"]
+[gd_scene load_steps=8 format=3 uid="uid://bv3r20c0gu33v"]
 
 [ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_jyskt"]
 [ext_resource type="Texture2D" uid="uid://go30fno5akpc" path="res://assets/ruleta.png" id="2_jyskt"]
-[ext_resource type="Script" uid="uid://d1s3pk6cls46q" path="res://scripts/RouletteSlice.gd" id="4_jyskt"]
+[ext_resource type="Script" path="res://scripts/RouletteSlice.gd" id="4_jyskt"]
 [ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="4_k6evh"]
 [ext_resource type="Texture2D" uid="uid://qmthj5xqadhq" path="res://assets/Manilla (1).png" id="5_jyskt"]
 
@@ -11,9 +11,6 @@ size = Vector2(544.9423, 240.75171)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_t1x4v"]
 height = 92.0
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_jyskt"]
-size = Vector2(1048.2444, 6922.222)
 
 [node name="Roulette" type="Node2D"]
 script = ExtResource("1_jyskt")
@@ -252,15 +249,6 @@ position = Vector2(-0.8123779, 2.4012146)
 shape = SubResource("CapsuleShape2D_t1x4v")
 
 [node name="Timer" type="Timer" parent="."]
-
-[node name="Area2D" type="Area2D" parent="."]
-position = Vector2(1773, 373.99997)
-scale = Vector2(1299.6001, 0.09)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
-position = Vector2(-0.14850718, 955.55566)
-scale = Vector2(8.771928e-05, 1)
-shape = SubResource("RectangleShape2D_jyskt")
 
 [connection signal="area_entered" from="Manecilla" to="." method="_on_AreaManecilla_area_entered"]
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]

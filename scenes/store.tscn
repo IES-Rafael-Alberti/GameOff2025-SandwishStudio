@@ -1,7 +1,6 @@
-[gd_scene load_steps=23 format=3 uid="uid://bwh1obe7043i"]
+[gd_scene load_steps=31 format=3 uid="uid://bwh1obe7043i"]
 
 [ext_resource type="Script" uid="uid://boom6onvffdah" path="res://scripts/store.gd" id="1_atuvt"]
-[ext_resource type="Texture2D" uid="uid://dthf2y24tgfel" path="res://icon.svg" id="1_jmp1n"]
 [ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="2_n3io3"]
 [ext_resource type="Resource" uid="uid://dateynk6k5fui" path="res://resources/pieces/oni.tres" id="3_abbvk"]
 [ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/jotun.tres" id="4_3ro5p"]
@@ -24,6 +23,8 @@
 [ext_resource type="Resource" uid="uid://nytgdhu2kh46" path="res://resources/passives/passive_6.tres" id="15_5xsmt"]
 [ext_resource type="Shader" uid="uid://0gvrjar422gt" path="res://shaders/store.gdshader" id="16_3ro5p"]
 [ext_resource type="Texture2D" uid="uid://bht4fapjev55r" path="res://assets/Tienda.png" id="16_abbvk"]
+[ext_resource type="Texture2D" uid="uid://clucu0hyocvrs" path="res://assets/CONTINUENEGRO.png" id="24_816qq"]
+[ext_resource type="Texture2D" uid="uid://dro10dcj34d2s" path="res://assets/REROLLBLANCO.png" id="25_7pi7j"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_3ro5p"]
 shader = ExtResource("16_3ro5p")
@@ -85,6 +86,7 @@ _data = {
 [node name="Store" type="Control"]
 layout_mode = 3
 anchors_preset = 0
+scale = Vector2(1.0102348, 1.0076514)
 mouse_filter = 2
 script = ExtResource("1_atuvt")
 piece_origins = Array[ExtResource("2_n3io3")]([ExtResource("3_abbvk"), ExtResource("4_3ro5p"), ExtResource("8_5xsmt"), ExtResource("6_5xsmt"), ExtResource("7_burfl"), ExtResource("5_klwl8"), ExtResource("9_wk1we"), ExtResource("6_h7duq"), ExtResource("11_ht5i3"), ExtResource("12_816qq"), ExtResource("13_7pi7j"), ExtResource("14_ttn3v")])
@@ -92,7 +94,7 @@ passive_origins = Array[ExtResource("9_n3io3")]([ExtResource("10_abbvk"), ExtRes
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 material = SubResource("ShaderMaterial_3ro5p")
-position = Vector2(1773, 390.62555)
+position = Vector2(1763.1869, 392.99298)
 scale = Vector2(0.114, 0.09)
 texture = ExtResource("16_abbvk")
 offset = Vector2(-7887.7275, 421.19434)
@@ -104,11 +106,11 @@ libraries = {
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 0
-offset_left = 222.0
-offset_top = 69.0
-offset_right = 1364.0
-offset_bottom = 863.0
-theme_override_constants/separation = 49
+offset_left = -137.59178
+offset_right = 1290.5269
+offset_bottom = 794.0
+scale = Vector2(1.0237498, 0.9883052)
+theme_override_constants/separation = 30
 alignment = 1
 
 [node name="piece_label" type="Label" parent="VBoxContainer"]
@@ -134,25 +136,20 @@ size_flags_horizontal = 4
 size_flags_stretch_ratio = 0.85
 theme_override_constants/separation = 200
 
-[node name="Options" type="Label" parent="VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 40
-text = "Options"
-horizontal_alignment = 1
-
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
-size_flags_horizontal = 4
-theme_override_constants/separation = 700
-
-[node name="Exit" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 4
-texture_normal = ExtResource("1_jmp1n")
+size_flags_horizontal = 8
+size_flags_vertical = 4
+theme_override_constants/separation = 200
 
 [node name="Reroll" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
-texture_normal = ExtResource("1_jmp1n")
+texture_normal = ExtResource("25_7pi7j")
+
+[node name="Exit" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+texture_normal = ExtResource("24_816qq")
 
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/Reroll" to="." method="generate"]
