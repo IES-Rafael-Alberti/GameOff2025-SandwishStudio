@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://hbcgudcjh0wn"]
+[gd_scene load_steps=8 format=3 uid="uid://hbcgudcjh0wn"]
 
 [ext_resource type="Script" uid="uid://cmqqk0nk7sejg" path="res://scripts/inventory.gd" id="1_hj2ta"]
 [ext_resource type="PackedScene" uid="uid://n7qqfs70w4b" path="res://scenes/inventory_slot.tscn" id="2_ty45s"]
@@ -6,13 +6,14 @@
 [ext_resource type="Texture2D" uid="uid://boul6livclehs" path="res://assets/unnamed (1).jpg" id="4_53g1v"]
 [ext_resource type="Texture2D" uid="uid://b4bl7jr41p7bk" path="res://assets/Inventario.png" id="4_uae8j"]
 [ext_resource type="Script" uid="uid://cm67y0q4u1ot5" path="res://scripts/DeleteArea.gd" id="4_yyk2a"]
+[ext_resource type="Texture2D" uid="uid://b3gvhhihiil78" path="res://assets/Bandeja.png" id="5_s887n"]
 
 [node name="inventory" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = -482.0
+offset_right = 714.0
 offset_bottom = 400.0
 grow_horizontal = 2
 grow_vertical = 2
@@ -25,57 +26,51 @@ layout_mode = 0
 offset_left = -20.0
 offset_right = 3291.0
 offset_bottom = 8000.0
-scale = Vector2(0.21767324, 0.20484227)
+scale = Vector2(0.143898, 0.12514244)
 texture = ExtResource("4_uae8j")
 
-[node name="piece_label" type="Label" parent="."]
+[node name="TextureRect2" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 276.0
-offset_top = 6.0
-offset_right = 403.0
-offset_bottom = 64.0
-theme_override_font_sizes/font_size = 42
-text = "Pieces"
+offset_left = 1803.0002
+offset_top = 79.0
+offset_right = 6370.0
+offset_bottom = 7079.0
+rotation = -0.006927715
+scale = Vector2(0.087852575, 0.087852575)
+texture = ExtResource("5_s887n")
+flip_v = true
 
 [node name="piece_inventory" type="GridContainer" parent="."]
 layout_mode = 0
-offset_left = 152.0
-offset_top = 71.0
-offset_right = 508.0
-offset_bottom = 635.0
+offset_left = 41.0
+offset_top = 85.0
+offset_right = 397.0
+offset_bottom = 649.0
 theme_override_constants/h_separation = 126
 theme_override_constants/v_separation = 71
 columns = 2
 
-[node name="passive_label" type="Label" parent="."]
-layout_mode = 0
-offset_left = 255.0
-offset_top = 672.0
-offset_right = 425.0
-offset_bottom = 730.0
-theme_override_font_sizes/font_size = 42
-text = "Passives"
-
 [node name="passive_inventory" type="GridContainer" parent="."]
 layout_mode = 0
-offset_left = 145.0
-offset_top = 757.0
-offset_right = 913.0
-offset_bottom = 1217.0
+offset_left = 1923.0
+offset_top = 161.00002
+offset_right = 2322.0698
+offset_bottom = 659.3279
+rotation = -0.0030516738
 scale = Vector2(0.5, 0.5)
 theme_override_constants/h_separation = 28
 theme_override_constants/v_separation = 25
-columns = 6
+columns = 3
 
 [node name="delete" type="Panel" parent="."]
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 0
-offset_left = 287.0
-offset_top = 1005.0
-offset_right = 387.0
-offset_bottom = 1105.0
+offset_left = 167.0
+offset_top = 741.0
+offset_right = 267.0
+offset_bottom = 841.0
 script = ExtResource("4_yyk2a")
 
 [node name="Sprite2D" type="Sprite2D" parent="delete"]
-position = Vector2(51, 50)
+position = Vector2(51, 47)
 texture = ExtResource("4_53g1v")

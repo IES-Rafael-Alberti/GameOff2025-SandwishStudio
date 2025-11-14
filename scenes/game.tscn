@@ -7,25 +7,27 @@
 [ext_resource type="PackedScene" uid="uid://bv3r20c0gu33v" path="res://scenes/roulette.tscn" id="5_iywne"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_iywne"]
-size = Vector2(1048.2444, 6922.222)
+size = Vector2(107, 515)
 
 [node name="game" type="Node2D"]
 script = ExtResource("1_lbhrr")
 
 [node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
-offset_left = -277.0
-offset_top = -62.0
-offset_right = -277.0
-offset_bottom = 338.0
+offset_left = -378.0
+offset_top = 360.0
+offset_right = -378.0
+offset_bottom = 760.0
 
 [node name="Store" parent="." instance=ExtResource("3_iywne")]
-offset_left = 403.0
-offset_top = 405.0
-offset_right = 403.0
-offset_bottom = 405.0
+visible = false
+offset_left = 398.0
+offset_top = 400.0
+offset_right = 398.0
+offset_bottom = 400.0
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
-position = Vector2(1013, 119)
+position = Vector2(-245, -105.00001)
+scale = Vector2(0.5729072, 0.37119067)
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(902, 590)
@@ -39,10 +41,10 @@ offset_bottom = 379.0
 theme_override_font_sizes/font_size = 28
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
-visible = false
-position = Vector2(402, 420)
+position = Vector2(112, 392)
+
+[node name="Area2D" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
-position = Vector2(0.2539243, 4555.5557)
-scale = Vector2(8.771928e-05, 1)
+position = Vector2(2098, 788)
 shape = SubResource("RectangleShape2D_iywne")

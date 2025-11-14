@@ -28,7 +28,6 @@ theme_override_styles/fill = SubResource("StyleBoxFlat_abqhh")
 show_percentage = false
 
 [node name="red_warrior" type="AnimatedSprite2D" parent="."]
-visible = false
 sprite_frames = ExtResource("2_abqhh")
 animation = &"idle"
 frame_progress = 0.5354015
