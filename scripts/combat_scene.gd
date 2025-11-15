@@ -88,6 +88,31 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 		n.npc_res = RES_LIST[randi() % RES_LIST.size()]
 	add_child(n)
 	
+	# --- INICIO DE CÓDIGO NUEVO ---
+	# Si es un aliado y el singleton existe, aplicamos bonificaciones
+	if team == npc.Team.ALLY and has_node("/root/GlobalStats"):
+		
+		# Obtenemos las bonificaciones desde el singleton
+		var health_bonus = GlobalStats.get_health_bonus()
+		var damage_bonus = GlobalStats.get_damage_bonus()
+		var speed_bonus = GlobalStats.get_speed_bonus()
+		var crit_chance_bonus = GlobalStats.get_crit_chance_bonus()
+		var crit_damage_bonus = GlobalStats.get_crit_damage_bonus()
+
+		# Asumimos que 'npc.gd' tendrá una función para aplicar esto.
+		# (Ver Paso 4 - Tendrás que crear esta función en 'npc.gd')
+		if n.has_method("apply_passive_bonuses"):
+			n.apply_passive_bonuses(
+				health_bonus,
+				damage_bonus,
+				speed_bonus,
+				crit_chance_bonus,
+				crit_damage_bonus
+			)
+		else:
+			push_warning("npc.gd no tiene el método 'apply_passive_bonuses'. No se aplicarán las pasivas.")
+	# --- FIN DE CÓDIGO NUEVO ---
+	
 	# if is ENEMY (warrior), the gold pool is = to resource
 	if team == npc.Team.ENEMY:
 		n.gold_pool = int(n.npc_res.gold)

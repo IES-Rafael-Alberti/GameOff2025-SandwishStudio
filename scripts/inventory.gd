@@ -324,6 +324,7 @@ func _on_item_return_requested(item_data_packet: Variant, on_complete_callback: 
 	
 	if on_complete_callback.is_valid():
 		on_complete_callback.call(success)
+
 func _update_passive_stats_display() -> void:
 	
 	var total_health: float = 0.0
@@ -359,11 +360,25 @@ func _update_passive_stats_display() -> void:
 			PassiveData.PassiveType.CRITICAL_DAMAGE_INCREASE:
 				total_crit_damage += (data.value * count)
 			
-
-
 	# 3. Actualizar el texto de las etiquetas
 	health_label.text = "+%s" % str(total_health)
 	damage_label.text = "+%s" % str(total_damage)
 	speed_label.text = "+%s" % str(total_speed) 
 	crit_chance_label.text = "+%s" % str(total_crit_chance)
 	crit_damage_label.text = "+%s" % str(total_crit_damage)
+	
+	# --- INICIO DE CÓDIGO NUEVO ---
+	# Compilamos un diccionario con los totales
+	var stats_payload := {
+		"health": total_health,
+		"damage": total_damage,
+		"speed": total_speed,
+		"crit_chance": total_crit_chance,
+		"crit_damage": total_crit_damage
+	}
+	
+	# Enviamos los datos al singleton GlobalStats
+	# Comprobamos que exista por si acaso
+	if has_node("/root/GlobalStats"):
+		GlobalStats.update_stats(stats_payload)
+	# --- FIN DE CÓDIGO NUEVO ---
