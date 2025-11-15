@@ -12,46 +12,83 @@ position = Vector2(0, 4)
 script = ExtResource("1_ivkwx")
 
 [node name="TextureRect" type="TextureRect" parent="."]
-offset_left = -474.0
-offset_top = -188.0
-offset_right = 979.0
-offset_bottom = 212.0
+offset_left = -480.0
+offset_top = -140.0
+offset_right = 4644.0
+offset_bottom = 1381.0
 texture = SubResource("AtlasTexture_ofoda")
 metadata/_edit_use_anchors_ = true
 
-[node name="BeastSpawn" type="Marker2D" parent="."]
-position = Vector2(-11, 602)
+[node name="GladiatorSpawn" type="Marker2D" parent="."]
+position = Vector2(-640, 572)
 
-[node name="WarriorSpawn1" type="Marker2D" parent="."]
-position = Vector2(3208, 477)
+[node name="AlliesSpawn" type="Marker2D" parent="."]
+position = Vector2(4736, 572)
 
-[node name="WarriorSpawn2" type="Marker2D" parent="."]
-position = Vector2(3283, 600)
+[node name="AllyFinalSlots" type="Node2D" parent="."]
 
-[node name="WarriorSpawn3" type="Marker2D" parent="."]
-position = Vector2(3283, 377)
+[node name="AllyFinalSlot1" type="Marker2D" parent="AllyFinalSlots"]
+position = Vector2(3648, 252)
 
-[node name="WarriorSpawn4" type="Marker2D" parent="."]
-position = Vector2(3570, 377)
+[node name="AllyFinalSlot2" type="Marker2D" parent="AllyFinalSlots"]
+position = Vector2(3648, 452)
 
-[node name="WarriorSpawn5" type="Marker2D" parent="."]
-position = Vector2(3570, 600)
+[node name="AllyFinalSlot3" type="Marker2D" parent="AllyFinalSlots"]
+position = Vector2(3648, 636)
 
-[node name="WarriorSpawn6" type="Marker2D" parent="."]
-position = Vector2(3477, 477)
+[node name="AllyFinalSlot4" type="Marker2D" parent="AllyFinalSlots"]
+position = Vector2(3648, 828)
+
+[node name="AllyFinalSlot5" type="Marker2D" parent="AllyFinalSlots"]
+position = Vector2(3904, 252)
+
+[node name="AllyFinalSlot6" type="Marker2D" parent="AllyFinalSlots"]
+position = Vector2(3904, 444)
+
+[node name="AllyFinalSlot7" type="Marker2D" parent="AllyFinalSlots"]
+position = Vector2(3904, 636)
+
+[node name="AllyFinalSlot8" type="Marker2D" parent="AllyFinalSlots"]
+position = Vector2(3904, 828)
+
+[node name="AllyFinalSlot9" type="Marker2D" parent="AllyFinalSlots"]
+position = Vector2(4160, 252)
+
+[node name="AllyFinalSlot10" type="Marker2D" parent="AllyFinalSlots"]
+position = Vector2(4160, 444)
+
+[node name="AllyFinalSlot11" type="Marker2D" parent="AllyFinalSlots"]
+position = Vector2(4160, 636)
+
+[node name="AllyFinalSlot12" type="Marker2D" parent="AllyFinalSlots"]
+position = Vector2(4160, 820)
+
+[node name="AllyFinalSlot13" type="Marker2D" parent="AllyFinalSlots"]
+position = Vector2(4416, 444)
+
+[node name="AllyFinalSlot14" type="Marker2D" parent="AllyFinalSlots"]
+position = Vector2(4416, 636)
 
 [node name="RoundMessage" type="Label" parent="."]
-offset_left = -427.0
-offset_top = -259.0
-offset_right = -152.0
-offset_bottom = -137.0
+offset_left = 757.0
+offset_top = 602.0
+offset_right = 1032.0
+offset_bottom = 724.0
 theme_override_font_sizes/font_size = 46
 metadata/_edit_use_anchors_ = true
 
 [node name="RoundCounter" type="Label" parent="."]
-offset_left = 900.0
-offset_top = -248.0
-offset_right = 940.0
-offset_bottom = -190.0
+offset_left = 814.0
+offset_top = 97.0
+offset_right = 854.0
+offset_bottom = 155.0
 theme_override_font_sizes/font_size = 42
 metadata/_edit_use_anchors_ = true
+
+[node name="EnemySlots" type="Node2D" parent="."]
+
+[node name="EnemyWaitSlot" type="Marker2D" parent="EnemySlots"]
+position = Vector2(320, 572)
+
+[node name="EnemyBattleSlot" type="Marker2D" parent="EnemySlots"]
+position = Vector2(1690, 572)
