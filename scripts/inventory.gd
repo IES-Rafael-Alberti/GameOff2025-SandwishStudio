@@ -9,6 +9,11 @@ signal item_sold(refund_amount: int)
 @onready var piece_inventory: GridContainer = $piece_inventory
 @onready var passive_inventory: GridContainer = $passive_inventory
 @onready var refund_percent: int = 50
+@onready var health_label: Label = $TextureRect3/VBoxContainer/HBoxContainer/Health_container/Label
+@onready var damage_label: Label = $TextureRect3/VBoxContainer/HBoxContainer/Damage_container/Label
+@onready var speed_label: Label = $TextureRect3/VBoxContainer/HBoxContainer/SpeedCOntainer/Label
+@onready var crit_chance_label: Label = $TextureRect3/VBoxContainer/HBoxContainer2/CChance_container/Label
+@onready var crit_damage_label: Label = $TextureRect3/VBoxContainer/HBoxContainer2/CDamage_chance/Label
 @export var max_pieces: int = 6
 @export var max_passives: int = 30
 @export var inventory_slot_scene: PackedScene 
@@ -31,7 +36,7 @@ func _ready() -> void:
 	GlobalSignals.item_deleted.connect(remove_item)
 	GlobalSignals.item_attached.connect(remove_item_no_money)
 	GlobalSignals.item_return_to_inventory_requested.connect(_on_item_return_requested)
-
+	_update_passive_stats_display()
 	if not inventory_slot_scene:
 		push_error("¡La variable 'Inventory Slot Scene' no está asignada en el script Inventory.gd!")
 		return
@@ -86,6 +91,8 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 		var slot_node: Node = entry["slot_node"]
 		if slot_node and slot_node.has_method("update_count"):
 			slot_node.update_count(entry["count"])
+		if context.is_passive:
+			_update_passive_stats_display()
 		return true
 
 	# Lógica de Nuevo Item (en un slot vacío)
@@ -106,6 +113,8 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 			"slot_node": empty_slot 
 		}
 		inventory_map[id] = new_entry
+		if context.is_passive:
+			_update_passive_stats_display()
 		return true
 
 	print("... FALLO INESPERADO: No se pudo apilar ni encontrar slot vacío.")
@@ -152,6 +161,7 @@ func decrement_item(data: Resource):
 		
 		if context.is_passive:
 			_compact_passive_slots()
+			_update_passive_stats_display()
 
 	return true
 
@@ -209,7 +219,7 @@ func _remove_item_stack(item_data: Resource, with_refund: bool) -> bool:
 	
 	if context.is_passive:
 		_compact_passive_slots()
-
+		_update_passive_stats_display()
 	return true
 
 # FUNCIÓN AUXILIAR (NUEVA)
@@ -301,22 +311,59 @@ func _on_item_selected_from_slot(data: Resource) -> void:
 
 func _on_item_return_requested(item_data_packet: Variant, on_complete_callback: Callable):
 	
-	# 1. Comprobar si recibimos el paquete de datos (diccionario)
 	if not (item_data_packet is Dictionary and "data" in item_data_packet and "count" in item_data_packet):
 		push_error("item_return_requested: Se recibieron datos inválidos.")
 		if on_complete_callback.is_valid():
-			on_complete_callback.call(false) # Informamos del fallo
+			on_complete_callback.call(false) 
 		return
 
-	# 2. Extraemos los datos y la cantidad
 	var item_data: Resource = item_data_packet.data
 	var item_count: int = item_data_packet.count
 	
-	# 3. Intentamos añadir el ítem usando tu lógica existente Y la cantidad.
 	var success: bool = add_item(item_data, item_count)
 	
-	# 4. Comprobamos si el "callback" que nos pasaron es válido.
 	if on_complete_callback.is_valid():
-		# 5. "Llamamos de vuelta" a la función que nos pasaron,
-		#    enviándole el resultado (true si se añadió, false si no).
 		on_complete_callback.call(success)
+func _update_passive_stats_display() -> void:
+	
+	var total_health: float = 0.0
+	var total_damage: float = 0.0
+	var total_speed: float = 0.0
+	var total_crit_chance: float = 0.0
+	var total_crit_damage: float = 0.0
+
+	for item_id in passive_counts:
+		var entry = passive_counts[item_id]
+		var data: PassiveData = entry.data
+		var count: int = entry.count
+		
+		if not data:
+			print("... ... ERROR DEBUG: Entrada '%s' tiene datos NULOS." % item_id)
+			continue
+		
+		if not data is PassiveData:
+			continue
+		
+		var item_name = data.resource_name
+		if "name_passive" in data and not data.name_passive.is_empty():
+			item_name = data.name_passive
+		match data.type:
+			PassiveData.PassiveType.HEALTH_INCREASE:
+				total_health += (data.value * count)
+			PassiveData.PassiveType.BASE_DAMAGE_INCREASE:
+				total_damage += (data.value * count)
+			PassiveData.PassiveType.ATTACK_SPEED_INCREASE:
+				total_speed += (data.value * count)
+			PassiveData.PassiveType.CRITICAL_CHANCE_INCREASE:
+				total_crit_chance += (data.value * count)
+			PassiveData.PassiveType.CRITICAL_DAMAGE_INCREASE:
+				total_crit_damage += (data.value * count)
+			
+
+
+	# 3. Actualizar el texto de las etiquetas
+	health_label.text = "+%s" % str(total_health)
+	damage_label.text = "+%s" % str(total_damage)
+	speed_label.text = "+%s" % str(total_speed) 
+	crit_chance_label.text = "+%s" % str(total_crit_chance)
+	crit_damage_label.text = "+%s" % str(total_crit_damage)
