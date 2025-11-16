@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://bevacqmdtykqr"]
+
+[ext_resource type="Texture2D" uid="uid://s8xb53u0u4ob" path="res://assets/Mostrada.png" id="1_rbhky"]
+[ext_resource type="Texture2D" uid="uid://2ggc15pgbjpi" path="res://assets/Oculta.png" id="2_wvo3v"]
+
+[node name="ButtonShop" type="Button"]
+offset_right = 8.0
+offset_bottom = 8.0
+
+[node name="SpriteShow" type="Sprite2D" parent="."]
+position = Vector2(51, 46)
+scale = Vector2(0.035525758, 0.035525758)
+texture = ExtResource("1_rbhky")
+
+[node name="SpriteHide" type="Sprite2D" parent="."]
+position = Vector2(51, 46)
+scale = Vector2(0.035525758, 0.035525758)
+texture = ExtResource("2_wvo3v")

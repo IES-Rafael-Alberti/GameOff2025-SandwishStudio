@@ -23,8 +23,8 @@ GlobalStats="*res://scripts/GlobalStats.gd"
 
 [display]
 
-window/size/viewport_width=1800
-window/size/viewport_height=1000
+window/size/viewport_width=1162
+window/size/viewport_height=760
 window/stretch/mode="canvas_items"
 
 [input]

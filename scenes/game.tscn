@@ -4,30 +4,30 @@
 [ext_resource type="PackedScene" uid="uid://hbcgudcjh0wn" path="res://scenes/inventory.tscn" id="2_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://bwh1obe7043i" path="res://scenes/store.tscn" id="3_iywne"]
 [ext_resource type="PackedScene" uid="uid://0dvayl6271no" path="res://scenes/combat_scene.tscn" id="3_lnu2h"]
-[ext_resource type="PackedScene" uid="uid://c2wj1k0bbhih8" path="res://scenes/roulette.tscn" id="5_iywne"]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_iywne"]
-size = Vector2(107, 515)
+[ext_resource type="PackedScene" uid="uid://bv3r20c0gu33v" path="res://scenes/roulette.tscn" id="5_iywne"]
+[ext_resource type="PackedScene" uid="uid://bevacqmdtykqr" path="res://scenes/button_shop.tscn" id="6_p57ef"]
 
 [node name="game" type="Node2D"]
 script = ExtResource("1_lbhrr")
 
 [node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
-offset_left = -378.0
-offset_top = 360.0
-offset_right = -378.0
-offset_bottom = 760.0
+offset_left = 83.0
+offset_top = 369.0
+offset_right = 83.0
+offset_bottom = 769.0
+scale = Vector2(0.77105117, 0.77105117)
 
 [node name="Store" parent="." instance=ExtResource("3_iywne")]
 visible = false
-offset_left = 398.0
-offset_top = 400.0
-offset_right = 398.0
-offset_bottom = 400.0
+offset_left = 416.0
+offset_top = 394.0
+offset_right = 416.0
+offset_bottom = 394.0
+scale = Vector2(0.8860778, 0.88381195)
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
-position = Vector2(-245, -105.00001)
-scale = Vector2(0.5729072, 0.37119067)
+position = Vector2(186, 70.99998)
+scale = Vector2(0.35700324, 0.2319321)
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(902, 590)
@@ -41,10 +41,11 @@ offset_bottom = 462.0
 theme_override_font_sizes/font_size = 28
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
-position = Vector2(112, 392)
+position = Vector2(284, 365)
+scale = Vector2(0.8845031, 0.8845031)
 
-[node name="Area2D" type="Area2D" parent="."]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
-position = Vector2(2098, 788)
-shape = SubResource("RectangleShape2D_iywne")
+[node name="ButtonShop" parent="." instance=ExtResource("6_p57ef")]
+offset_left = 1633.0
+offset_top = 784.0
+offset_right = 1733.0
+offset_bottom = 876.0

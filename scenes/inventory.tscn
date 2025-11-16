@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://n7qqfs70w4b" path="res://scenes/inventory_slot.tscn" id="2_ty45s"]
 [ext_resource type="PackedScene" uid="uid://7erbtxd030w2" path="res://scenes/piece.tscn" id="3_uae8j"]
 [ext_resource type="Texture2D" uid="uid://boul6livclehs" path="res://assets/unnamed (1).jpg" id="4_53g1v"]
+[ext_resource type="Texture2D" uid="uid://dvhj1vcqtnvgl" path="res://assets/Tex_Marble_White_02-512x512.png" id="4_g71ie"]
 [ext_resource type="Texture2D" uid="uid://b4bl7jr41p7bk" path="res://assets/Inventario.png" id="4_uae8j"]
 [ext_resource type="Script" uid="uid://cm67y0q4u1ot5" path="res://scripts/DeleteArea.gd" id="4_yyk2a"]
 [ext_resource type="Texture2D" uid="uid://b3gvhhihiil78" path="res://assets/Bandeja.png" id="5_s887n"]
@@ -27,7 +28,16 @@ script = ExtResource("1_hj2ta")
 inventory_slot_scene = ExtResource("2_ty45s")
 piece_scene = ExtResource("3_uae8j")
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="MarmolMesa" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = -20.0
+offset_right = 3291.0
+offset_bottom = 8000.0
+scale = Vector2(0.65658104, 0.12503731)
+mouse_filter = 0
+texture = ExtResource("4_g71ie")
+
+[node name="Alfombra" type="TextureRect" parent="."]
 layout_mode = 0
 offset_left = -20.0
 offset_right = 3291.0
@@ -35,12 +45,12 @@ offset_bottom = 8000.0
 scale = Vector2(0.143898, 0.12514244)
 texture = ExtResource("4_uae8j")
 
-[node name="TextureRect2" type="TextureRect" parent="."]
+[node name="Bandeja" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 1803.0002
-offset_top = 79.0
-offset_right = 6370.0
-offset_bottom = 7079.0
+offset_left = 1643.0
+offset_top = 80.00001
+offset_right = 6210.0
+offset_bottom = 7080.0
 rotation = -0.006927715
 scale = Vector2(0.087852575, 0.087852575)
 texture = ExtResource("5_s887n")
@@ -58,10 +68,10 @@ columns = 2
 
 [node name="passive_inventory" type="GridContainer" parent="."]
 layout_mode = 0
-offset_left = 1923.0
-offset_top = 161.00002
-offset_right = 2322.0698
-offset_bottom = 659.3279
+offset_left = 1761.0001
+offset_top = 278.0
+offset_right = 2160.0698
+offset_bottom = 776.3279
 rotation = -0.0030516738
 scale = Vector2(0.5, 0.5)
 theme_override_constants/h_separation = 28
