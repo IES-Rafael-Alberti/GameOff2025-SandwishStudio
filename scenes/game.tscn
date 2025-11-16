@@ -26,7 +26,7 @@ offset_bottom = 394.0
 scale = Vector2(0.8860778, 0.88381195)
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
-position = Vector2(186, 70.99998)
+position = Vector2(187, 70.99997)
 scale = Vector2(0.35700324, 0.2319321)
 
 [node name="Camera2D" type="Camera2D" parent="."]
@@ -34,10 +34,10 @@ position = Vector2(902, 590)
 zoom = Vector2(0.7, 0.7)
 
 [node name="gold_label" type="Label" parent="."]
-offset_left = 141.0
-offset_top = 423.0
-offset_right = 179.0
-offset_bottom = 462.0
+offset_left = 134.0
+offset_top = 323.0
+offset_right = 271.0
+offset_bottom = 362.0
 theme_override_font_sizes/font_size = 28
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
@@ -45,7 +45,7 @@ position = Vector2(284, 365)
 scale = Vector2(0.8845031, 0.8845031)
 
 [node name="ButtonShop" parent="." instance=ExtResource("6_p57ef")]
-offset_left = 1633.0
-offset_top = 784.0
-offset_right = 1733.0
-offset_bottom = 876.0
+offset_left = 1638.0
+offset_top = 793.0
+offset_right = 1738.0
+offset_bottom = 885.0
