@@ -21,6 +21,16 @@ var display_name: String = ""
 @onready var name_label: Label = $NameLabel
 @onready var health_bar: ProgressBar = $healthBar
 
+# --- INICIO DE CÓDIGO NUEVO ---
+# Variables para almacenar las bonificaciones de GlobalStats
+var bonus_health: float = 0.0
+var bonus_damage: float = 0.0
+var bonus_speed: float = 0.0
+var bonus_crit_chance: float = 0.0
+var bonus_crit_damage: float = 0.0
+# --- FIN DE CÓDIGO NUEVO ---
+
+
 func _ready() -> void:
 	# Carge stats form the resource
 	if npc_res:
@@ -72,28 +82,51 @@ func heal(amount: float) -> void:
 	health = min(max_health, health + amount)
 	_update_healthbar()
 
+
+func apply_passive_bonuses(p_health: float, p_damage: float, p_speed: float, p_crit_c: float, p_crit_d: float):
+	bonus_health = p_health
+	bonus_damage = p_damage
+	bonus_speed = p_speed
+	bonus_crit_chance = p_crit_c
+	bonus_crit_damage = p_crit_d
+	
+	max_health += bonus_health
+	health = max_health 
+	
+	_update_healthbar()
+
+
+
 # CONTROLER BATTLE
 func get_damage(target: npc) -> float:
-	var val := npc_res.damage
+
+	var val := npc_res.damage + bonus_damage
+	
 	for ab in abilities:
 		if ab: val = ab.modify_damage(val, self, target)
 	return max(0.0, val)
 
 func get_attack_speed() -> float:
-	var val := npc_res.atack_speed
-	for ab in abilities: 
+
+	var val := npc_res.atack_speed + bonus_speed
+	
+	for ab in abilities:
 		if ab: val = ab.modify_attack_speed(val, self)
 	return max (0.01, val)
 
 func get_crit_chance(target: npc) -> int:
-	var val := npc_res.critical_chance
-	for ab in abilities: 
+
+	var val := npc_res.critical_chance + bonus_crit_chance
+	
+	for ab in abilities:
 		if ab: val = ab.modify_crit_chance(val, self, target)
 	return max (0, val)
 
 func get_crit_mult(target: npc) -> float:
-	var val := npc_res.critical_damage
-	for ab in abilities: 
+
+	var val := npc_res.critical_damage + bonus_crit_damage
+	
+	for ab in abilities:
 		if ab: val = ab.modify_crit_damage(val, self, target)
 	return max (1.0, val)
 
