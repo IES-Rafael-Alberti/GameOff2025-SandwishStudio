@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://hbcgudcjh0wn"]
+[gd_scene load_steps=15 format=3 uid="uid://hbcgudcjh0wn"]
 
 [ext_resource type="Script" uid="uid://cmqqk0nk7sejg" path="res://scripts/inventory.gd" id="1_hj2ta"]
 [ext_resource type="PackedScene" uid="uid://n7qqfs70w4b" path="res://scenes/inventory_slot.tscn" id="2_ty45s"]
@@ -93,10 +93,10 @@ texture = ExtResource("4_53g1v")
 
 [node name="TextureRect3" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 1486.0
-offset_top = 770.0
-offset_right = 2395.0
-offset_bottom = 948.0
+offset_left = 1249.0
+offset_top = 819.0
+offset_right = 2158.0
+offset_bottom = 997.0
 texture = ExtResource("8_g71ie")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="TextureRect3"]
