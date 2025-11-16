@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://bwh1obe7043i"]
+[gd_scene load_steps=30 format=3 uid="uid://bwh1obe7043i"]
 
 [ext_resource type="Script" uid="uid://boom6onvffdah" path="res://scripts/store.gd" id="1_atuvt"]
 [ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="2_n3io3"]
@@ -17,7 +17,6 @@
 [ext_resource type="Resource" uid="uid://bbdpgtkgsv6an" path="res://resources/pieces/hitotsume.tres" id="12_816qq"]
 [ext_resource type="Resource" uid="uid://dfo807y07xegd" path="res://resources/passives/passive_3.tres" id="12_klwl8"]
 [ext_resource type="Resource" uid="uid://cxbloivuqkrwe" path="res://resources/pieces/valkirias.tres" id="13_7pi7j"]
-[ext_resource type="Resource" uid="uid://cjfr4hn8wgopn" path="res://resources/passives/passive_4.tres" id="13_h7duq"]
 [ext_resource type="Resource" uid="uid://dyqha0iqhcdfr" path="res://resources/passives/passive_5.tres" id="14_burfl"]
 [ext_resource type="Resource" uid="uid://57d6mtngeb8t" path="res://resources/pieces/draugr.tres" id="14_ttn3v"]
 [ext_resource type="Resource" uid="uid://nytgdhu2kh46" path="res://resources/passives/passive_6.tres" id="15_5xsmt"]
@@ -30,6 +29,7 @@
 shader = ExtResource("16_3ro5p")
 shader_parameter/roll_amount = 0.0
 shader_parameter/radius = 50.0
+shader_parameter/max_lift = 0.12
 
 [sub_resource type="Animation" id="Animation_klwl8"]
 length = 0.001
@@ -90,7 +90,7 @@ scale = Vector2(1.0102348, 1.0076514)
 mouse_filter = 2
 script = ExtResource("1_atuvt")
 piece_origins = Array[ExtResource("2_n3io3")]([ExtResource("3_abbvk"), ExtResource("4_3ro5p"), ExtResource("8_5xsmt"), ExtResource("6_5xsmt"), ExtResource("7_burfl"), ExtResource("5_klwl8"), ExtResource("9_wk1we"), ExtResource("6_h7duq"), ExtResource("11_ht5i3"), ExtResource("12_816qq"), ExtResource("13_7pi7j"), ExtResource("14_ttn3v")])
-passive_origins = Array[ExtResource("9_n3io3")]([ExtResource("10_abbvk"), ExtResource("11_3ro5p"), ExtResource("12_klwl8"), ExtResource("13_h7duq"), ExtResource("14_burfl"), ExtResource("15_5xsmt")])
+passive_origins = Array[ExtResource("9_n3io3")]([ExtResource("10_abbvk"), ExtResource("11_3ro5p"), ExtResource("12_klwl8"), ExtResource("14_burfl"), ExtResource("15_5xsmt")])
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 material = SubResource("ShaderMaterial_3ro5p")

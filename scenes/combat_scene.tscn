@@ -9,6 +9,7 @@ region = Rect2(1398.4012, 0, 5124.82, 1521.2389)
 
 [node name="combat_scene" type="Node2D"]
 position = Vector2(0, 4)
+scale = Vector2(1.0102993, 1.021862)
 script = ExtResource("1_ivkwx")
 
 [node name="TextureRect" type="TextureRect" parent="."]
