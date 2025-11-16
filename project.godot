@@ -19,11 +19,12 @@ config/features=PackedStringArray("4.5", "GL Compatibility")
 PlayerData="*res://scripts/PlayerData.gd"
 GlobalSignals="*res://scripts/GlobalSignals.gd"
 Piece_Registry="*res://scripts/piece_Registry.gd"
+GlobalStats="*res://scripts/GlobalStats.gd"
 
 [display]
 
-window/size/viewport_width=1800
-window/size/viewport_height=1000
+window/size/viewport_width=1162
+window/size/viewport_height=760
 window/stretch/mode="canvas_items"
 
 [input]
