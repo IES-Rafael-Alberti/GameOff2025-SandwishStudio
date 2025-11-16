@@ -23,11 +23,11 @@ var is_tended = true
 var anim_playing = false
 var original_positions = {}
 var blink_tween: Tween = null
-var max_distance: float = 5.0
+var max_distance: float = 100
 
 func _ready():
 	pupil_offset = pupil.position
-	eye_closed_texture = preload("res://assets/Mostrada.png")
+	eye_closed_texture = preload("res://assets/Oculta.png")
 	original_eye_texture = sprite_show.texture
 
 	# Guardar posiciones originales
@@ -47,6 +47,9 @@ func _ready():
 	else:
 		push_warning("game.gd: El nodo de inventario no tiene la señal 'item_sold'.")
 
+	# Inicializar blink timer aleatoriamente
+	blink_timer = randf_range(blink_interval_min, blink_interval_max)
+
 	# Sincronizar estado inicial
 	_update_eye_state()
 	roulette.visible = is_tended
@@ -55,13 +58,19 @@ func _ready():
 
 func _process(delta: float) -> void:
 	if not is_tended:
+		pupil.visible = false
+		
+	else:
+		# Tienda cerrada → parpadeo
+		pupil.visible = true
 		blink_timer -= delta
+		_update_pupil_position()
 		if blink_timer <= 0.0 and sprite_show.visible:
 			await _toggle_eye_parpadeo()
 			blink_timer = randf_range(blink_interval_min, blink_interval_max)
+
 	if Input.is_action_just_pressed("pause"):
 		pausar()
-	_update_pupil_position()
 
 # --- Señales ---
 func _on_PlayerData_currency_changed(new_amount: int) -> void:
@@ -70,9 +79,8 @@ func _on_PlayerData_currency_changed(new_amount: int) -> void:
 
 # --- Parpadeo ---
 func _toggle_eye_parpadeo() -> void:
-	if is_tended:
+	if not is_tended:
 		return
-
 	sprite_show.texture = eye_closed_texture
 	await get_tree().create_timer(0.07).timeout
 	sprite_show.texture = original_eye_texture
@@ -82,12 +90,23 @@ func _update_pupil_position():
 	if not pupil.visible or not sprite_show.visible:
 		return
 
-	var mouse_global = get_viewport().get_mouse_position()
-	var mouse_local = sprite_show.to_local(mouse_global)
-	var dir = pupil_offset - mouse_local 
+	# Obtener posición global del ratón
+	var mouse_global = get_global_mouse_position()
+
+	# Obtener posición global del centro del ojo (sprite_show)
+	var eye_global_pos = sprite_show.global_position
+
+	# Vector desde el ojo al ratón
+	var dir = mouse_global - eye_global_pos
+
+	# Limitar distancia
 	if dir.length() > max_distance:
 		dir = dir.normalized() * max_distance
+
+	# Actualizar posición de la pupila local respecto a EyeSprite
 	pupil.position = pupil_offset + dir
+
+
 
 # --- Hover del botón de tienda ---
 func _on_shop_hover():
@@ -146,10 +165,10 @@ func _on_animation_finished(anim_name: String):
 # --- Ojo según estado ---
 func _update_eye_state():
 	if is_tended:
-		sprite_show.texture = eye_closed_texture
+		sprite_show.texture = original_eye_texture
 		pupil.visible = true
 	else:
-		sprite_show.texture = original_eye_texture
+		sprite_show.texture = eye_closed_texture
 		pupil.visible = false
 
 # --- Animaciones ---
