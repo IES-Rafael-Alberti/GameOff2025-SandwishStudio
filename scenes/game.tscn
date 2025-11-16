@@ -16,7 +16,6 @@ offset_top = 369.0
 offset_right = 83.0
 offset_bottom = 769.0
 scale = Vector2(0.77105117, 0.77105117)
-max_pieces = -759
 
 [node name="Store" parent="." instance=ExtResource("3_iywne")]
 visible = false

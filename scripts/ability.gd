@@ -8,7 +8,7 @@ func modify_damage(base: float, user: Node, target: Node) -> float:
 func modify_attack_speed(base_aps: float, user: Node) -> float:
 	return base_aps
 
-func modify_crit_chance(base_cc: int, user: Node, target: Node) -> int:
+func modify_crit_chance(base_cc: float, user: Node, target: Node) -> float:
 	return base_cc
 
 func modify_crit_mult(base_cm: float, user: Node, target: Node) -> float:
