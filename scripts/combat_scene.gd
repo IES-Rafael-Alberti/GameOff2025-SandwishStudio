@@ -2,13 +2,6 @@ extends Node2D
 
 const NPC_SCENE := preload("res://scenes/npc.tscn")
 const PieceAdapter := preload("res://scripts/piece_adapter.gd")
-# Allies pool: only goblings
-const RES_LIST := [
-	preload("res://resources/gobling/blue_gobling.tres"),
-	preload("res://resources/gobling/red_gobling.tres"),
-	preload("res://resources/gobling/yellow_gobling.tres"),
-	preload("res://resources/gobling/purple_gobling.tres")
-]
 
 # Enemy pool: only warriors
 const ENEMY_RES := [
@@ -17,21 +10,38 @@ const ENEMY_RES := [
 	preload("res://resources/warrior/red_warrior.tres"),
 	preload("res://resources/warrior/yellow_warrior.tres")
 ]
+const ALLY_LIMIT := 14  # max allys on field (14)
 
 const ENEMY_LIMIT := 1  # max enemies on field (1 warrior)
-# Ally limit is implicitly the number of AllySpawn markers (6)
 
-@onready var enemy_spawn: Marker2D = $BeastSpawn
+@onready var enemy_spawn: Marker2D = $GladiatorSpawn
 @onready var round_message: Label = $RoundMessage
 @onready var round_counter: Label = $RoundCounter
+@onready var ally_entry_spawn: Marker2D = $AlliesSpawn
+@onready var enemy_wait_slot: Marker2D = $EnemySlots/EnemyWaitSlot
+@onready var enemy_battle_slot: Marker2D = $EnemySlots/EnemyBattleSlot
+
+const ALLY_BATTLE_OFSET := Vector2(-880, 0)
 
 # Ally spawn points (6)
-@onready var ally_spawns: Array[Marker2D] = [
-	$WarriorSpawn1, $WarriorSpawn2, $WarriorSpawn3,
-	$WarriorSpawn4, $WarriorSpawn5, $WarriorSpawn6
+@onready var ally_final_slots: Array[Marker2D] = [
+	$AllyFinalSlots/AllyFinalSlot1, 
+	$AllyFinalSlots/AllyFinalSlot2,
+	 $AllyFinalSlots/AllyFinalSlot3,
+	$AllyFinalSlots/AllyFinalSlot4, 
+	$AllyFinalSlots/AllyFinalSlot5, 
+	$AllyFinalSlots/AllyFinalSlot6, 
+	$AllyFinalSlots/AllyFinalSlot7, 
+	$AllyFinalSlots/AllyFinalSlot8,
+	$AllyFinalSlots/AllyFinalSlot9, 
+	$AllyFinalSlots/AllyFinalSlot10, 
+	$AllyFinalSlots/AllyFinalSlot11, 
+	$AllyFinalSlots/AllyFinalSlot12, 
+	$AllyFinalSlots/AllyFinalSlot13, 
+	$AllyFinalSlots/AllyFinalSlot14
 ]
 
-var ally_npcs: Array[npc] = []    # active allies (goblins)
+var ally_npcs: Array[npc] = []    # active allies
 var enemy_npcs: Array[npc] = []   # active enemies (1 warrior)
 
 var combat_running := false
@@ -55,7 +65,7 @@ func _ready() -> void:
 
 func _update_round_counter() -> void:
 	if is_instance_valid(round_counter):
-		round_counter.text = "Ronda: %d" % round_number
+		round_counter.text = "Wave: %d" % round_number
 
 func _advance_round() -> void:
 	print("next round")
@@ -68,24 +78,21 @@ func spawn_enemy_one() -> void:
 		print("Enemy limit reached (%d)." % ENEMY_LIMIT)
 		return
 
-	# single warrior at BeastSpawn
+	# single warrior at GladiatorSpawn
 	var pos := enemy_spawn.position
 	var war_res: npcRes = ENEMY_RES[randi() % ENEMY_RES.size()]
 	var e := _spawn_npc(npc.Team.ENEMY, pos, war_res)
 	if e:
 		enemy_npcs.append(e)
-		print("Enemy spawned at BeastSpawn -> %s" % war_res.resource_path.get_file().get_basename())
+		print("Enemy spawned at GladiatorSpawn -> %s" % war_res.resource_path.get_file().get_basename())
+		_move_with_tween(e, enemy_wait_slot.position, 0.8)
 
 # Optional resource override lets us force a specific npcRes (used here for both sides)
 func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 	var n: npc = NPC_SCENE.instantiate()
 	n.team = team
 	n.position = pos
-	if res_override != null:
-		n.npc_res = res_override
-	else:
-		# fallback: allies use goblin pool by default
-		n.npc_res = RES_LIST[randi() % RES_LIST.size()]
+	n.npc_res = res_override
 	add_child(n)
 	
 	# --- INICIO DE CÓDIGO NUEVO ---
@@ -116,11 +123,37 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 	# if is ENEMY (warrior), the gold pool is = to resource
 	if team == npc.Team.ENEMY:
 		n.gold_pool = int(n.npc_res.gold)
-
+	
 	# connect gold handling on death and slot freeing on exit
 	n.died.connect(_on_npc_died)
 	n.tree_exited.connect(_on_npc_exited.bind(n))
 	return n
+
+func _move_with_tween(n: npc, target_pos: Vector2, duration: float = 1.8) -> void:
+	if not is_instance_valid(n):
+		return
+	var tween := create_tween()
+	tween.tween_property(n, "position", target_pos, duration) \
+		.set_trans(Tween.TRANS_SINE) \
+		.set_ease(Tween.EASE_OUT)
+
+func _get_free_ally_slots() -> Array[Marker2D]:
+	var free: Array[Marker2D] = []
+
+	for slot in ally_final_slots:
+		if slot == null:
+			continue
+
+		var occupied := false
+		for a in ally_npcs:
+			if is_instance_valid(a) and a.position == slot.position:
+				occupied = true
+				break
+
+		if not occupied:
+			free.append(slot)
+
+	return free
 
 func spawn_piece(team: int, piece: PieceRes) -> void:
 	if piece == null:
@@ -130,35 +163,36 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 	var npc_template: npcRes = pack["res"]
 	var members: int = int(pack["members"])
 
-	var spawn_points: Array[Marker2D]
 	if team == npc.Team.ALLY:
-		# Construimos una lista de markers libres (no ocupados por aliados)
-		spawn_points = []
-		for m in ally_spawns:
-			var occupied := false
-			for a in ally_npcs:
-				if is_instance_valid(a) and a.position == m.position:
-					occupied = true
-					break
-			if not occupied:
-				spawn_points.append(m)
-	else:
-		# Enemigos: todos al BeastSpawn
-		spawn_points = [enemy_spawn]
+		# Respeta el límite total de aliados
+		var free_slots_limit := ALLY_LIMIT - ally_npcs.size()
+		if free_slots_limit <= 0:
+			print("ALLY_LIMIT alcanzado, no se spawnea nada.")
+			return
 
-	# No más unidades que puntos de spawn disponibles
-	var room: int = min(members, spawn_points.size())
+		# Array de puntos libres
+		var free_markers: Array[Marker2D] = _get_free_ally_slots()
+		if free_markers.is_empty():
+			print("No hay slots libres en los aliados")
+			return
 
-	for i in range(room):
-		var pos: Vector2 = spawn_points[i].position
-		var n: npc = _spawn_npc(team, pos, npc_template)
-		if n:
-			if piece.display_name != "":
-				n.set_display_name(piece.display_name)
-			if team == npc.Team.ALLY:
+		var to_spawn: int = min(members, free_slots_limit, free_markers.size())
+
+		for i in range(to_spawn):
+			var idx: int = randi() % free_markers.size()
+			var slot: Marker2D = free_markers[idx]
+			free_markers.remove_at(idx)
+			
+			var n: npc = _spawn_npc(team, ally_entry_spawn.position, npc_template)
+			if n:
+				if piece.display_name != "":
+					n.set_display_name(piece.display_name)
 				ally_npcs.append(n)
-			else:
-				enemy_npcs.append(n)
+				_place_ally_in_slot_with_tween(n, slot.position)
+
+func _place_ally_in_slot_with_tween(n: npc, target_pos: Vector2) -> void:
+	n.position = ally_entry_spawn.position
+	_move_with_tween(n, target_pos, 0.8)
 
 # Pay full remaining gold if the enemy (warrior) dies
 func _on_npc_died(n: npc) -> void:
@@ -433,14 +467,35 @@ func on_roulette_combat_requested(piece_resource: Resource) -> void:
 		
 	print("Señal de combate global recibida. Aliado: ", piece_resource.display_name)
 	
-	# 1. Limpia cualquier aliado anterior (Opcional, si quieres 1v1)
 	_cleanup_allies_and_reset()
-	
-	# 2. Spawnea el aliado
 	spawn_piece(npc.Team.ALLY, piece_resource)
-	
-	# 3. Spawnea un enemigo aleatorio
 	spawn_enemy_one()
+	_start_pre_battle_sequence()
+
+func _start_pre_battle_sequence() -> void:
+	if ally_npcs.is_empty() or enemy_npcs.is_empty():
+		return
+		
+	var t:= Timer.new()
+	t.one_shot = true
+	t.wait_time = 1.0
+	add_child(t)
+	t.timeout.connect(_advance_to_battle_and_start)
+	t.start()
 	
-	# 4. Inicia el combate
-	_on_start_pressed()
+func _advance_to_battle_and_start() -> void:
+	# Move gladiator
+	if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
+		var g := enemy_npcs[0]
+		_move_with_tween(g, enemy_battle_slot.position, 0.8)
+	
+	# Move allies 
+	for a in ally_npcs:
+		if is_instance_valid(a):
+			var target := a.position +ALLY_BATTLE_OFSET
+			_move_with_tween(a, target, 0.8)
+	
+	# When they finish they movement, battle starts
+	if not combat_running:
+		combat_running = true
+		start_timer.start(0.8)
