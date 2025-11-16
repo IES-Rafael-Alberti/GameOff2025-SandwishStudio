@@ -17,7 +17,11 @@ signal item_sold(refund_amount: int)
 @export var max_pieces: int = 6
 @export var max_passives: int = 30
 @export var inventory_slot_scene: PackedScene 
-@export var piece_scene: PackedScene # Arrastra tu escena piece.tscn aquí
+@export var piece_scene: PackedScene
+
+# --- ¡CORREGIDO! ---
+# Vuelve a ser un Array[PieceData]
+@export var initial_pieces: Array[PieceData] 
 
 ## ------------------------------------------------------------------
 ## Datos del Inventario
@@ -41,18 +45,29 @@ func _ready() -> void:
 		push_error("¡La variable 'Inventory Slot Scene' no está asignada en el script Inventory.gd!")
 		return
 
-	# 1. Generar los slots de piezas
 	_initialize_slots(piece_inventory, piece_slots, max_pieces, refund_percent)
+	_initialize_slots(passive_inventory, passive_slots, max_passives, 0)
 
-	# 2. Generar los slots de pasivos
-	_initialize_slots(passive_inventory, passive_slots, max_passives, 0) # Pasivos no se venden desde aquí
-
-	# 3. Imprimir la confirmación
 	print("Inventory _ready: Generados %d slots de piezas y %d slots de pasivos." % [piece_slots.size(), passive_slots.size()])
 
 ## ------------------------------------------------------------------
 ## Funciones Públicas 
 ## ------------------------------------------------------------------
+
+# --- ¡CORREGIDO! ---
+# Devuelve PieceData
+func get_random_initial_piece() -> PieceData:
+	if initial_pieces.is_empty():
+		return null
+	
+	var shuffled = initial_pieces.duplicate()
+	shuffled.shuffle()
+	return shuffled[0]
+
+func set_interactive(is_interactive: bool):
+	for slot in piece_slots:
+		if slot.has_node("TextureButton"):
+			slot.get_node("TextureButton").disabled = not is_interactive
 
 func can_add_item(data: Resource) -> bool:
 	var context = _get_inventory_context(data)
@@ -71,23 +86,21 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 		push_error("add_item: Se intentó añadir un item NULO.")
 		return false
 		
-	# ¡CAMBIO! Actualizamos el print
 	print("--- add_item() llamado con: %s (Cantidad: %d) ---" % [data.resource_name, amount])
 
 	var context = _get_inventory_context(data)
 
-	if not can_add_item(data): # can_add_item no necesita cambiar
+	if not can_add_item(data):
 		print("... FALLO: can_add_item devolvió false. Inventario probablemente lleno.")
 		return false
 
 	var id: String = _get_item_id(data)
 	var inventory_map = context.map
 
-	# Lógica de Apilamiento (Stacking)
 	if inventory_map.has(id):
 		print("... Item ya existe. Apilando.")
 		var entry = inventory_map[id]
-		entry["count"] += amount # <-- ¡CAMBIO! Sumamos la cantidad recibida
+		entry["count"] += amount
 		var slot_node: Node = entry["slot_node"]
 		if slot_node and slot_node.has_method("update_count"):
 			slot_node.update_count(entry["count"])
@@ -95,20 +108,18 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 			_update_passive_stats_display()
 		return true
 
-	# Lógica de Nuevo Item (en un slot vacío)
 	var empty_slot: Node = _find_empty_slot(context.slots)
 	
 	if empty_slot:
 		print("... Item nuevo. Slot vacío encontrado. Asignando item.")
 		if empty_slot.has_method("set_item"):
-			empty_slot.set_item(data) # set_item lo pone a 1
+			empty_slot.set_item(data)
 
-		# ¡CAMBIO! Pero lo actualizamos a la cantidad correcta
 		if empty_slot.has_method("update_count"):
 			empty_slot.update_count(amount)
 
 		var new_entry = {
-			"count": amount, # <-- ¡CAMBIO! Usamos la cantidad recibida
+			"count": amount,
 			"data": data,
 			"slot_node": empty_slot 
 		}
@@ -124,7 +135,6 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 ## Funciones de Eliminación de Items
 ## ------------------------------------------------------------------
 
-# Esta función elimina UNA unidad del stack
 func decrement_item(data: Resource):
 	var context = _get_inventory_context(data)
 	if not context:
@@ -165,11 +175,9 @@ func decrement_item(data: Resource):
 
 	return true
 
-# Esta función elimina el STACK COMPLETO (para vender)
 func remove_item(item_data: Resource):
 	return _remove_item_stack(item_data, true)
 
-# Esta función elimina el STACK COMPLETO (sin reembolso)
 func remove_item_no_money(item_data: Resource):
 	return _remove_item_stack(item_data, false)
 
@@ -178,8 +186,6 @@ func remove_item_no_money(item_data: Resource):
 ## Funciones Privadas / Auxiliares
 ## ------------------------------------------------------------------
 
-# FUNCIÓN AUXILIAR (NUEVA)
-# Consolida la lógica de eliminación de stacks completos
 func _remove_item_stack(item_data: Resource, with_refund: bool) -> bool:
 	var context = _get_inventory_context(item_data)
 	if not context:
@@ -198,7 +204,6 @@ func _remove_item_stack(item_data: Resource, with_refund: bool) -> bool:
 	
 	print("... Item encontrado. Eliminando %d copias." % total_count)
 
-	# --- 💰 LÓGICA DE REEMBOLSO ---
 	if with_refund and "price" in item_data and item_data.price > 0:
 		var refund_amount = (int(item_data.price * (refund_percent / 100.0)) * total_count)
 		item_sold.emit(refund_amount)
@@ -206,7 +211,6 @@ func _remove_item_stack(item_data: Resource, with_refund: bool) -> bool:
 	else:
 		print("... Eliminando sin reembolso.")
 
-	# --- LÓGICA DE ELIMINACIÓN ---
 	var slot_node: Node = entry["slot_node"]
 
 	if slot_node and slot_node.has_method("clear_slot"):
@@ -222,20 +226,17 @@ func _remove_item_stack(item_data: Resource, with_refund: bool) -> bool:
 		_update_passive_stats_display()
 	return true
 
-# FUNCIÓN AUXILIAR (NUEVA)
-# Devuelve el mapa de inventario y el array de slots correctos para un item
+# --- ¡CORREGIDO! ---
+# Vuelve a comprobar 'PieceData'
 func _get_inventory_context(data: Resource) -> Dictionary:
-	if data is PieceData:
+	if data is PieceData: # <-- CAMBIADO
 		return { "map": piece_counts, "slots": piece_slots, "is_passive": false }
 	elif data is PassiveData:
 		return { "map": passive_counts, "slots": passive_slots, "is_passive": true }
 	
-	# Tipo de dato no reconocido
-	return {} # Devuelve un diccionario vacío (que fallará como 'null' en las comprobaciones)
+	return {}
 
 
-# FUNCIÓN AUXILIAR (NUEVA)
-# Genera los slots de inventario en el _ready
 func _initialize_slots(container: GridContainer, slot_array: Array, count: int, sell_perc: int) -> void:
 	for i in range(count):
 		var new_slot = inventory_slot_scene.instantiate()
@@ -360,15 +361,12 @@ func _update_passive_stats_display() -> void:
 			PassiveData.PassiveType.CRITICAL_DAMAGE_INCREASE:
 				total_crit_damage += (data.value * count)
 			
-	# 3. Actualizar el texto de las etiquetas
 	health_label.text = "+%s" % str(total_health)
 	damage_label.text = "+%s" % str(total_damage)
 	speed_label.text = "+%s" % str(total_speed) 
 	crit_chance_label.text = "+%s" % str(total_crit_chance)
 	crit_damage_label.text = "+%s" % str(total_crit_damage)
 	
-	# --- INICIO DE CÓDIGO NUEVO ---
-	# Compilamos un diccionario con los totales
 	var stats_payload := {
 		"health": total_health,
 		"damage": total_damage,
@@ -377,8 +375,5 @@ func _update_passive_stats_display() -> void:
 		"crit_damage": total_crit_damage
 	}
 	
-	# Enviamos los datos al singleton GlobalStats
-	# Comprobamos que exista por si acaso
 	if has_node("/root/GlobalStats"):
 		GlobalStats.update_stats(stats_payload)
-	# --- FIN DE CÓDIGO NUEVO ---

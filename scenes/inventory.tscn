@@ -1,13 +1,17 @@
-[gd_scene load_steps=15 format=3 uid="uid://hbcgudcjh0wn"]
+[gd_scene load_steps=19 format=3 uid="uid://hbcgudcjh0wn"]
 
 [ext_resource type="Script" uid="uid://cmqqk0nk7sejg" path="res://scripts/inventory.gd" id="1_hj2ta"]
 [ext_resource type="PackedScene" uid="uid://n7qqfs70w4b" path="res://scenes/inventory_slot.tscn" id="2_ty45s"]
 [ext_resource type="PackedScene" uid="uid://7erbtxd030w2" path="res://scenes/piece.tscn" id="3_uae8j"]
+[ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="4_40feg"]
 [ext_resource type="Texture2D" uid="uid://boul6livclehs" path="res://assets/unnamed (1).jpg" id="4_53g1v"]
 [ext_resource type="Texture2D" uid="uid://dvhj1vcqtnvgl" path="res://assets/Tex_Marble_White_02-512x512.png" id="4_g71ie"]
 [ext_resource type="Texture2D" uid="uid://b4bl7jr41p7bk" path="res://assets/Inventario.png" id="4_uae8j"]
 [ext_resource type="Script" uid="uid://cm67y0q4u1ot5" path="res://scripts/DeleteArea.gd" id="4_yyk2a"]
 [ext_resource type="Texture2D" uid="uid://b3gvhhihiil78" path="res://assets/Bandeja.png" id="5_s887n"]
+[ext_resource type="Resource" uid="uid://57d6mtngeb8t" path="res://resources/pieces/draugr.tres" id="5_tla8l"]
+[ext_resource type="Resource" uid="uid://b065ie430glv1" path="res://resources/pieces/banshie.tres" id="6_w24ly"]
+[ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/jotun.tres" id="7_ohgsq"]
 [ext_resource type="Texture2D" uid="uid://dycbttp2vpnv1" path="res://assets/Tiny Swords (Free Pack)/Terrain/Water Background color.png" id="8_g71ie"]
 [ext_resource type="Texture2D" uid="uid://d32k775bkfw00" path="res://assets/VIDA.png" id="9_ylenm"]
 [ext_resource type="Texture2D" uid="uid://xr5sxokqvql1" path="res://assets/ADMG.png" id="10_0df5h"]
@@ -27,6 +31,7 @@ grow_vertical = 2
 script = ExtResource("1_hj2ta")
 inventory_slot_scene = ExtResource("2_ty45s")
 piece_scene = ExtResource("3_uae8j")
+initial_pieces = Array[ExtResource("4_40feg")]([ExtResource("5_tla8l"), ExtResource("6_w24ly"), ExtResource("7_ohgsq")])
 
 [node name="MarmolMesa" type="TextureRect" parent="."]
 layout_mode = 0
