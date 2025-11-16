@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bq5j0k20aml4l"
-path="res://.godot/imported/Mostrada.png-ee4bcf03740b45c6a4bc24143dc8a020.ctex"
+uid="uid://c2fa30p75xeed"
+path="res://.godot/imported/Pupil.png-dd7a3155e958a0359546bfc00b2449bf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Mostrada.png"
-dest_files=["res://.godot/imported/Mostrada.png-ee4bcf03740b45c6a4bc24143dc8a020.ctex"]
+source_file="res://assets/Pupil.png"
+dest_files=["res://.godot/imported/Pupil.png-dd7a3155e958a0359546bfc00b2449bf.ctex"]
 
 [params]
 

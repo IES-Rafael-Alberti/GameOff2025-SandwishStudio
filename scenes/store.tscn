@@ -29,6 +29,7 @@
 shader = ExtResource("16_3ro5p")
 shader_parameter/roll_amount = 0.0
 shader_parameter/radius = 50.0
+shader_parameter/max_lift = 0.12
 
 [sub_resource type="Animation" id="Animation_klwl8"]
 length = 0.001
