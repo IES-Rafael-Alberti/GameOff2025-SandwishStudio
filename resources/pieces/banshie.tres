@@ -9,4 +9,5 @@ script = ExtResource("3_366k6")
 piece_name = "Banshie"
 piece_origin = ExtResource("2_6vs4s")
 icon = ExtResource("1_ot8qb")
+uses = 3
 price = 322

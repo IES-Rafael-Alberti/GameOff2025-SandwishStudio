@@ -67,7 +67,13 @@ func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 		return false
 		
 	if data is Dictionary and "data" in data and "count" in data:
-		return data.data is PieceData
+		# --- ¡LÓGICA DE USOS AÑADIDA! ---
+		# Comprobamos que es una pieza Y que le quedan usos.
+		if data.data is PieceData:
+			return data.data.uses > 0
+		
+		# Si es otro tipo de item (ej: pasivo), lo rechazamos
+		return false
 
 	return false
 
@@ -75,7 +81,7 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 	
 	occupied = true
 	current_piece_data = data.data
-	current_piece_count = data.count
+	current_piece_count = 1 # Solo se coloca 1, aunque la pila tenga más
 	
 	if current_piece_data and "icon" in current_piece_data:
 		
@@ -88,7 +94,11 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 	else:
 		push_warning("RouletteSlot: El Resource soltado no tiene la propiedad 'icon'. No se puede mostrar la imagen.")
 
-	GlobalSignals.item_attached.emit(data.data)
+	# --- ¡LÓGICA MODIFICADA! ---
+	# Ya NO emitimos 'item_attached' (que borraba la pila).
+	# En su lugar, emitimos la nueva señal para que 'inventory.gd' reste 1 uso.
+	GlobalSignals.piece_placed_on_roulette.emit(current_piece_data)
+
 
 func clear_slot():
 	occupied = false
@@ -98,6 +108,8 @@ func clear_slot():
 		piece_texture_rect.visible = false
 
 # --- ¡FUNCIÓN MODIFICADA! ---
+# Ahora, hacer clic en la pieza la "devuelve", sumando 1 uso
+# al inventario y limpiando este slot.
 func _on_gui_input(event: InputEvent) -> void:
 	if not (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed):
 		return
@@ -113,18 +125,21 @@ func _on_gui_input(event: InputEvent) -> void:
 			print("No se puede devolver la pieza: ¡La ruleta está girando o el juego está en combate!")
 			return
 
-	var callback = Callable(self, "_on_return_attempt_finished")
+	# --- ¡LÓGICA MODIFICADA! ---
+	# Ya no pedimos devolver el item al inventario (lo que duplicaría).
+	# Ahora emitimos una señal para "devolver" 1 uso al contador
+	# de la pieza que está en el inventario.
+	GlobalSignals.piece_returned_from_roulette.emit(current_piece_data)
 	
-	var return_data_packet = {
-		"data": current_piece_data,
-		"count": current_piece_count
-	}
-	
-	GlobalSignals.item_return_to_inventory_requested.emit(return_data_packet, callback)
+	# Y simplemente limpiamos este slot.
+	clear_slot()
 
 
+# Esta función ya no es necesaria con la nueva lógica,
+# pero la dejamos por si se usa en otro sitio.
 func _on_return_attempt_finished(success: bool):
 	if success:
+		# Esta línea ya no se ejecutará si _on_gui_input no la llama.
 		clear_slot()
 	else:
 		print("No se puede devolver la pieza: ¡El inventario está lleno!")

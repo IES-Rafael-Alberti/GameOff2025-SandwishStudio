@@ -12,7 +12,8 @@ signal roulette_spin_started
 @export var min_impulse_random_range := Vector2(1.5, 4)
 @onready var SlotsContainer: Node2D = $SpriteRuleta/SlotsContainer
 
-# --- ¡CAMBIO 1! Se elimina el estado 'SNAP' ---
+# --- ¡CAMBIO 1!
+# Se elimina el estado 'SNAP' ---
 enum State { IDLE, DRAGGING, SPINNING }
 var state := State.IDLE
 var last_mouse_angle := 0.0
@@ -21,6 +22,13 @@ var _selected_area: Area2D = null
 var bouncing := false
 
 var is_interactive := true
+
+# --- ¡NUEVA FUNCIÓN! ---
+# Se llama cuando el script _ready() esté disponible
+func _ready():
+	# Conectamos la señal de borrado de inventario
+	GlobalSignals.piece_type_deleted.connect(_on_piece_type_deleted)
+
 
 func is_moving(): 
 	return state != State.IDLE
@@ -40,7 +48,8 @@ func _process(delta: float) -> void:
 			_drag()
 		State.SPINNING:
 			_spin(delta)
-		# --- ¡CAMBIO 2! Se elimina el 'case State.SNAP:' ---
+		# --- ¡CAMBIO 2!
+# Se elimina el 'case State.SNAP:' ---
 		
 
 func _input(event):
@@ -81,7 +90,8 @@ func _spin(delta: float):
 	$SpriteRuleta.rotation_degrees += inertia
 	inertia *= friction
 
-	# --- ¡CAMBIO 3! La ruleta se detiene por fricción ---
+	# --- ¡CAMBIO 3!
+# La ruleta se detiene por fricción ---
 	# Ya no cambia a 'State.SNAP'
 	if abs(inertia) < 0.05:
 		# Si la inercia es casi cero, paramos, damos recompensa y reseteamos estado.
@@ -175,7 +185,8 @@ func _reset():
 	inertia = 0.0
 	bouncing = false
 	state = State.IDLE
-	# ¡Importante! No reseteamos la rotación aquí.
+	# ¡Importante!
+# No reseteamos la rotación aquí.
 	
 # --- ¡CAMBIO 5! Nueva función pública ---
 # Esta función será llamada por gameManager para reiniciar la
@@ -184,3 +195,32 @@ func reset_rotation_to_zero():
 	# Solo reseteamos si la ruleta está en reposo (IDLE)
 	if state == State.IDLE:
 		$SpriteRuleta.rotation_degrees = 0.0
+
+
+# --- ¡NUEVA FUNCIÓN DE SEÑAL! ---
+# Se llama cuando GlobalSignals.piece_type_deleted se emite desde inventory.gd
+func _on_piece_type_deleted(piece_data: PieceData):
+	if not piece_data:
+		return
+		
+	print("... Ruleta ha recibido orden de borrado para: %s" % piece_data.resource_name)
+	
+	# Recorremos todos los slots de la ruleta
+	for slot_root in SlotsContainer.get_children():
+		if not slot_root.has_node("slot"):
+			continue
+			
+		var slot = slot_root.get_node("slot")
+		
+		# Usamos la variable 'current_piece_data' de tu script slot.gd
+		if slot and "current_piece_data" in slot:
+			
+			# Si la pieza en este slot es la que se borró
+			if slot.current_piece_data == piece_data:
+				
+				# Usamos el método 'clear_slot()' de tu script slot.gd
+				if slot.has_method("clear_slot"):
+					print("... ... Limpiando slot %s" % slot.name)
+					slot.clear_slot()
+				else:
+					push_warning("Ruleta: El slot %s no tiene método clear_slot()" % slot.name)

@@ -52,7 +52,8 @@ func update_count(count: int) -> void:
 	else:
 		count_label.hide()
 		
-	# ¡NUEVA LÍNEA! Actualizamos el botón para el drag-and-drop
+	# ¡NUEVA LÍNEA!
+# Actualizamos el botón para el drag-and-drop
 	button.item_count = current_count
 
 ## Limpia el slot para que parezca vacío
@@ -69,16 +70,34 @@ func clear_slot() -> void:
 	count_label.hide()
 	uses_label.hide()
 	tooltip.hide_tooltip()
+	
+	# --- ¡NUEVA LÍNEA! ---
+	# Reseteamos el color por si estaba gris
+	button.modulate = Color.WHITE
 
 func is_empty() -> bool:
 	return item_data == null
 
+# --- ¡FUNCIÓN MODIFICADA! ---
 func _update_uses(data: Resource) -> void:
 	if data is PieceData:
 		uses_label.text = "%d" % data.uses
 		uses_label.show()
+		
+		# --- ¡LÓGICA DE AGOTADO! ---
+		# Si los usos llegan a 0, lo ponemos gris.
+		# Si tiene > 0 usos, nos aseguramos de que sea blanco.
+		if data.uses <= 0:
+			button.modulate = Color(0.5, 0.5, 0.5) # Gris
+		else:
+			button.modulate = Color.WHITE # Blanco normal
+			
 	else:
 		uses_label.hide()
+		# --- ¡NUEVA LÍNEA! ---
+		# Nos aseguramos de que otros items no PieceData no se queden grises
+		button.modulate = Color.WHITE
+
 
 func _on_button_pressed() -> void:
 	if item_data:
