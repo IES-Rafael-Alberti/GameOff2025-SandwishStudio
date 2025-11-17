@@ -4,7 +4,7 @@ extends Node2D
 signal roulette_spin_started
 
 @export var friction := 0.985
-@export var snap_speed := 7.5
+@export var snap_speed := 7.5 # Ya no se usa para el snap, pero se deja por si acaso
 @export var bounce_angle := 12.0
 @export var bounce_time := 0.08
 @export var enemy_manager: Node
@@ -12,7 +12,8 @@ signal roulette_spin_started
 @export var min_impulse_random_range := Vector2(1.5, 4)
 @onready var SlotsContainer: Node2D = $SpriteRuleta/SlotsContainer
 
-enum State { IDLE, DRAGGING, SPINNING, SNAP}
+# --- ¡CAMBIO 1! Se elimina el estado 'SNAP' ---
+enum State { IDLE, DRAGGING, SPINNING }
 var state := State.IDLE
 var last_mouse_angle := 0.0
 var inertia := 0.0
@@ -39,8 +40,8 @@ func _process(delta: float) -> void:
 			_drag()
 		State.SPINNING:
 			_spin(delta)
-		State.SNAP:
-			_snap(delta)
+		# --- ¡CAMBIO 2! Se elimina el 'case State.SNAP:' ---
+		
 
 func _input(event):
 	if not is_interactive:
@@ -80,32 +81,23 @@ func _spin(delta: float):
 	$SpriteRuleta.rotation_degrees += inertia
 	inertia *= friction
 
+	# --- ¡CAMBIO 3! La ruleta se detiene por fricción ---
+	# Ya no cambia a 'State.SNAP'
 	if abs(inertia) < 0.05:
-		if _selected_area:
-			state = State.SNAP
-		else:
-			_reward() 
-			_reset()
-
-
-func _snap(delta: float):
-	if not _selected_area:
+		# Si la inercia es casi cero, paramos, damos recompensa y reseteamos estado.
+		_reward() 
 		_reset()
-		return
 
-	var current_angle = wrapf($SpriteRuleta.rotation_degrees, 0.0, 360.0)
-	var target_angle = wrapf(_selected_area.rotation_degrees, 0.0, 360.0)
-	var diff = fmod((target_angle - current_angle + 540.0), 360.0) - 180.0
 
-	inertia *= friction
-	$SpriteRuleta.rotation_degrees += diff * snap_speed * delta
+# --- ¡CAMBIO 4! Se elimina la función _snap() completa ---
+# func _snap(delta: float):
+#	...
+#	...
 
-	if abs(diff) < 0.5 and abs(inertia) < 0.05:
-		$SpriteRuleta.rotation_degrees = target_angle
-		_reward()
-		_reset()
 
 func _on_AreaManecilla_area_entered(area: Area2D) -> void:
+	# Aún necesitamos esto para saber qué área es la seleccionada
+	# en el momento en que la ruleta se detiene.
 	if state != State.SPINNING:
 		return
 	_selected_area = area
@@ -130,8 +122,9 @@ func _bounce():
 func _bounce_end():
 	bouncing = false
 
-# --- ¡FUNCIÓN _reward CORREGIDA! ---
+
 func _reward():
+	# Esta función es la original
 	if not _selected_area or not "slot_index" in _selected_area:
 		print("¡El giro terminó en un espacio vacío! Saltando combate.")
 		GlobalSignals.emit_signal("combat_requested", null)
@@ -152,33 +145,24 @@ func _reward():
 
 	if actual_slot_node and "current_piece_data" in actual_slot_node:
 		
-		# 'piece' es el PieceData que está en el slot
 		var piece = actual_slot_node.current_piece_data 
 		
-		# --- ¡LÓGICA CORREGIDA! ---
-		# Verificamos si 'piece' es un PieceData Y si tiene la propiedad 'piece_origin'
 		if piece and piece is PieceData and "piece_origin" in piece:
 			
-			# 'combat_resource' es el PieceRes que está DENTRO del PieceData
 			var combat_resource = piece.piece_origin
 			
-			# Verificamos que el combat_resource sea válido
 			if combat_resource and combat_resource is PieceRes:
 				print("¡El slot (Índice %d) tiene la pieza: %s!" % [index, piece.resource_name])
-				# Enviamos el PieceRes (piece_origin) al combate
 				GlobalSignals.emit_signal("combat_requested", combat_resource)
 			else:
-				# Tenía PieceData, pero el 'piece_origin' estaba vacío o no era un PieceRes
 				print("¡El slot (Índice %d) tiene PieceData pero 'piece_origin' es nulo o no es PieceRes!" % index)
 				GlobalSignals.emit_signal("combat_requested", null)
 				
 		elif piece:
-			# El slot tenía algo, pero no era un PieceData (quizás un PassiveData?)
 			push_error("Ruleta _reward(): El item '%s' no es un 'PieceData' o no tiene 'piece_origin'." % piece.resource_name)
 			GlobalSignals.emit_signal("combat_requested", null)
 			
 		else:
-			# El slot estaba vacío
 			print("¡El slot ganador (Índice %d) estaba vacío o 'current_piece_data' es nulo!" % index)
 			GlobalSignals.emit_signal("combat_requested", null)
 	else:
@@ -191,4 +175,12 @@ func _reset():
 	inertia = 0.0
 	bouncing = false
 	state = State.IDLE
-	# No reseteamos la rotación
+	# ¡Importante! No reseteamos la rotación aquí.
+	
+# --- ¡CAMBIO 5! Nueva función pública ---
+# Esta función será llamada por gameManager para reiniciar la
+# rotación de la ruleta DESPUÉS del combate.
+func reset_rotation_to_zero():
+	# Solo reseteamos si la ruleta está en reposo (IDLE)
+	if state == State.IDLE:
+		$SpriteRuleta.rotation_degrees = 0.0
