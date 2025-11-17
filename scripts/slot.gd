@@ -70,14 +70,12 @@ func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 		return data.data is PieceData # Comprobamos el 'PieceData' dentro del diccionario
 
 	return false # Si no es el diccionario, lo rechazamos
-# En tu script de Slot de Ruleta (slot.gd)
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
 	
-	# 1. Marcar como ocupado y guardar los datos
 	occupied = true
-	current_piece_data = data.data   # <-- ¡CAMBIO! Extraemos los datos
-	current_piece_count = data.count # <-- ¡NUEVA LÍNEA! Guardamos la cantidad
+	current_piece_data = data.data
+	current_piece_count = 1 
 	
 
 	if current_piece_data and "icon" in current_piece_data:
@@ -91,10 +89,8 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 	else:
 		push_warning("RouletteSlot: El Resource soltado no tiene la propiedad 'icon'. No se puede mostrar la imagen.")
 
-	# 3. Emitir la señal para que el Inventario elimine la pieza
-	#    Le pasamos solo el 'data.data' (el Resource), que es lo que
-	#    'remove_item_no_money' espera recibir.
 	GlobalSignals.item_attached.emit(data.data)
+	
 func clear_slot():
 	occupied = false
 	current_piece_data = null

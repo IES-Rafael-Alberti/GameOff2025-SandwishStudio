@@ -34,7 +34,7 @@ var passive_slots: Array[Node] = []
 
 func _ready() -> void:
 	GlobalSignals.item_deleted.connect(remove_item)
-	GlobalSignals.item_attached.connect(remove_item_no_money)
+	GlobalSignals.item_attached.connect(decrement_item)
 	GlobalSignals.item_return_to_inventory_requested.connect(_on_item_return_requested)
 	_update_passive_stats_display()
 	if not inventory_slot_scene:
@@ -151,17 +151,12 @@ func decrement_item(data: Resource):
 		else:
 			push_error("decrement_item: El slot_node es inválido o no tiene update_count().")
 	else:
-		if slot_node and slot_node.has_method("clear_slot"):
-			slot_node.clear_slot()
+		if slot_node and slot_node.has_method("update_count"):
+			slot_node.update_count(0)
 		else:
-			push_error("decrement_item: El slot_node es inválido o no tiene clear_slot().")
+			push_error("decrement_item: El slot_node es inválido o no tiene update_count().")
 		
-		inventory_map.erase(id)
-		print("... Contador a cero. Eliminando item del diccionario.")
-		
-		if context.is_passive:
-			_compact_passive_slots()
-			_update_passive_stats_display()
+		print("... Contador a cero. Slot 'apagado' pero persistente.")
 
 	return true
 
