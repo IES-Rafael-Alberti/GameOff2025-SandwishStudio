@@ -12,16 +12,11 @@ signal item_selected(data: Resource)
 var item_data: Resource = null
 var current_count: int = 0
 
-# --- NUEVA VARIABLE ---
-# 'inventory.gd' nos dirá qué valor poner aquí
 var sell_percentage: int = 50
 
 
 func _ready() -> void:
 	button.pressed.connect(_on_button_pressed)
-	
-	# --- NUEVAS LÍNEAS ---
-	# Conectamos las señales del ratón del botón a nuestras nuevas funciones
 	button.mouse_entered.connect(_on_button_mouse_entered)
 	button.mouse_exited.connect(_on_button_mouse_exited)
 	
@@ -52,7 +47,8 @@ func update_count(count: int) -> void:
 	else:
 		count_label.hide()
 		
-	# ¡NUEVA LÍNEA! Actualizamos el botón para el drag-and-drop
+	# ¡NUEVA LÍNEA!
+# Actualizamos el botón para el drag-and-drop
 	button.item_count = current_count
 
 ## Limpia el slot para que parezca vacío
@@ -69,16 +65,35 @@ func clear_slot() -> void:
 	count_label.hide()
 	uses_label.hide()
 	tooltip.hide_tooltip()
+	
+	# --- ¡NUEVA LÍNEA! ---
+	# Reseteamos el color por si estaba gris
+	button.modulate = Color.WHITE
 
 func is_empty() -> bool:
 	return item_data == null
+
+# --- ¡FUNCIÓN MODIFICADA! ---
+# En scripts/InventorySlot.gd
 
 func _update_uses(data: Resource) -> void:
 	if data is PieceData:
 		uses_label.text = "%d" % data.uses
 		uses_label.show()
+		
+		# --- ¡LÓGICA DE AGOTADO! ---
+		if data.uses <= 0:
+			print("DEBUG: Aplicando filtro gris (self_modulate).")
+			button.self_modulate = Color(0.5, 0.5, 0.5) # ¡CAMBIADO!
+		else:
+			print("DEBUG: Aplicando color blanco (self_modulate).")
+			button.self_modulate = Color.WHITE # ¡CAMBIADO!
+			
 	else:
 		uses_label.hide()
+		# --- ¡LÍNEA MODIFICADA! ---
+		# Nos aseguramos de que otros items no PieceData no se queden grises
+		button.self_modulate = Color.WHITE # ¡CAMBIADO!
 
 func _on_button_pressed() -> void:
 	if item_data:

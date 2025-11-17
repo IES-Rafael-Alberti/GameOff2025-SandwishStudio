@@ -78,14 +78,6 @@ offset_bottom = 724.0
 theme_override_font_sizes/font_size = 46
 metadata/_edit_use_anchors_ = true
 
-[node name="RoundCounter" type="Label" parent="."]
-offset_left = 814.0
-offset_top = 97.0
-offset_right = 854.0
-offset_bottom = 155.0
-theme_override_font_sizes/font_size = 42
-metadata/_edit_use_anchors_ = true
-
 [node name="EnemySlots" type="Node2D" parent="."]
 
 [node name="EnemyWaitSlot" type="Marker2D" parent="EnemySlots"]
