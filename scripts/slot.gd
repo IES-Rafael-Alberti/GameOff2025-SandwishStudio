@@ -15,6 +15,52 @@ var current_piece_count: int = 0
 @onready var ruleta: Node = get_parent().get_parent().get_parent().get_parent()
 @onready var piece_texture_rect: TextureRect = $PieceTextureRect
 
+
+# --- ¡FUNCIONES MOVIDAS AQUÍ! ---
+# Las funciones de input deben estar definidas ANTES de
+# que _ready() intente conectarse a ellas.
+
+# --- ¡FUNCIÓN MODIFICADA! ---
+# Ahora, hacer clic en la pieza la "devuelve", sumando 1 uso
+# al inventario y limpiando este slot.
+func _on_gui_input(event: InputEvent) -> void:
+	if not (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed):
+		return
+
+	if not occupied:
+		return
+		
+	# --- MODIFICADO ---
+	# Comprobamos si la ruleta está interactiva (controlado por la FSM)
+	if ruleta and ruleta.has_method("is_moving"):
+		# Comprobamos si está girando O si la FSM la ha bloqueado
+		if ruleta.is_moving() or not ruleta.is_interactive:
+			print("No se puede devolver la pieza: ¡La ruleta está girando o el juego está en combate!")
+			return
+
+	# --- ¡LÓGICA MODIFICADA! ---
+	# Ya no pedimos devolver el item al inventario (lo que duplicaría).
+	# Ahora emitimos una señal para "devolver" 1 uso al contador
+	# de la pieza que está en el inventario.
+	GlobalSignals.piece_returned_from_roulette.emit(current_piece_data)
+	
+	# Y simplemente limpiamos este slot.
+	clear_slot()
+
+
+# Esta función ya no es necesaria con la nueva lógica,
+# pero la dejamos por si se usa en otro sitio.
+func _on_return_attempt_finished(success: bool):
+	if success:
+		# Esta línea ya no se ejecutará si _on_gui_input no la llama.
+		clear_slot()
+	else:
+		print("No se puede devolver la pieza: ¡El inventario está lleno!")
+
+
+# --- FIN DE LAS FUNCIONES MOVIDAS ---
+
+
 func _ready():
 	if not has_node("Highlight"):
 		var h = Node2D.new()
@@ -39,6 +85,8 @@ func _ready():
 		push_error("RouletteSlot: ¡No se encontró el nodo hijo 'PieceTextureRect'!")
 	else:
 		piece_texture_rect.visible = false
+		
+	# Ahora esta conexión funcionará porque _on_gui_input está definida arriba.
 	self.gui_input.connect(_on_gui_input)
 
 func _process(delta):
@@ -94,9 +142,9 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 	else:
 		push_warning("RouletteSlot: El Resource soltado no tiene la propiedad 'icon'. No se puede mostrar la imagen.")
 
-	# --- ¡LÓGICA MODIFICADA! ---
-	# Ya NO emitimos 'item_attached' (que borraba la pila).
-	# En su lugar, emitimos la nueva señal para que 'inventory.gd' reste 1 uso.
+	# --- ¡LÓGICA MODIFICADA Y CORREGIDA! ---
+	# Ya NO emitimos 'item_attached'.
+	# Emitimos la nueva señal y le pasamos el 'current_piece_data'.
 	GlobalSignals.piece_placed_on_roulette.emit(current_piece_data)
 
 
@@ -106,40 +154,3 @@ func clear_slot():
 	current_piece_count = 0
 	if piece_texture_rect:
 		piece_texture_rect.visible = false
-
-# --- ¡FUNCIÓN MODIFICADA! ---
-# Ahora, hacer clic en la pieza la "devuelve", sumando 1 uso
-# al inventario y limpiando este slot.
-func _on_gui_input(event: InputEvent) -> void:
-	if not (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed):
-		return
-
-	if not occupied:
-		return
-		
-	# --- MODIFICADO ---
-	# Comprobamos si la ruleta está interactiva (controlado por la FSM)
-	if ruleta and ruleta.has_method("is_moving"):
-		# Comprobamos si está girando O si la FSM la ha bloqueado
-		if ruleta.is_moving() or not ruleta.is_interactive:
-			print("No se puede devolver la pieza: ¡La ruleta está girando o el juego está en combate!")
-			return
-
-	# --- ¡LÓGICA MODIFICADA! ---
-	# Ya no pedimos devolver el item al inventario (lo que duplicaría).
-	# Ahora emitimos una señal para "devolver" 1 uso al contador
-	# de la pieza que está en el inventario.
-	GlobalSignals.piece_returned_from_roulette.emit(current_piece_data)
-	
-	# Y simplemente limpiamos este slot.
-	clear_slot()
-
-
-# Esta función ya no es necesaria con la nueva lógica,
-# pero la dejamos por si se usa en otro sitio.
-func _on_return_attempt_finished(success: bool):
-	if success:
-		# Esta línea ya no se ejecutará si _on_gui_input no la llama.
-		clear_slot()
-	else:
-		print("No se puede devolver la pieza: ¡El inventario está lleno!")

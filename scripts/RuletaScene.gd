@@ -153,6 +153,7 @@ func _reward():
 	if winning_slot_root and winning_slot_root.has_node("slot"):
 		actual_slot_node = winning_slot_root.get_node("slot")
 
+	# Usamos 'current_piece_data' del script slot.gd
 	if actual_slot_node and "current_piece_data" in actual_slot_node:
 		
 		var piece = actual_slot_node.current_piece_data 

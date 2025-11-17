@@ -19,6 +19,10 @@ signal item_sold(refund_amount: int)
 @export var inventory_slot_scene: PackedScene 
 @export var piece_scene: PackedScene
 
+# --- ¡NUEVA VARIABLE! ---
+# Límite de cuántas copias de una misma pieza se pueden tener.
+@export var max_piece_copies: int = 3
+
 # --- ¡CORREGIDO!
 # Vuelve a ser un Array[PieceData]
 @export var initial_pieces: Array[PieceData] 
@@ -79,18 +83,38 @@ func set_interactive(is_interactive: bool):
 		if slot.has_node("TextureButton"):
 			slot.get_node("TextureButton").disabled = not is_interactive
 
+# --- ¡FUNCIÓN MODIFICADA! ---
+# Comprueba si el jugador puede añadir un item (incluyendo el límite de copias)
 func can_add_item(data: Resource) -> bool:
 	var context = _get_inventory_context(data)
 	if not context:
 		return false
 
 	var id: String = _get_item_id(data)
+	
+	# --- ¡NUEVA LÓGICA DE LÍMITE! ---
+	if data is PieceData:
+		if context.map.has(id):
+			var current_count = context.map[id]["count"]
+			if current_count >= max_piece_copies:
+				# Ya estamos en el límite, no se puede añadir ni 1 más.
+				return false
+	# --- FIN DE LA NUEVA LÓGICA ---
+
+	# Comprobación original:
+	# ¿Podemos apilarlo (porque ya existe) o tenemos un slot vacío?
 	var can_stack = context.map.has(id)
 	var has_empty_slot = _find_empty_slot(context.slots) != null
 	
 	return can_stack or has_empty_slot
 
 
+# --- ¡FUNCIÓN MODIFICADA! ---
+# Añade un item, respetando el límite de copias
+# En /scripts/inventory.gd
+
+# --- ¡FUNCIÓN MODIFICADA! ---
+# Añade un item, respetando el límite de copias
 func add_item(data: Resource, amount: int = 1) -> bool:
 	if not data:
 		push_error("add_item: Se intentó añadir un item NULO.")
@@ -99,19 +123,42 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 	print("--- add_item() llamado con: %s (Cantidad: %d) ---" % [data.resource_name, amount])
 
 	var context = _get_inventory_context(data)
-
-	if not can_add_item(data):
-		print("... FALLO: can_add_item devolvió false.
-Inventario probablemente lleno.")
-		return false
-
 	var id: String = _get_item_id(data)
 	var inventory_map = context.map
+	var final_amount = amount
 
+	# --- LÓGICA DE LÍMITE DE COPIAS (Esto está bien) ---
+	if data is PieceData:
+		var current_count = 0
+		if inventory_map.has(id):
+			current_count = inventory_map[id]["count"]
+		
+		if current_count >= max_piece_copies:
+			print("... FALLO: Límite de %d copias ya alcanzado." % max_piece_copies)
+			return false
+		
+		if (current_count + amount) > max_piece_copies:
+			final_amount = max_piece_copies - current_count
+			print("... ADVERTENCIA: Se comprarán %d en lugar de %d para no superar el límite." % [final_amount, amount])
+
+	if final_amount <= 0:
+		print("... FALLO: No hay nada que añadir (probablemente por el límite).")
+		return false
+	# --- FIN DE LA LÓGICA DE LÍMITE ---
+
+
+	var can_stack = inventory_map.has(id)
+	var has_empty_slot = _find_empty_slot(context.slots) != null
+
+	if not can_stack and not has_empty_slot:
+		print("... FALLO: No hay slot vacío para un item nuevo. Inventario probablemente lleno.")
+		return false
+
+	# Lógica de apilar (Esto está bien)
 	if inventory_map.has(id):
-		print("... Item ya existe. Apilando.")
+		print("... Item ya existe. Apilando %d." % final_amount)
 		var entry = inventory_map[id]
-		entry["count"] += amount
+		entry["count"] += final_amount
 		var slot_node: Node = entry["slot_node"]
 		if slot_node and slot_node.has_method("update_count"):
 			slot_node.update_count(entry["count"])
@@ -119,18 +166,31 @@ Inventario probablemente lleno.")
 			_update_passive_stats_display()
 		return true
 
+	# Lógica de añadir a slot nuevo
 	var empty_slot: Node = _find_empty_slot(context.slots)
 	
 	if empty_slot:
-		print("... Item nuevo. Slot vacío encontrado. Asignando item.")
+		print("... Item nuevo. Slot vacío encontrado. Asignando %d." % final_amount)
+		
+		# --- ¡¡AQUÍ ESTÁ EL FIX!! ---
+		# Si es una pieza, reiniciamos sus usos al valor por defecto
+		# antes de asignarla al slot.
+		if data is PieceData:
+			# Si tienes un valor de "usos por defecto" en tu recurso, úsalo.
+			# data.uses = data.default_uses 
+			# Si no, pon el valor a mano (como 3):
+			data.uses = 3
+			print("... ¡FIX APLICADO! Reseteando usos a 3.")
+		# --- ¡¡FIN DEL FIX!! ---
+		
 		if empty_slot.has_method("set_item"):
-			empty_slot.set_item(data)
+			empty_slot.set_item(data) # 'data' ahora tiene los usos reseteados
 
 		if empty_slot.has_method("update_count"):
-			empty_slot.update_count(amount)
+			empty_slot.update_count(final_amount) # <-- Usamos final_amount
 
 		var new_entry = {
-			"count": amount,
+			"count": final_amount, # <-- Usamos final_amount
 			"data": data,
 			"slot_node": empty_slot 
 		}
@@ -141,7 +201,6 @@ Inventario probablemente lleno.")
 
 	print("... FALLO INESPERADO: No se pudo apilar ni encontrar slot vacío.")
 	return false
-
 ## ------------------------------------------------------------------
 ## Funciones de Eliminación de Items
 ## ------------------------------------------------------------------
@@ -240,7 +299,6 @@ func _remove_item_stack(item_data: Resource, with_refund: bool) -> bool:
 	# --- ¡NUEVA LÍNEA! ---
 	# Avisamos al resto del juego (a la Ruleta) que este TIPO de
 	# pieza ha sido eliminado por completo.
-	# Hacemos esto solo para piezas, que son las que tienen copias.
 	if item_data is PieceData:
 		GlobalSignals.piece_type_deleted.emit(item_data)
 	
