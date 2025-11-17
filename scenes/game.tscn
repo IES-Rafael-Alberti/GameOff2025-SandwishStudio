@@ -50,7 +50,7 @@ offset_top = 793.0
 offset_right = 1738.0
 offset_bottom = 885.0
 
-[node name="Round_Label" type="Label" parent="."]
+[node name="RoundLabel" type="Label" parent="."]
 offset_left = 336.0
 offset_top = 342.0
 offset_right = 880.0
