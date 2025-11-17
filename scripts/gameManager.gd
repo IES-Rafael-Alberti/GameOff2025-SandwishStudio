@@ -193,11 +193,12 @@ func _on_combat_requested(piece_resource: Resource):
 	else:
 		# 2. Giro en Vacío
 		# El estado actual es SPINNING.
-		# Saltamos el combate y pasamos a la tienda
-		# SIN incrementar la ronda.
-		print("Giro en vacío detectado. Pasando a Tienda.")
-		set_state(GameState.SHOP)
-		store.generate()
+		# ¡CAMBIO! Ahora llamamos a _on_combat_finished() para
+		# que incremente la ronda y pase a la tienda.
+		print("Giro en vacío detectado. Pasando a siguiente ronda.")
+		
+		# Esta es la única línea que necesitas cambiar/añadir en el 'else':
+		_on_combat_finished()
 
 # El combate TERMINA (solo se llama si hubo un combate real)
 func _on_combat_finished():
