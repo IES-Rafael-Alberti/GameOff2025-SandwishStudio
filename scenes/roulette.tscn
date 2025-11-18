@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_jyskt"]
 [ext_resource type="Texture2D" uid="uid://dnbq7cidfb75v" path="res://assets/palanca.png" id="2_iqt6o"]
 [ext_resource type="Texture2D" uid="uid://go30fno5akpc" path="res://assets/ruleta.png" id="2_jyskt"]
-[ext_resource type="Script" path="res://scripts/RouletteSlice.gd" id="4_jyskt"]
+[ext_resource type="Script" uid="uid://d1s3pk6cls46q" path="res://scripts/RouletteSlice.gd" id="4_jyskt"]
 [ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="4_k6evh"]
 [ext_resource type="Texture2D" uid="uid://qmthj5xqadhq" path="res://assets/Manilla (1).png" id="5_jyskt"]
 
@@ -20,10 +20,11 @@ height = 92.0
 script = ExtResource("1_jyskt")
 
 [node name="Lever" type="Sprite2D" parent="."]
-position = Vector2(930, 177.00005)
+position = Vector2(912.4984, 203.31917)
 rotation = 0.62912136
 scale = Vector2(1.0639179, 1.3108115)
 texture = ExtResource("2_iqt6o")
+offset = Vector2(-1.2559814, -24.090973)
 
 [node name="AreaLever" type="Area2D" parent="Lever"]
 

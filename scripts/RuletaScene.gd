@@ -1,225 +1,237 @@
-# RuletaScene.gd
 extends Node2D
 
 signal roulette_spin_started
 
+# --- CONFIGURACIÓN DE LA RULETA ---
 @export var friction := 0.985
-@export var snap_speed := 7.5
 @export var bounce_angle := 12.0
 @export var bounce_time := 0.08
-@export var enemy_manager: Node
-@export var min_impulse_force := 10.0
-@export var min_impulse_random_range := Vector2(1.5, 4)
-@onready var SlotsContainer: Node2D = $SpriteRuleta/SlotsContainer
+@export var min_impulse_force := 45.0 
+@export var min_impulse_random_range := Vector2(1.0, 1.4)
 
-# --- ¡CAMBIO 1!
-# Se elimina el estado 'SNAP' ---
-enum State { IDLE, DRAGGING, SPINNING }
+# --- CONFIGURACIÓN DE LA PALANCA (FEELING) ---
+@export_category("Lever Feel")
+@export var lever_max_angle := 55.0    
+@export var drag_sensitivity := 0.5    
+@export var activation_threshold := 0.8 
+
+# --- REFERENCIAS (OnReady) ---
+# Ajustados según tu imagen
+@onready var SlotsContainer: Node2D = $SpriteRuleta/SlotsContainer
+@onready var lever_sprite: Sprite2D = $Lever
+@onready var lever_area: Area2D = $Lever/AreaLever 
+@onready var manecilla_area: Area2D = $Manecilla # Asumiendo que el nodo raíz Manecilla es el Area2D
+@onready var manecilla_sprite: Sprite2D = $Manecilla/SpriteManecilla
+
+# --- ESTADOS ---
+enum State { IDLE, SPINNING }
 var state := State.IDLE
-var last_mouse_angle := 0.0
+var is_interactive := true
+
+# Variables palanca
+var is_dragging_lever := false
+var drag_start_mouse_y := 0.0
+var current_lever_rotation := 0.0
+
+# Variables física
 var inertia := 0.0
 var _selected_area: Area2D = null
 var bouncing := false
 
-var is_interactive := true
-
-# --- ¡NUEVA FUNCIÓN! ---
-
+# --- INICIO ---
 func _ready():
-	# Conectamos la señal de borrado de inventario
-	GlobalSignals.piece_type_deleted.connect(_on_piece_type_deleted)
+	# Conectar señales globales si existen
+	if GlobalSignals:
+		GlobalSignals.piece_type_deleted.connect(_on_piece_type_deleted)
+	
+	# 1. CONEXIÓN PALANCA
+	if lever_area:
+		# Aseguramos que el área sea detectable
+		lever_area.input_pickable = true 
+		lever_area.input_event.connect(_on_lever_input_event)
+	else:
+		printerr("ERROR: No se encontró $Lever/AreaLever")
 
+	# 2. CONEXIÓN MANECILLA (CRÍTICO: Esto faltaba o fallaba)
+	if manecilla_area:
+		manecilla_area.area_entered.connect(_on_AreaManecilla_area_entered)
+	else:
+		printerr("ERROR: No se encontró el nodo $Manecilla o no es un Area2D")
 
-func is_moving(): 
-	return state != State.IDLE
+# --- INPUT GESTURE (ARRASTRAR PALANCA) ---
 
-func set_interactive(interactive: bool):
-	is_interactive = interactive
-	for slot_root in SlotsContainer.get_children():
-		if slot_root.has_node("slot"):
-			var slot = slot_root.get_node("slot")
-			if slot is Control:
-				slot.mouse_filter = Control.MOUSE_FILTER_PASS if interactive else Control.MOUSE_FILTER_IGNORE
-				
-
-func _process(delta: float) -> void:
-	match state:
-		State.DRAGGING:
-			_drag()
-		State.SPINNING:
-			_spin(delta)
-		# --- ¡CAMBIO 2!
-# Se elimina el 'case State.SNAP:' ---
-		
+func _on_lever_input_event(_viewport, event, _shape_idx):
+	# Validaciones iniciales
+	if not is_interactive or state != State.IDLE: return
+	
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			print("DEBUG: Palanca agarrada")
+			start_dragging()
 
 func _input(event):
-	if not is_interactive:
-		return
-		
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT:
-		
-		if event.pressed and state == State.IDLE:
-			state = State.DRAGGING
-			last_mouse_angle = rad_to_deg((get_global_mouse_position() - $SpriteRuleta.global_position).angle())
-		
-		elif not event.pressed and state == State.DRAGGING:
-			state = State.SPINNING
+	# Soltar la palanca (Global input para no perder el agarre si el mouse sale del área)
+	if is_dragging_lever and event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+			release_lever()
 			
-			var min_boost = min_impulse_force * randf_range(min_impulse_random_range.x, min_impulse_random_range.y)
-			inertia += min_boost
-			_selected_area = null
-			
-			roulette_spin_started.emit()
+	# Mover la palanca
+	if is_dragging_lever and event is InputEventMouseMotion:
+		update_lever_drag()
 
-func _drag():
-	var mouse = get_global_mouse_position()
-	var center = $SpriteRuleta.global_position
-	var angle_deg = rad_to_deg((mouse-center).angle())
-	var diff = fmod((angle_deg-last_mouse_angle+540),360)-180
-	last_mouse_angle = angle_deg
-	
-	if diff < 0.0:
-		diff = 0.0
-	
-	inertia = diff*1.2
-	$SpriteRuleta.rotation_degrees += inertia
+func start_dragging():
+	is_dragging_lever = true
+	drag_start_mouse_y = get_global_mouse_position().y
 
-func _spin(delta: float):
+func update_lever_drag():
+	var current_mouse_y = get_global_mouse_position().y
+	var diff = current_mouse_y - drag_start_mouse_y
+	
+	if diff < 0: diff = 0
+	
+	var target_angle = diff * drag_sensitivity
+	current_lever_rotation = clamp(target_angle, 0.0, lever_max_angle)
+	
+	lever_sprite.rotation_degrees = current_lever_rotation
+
+func release_lever():
+	is_dragging_lever = false
+	print("DEBUG: Palanca soltada. Angulo actual: ", current_lever_rotation)
+	
+	var percentage_pulled = current_lever_rotation / lever_max_angle
+	
+	if percentage_pulled >= activation_threshold:
+		trigger_spin()
+		# Animación retorno elástica
+		var t = create_tween()
+		t.tween_property(lever_sprite, "rotation_degrees", 0.0, 0.4)\
+			.set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	else:
+		# Cancelar (volver suave)
+		var t = create_tween()
+		t.tween_property(lever_sprite, "rotation_degrees", 0.0, 0.2)\
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+# --- LÓGICA DE GIRO (SPIN) ---
+
+func trigger_spin():
+	print("DEBUG: ¡Giro iniciado!")
+	state = State.SPINNING
+	_selected_area = null
+	
+	var pull_factor = current_lever_rotation / lever_max_angle
+	var base_force = min_impulse_force * pull_factor
+	var random_multiplier = randf_range(min_impulse_random_range.x, min_impulse_random_range.y)
+	
+	inertia = base_force * random_multiplier
+	roulette_spin_started.emit()
+
+func _process(delta: float) -> void:
+	if state == State.SPINNING:
+		_spin(delta)
+
+func _spin(_delta: float):
 	$SpriteRuleta.rotation_degrees += inertia
 	inertia *= friction
 
-	# --- ¡CAMBIO 3!
-# La ruleta se detiene por fricción ---
-	# Ya no cambia a 'State.SNAP'
+	# Detenerse cuando la inercia es muy baja
 	if abs(inertia) < 0.05:
-		# Si la inercia es casi cero, paramos, damos recompensa y reseteamos estado.
+		inertia = 0
 		_reward() 
 		_reset()
 
-
-# --- ¡CAMBIO 4! Se elimina la función _snap() completa ---
-# func _snap(delta: float):
-#	...
-#	...
-
+# --- SISTEMA DE MANECILLA (TIC-TIC-TIC) ---
 
 func _on_AreaManecilla_area_entered(area: Area2D) -> void:
-	# Aún necesitamos esto para saber qué área es la seleccionada
-	# en el momento en que la ruleta se detiene.
-	if state != State.SPINNING:
-		return
-	_selected_area = area
+	# Solo rebotamos si estamos girando
+	# Nota: Si quieres que suene al moverla con la mano manualmente, quita el check de State.SPINNING
+	if state != State.SPINNING: return
+	
+	# Guardamos el área actual como la "posible ganadora"
+	_selected_area = area 
 	_bounce()
 
 func _bounce():
-	if bouncing:
-		return
+	if bouncing: return
 	bouncing = true
-	var spr = $Manecilla/SpriteManecilla
-	var orig_pos = spr.position
-	var orig_rot = spr.rotation_degrees
-	spr.rotation_degrees = -bounce_angle
-	spr.position.y -= 4
+	
+	var orig_pos = manecilla_sprite.position
+	var orig_rot = manecilla_sprite.rotation_degrees
+	
+	# Golpe visual
+	manecilla_sprite.rotation_degrees = -bounce_angle
+	manecilla_sprite.position.y -= 4
+	
+	# Sonido (Opcional, descomentar si tienes el nodo)
+	if $Manecilla/AudioStreamPlayer:
+		$Manecilla/AudioStreamPlayer.play()
+	
 	var t = create_tween()
-	t.tween_property(spr, "rotation_degrees", orig_rot, bounce_time)
-	t.tween_property(spr, "position", orig_pos, bounce_time)
-	t.connect("finished", Callable(self, "_bounce_end"))
-	t.play()
+	t.tween_property(manecilla_sprite, "rotation_degrees", orig_rot, bounce_time)
+	t.tween_property(manecilla_sprite, "position", orig_pos, bounce_time)
+	t.finished.connect(func(): bouncing = false)
 
-
-func _bounce_end():
-	bouncing = false
-
+# --- RECOMPENSAS ---
 
 func _reward():
-	# Esta función es la original
-	if not _selected_area or not "slot_index" in _selected_area:
-		print("¡El giro terminó en un espacio vacío! Saltando combate.")
+	print("DEBUG: Calculando recompensa...")
+	if not _selected_area:
+		print("RESULTADO: La ruleta se detuvo pero _selected_area es null. (¿No chocó con nada?)")
+		GlobalSignals.emit_signal("combat_requested", null)
+		return
+
+	# Intentamos obtener el índice del slot
+	if not "slot_index" in _selected_area:
+		print("RESULTADO: El área detectada no tiene 'slot_index'. Nombre área: ", _selected_area.name)
 		GlobalSignals.emit_signal("combat_requested", null)
 		return
 
 	var index: int = _selected_area.slot_index
-
-	if index < 0 or index >= SlotsContainer.get_child_count():
-		push_error("Ruleta _reward(): El 'slot_index' (%d) está fuera de rango." % index)
-		GlobalSignals.emit_signal("combat_requested", null)
+	print("DEBUG: Slot ganador índice: ", index)
+	
+	if index >= SlotsContainer.get_child_count():
+		print("ERROR: Índice fuera de rango.")
 		return
 
 	var winning_slot_root = SlotsContainer.get_child(index)
-	var actual_slot_node = null
-
-	if winning_slot_root and winning_slot_root.has_node("slot"):
-		actual_slot_node = winning_slot_root.get_node("slot")
-
-	# Usamos 'current_piece_data' del script slot.gd
-	if actual_slot_node and "current_piece_data" in actual_slot_node:
-		
-		var piece = actual_slot_node.current_piece_data 
-		
-		if piece and piece is PieceData and "piece_origin" in piece:
-			
-			var combat_resource = piece.piece_origin
-			
-			if combat_resource and combat_resource is PieceRes:
-				print("¡El slot (Índice %d) tiene la pieza: %s!" % [index, piece.resource_name])
-				GlobalSignals.emit_signal("combat_requested", combat_resource)
-			else:
-				print("¡El slot (Índice %d) tiene PieceData pero 'piece_origin' es nulo o no es PieceRes!" % index)
-				GlobalSignals.emit_signal("combat_requested", null)
-				
-		elif piece:
-			push_error("Ruleta _reward(): El item '%s' no es un 'PieceData' o no tiene 'piece_origin'." % piece.resource_name)
-			GlobalSignals.emit_signal("combat_requested", null)
-			
-		else:
-			print("¡El slot ganador (Índice %d) estaba vacío o 'current_piece_data' es nulo!" % index)
-			GlobalSignals.emit_signal("combat_requested", null)
-	else:
-		push_error("Ruleta _reward(): El nodo 'SlotPiece' (índice %d) o su hijo 'slot' no son válidos." % index)
-		GlobalSignals.emit_signal("combat_requested", null)
-
 	
+	if winning_slot_root and winning_slot_root.has_node("slot"):
+		var actual_slot = winning_slot_root.get_node("slot")
+		
+		if actual_slot and "current_piece_data" in actual_slot:
+			var piece = actual_slot.current_piece_data 
+			# Verificación de tipo segura
+			if piece and piece.get("piece_origin"): # Usamos get para seguridad
+				print("¡PREMIO: %s!" % piece.resource_name)
+				GlobalSignals.emit_signal("combat_requested", piece.piece_origin)
+				return
+	
+	# Fallback si no hay premio
+	print("RESULTADO: Slot vacío o sin datos válidos.")
+	GlobalSignals.emit_signal("combat_requested", null)
+
+# --- RESET Y UTILIDADES ---
+
 func _reset():
 	_selected_area = null
 	inertia = 0.0
 	bouncing = false
 	state = State.IDLE
-	# ¡Importante!
-# No reseteamos la rotación aquí.
-	
-# --- ¡CAMBIO 5! Nueva función pública ---
-# Esta función será llamada por gameManager para reiniciar la
-# rotación de la ruleta DESPUÉS del combate.
+	print("DEBUG: Ruleta reseteada a IDLE")
+
 func reset_rotation_to_zero():
-	# Solo reseteamos si la ruleta está en reposo (IDLE)
 	if state == State.IDLE:
 		$SpriteRuleta.rotation_degrees = 0.0
 
+func set_interactive(interactive: bool):
+	is_interactive = interactive
+	if lever_sprite:
+		lever_sprite.modulate = Color.WHITE if interactive else Color(0.5, 0.5, 0.5)
 
-# --- ¡NUEVA FUNCIÓN DE SEÑAL! ---
-# Se llama cuando GlobalSignals.piece_type_deleted se emite desde inventory.gd
-func _on_piece_type_deleted(piece_data: PieceData):
-	if not piece_data:
-		return
-		
-	print("... Ruleta ha recibido orden de borrado para: %s" % piece_data.resource_name)
-	
-	# Recorremos todos los slots de la ruleta
+func _on_piece_type_deleted(piece_data):
+	if not piece_data or not SlotsContainer: return
 	for slot_root in SlotsContainer.get_children():
-		if not slot_root.has_node("slot"):
-			continue
-			
-		var slot = slot_root.get_node("slot")
-		
-		# Usamos la variable 'current_piece_data' de tu script slot.gd
-		if slot and "current_piece_data" in slot:
-			
-			# Si la pieza en este slot es la que se borró
-			if slot.current_piece_data == piece_data:
-				
-				# Usamos el método 'clear_slot()' de tu script slot.gd
-				if slot.has_method("clear_slot"):
-					print("... ... Limpiando slot %s" % slot.name)
-					slot.clear_slot()
-				else:
-					push_warning("Ruleta: El slot %s no tiene método clear_slot()" % slot.name)
+		if slot_root.has_node("slot"):
+			var slot = slot_root.get_node("slot")
+			if slot and slot.get("current_piece_data") == piece_data:
+				if slot.has_method("clear_slot"): slot.clear_slot()
