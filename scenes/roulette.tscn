@@ -1,14 +1,14 @@
 [gd_scene load_steps=10 format=3 uid="uid://bv3r20c0gu33v"]
 
 [ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_jyskt"]
-[ext_resource type="Texture2D" uid="uid://dnbq7cidfb75v" path="res://assets/palanca.png" id="2_iqt6o"]
+[ext_resource type="Texture2D" uid="uid://dmlid2sk24v8v" path="res://assets/palanca.png" id="2_iqt6o"]
 [ext_resource type="Texture2D" uid="uid://go30fno5akpc" path="res://assets/ruleta.png" id="2_jyskt"]
 [ext_resource type="Script" uid="uid://d1s3pk6cls46q" path="res://scripts/RouletteSlice.gd" id="4_jyskt"]
 [ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="4_k6evh"]
 [ext_resource type="Texture2D" uid="uid://qmthj5xqadhq" path="res://assets/Manilla (1).png" id="5_jyskt"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jyskt"]
-size = Vector2(6091.349, 229.43796)
+size = Vector2(6091.349, 360.72424)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nqo7r"]
 size = Vector2(544.9423, 240.75171)
@@ -20,18 +20,18 @@ height = 92.0
 script = ExtResource("1_jyskt")
 
 [node name="Lever" type="Sprite2D" parent="."]
-position = Vector2(912.4984, 203.31917)
-rotation = 0.62912136
-scale = Vector2(1.0639179, 1.3108115)
+position = Vector2(893.56085, 238.00085)
+rotation = 0.6235494
+scale = Vector2(0.92160326, 1.0670819)
 texture = ExtResource("2_iqt6o")
-offset = Vector2(-1.2559814, -24.090973)
+offset = Vector2(-3.5906982, -90.26892)
 
 [node name="AreaLever" type="Area2D" parent="Lever"]
 
 [node name="CollisionLever" type="CollisionShape2D" parent="Lever/AreaLever"]
-position = Vector2(1.4465418, -48.33118)
+position = Vector2(1.4466553, -88.343414)
 rotation = -3.1415925
-scale = Vector2(0.004986905, -0.60954136)
+scale = Vector2(0.004986906, -0.6095414)
 shape = SubResource("RectangleShape2D_jyskt")
 
 [node name="DragLayer" type="CanvasLayer" parent="."]

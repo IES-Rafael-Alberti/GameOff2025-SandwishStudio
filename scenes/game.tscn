@@ -30,7 +30,7 @@ position = Vector2(187, 70.99997)
 scale = Vector2(0.35700324, 0.2319321)
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
-position = Vector2(133, 288)
+position = Vector2(130, 299)
 scale = Vector2(0.8845031, 0.8845031)
 
 [node name="Camera2D" type="Camera2D" parent="."]
