@@ -82,35 +82,82 @@ func _update_healthbar() -> void:
 func _show_damage_text(amount: float) -> void:
 	# Instanciamos el Label
 	var dmg_label: Label = DAMAGE_TEXT_SCENE.instantiate()
-	
-	# Redondeamos el daño para mostrarlo bonito
-	dmg_label.text = str(int(round(amount)))
-	
-	# Lo añadimos a la escena raíz para que no herede escalados raros
+
+	# Texto del daño
+	var dmg_int := int(round(amount))
+	dmg_label.text = str(dmg_int)
+
+	# --- Escalado del label según el daño ---
+	var base_font_size := 34.0
+	var size_factor : float = clamp(0.7 + float(dmg_int) / 60.0, 0.7, 2.5)
+	var new_size := int(base_font_size * size_factor)
+
+	# Esta es la forma correcta en Godot 4:
+	dmg_label.add_theme_font_size_override("font_size", new_size)
+
+	# Añadimos el label a la escena raíz
 	var root := get_tree().current_scene
 	if root == null:
 		return
 	root.add_child(dmg_label)
-	
-	# Posición inicial = posición del NPC, un poco por encima
-	dmg_label.global_position = global_position + Vector2(0, -20)
-	
-	# Color rojo por si no lo pusiste en el inspector
+
+	# --------------------
+	#  POSICIÓN DENTRO DE UN "CONO"
+	# --------------------
+	# Altura máxima del cono (distancia vertical desde el NPC)
+	var max_height := 140.0   # cuanto más grande, más alto pueden aparecer
+	var min_height := 50.0
+
+	# Elegimos una altura aleatoria dentro del cono
+	var h := randf_range(min_height, max_height)  # valor positivo
+
+	# En esa altura, el ancho del cono es proporcional a h
+	var max_width_at_top := 160.0  # ancho máximo en la parte superior del cono
+	var half_width := (h / max_height) * (max_width_at_top * 0.5)
+
+	# Offset horizontal aleatorio dentro del cono para esa altura
+	var offset_x := randf_range(-half_width, half_width)
+	# Offset vertical (negativo porque es hacia arriba)
+	var offset_y := -h
+
+	var start_pos := global_position + Vector2(offset_x, offset_y)
+
+	dmg_label.global_position = start_pos
 	dmg_label.modulate = Color(1, 0, 0, 1)
 
-	# Animación: subir y desvanecerse
+	# --------------------
+	#  ANIMACIÓN SERPENTEANTE
+	# --------------------
+	var total_travel := randf_range(40.0, 90.0)  # cuánto más sube desde la posición inicial
+	var amplitude := randf_range(10.0, 25.0)     # amplitud de la oscilación lateral
+	var waves := randf_range(1.5, 3.0)          # cuántas “eses” hace
+	var move_time := 0.7                        # duración del movimiento
+	var fade_time := 0.3                        # tiempo de desvanecerse (solapado con el final)
+
 	var tween := root.create_tween()
-	# Sube hacia arriba
-	tween.tween_property(dmg_label, "position", dmg_label.position + Vector2(0, -30), 0.4) \
-		.set_trans(Tween.TRANS_SINE) \
-		.set_ease(Tween.EASE_OUT)
-	# Luego baja la alpha a 0
-	tween.tween_property(dmg_label, "modulate:a", 0.0, 0.3) \
-		.set_trans(Tween.TRANS_SINE) \
-		.set_ease(Tween.EASE_IN)
-	
-	# Cuando acabe la animación, lo destruimos
-	tween.finished.connect(func ():
+
+	# Movimiento serpenteante usando tween_method con una lambda (Godot 4)
+	tween.tween_method(
+		func(t: float) -> void:
+			if not is_instance_valid(dmg_label):
+				return
+			# t va de 0 a 1
+			var y := -t * total_travel
+			var x := sin(t * TAU * waves) * amplitude
+			dmg_label.global_position = start_pos + Vector2(x, y)
+	,
+		0.0,
+		1.0,
+		move_time
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+	# Desvanecer alpha en paralelo
+	tween.parallel().tween_property(
+		dmg_label, "modulate:a", 0.0, fade_time
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN).set_delay(move_time - fade_time)
+
+	# Cuando termine, borramos el label
+	tween.finished.connect(func() -> void:
 		if is_instance_valid(dmg_label):
 			dmg_label.queue_free()
 	)
