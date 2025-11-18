@@ -115,15 +115,35 @@ func can_add_item(data: Resource) -> bool:
 func get_item_count(target_res: Resource) -> int:
 	if not target_res:
 		return 0
+	
+	# CASO 1: Nos pasan una Pieza (PieceData o PieceRes)
+	# Si es PieceData, extraemos el origen para buscar todas las variantes
+	var search_res = target_res
+	if target_res is PieceData:
+		search_res = target_res.piece_origin
+	
+	# Buscamos en el inventario de PIEZAS
+	if search_res is PieceRes:
+		for id in piece_counts:
+			var entry = piece_counts[id]
+			var data = entry["data"]
+			# Comparamos el PieceRes original (identidad de la unidad)
+			if data is PieceData and data.piece_origin == search_res:
+				return entry["count"]
+
+	# CASO 2: Nos pasan una Pasiva (PassiveData)
+	# Buscamos en el inventario de PASIVAS
+	elif target_res is PassiveData:
+		# Intento 1: Buscar por ID de recurso (más rápido y exacto)
+		var target_id = _get_item_id(target_res)
+		if passive_counts.has(target_id):
+			return passive_counts[target_id]["count"]
 		
-	# Iteramos sobre todos los items guardados en la sección de piezas
-	for id in piece_counts:
-		var entry = piece_counts[id]
-		var data = entry["data"]
-		
-		# Verificamos si el item es un PieceData y si su origen coincide con lo que buscamos
-		if data is PieceData and "piece_origin" in data:
-			if data.piece_origin == target_res:
+		# Intento 2: Búsqueda manual (por si acaso las instancias son diferentes pero el recurso es igual)
+		for id in passive_counts:
+			var entry = passive_counts[id]
+			var data = entry["data"]
+			if data == target_res: # Comparación de puntero/recurso
 				return entry["count"]
 	
 	return 0

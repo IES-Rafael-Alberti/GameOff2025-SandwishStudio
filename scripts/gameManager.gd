@@ -129,8 +129,7 @@ func set_state(new_state: GameState):
 				_toggle_store(false) # Abrir tienda
 				buttonShop.disabled = false
 				inventory.set_interactive(true)
-				var round_income = gold_round_base * (gold_day_mult)
-				PlayerData.add_currency(round_income)
+
 			
 			GameState.ROULETTE:
 				round_label.text = "Ronda " + str(current_round) + " - ¡Gira la ruleta!"
@@ -206,8 +205,14 @@ func _on_combat_requested(piece_resource: Resource):
 
 # El combate TERMINA (solo se llama si hubo un combate real)
 func _on_combat_finished():
+
+	var round_income = int(gold_round_base * gold_day_mult)
+	PlayerData.add_currency(round_income)
+	print("Ronda finalizada. Ingresos obtenidos: %d" % round_income)
+	# -----------------------------
 	current_round += 1
 	print("--- Fin de la Ronda. Empezando Ronda %d ---" % current_round)
+	
 	set_state(GameState.SHOP)
 	store.generate()
 

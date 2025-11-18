@@ -1,47 +1,30 @@
 extends Control
-@export var price_increase: float = 0.5
+
 @onready var piece_scene: PackedScene = preload("res://scenes/piece.tscn")
 @onready var passive_scene: PackedScene = preload("res://scenes/passive.tscn")
+
+@export_group("Configuración de Items")
 @export var piece_origins: Array[PieceData]
 @export var passive_origins: Array[PassiveData]
+@export var max_copies: int = 3 # Límite para dejar de salir en tienda
+
+@export_group("Economía")
+@export_range(0.0, 2.0) var duplicate_piece_mult: float = 0.5 # 50% extra para Piezas
+@export_range(0.0, 2.0) var duplicate_passive_mult: float = 0.5 # 50% extra para Pasivas
+@export var COLOR_NORMAL_BG = Color(0, 0, 0, 0.6) 
+@export var COLOR_UNAFFORD_BG = Color(1.0, 0, 0, 0.6) 
+
 @onready var inventory: Control = $"../inventory"
 @onready var piece_zone: HBoxContainer = $VBoxContainer/piece_zone
 @onready var passive_zone: HBoxContainer = $VBoxContainer/passive_zone
 @onready var reroll_button: TextureButton = $VBoxContainer/HBoxContainer/Reroll
 
-# --- NUEVA VARIABLE ---
-
 var current_shop_styles: Array = []
-@export var COLOR_NORMAL_BG = Color(0, 0, 0, 0.6) 
-@export var COLOR_UNAFFORD_BG = Color(1.0, 0, 0, 0.6) 
+
 
 func _ready() -> void:
 	PlayerData.currency_changed.connect(_update_all_label_colors)
 
-# --- NUEVA FUNCIÓN PARA CALCULAR PRECIO ---
-func _calculate_price(data) -> int:
-	# Comprobación de seguridad: si el objeto no tiene precio, retornamos 0
-	if not "price" in data:
-		return 0
-
-	var base_price: int = data.price
-	
-	# Lógica para buscar al GameManager y contar copias
-	var count: int = 0
-	
-	# Intentamos encontrar el GameManager de forma robusta
-	var game_manager = null
-	if owner and owner.has_method("get_inventory_piece_count"):
-		game_manager = owner
-	elif get_tree().current_scene and get_tree().current_scene.has_method("get_inventory_piece_count"):
-		game_manager = get_tree().current_scene
-	
-	if game_manager:
-		count = game_manager.get_inventory_piece_count(data)
-	
-	# Si count es 0, el precio es el base. Si es 1, aumenta según el porcentaje configurado.
-	var multiplier: float = 1.0 + (price_increase * count)
-	return int(base_price * multiplier)
 
 func generate():
 	current_shop_styles.clear()
@@ -51,14 +34,34 @@ func generate():
 	for child in passive_zone.get_children():
 		child.queue_free()
 
-	_generate_buttons(piece_origins, piece_zone, piece_scene)
-	_generate_buttons(passive_origins, passive_zone, passive_scene)
+	# --- PASO 1: Filtrar items que ya tienen max_copies ---
+	var available_pieces = _filter_maxed_items(piece_origins)
+	var available_passives = _filter_maxed_items(passive_origins)
+
+	# --- PASO 2: Generar solo con los disponibles ---
+	_generate_buttons(available_pieces, piece_zone, piece_scene)
+	_generate_buttons(available_passives, passive_zone, passive_scene)
 	
 	_update_all_label_colors()
 
 
+# Nueva función auxiliar para filtrar la pool
+func _filter_maxed_items(candidates: Array) -> Array:
+	var available = []
+	for item in candidates:
+		if item is PieceData:
+			var count = _get_item_count_safe(item)
+			if count < max_copies:
+				available.append(item)
+		else:
+			available.append(item)
+			
+	return available
+
+
 func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_scene: PackedScene) -> void:
 	if origin_array.is_empty():
+		# Opcional: Mostrar mensaje de "Agotado" si no queda nada
 		return
 
 	var shuffled = origin_array.duplicate()
@@ -80,7 +83,6 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 			item_container.alignment = VBoxContainer.ALIGNMENT_CENTER
 
 			if "price" in origin_data:
-				# --- CAMBIO AQUÍ: Usar precio calculado ---
 				var final_price: int = _calculate_price(origin_data)
 				
 				var price_label = Label.new()
@@ -89,7 +91,6 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 				
 				var style_box = StyleBoxFlat.new()
 				
-				# Lógica de color inicial
 				if PlayerData.has_enough_currency(final_price):
 					style_box.bg_color = COLOR_NORMAL_BG
 				else:
@@ -107,7 +108,6 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 				price_label.add_theme_stylebox_override("normal", style_box)
 				item_container.add_child(price_label)
 				
-				# --- CAMBIO AQUÍ: Guardamos 'data' y 'label' para recalcular luego si hace falta ---
 				current_shop_styles.append({
 					"style": style_box, 
 					"data": origin_data, 
@@ -134,15 +134,14 @@ func _on_button_pressed(button: TextureButton) -> void:
 
 	var price: int = 0
 	if "price" in data:
-		# --- CAMBIO AQUÍ: Usar precio calculado al momento de comprar ---
 		price = _calculate_price(data)
 		
 	if not PlayerData.has_enough_currency(price):
-		print("No tienes suficiente oro para comprar %s. Precio: %d" % [data.resource_name, price])
+		print("No tienes suficiente oro. Precio: %d" % price)
 		return
 
 	if not inventory.can_add_item(data):
-		print("Inventario lleno, no se puede comprar")
+		print("Inventario lleno")
 		return
 
 	if PlayerData.spend_currency(price):
@@ -151,10 +150,10 @@ func _on_button_pressed(button: TextureButton) -> void:
 		button.modulate = Color(0.25, 0.25, 0.25, 1.0)
 		print("Compraste %s por %d oro." % [data.resource_name, price])
 		
-		# Opcional: Si quieres que al comprar uno, el precio del OTRO (si hubiera otro igual en tienda) suba inmediatamente:
-		# _update_all_label_colors() 
+		# Actualizamos precios por si subieron al comprar copia
+		_update_all_label_colors()
 	else:
-		print("Error: No se pudo gastar el oro.")
+		print("Error al gastar oro.")
 
 
 func _update_all_label_colors(_new_amount: int = 0) -> void:
@@ -166,10 +165,8 @@ func _update_all_label_colors(_new_amount: int = 0) -> void:
 		var data = item.data
 		var label: Label = item.label
 		
-		# Recalculamos precio por si cambió algo (ej. compraste una unidad y ahora la siguiente es más cara)
 		var current_price: int = _calculate_price(data)
 		
-		# Actualizamos el texto del label por seguridad
 		if label:
 			label.text = str(current_price) + "€"
 		
@@ -177,3 +174,37 @@ func _update_all_label_colors(_new_amount: int = 0) -> void:
 			style_box.bg_color = COLOR_NORMAL_BG
 		else:
 			style_box.bg_color = COLOR_UNAFFORD_BG
+
+
+# --- LÓGICA DE PRECIO MEJORADA ---
+func _calculate_price(data) -> int:
+	if not "price" in data:
+		return 0
+
+	var base_price: int = data.price
+	var count: int = _get_item_count_safe(data)
+	
+	# Seleccionamos el multiplicador correcto según el tipo
+	var multiplier_val: float = 0.0
+	
+	# Detectamos si es pieza o pasiva
+	if data is PieceData:
+		multiplier_val = duplicate_piece_mult
+	elif data is PassiveData:
+		multiplier_val = duplicate_passive_mult
+	
+	var total_mult: float = 1.0 + (multiplier_val * count)
+	return int(base_price * total_mult)
+
+
+# Helper para obtener conteo de forma segura
+func _get_item_count_safe(data) -> int:
+	var game_manager = null
+	if owner and owner.has_method("get_inventory_piece_count"):
+		game_manager = owner
+	elif get_tree().current_scene and get_tree().current_scene.has_method("get_inventory_piece_count"):
+		game_manager = get_tree().current_scene
+	
+	if game_manager:
+		return game_manager.get_inventory_piece_count(data)
+	return 0
