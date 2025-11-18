@@ -337,3 +337,10 @@ func pausar():
 	var pause_instance = pause_scene.instantiate()
 	add_child(pause_instance)
 	get_tree().paused = true
+	
+func get_inventory_piece_count(piece_data: Resource) -> int:
+	if inventory and inventory.has_method("get_item_count"):
+		return inventory.get_item_count(piece_data)
+		
+	push_error("GameManager: No se pudo acceder a get_item_count en el inventario.")
+	return 0
