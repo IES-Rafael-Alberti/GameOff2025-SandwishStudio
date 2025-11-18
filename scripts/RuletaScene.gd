@@ -195,15 +195,8 @@ func _reset():
 	# Avisamos a todos que la ruleta se ha DETENIDO.
 	GlobalSignals.emit_signal("roulette_state_changed", false)
 
-	# ¡Importante!
-# No reseteamos la rotación aquí.
-	
-# --- ¡CAMBIO 5!
-# Nueva función pública ---
-# Esta función será llamada por gameManager para reiniciar la
-# rotación de la ruleta DESPUÉS del combate.
+
 func reset_rotation_to_zero():
-	# Solo reseteamos si la ruleta está en reposo (IDLE)
 	if state == State.IDLE:
 		$SpriteRuleta.rotation_degrees = 0.0
 
