@@ -6,4 +6,5 @@
 script = ExtResource("1_x2ot1")
 id = "europea.dragon"
 display_name = "dragon"
+rarity = 3
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"

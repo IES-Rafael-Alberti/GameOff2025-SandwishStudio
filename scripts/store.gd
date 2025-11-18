@@ -12,8 +12,14 @@ extends Control
 @export_range(0.0, 2.0) var duplicate_piece_mult: float = 0.5 # 50% extra para Piezas
 @export_range(0.0, 2.0) var duplicate_passive_mult: float = 0.5 # 50% extra para Pasivas
 @export var COLOR_NORMAL_BG = Color(0, 0, 0, 0.6) 
-@export var COLOR_UNAFFORD_BG = Color(1.0, 0, 0, 0.6) 
+@export var COLOR_UNAFFORD_BG = Color(1.0, 0, 0, 0.6)
 
+@export_group("Probabilidades de Tienda (%)")
+@export_range(0, 100) var prob_comun: int = 70
+@export_range(0, 100) var prob_raro: int = 20
+@export_range(0, 100) var prob_epico: int = 8
+@export_range(0, 100) var prob_legendario: int = 2
+var _pieces_by_rarity: Dictionary = {}
 @onready var inventory: Control = $"../inventory"
 @onready var piece_zone: HBoxContainer = $VBoxContainer/piece_zone
 @onready var passive_zone: HBoxContainer = $VBoxContainer/passive_zone
@@ -34,16 +40,96 @@ func generate():
 	for child in passive_zone.get_children():
 		child.queue_free()
 
-	# --- PASO 1: Filtrar items que ya tienen max_copies ---
+	# 1. Obtener piezas válidas (que no tengamos 3 copias)
 	var available_pieces = _filter_maxed_items(piece_origins)
-	var available_passives = _filter_maxed_items(passive_origins)
+	
+	# 2. Organizarlas por rareza para poder elegir
+	_organize_pieces_by_rarity(available_pieces)
+	
+	# 3. Elegir 3 piezas basadas en probabilidad
+	var selected_pieces: Array = []
+	for i in range(3):
+		var piece = _get_random_weighted_piece()
+		if piece:
+			selected_pieces.append(piece)
 
-	# --- PASO 2: Generar solo con los disponibles ---
-	_generate_buttons(available_pieces, piece_zone, piece_scene)
-	_generate_buttons(available_passives, passive_zone, passive_scene)
+	# 4. Generar los botones (Pasamos la lista YA seleccionada)
+	_generate_buttons(selected_pieces, piece_zone, piece_scene)
+	
+	# --- Lógica de Pasivas (Se mantiene aleatoria simple por ahora) ---
+	var available_passives = _filter_maxed_items(passive_origins)
+	if not available_passives.is_empty():
+		var shuffled_passives = available_passives.duplicate()
+		shuffled_passives.shuffle()
+		# Cogemos 3 o menos si no hay suficientes
+		var selected_passives = shuffled_passives.slice(0, min(3, shuffled_passives.size()))
+		_generate_buttons(selected_passives, passive_zone, passive_scene)
 	
 	_update_all_label_colors()
 
+# --- NUEVAS FUNCIONES DE PROBABILIDAD ---
+
+# Clasifica las piezas disponibles en un diccionario { RAREZA: [lista_piezas] }
+func _organize_pieces_by_rarity(pieces: Array):
+	_pieces_by_rarity.clear()
+	
+	# Inicializamos arrays vacíos para evitar errores si no hay piezas de un tipo
+	_pieces_by_rarity[PieceRes.PieceRarity.COMUN] = []
+	_pieces_by_rarity[PieceRes.PieceRarity.RARO] = []
+	_pieces_by_rarity[PieceRes.PieceRarity.EPICO] = []
+	_pieces_by_rarity[PieceRes.PieceRarity.LEGENDARIO] = []
+	
+	for p in pieces:
+		# Verificamos que tenga piece_origin y rarity
+		if p is PieceData and p.piece_origin:
+			var rarity = p.piece_origin.rarity
+			if _pieces_by_rarity.has(rarity):
+				_pieces_by_rarity[rarity].append(p)
+
+# Algoritmo de Ruleta para elegir rareza
+func _get_random_weighted_piece() -> Resource:
+	var roll = randi() % 100 + 1 # Número entre 1 y 100
+	var selected_rarity = -1
+	
+	var umbral_comun = prob_comun
+	var umbral_raro = prob_comun + prob_raro
+	var umbral_epico = prob_comun + prob_raro + prob_epico
+	# El resto es legendario
+	
+	# Determinamos qué rareza "tocó"
+	if roll <= umbral_comun:
+		selected_rarity = PieceRes.PieceRarity.COMUN
+	elif roll <= umbral_raro:
+		selected_rarity = PieceRes.PieceRarity.RARO
+	elif roll <= umbral_epico:
+		selected_rarity = PieceRes.PieceRarity.EPICO
+	else:
+		selected_rarity = PieceRes.PieceRarity.LEGENDARIO
+	
+	# Intentamos obtener una pieza de esa rareza
+	var piece = _pick_from_rarity_pool(selected_rarity)
+	
+	# --- SISTEMA DE FALLBACK (Seguridad) ---
+	# Si salió Legendario pero NO tenemos legendarios definidos o disponibles (por max copias),
+	# bajamos de categoría hasta encontrar algo.
+	if piece == null:
+		piece = _pick_from_rarity_pool(PieceRes.PieceRarity.COMUN) # Intento fallback a Común
+	if piece == null:
+		# Si ni siquiera hay comunes, cogemos cualquiera de la lista general flat
+		var all_pools = _pieces_by_rarity.values()
+		for pool in all_pools:
+			if not pool.is_empty():
+				return pool.pick_random()
+				
+	return piece
+
+# Helper simple para sacar una al azar de una lista específica
+func _pick_from_rarity_pool(rarity: int) -> Resource:
+	if _pieces_by_rarity.has(rarity):
+		var pool = _pieces_by_rarity[rarity]
+		if not pool.is_empty():
+			return pool.pick_random()
+	return null
 
 # Nueva función auxiliar para filtrar la pool
 func _filter_maxed_items(candidates: Array) -> Array:
