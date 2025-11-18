@@ -1,19 +1,12 @@
 # combat_scene.gd
 extends Node2D
 
-# --- ¡SEÑAL ORIGINAL! ---
-# (Ya la tenías, solo confirmo que la necesitamos)
 signal combat_finished
 
 const NPC_SCENE := preload("res://scenes/npc.tscn")
 const PieceAdapter := preload("res://scripts/piece_adapter.gd")
 
-const ENEMY_RES := [
-	preload("res://resources/warrior/black_warrior.tres"),
-	preload("res://resources/warrior/blue_warrior.tres"),
-	preload("res://resources/warrior/red_warrior.tres"),
-	preload("res://resources/warrior/yellow_warrior.tres")
-]
+@export var enemy_res: Array[npcRes] = []
 const ALLY_LIMIT := 14
 const ENEMY_LIMIT := 1
 
@@ -221,20 +214,26 @@ func _stop_combat() -> void:
 #	enemy_npcs.clear()
 #	print("Limpiando Gladiador...")
 
-
-# (El resto de funciones originales)
-
 func spawn_enemy_one() -> void:
 	if enemy_npcs.size() >= ENEMY_LIMIT:
-		# Prevenimos spam si algo sale mal
-		# print("Enemy limit reached (%d)." % ENEMY_LIMIT) 
+		print("Enemy limit reached (%d)." % ENEMY_LIMIT)
 		return
+
+	if enemy_res.is_empty():
+		push_error("enemy_res está vacío en combat_scene.gd. Asigna gladiadores .tres de res://resources/warrior.")
+		return
+
+	# Posición de spawn (fuera de la arena)
 	var pos := enemy_spawn.position
-	var war_res: npcRes = ENEMY_RES[randi() % ENEMY_RES.size()]
+
+	# Elegimos un gladiador al azar de la lista
+	var war_res: npcRes = enemy_res[randi() % enemy_res.size()]
+
 	var e := _spawn_npc(npc.Team.ENEMY, pos, war_res)
 	if e:
 		enemy_npcs.append(e)
 		print("Enemy spawned at GladiatorSpawn -> %s" % war_res.resource_path.get_file().get_basename())
+		# Entrada hasta el punto de mirar
 		_move_with_tween(e, enemy_wait_slot.position, 0.8)
 
 func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
