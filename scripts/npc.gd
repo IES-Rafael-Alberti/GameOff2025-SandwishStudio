@@ -7,9 +7,13 @@ enum Team { ALLY, ENEMY }
 @export var team: Team = Team.ALLY
 const NpcRes = preload("res://scripts/npc_res.gd")
 
+# Speed Atack adaptable
 const ATTACK_SPEED_SOFT_CAP := 2.0   # a partir de aquí escala más lento
 const ATTACK_SPEED_HARD_CAP := 4.0   # nunca pasa de 4 ataques/segundo
 const ATTACK_SPEED_OVER_FACTOR := 0.3  # 30% de lo que pase del soft cap
+
+# Log
+const DAMAGE_TEXT_SCENE := preload("res://scenes/damage_text.tscn")
 
 @export var npc_res: npcRes
 @export var show_healthbar: bool = true
@@ -74,6 +78,42 @@ func _update_healthbar() -> void:
 	health_bar.max_value = max_health
 	health_bar.value = health
 	health_bar.visible = show_healthbar and (not hide_when_full or health < max_health)
+
+func _show_damage_text(amount: float) -> void:
+	# Instanciamos el Label
+	var dmg_label: Label = DAMAGE_TEXT_SCENE.instantiate()
+	
+	# Redondeamos el daño para mostrarlo bonito
+	dmg_label.text = str(int(round(amount)))
+	
+	# Lo añadimos a la escena raíz para que no herede escalados raros
+	var root := get_tree().current_scene
+	if root == null:
+		return
+	root.add_child(dmg_label)
+	
+	# Posición inicial = posición del NPC, un poco por encima
+	dmg_label.global_position = global_position + Vector2(0, -20)
+	
+	# Color rojo por si no lo pusiste en el inspector
+	dmg_label.modulate = Color(1, 0, 0, 1)
+
+	# Animación: subir y desvanecerse
+	var tween := root.create_tween()
+	# Sube hacia arriba
+	tween.tween_property(dmg_label, "position", dmg_label.position + Vector2(0, -30), 0.4) \
+		.set_trans(Tween.TRANS_SINE) \
+		.set_ease(Tween.EASE_OUT)
+	# Luego baja la alpha a 0
+	tween.tween_property(dmg_label, "modulate:a", 0.0, 0.3) \
+		.set_trans(Tween.TRANS_SINE) \
+		.set_ease(Tween.EASE_IN)
+	
+	# Cuando acabe la animación, lo destruimos
+	tween.finished.connect(func ():
+		if is_instance_valid(dmg_label):
+			dmg_label.queue_free()
+	)
 
 func can_damage(other: npc) -> bool:
 	return team != other.team
@@ -140,6 +180,7 @@ func get_crit_mult(target: npc) -> float:
 func take_damage(amount: float, from: npc = null) -> void:
 	if amount <= 0.0: return
 	health = max(0.0, health - amount)
+	_show_damage_text(amount)
 	for ab in abilities:
 		if ab: ab.on_take_damage(self, amount, from)
 	_update_healthbar()
