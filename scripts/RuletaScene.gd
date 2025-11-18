@@ -4,7 +4,7 @@ extends Node2D
 signal roulette_spin_started
 
 @export var friction := 0.985
-@export var snap_speed := 7.5 # Ya no se usa para el snap, pero se deja por si acaso
+@export var snap_speed := 7.5
 @export var bounce_angle := 12.0
 @export var bounce_time := 0.08
 @export var enemy_manager: Node
@@ -24,7 +24,7 @@ var bouncing := false
 var is_interactive := true
 
 # --- ¡NUEVA FUNCIÓN! ---
-# Se llama cuando el script _ready() esté disponible
+
 func _ready():
 	# Conectamos la señal de borrado de inventario
 	GlobalSignals.piece_type_deleted.connect(_on_piece_type_deleted)
@@ -71,7 +71,6 @@ func _input(event):
 			
 			roulette_spin_started.emit()
 
-
 func _drag():
 	var mouse = get_global_mouse_position()
 	var center = $SpriteRuleta.global_position
@@ -84,7 +83,6 @@ func _drag():
 	
 	inertia = diff*1.2
 	$SpriteRuleta.rotation_degrees += inertia
-
 
 func _spin(delta: float):
 	$SpriteRuleta.rotation_degrees += inertia

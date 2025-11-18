@@ -41,7 +41,7 @@ offset_bottom = 362.0
 theme_override_font_sizes/font_size = 28
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
-position = Vector2(284, 365)
+position = Vector2(111, 344)
 scale = Vector2(0.8845031, 0.8845031)
 
 [node name="ButtonShop" parent="." instance=ExtResource("6_p57ef")]
