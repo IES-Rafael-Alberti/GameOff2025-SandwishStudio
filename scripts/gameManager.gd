@@ -25,6 +25,8 @@ var current_round: int = 1
 @onready var inventory: Control = $inventory
 @onready var roulette: Node2D = $Roulette
 @onready var combat_scene: Node2D = $combat_scene
+@export var gold_round_base: int = 100
+@export var gold_day_mult: float = 1
 
 # (Asegúrate de que este nodo Label "RoundLabel" existe en tu escena game.tscn)
 @onready var round_label: Label = $RoundLabel
@@ -127,6 +129,8 @@ func set_state(new_state: GameState):
 				_toggle_store(false) # Abrir tienda
 				buttonShop.disabled = false
 				inventory.set_interactive(true)
+				var round_income = gold_round_base * (gold_day_mult)
+				PlayerData.add_currency(round_income)
 			
 			GameState.ROULETTE:
 				round_label.text = "Ronda " + str(current_round) + " - ¡Gira la ruleta!"
