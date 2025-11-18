@@ -338,9 +338,16 @@ func pausar():
 	add_child(pause_instance)
 	get_tree().paused = true
 	
-func get_inventory_piece_count(piece_data: Resource) -> int:
+func get_inventory_piece_count(resource_to_check: Resource) -> int:
+	var item_to_search = resource_to_check
+	
+	# Si nos pasan un PieceData (Tienda), extraemos el PieceRes (Identidad de la unidad)
+	if resource_to_check is PieceData:
+		item_to_search = resource_to_check.piece_origin
+	
+	# Ahora preguntamos al inventario usando siempre el PieceRes
 	if inventory and inventory.has_method("get_item_count"):
-		return inventory.get_item_count(piece_data)
+		return inventory.get_item_count(item_to_search)
 		
 	push_error("GameManager: No se pudo acceder a get_item_count en el inventario.")
 	return 0

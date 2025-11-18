@@ -20,7 +20,6 @@ const ENEMY_LIMIT := 1
 
 @onready var enemy_spawn: Marker2D = $GladiatorSpawn
 @onready var round_message: Label = $RoundMessage
-@onready var round_counter: Label = $RoundCounter
 @onready var ally_entry_spawn: Marker2D = $AlliesSpawn
 @onready var enemy_wait_slot: Marker2D = $EnemySlots/EnemyWaitSlot
 @onready var enemy_battle_slot: Marker2D = $EnemySlots/EnemyBattleSlot
@@ -50,7 +49,6 @@ var round_number := 0
 
 func _ready() -> void:
 	randomize()
-	_update_round_counter()
 	GlobalSignals.combat_requested.connect(on_roulette_combat_requested)
 
 	start_timer = Timer.new()
@@ -63,10 +61,7 @@ func _ready() -> void:
 	spawn_enemy_one()
 	# --- FIN DE CAMBIO ---
 
-func _update_round_counter() -> void:
-	if is_instance_valid(round_counter):
-		# (Lo dejamos como estaba, gameManager gestionará la etiqueta principal)
-		pass
+
 
 func _advance_round() -> void:
 	# (Lo dejamos como estaba)

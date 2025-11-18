@@ -127,6 +127,7 @@ func get_item_count(target_res: Resource) -> int:
 				return entry["count"]
 	
 	return 0
+
 # --- ¡FUNCIÓN MODIFICADA! ---
 # Añade un item, respetando el límite de copias
 func add_item(data: Resource, amount: int = 1) -> bool:
