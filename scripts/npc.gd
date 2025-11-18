@@ -7,6 +7,10 @@ enum Team { ALLY, ENEMY }
 @export var team: Team = Team.ALLY
 const NpcRes = preload("res://scripts/npc_res.gd")
 
+const ATTACK_SPEED_SOFT_CAP := 2.0   # a partir de aquí escala más lento
+const ATTACK_SPEED_HARD_CAP := 4.0   # nunca pasa de 4 ataques/segundo
+const ATTACK_SPEED_OVER_FACTOR := 0.3  # 30% de lo que pase del soft cap
+
 @export var npc_res: npcRes
 @export var show_healthbar: bool = true
 @export var hide_when_full: bool = false
@@ -21,15 +25,12 @@ var display_name: String = ""
 @onready var name_label: Label = $NameLabel
 @onready var health_bar: ProgressBar = $healthBar
 
-# --- INICIO DE CÓDIGO NUEVO ---
 # Variables para almacenar las bonificaciones de GlobalStats
 var bonus_health: float = 0.0
 var bonus_damage: float = 0.0
 var bonus_speed: float = 0.0
 var bonus_crit_chance: float = 0.0
 var bonus_crit_damage: float = 0.0
-# --- FIN DE CÓDIGO NUEVO ---
-
 
 func _ready() -> void:
 	# Carge stats form the resource
@@ -82,7 +83,6 @@ func heal(amount: float) -> void:
 	health = min(max_health, health + amount)
 	_update_healthbar()
 
-
 func apply_passive_bonuses(p_health: float, p_damage: float, p_speed: float, p_crit_c: float, p_crit_d: float):
 	bonus_health = p_health
 	bonus_damage = p_damage
@@ -95,8 +95,6 @@ func apply_passive_bonuses(p_health: float, p_damage: float, p_speed: float, p_c
 	
 	_update_healthbar()
 
-
-
 # CONTROLER BATTLE
 func get_damage(target: npc) -> float:
 
@@ -107,12 +105,20 @@ func get_damage(target: npc) -> float:
 	return max(0.0, val)
 
 func get_attack_speed() -> float:
-
+	#Base plus bonus
 	var val := npc_res.atack_speed + bonus_speed
 	
+	# Skill Modifiers
 	for ab in abilities:
 		if ab: val = ab.modify_attack_speed(val, self)
-	return max (0.01, val)
+
+	# Diminishing returns a partir del soft cap
+	if val > ATTACK_SPEED_SOFT_CAP:
+		var over := val - ATTACK_SPEED_SOFT_CAP
+		val = ATTACK_SPEED_SOFT_CAP + over * ATTACK_SPEED_OVER_FACTOR
+	
+	val = clamp(val, 0.1, ATTACK_SPEED_HARD_CAP)
+	return val
 
 func get_crit_chance(target: npc) -> int:
 
