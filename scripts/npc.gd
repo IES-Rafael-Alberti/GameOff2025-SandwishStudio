@@ -15,6 +15,11 @@ const ATTACK_SPEED_OVER_FACTOR := 0.3  # 30% de lo que pase del soft cap
 # Log
 const DAMAGE_TEXT_SCENE := preload("res://scenes/damage_text.tscn")
 
+# Shader de daño (shock)
+@onready var shock_material: ShaderMaterial = material
+var shock_timer: float = 0.0
+var is_shocked: bool = false
+
 @export var npc_res: npcRes
 @export var show_healthbar: bool = true
 @export var hide_when_full: bool = false
@@ -53,6 +58,8 @@ func _ready() -> void:
 		if sprite_frames.has_animation("idle"):
 			animation = "idle"
 			play()
+	if shock_material:
+		shock_material.set_shader_parameter("shock_time", 999.0)
 	else:
 		push_error("Debbug posible problema en el inspector")
 
@@ -239,7 +246,13 @@ func get_crit_mult(target: npc) -> float:
 func take_damage(amount: float, from: npc = null, was_crit: bool = false) -> void:
 	if amount <= 0.0: return
 	health = max(0.0, health - amount)
+	if shock_material:
+		shock_timer = 0.0
+		is_shocked = true
+		shock_material.set_shader_parameter("shock_time", shock_timer)
+
 	_show_damage_text(amount, was_crit)
+
 	for ab in abilities:
 		if ab: ab.on_take_damage(self, amount, from)
 	_update_healthbar()
@@ -264,3 +277,14 @@ func notify_after_attack(target: npc, dealt_damage: float, was_crit: bool) -> vo
 func notify_kill(victim: npc) -> void:
 	for ab in abilities:
 		if ab: ab.on_kill(self, victim)
+
+func _process(delta: float) -> void:
+	if is_shocked and shock_material:
+		# Avanzamos el tiempo del efecto
+		shock_timer += delta * 8.0  # sube/baja este 8.0 para cambiar velocidad
+		shock_material.set_shader_parameter("shock_time", shock_timer)
+
+		# Cuando pasa un rato, damos por terminado el efecto
+		if shock_timer > 0.3:
+			is_shocked = false
+			shock_material.set_shader_parameter("shock_time", 999.0)
