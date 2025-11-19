@@ -277,15 +277,7 @@ func _advance_to_next_day() -> void:
 ## ------------------------------------------------------------------
 # ... (El resto de funciones auxiliares siguen igual) ...
 
-func _on_shop_button_pressed():
-	if anim.is_playing(): return
-	if current_state == GameState.SHOP:
-		set_state(GameState.ROULETTE)
-	elif current_state == GameState.ROULETTE:
-		set_state(GameState.SHOP)
 
-func _on_roulette_spin_started():
-	set_state(GameState.SPINNING)
 
 func _give_initial_piece():
 	if not inventory.has_method("get_random_initial_piece"): return
