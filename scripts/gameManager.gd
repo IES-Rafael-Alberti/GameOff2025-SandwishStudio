@@ -36,6 +36,7 @@ var gladiators_defeated: int = 0
 @export var gladiators_mult: int = 1
 @export var max_days: int = 2
 
+
 # --- UI LABELS ---
 @onready var round_label: Label = $RoundLabel
 @onready var day_label: Label = $DayLabel
@@ -174,6 +175,19 @@ func set_state(new_state: GameState):
 ## ------------------------------------------------------------------
 ## Lógica Principal (MODIFICADA)
 ## ------------------------------------------------------------------
+
+func _on_shop_button_pressed():
+	if anim.is_playing():
+		return
+		
+	if current_state == GameState.SHOP:
+		set_state(GameState.ROULETTE)
+	elif current_state == GameState.ROULETTE:
+		set_state(GameState.SHOP)
+
+func _on_roulette_spin_started():
+	set_state(GameState.SPINNING)
+
 
 func _on_combat_requested(piece_resource: Resource):
 	if piece_resource and piece_resource is PieceRes:
@@ -368,3 +382,82 @@ func get_inventory_piece_count(resource_to_check: Resource) -> int:
 	if inventory and inventory.has_method("get_item_count"):
 		return inventory.get_item_count(item_to_search)
 	return 0
+
+## ------------------------------------------------------------------
+## SISTEMA DE SINERGIAS (NUEVO)
+## ------------------------------------------------------------------
+
+# Esta función recorre la ruleta, cuenta las piezas únicas y devuelve los niveles de bonus.
+# Se llama desde combat_scene.gd antes de spawnear a los aliados.
+func get_active_synergies() -> Dictionary:
+	var result = {
+		"jap": 0, # Tier Japonés
+		"nor": 0, # Tier Nórdico
+		"eur": 0  # Tier Europeo
+	}
+	
+	# Validaciones de seguridad
+	if not roulette or not roulette.has_node("SpriteRuleta/SlotsContainer"):
+		push_warning("GameManager: No se encontró el contenedor de slots en la ruleta.")
+		return result
+
+	var slots_container = roulette.get_node("SpriteRuleta/SlotsContainer")
+	
+	# Usamos Diccionarios para contar IDs únicos (Set)
+	var unique_ids_jap = {}
+	var unique_ids_nor = {}
+	var unique_ids_eur = {}
+	
+	for slot_root in slots_container.get_children():
+		if not slot_root.has_node("slot"):
+			continue
+			
+		var actual_slot = slot_root.get_node("slot")
+		
+		# Verificamos si hay una pieza válida en el slot
+		if "current_piece_data" in actual_slot and actual_slot.current_piece_data:
+			var piece_data = actual_slot.current_piece_data
+			
+			# Accedemos al PieceRes (donde está la raza y el ID)
+			if "piece_origin" in piece_data and piece_data.piece_origin is PieceRes:
+				var res = piece_data.piece_origin
+				var id = res.id
+				
+				match res.race:
+					PieceRes.PieceRace.JAPONESA:
+						unique_ids_jap[id] = true
+					PieceRes.PieceRace.NORDICA:
+						unique_ids_nor[id] = true
+					PieceRes.PieceRace.EUROPEA:
+						unique_ids_eur[id] = true
+
+	# --- CÁLCULO DE TIERS ---
+	
+	# Japonesas (2 -> +50% Dmg, 4 -> +100% Dmg Primer golpe)
+	var count_jap = unique_ids_jap.size()
+	if count_jap >= 4:
+		result["jap"] = 2
+	elif count_jap >= 2:
+		result["jap"] = 1
+		
+	# Nórdicas (2 -> Cura 50%, 4 -> Cura 75% al bajar de 25% HP)
+	var count_nor = unique_ids_nor.size()
+	if count_nor >= 4:
+		result["nor"] = 2
+	elif count_nor >= 2:
+		result["nor"] = 1
+		
+	# Europeas (2 -> +25% HP, 4 -> +50% HP)
+	var count_eur = unique_ids_eur.size()
+	if count_eur >= 4:
+		result["eur"] = 2
+	elif count_eur >= 2:
+		result["eur"] = 1
+		
+	if count_jap > 0 or count_nor > 0 or count_eur > 0:
+		print("--- Sinergias Activas (Banca) ---")
+		print("Japonesas (Unicas: %d) -> Tier %d" % [count_jap, result["jap"]])
+		print("Nórdicas (Unicas: %d) -> Tier %d" % [count_nor, result["nor"]])
+		print("Europeas (Unicas: %d) -> Tier %d" % [count_eur, result["eur"]])
+	
+	return result
