@@ -20,7 +20,7 @@ layout_mode = 2
 [node name="NameLabel" type="Label" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="DescriptionLabel" type="Label" parent="VBoxContainer"]
+[node name="DescriptionLabel" type="RichTextLabel" parent="VBoxContainer"]
 layout_mode = 2
 
 [node name="SellPriceLabel" type="Label" parent="VBoxContainer"]

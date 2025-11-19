@@ -24,13 +24,18 @@ var _pieces_by_rarity: Dictionary = {}
 @onready var piece_zone: HBoxContainer = $VBoxContainer/piece_zone
 @onready var passive_zone: HBoxContainer = $VBoxContainer/passive_zone
 @onready var reroll_button: TextureButton = $VBoxContainer/HBoxContainer/Reroll
+@onready var tooltip: PanelContainer = $Tooltip
+
+var sell_percentage_store: int = 0 
 
 var current_shop_styles: Array = []
+@export var COLOR_NORMAL_BG: Color = Color(0, 0, 0, 0.6) 
+@export var COLOR_UNAFFORD_BG: Color = Color(1.0, 0, 0, 0.6)
 
 
 func _ready() -> void:
 	PlayerData.currency_changed.connect(_update_all_label_colors)
-
+	# --- CORRECCIÓN: Se han eliminado las líneas de 'button' aquí ---
 
 func generate():
 	current_shop_styles.clear()
@@ -66,6 +71,7 @@ func generate():
 		_generate_buttons(selected_passives, passive_zone, passive_scene)
 	
 	_update_all_label_colors()
+
 
 # --- NUEVAS FUNCIONES DE PROBABILIDAD ---
 
@@ -164,7 +170,6 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 				texture_to_use = sprite_node.texture
 
 		if texture_to_use:
-			
 			var item_container = VBoxContainer.new()
 			item_container.alignment = VBoxContainer.ALIGNMENT_CENTER
 
@@ -177,6 +182,7 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 				
 				var style_box = StyleBoxFlat.new()
 				
+
 				if PlayerData.has_enough_currency(final_price):
 					style_box.bg_color = COLOR_NORMAL_BG
 				else:
@@ -193,12 +199,8 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 				
 				price_label.add_theme_stylebox_override("normal", style_box)
 				item_container.add_child(price_label)
-				
-				current_shop_styles.append({
-					"style": style_box, 
-					"data": origin_data, 
-					"label": price_label
-				})
+				current_shop_styles.append({"style": style_box, "price": price})
+
 
 			var button = TextureButton.new()
 			button.texture_normal = texture_to_use
@@ -207,11 +209,15 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 			
 			button.pressed.connect(_on_button_pressed.bind(button))
 			
+			# --- CORRECCIÓN: Conectamos las señales del ratón aquí ---
+			# Usamos .bind(origin_data) para pasar los datos del ítem a la función
+			button.mouse_entered.connect(_on_button_mouse_entered.bind(origin_data))
+			button.mouse_exited.connect(_on_button_mouse_exited)
+			
 			item_container.add_child(button)
 			target_zone.add_child(item_container)
 
 		origin_instance.queue_free()
-
 
 func _on_button_pressed(button: TextureButton) -> void:
 	var data = button.get_meta("data")
@@ -223,17 +229,19 @@ func _on_button_pressed(button: TextureButton) -> void:
 		price = _calculate_price(data)
 		
 	if not PlayerData.has_enough_currency(price):
-		print("No tienes suficiente oro. Precio: %d" % price)
+		print("No tienes suficiente oro.")
 		return
 
 	if not inventory.can_add_item(data):
-		print("Inventario lleno")
+		print("Inventario lleno.")
+
 		return
 
 	if PlayerData.spend_currency(price):
 		inventory.add_item(data)
 		button.disabled = true
 		button.modulate = Color(0.25, 0.25, 0.25, 1.0)
+
 		print("Compraste %s por %d oro." % [data.resource_name, price])
 		
 		# Actualizamos precios por si subieron al comprar copia
@@ -245,6 +253,7 @@ func _on_button_pressed(button: TextureButton) -> void:
 func _update_all_label_colors(_new_amount: int = 0) -> void:
 	if current_shop_styles.is_empty():
 		return
+
 
 	for item in current_shop_styles:
 		var style_box: StyleBoxFlat = item.style
@@ -260,7 +269,6 @@ func _update_all_label_colors(_new_amount: int = 0) -> void:
 			style_box.bg_color = COLOR_NORMAL_BG
 		else:
 			style_box.bg_color = COLOR_UNAFFORD_BG
-
 
 # --- LÓGICA DE PRECIO MEJORADA ---
 func _calculate_price(data) -> int:
@@ -294,3 +302,4 @@ func _get_item_count_safe(data) -> int:
 	if game_manager:
 		return game_manager.get_inventory_piece_count(data)
 	return 0
+
