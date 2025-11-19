@@ -89,6 +89,7 @@ func _ready() -> void:
 		
 	if manecilla_area:
 		manecilla_area.area_entered.connect(_on_manecilla_area_entered)
+	GlobalSignals.piece_type_deleted.connect(_on_piece_type_deleted)
 
 # --- INPUT Y PALANCA ---
 func _on_lever_input_event(_viewport, event, _shape_idx):
@@ -98,10 +99,7 @@ func _on_lever_input_event(_viewport, event, _shape_idx):
 		if event.pressed:
 			start_dragging()
 
-# Se llama cuando el script _ready() esté disponible
-func _ready():
-	# Conectamos la señal de borrado de inventario
-	GlobalSignals.piece_type_deleted.connect(_on_piece_type_deleted)
+
 
 func _input(event):
 	if is_dragging_lever and event is InputEventMouseButton:
@@ -197,7 +195,7 @@ func release_lever():
 		t.tween_property(lever_sprite, "scale", Vector2.ONE, 0.3)
 
 		t.chain().tween_callback(func(): lever_sprite.position = lever_origin_pos)
-	  GlobalSignals.emit_signal("roulette_state_changed", true)
+		GlobalSignals.emit_signal("roulette_state_changed", true)
 
 
 
@@ -326,7 +324,7 @@ func _reward():
 		GlobalSignals.emit_signal("combat_requested", null)
 		return
 
-	var winning_slot_root = SlotsContainer.get_child(index)
+	var winning_slot_root = slots_container.get_child(index)
 	var actual_slot_node = null
 
 	if winning_slot_root and winning_slot_root.has_node("slot"):
@@ -336,8 +334,7 @@ func _reward():
 	if actual_slot_node and "current_piece_data" in actual_slot_node:
 		
 		var piece = actual_slot_node.current_piece_data
-		
-	var winning_slot_root = slots_container.get_child(index)
+		winning_slot_root = slots_container.get_child(index)
 	
 	# Resalte TEMPORAL de la victoria (ya no es permanente)
 	if winning_slot_root and winning_slot_root.has_node("slot"):
@@ -428,7 +425,7 @@ func _on_piece_type_deleted(piece_data: PieceData):
 	print("... Ruleta ha recibido orden de borrado para: %s" % piece_data.resource_name)
 	
 	# Recorremos todos los slots de la ruleta
-	for slot_root in SlotsContainer.get_children():
+	for slot_root in slots_container.get_children():
 		if not slot_root.has_node("slot"):
 			continue
 			
@@ -446,4 +443,3 @@ func _on_piece_type_deleted(piece_data: PieceData):
 					slot.clear_slot()
 				else:
 					push_warning("Ruleta: El slot %s no tiene método clear_slot()" % slot.name)
-
