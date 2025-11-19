@@ -6,8 +6,8 @@
 [resource]
 script = ExtResource("2_36jfr")
 frames = ExtResource("1_kgmlj")
-max_health = 50000.0
-health = 50000.0
+max_health = 1000.0
+health = 1000.0
 damage = 10.0
 atack_speed = 2.0
 critical_chance = 20

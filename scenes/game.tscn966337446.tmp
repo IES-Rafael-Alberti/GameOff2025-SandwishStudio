@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://dd8wqmfs2cj1j"]
+[gd_scene load_steps=12 format=3 uid="uid://dd8wqmfs2cj1j"]
 
 [ext_resource type="Script" uid="uid://bpnxk43sopml" path="res://scripts/gameManager.gd" id="1_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://hbcgudcjh0wn" path="res://scenes/inventory.tscn" id="2_lbhrr"]
@@ -11,11 +11,9 @@
 [ext_resource type="PackedScene" uid="uid://bevacqmdtykqr" path="res://scenes/button_shop.tscn" id="6_p57ef"]
 [ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/jotun.tres" id="6_trtic"]
 [ext_resource type="Resource" uid="uid://cxbloivuqkrwe" path="res://resources/pieces/valkirias.tres" id="7_ir15t"]
-[ext_resource type="Texture2D" uid="uid://dycbttp2vpnv1" path="res://assets/Tiny Swords (Free Pack)/Terrain/Water Background color.png" id="12_dinhu"]
 
 [node name="game" type="Node2D"]
 script = ExtResource("1_lbhrr")
-rounds_per_day = 1
 
 [node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
 offset_left = 83.0
@@ -32,6 +30,15 @@ offset_top = 394.0
 offset_right = 416.0
 offset_bottom = 394.0
 scale = Vector2(0.8860778, 0.88381195)
+max_copies = null
+duplicate_piece_mult = null
+duplicate_passive_mult = null
+prob_comun = null
+prob_raro = null
+prob_epico = null
+prob_legendario = null
+COLOR_NORMAL_BG = null
+COLOR_UNAFFORD_BG = null
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
 position = Vector2(187, 70.99997)
@@ -64,74 +71,3 @@ offset_top = 342.0
 offset_right = 880.0
 offset_bottom = 381.0
 theme_override_font_sizes/font_size = 28
-
-[node name="DayLabel" type="Label" parent="."]
-offset_left = 1576.0
-offset_top = 335.0
-offset_right = 1724.0
-offset_bottom = 374.0
-theme_override_font_sizes/font_size = 28
-
-[node name="GladiatorLabel" type="Label" parent="."]
-offset_left = 1076.0
-offset_top = 341.0
-offset_right = 1450.0
-offset_bottom = 380.0
-theme_override_font_sizes/font_size = 28
-
-[node name="GameOver" type="CanvasLayer" parent="."]
-visible = false
-
-[node name="GameOverImage" type="TextureRect" parent="GameOver"]
-offset_left = -4.0
-offset_top = -2.0
-offset_right = 1681.0
-offset_bottom = 1093.0
-mouse_filter = 0
-texture = ExtResource("12_dinhu")
-
-[node name="Label" type="Label" parent="GameOver"]
-offset_left = 433.0
-offset_top = 294.0
-offset_right = 747.0
-offset_bottom = 393.0
-theme_override_font_sizes/font_size = 72
-text = "CAGASTE"
-
-[node name="DayFinished" type="CanvasLayer" parent="."]
-visible = false
-
-[node name="NextDayImage" type="TextureRect" parent="DayFinished"]
-offset_left = -4.0
-offset_top = -2.0
-offset_right = 1681.0
-offset_bottom = 1093.0
-mouse_filter = 0
-texture = ExtResource("12_dinhu")
-
-[node name="Label" type="Label" parent="DayFinished"]
-offset_left = 333.0
-offset_top = 287.0
-offset_right = 841.0
-offset_bottom = 386.0
-theme_override_font_sizes/font_size = 72
-text = "SIGUIENTE DIA"
-
-[node name="Win" type="CanvasLayer" parent="."]
-visible = false
-
-[node name="WinImage" type="TextureRect" parent="Win"]
-offset_left = -4.0
-offset_top = -2.0
-offset_right = 1681.0
-offset_bottom = 1093.0
-mouse_filter = 0
-texture = ExtResource("12_dinhu")
-
-[node name="Label" type="Label" parent="Win"]
-offset_left = 333.0
-offset_top = 287.0
-offset_right = 841.0
-offset_bottom = 386.0
-theme_override_font_sizes/font_size = 72
-text = "Has ganado crack :)"

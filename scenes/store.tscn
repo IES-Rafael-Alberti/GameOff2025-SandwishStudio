@@ -1,10 +1,11 @@
-[gd_scene load_steps=30 format=3 uid="uid://bwh1obe7043i"]
+[gd_scene load_steps=31 format=3 uid="uid://bwh1obe7043i"]
 
 [ext_resource type="Script" uid="uid://boom6onvffdah" path="res://scripts/store.gd" id="1_atuvt"]
 [ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="2_n3io3"]
 [ext_resource type="Resource" uid="uid://dateynk6k5fui" path="res://resources/pieces/oni.tres" id="3_abbvk"]
 [ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/jotun.tres" id="4_3ro5p"]
 [ext_resource type="Resource" uid="uid://6rli8qlo7wmd" path="res://resources/pieces/duende.tres" id="5_klwl8"]
+[ext_resource type="PackedScene" uid="uid://dblnjb14cqaif" path="res://scenes/tooltip.tscn" id="6_5bups"]
 [ext_resource type="Resource" uid="uid://7qmqgai1xu80" path="res://resources/pieces/tengu.tres" id="6_5xsmt"]
 [ext_resource type="Resource" uid="uid://btl7owx64bo4s" path="res://resources/pieces/satiro.tres" id="6_h7duq"]
 [ext_resource type="Resource" uid="uid://cd2vljit13au2" path="res://resources/pieces/dragon.tres" id="7_burfl"]
@@ -151,5 +152,15 @@ texture_normal = ExtResource("25_7pi7j")
 layout_mode = 2
 size_flags_horizontal = 4
 texture_normal = ExtResource("24_816qq")
+
+[node name="Tooltip" parent="." instance=ExtResource("6_5bups")]
+layout_mode = 0
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_right = 1.0
+offset_bottom = 54.0
+grow_horizontal = 1
+grow_vertical = 1
 
 [connection signal="pressed" from="VBoxContainer/HBoxContainer/Reroll" to="." method="generate"]

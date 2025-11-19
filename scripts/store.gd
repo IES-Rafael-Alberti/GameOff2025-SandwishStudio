@@ -11,8 +11,8 @@ extends Control
 @export_group("Economía")
 @export_range(0.0, 2.0) var duplicate_piece_mult: float = 0.5 # 50% extra para Piezas
 @export_range(0.0, 2.0) var duplicate_passive_mult: float = 0.5 # 50% extra para Pasivas
-@export var COLOR_NORMAL_BG = Color(0, 0, 0, 0.6) 
-@export var COLOR_UNAFFORD_BG = Color(1.0, 0, 0, 0.6)
+@export var COLOR_NORMAL_BG: Color = Color(0, 0, 0, 0.6) 
+@export var COLOR_UNAFFORD_BG: Color = Color(1.0, 0, 0, 0.6)
 
 @export_group("Probabilidades de Tienda (%)")
 @export_range(0, 100) var prob_comun: int = 70
