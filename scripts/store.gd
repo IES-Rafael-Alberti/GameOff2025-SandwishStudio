@@ -3,6 +3,8 @@ extends Control
 @onready var piece_scene: PackedScene = preload("res://scenes/piece.tscn")
 @onready var passive_scene: PackedScene = preload("res://scenes/passive.tscn")
 
+@onready var tooltip: Control = $Tooltip 
+
 @export_group("Configuración de Items")
 @export var piece_origins: Array[PieceData]
 @export var passive_origins: Array[PassiveData]
@@ -14,12 +16,19 @@ extends Control
 @export var COLOR_NORMAL_BG: Color = Color(0, 0, 0, 0.6) 
 @export var COLOR_UNAFFORD_BG: Color = Color(1.0, 0, 0, 0.6)
 
+@export_group("Economía Reroll")
+@export var reroll_base_cost: int = 2 # Costo base después del gratis
+@export var reroll_cost_multiplier: float = 1.5 # Cuánto aumenta el precio por cada uso
+
 @export_group("Probabilidades de Tienda (%)")
 @export_range(0, 100) var prob_comun: int = 70
 @export_range(0, 100) var prob_raro: int = 20
 @export_range(0, 100) var prob_epico: int = 8
 @export_range(0, 100) var prob_legendario: int = 2
+
 var _pieces_by_rarity: Dictionary = {}
+var _rerolls_this_round: int = 0 # Contador de rerolls en la ronda actual
+
 @onready var inventory: Control = $"../inventory"
 @onready var piece_zone: HBoxContainer = $VBoxContainer/piece_zone
 @onready var passive_zone: HBoxContainer = $VBoxContainer/passive_zone
@@ -30,9 +39,47 @@ var current_shop_styles: Array = []
 
 func _ready() -> void:
 	PlayerData.currency_changed.connect(_update_all_label_colors)
+	
+	# Conectar señales de los botones generados en futuras actualizaciones
+	# (Opcional si quieres actualizar el texto del botón de reroll al inicio)
+	_update_reroll_button_visuals()
 
+# --- NUEVA FUNCIÓN PARA REINICIAR LA TIENDA AL EMPEZAR RONDA ---
+func start_new_round() -> void:
+	_rerolls_this_round = 0
+	_update_reroll_button_visuals()
+	# Opcional: Si quieres que la tienda se regenere gratis automáticamente al entrar:
+	# _refresh_shop_content() 
 
+# Esta función ahora actúa como el "Controlador del Botón Reroll"
+# Mantiene el nombre 'generate' porque el botón en la escena ya está conectado a este nombre.
 func generate():
+	# 1. Calcular costo actual
+	var current_cost = _calculate_reroll_cost()
+	
+	# 2. Verificar si podemos pagar (o es gratis)
+	if current_cost > 0:
+		if not PlayerData.has_enough_currency(current_cost):
+			print("No tienes suficiente dinero para reroll. Costo: %d" % current_cost)
+			# Aquí podrías añadir un efecto visual de "Error" o sonido
+			return
+		
+		# Pagar
+		PlayerData.spend_currency(current_cost)
+		print("Reroll pagado: %d monedas" % current_cost)
+	else:
+		print("Reroll GRATIS usado.")
+
+	# 3. Aumentar contador y actualizar contenido
+	_rerolls_this_round += 1
+	_refresh_shop_content()
+	
+	# 4. Actualizar visuales del botón para el SIGUIENTE precio
+	_update_reroll_button_visuals()
+
+
+# Lógica original de generación (movida aquí)
+func _refresh_shop_content():
 	current_shop_styles.clear()
 	
 	for child in piece_zone.get_children():
@@ -67,7 +114,44 @@ func generate():
 	
 	_update_all_label_colors()
 
-# --- NUEVAS FUNCIONES DE PROBABILIDAD ---
+
+# --- FUNCIONES AUXILIARES DE REROLL ---
+
+func _calculate_reroll_cost() -> int:
+	if _rerolls_this_round == 0:
+		return 0 # Primera es gratis
+	
+	# Fórmula: Costo aumenta por el multiplicador en cada uso EXTRA
+	# Uso 0: Gratis
+	# Uso 1: Base
+	# Uso 2: Base * Multi
+	# Uso 3: Base * Multi * Multi ...
+	
+	# Nota: (_rerolls_this_round - 1) porque el primero fue gratis y no cuenta para el aumento
+	# Si prefieres progresión lineal simple: reroll_base_cost * _rerolls_this_round
+	
+	var count_for_calc = _rerolls_this_round # Empezamos a multiplicar desde el primer pago
+	var multiplier_factor = pow(reroll_cost_multiplier, count_for_calc - 1)
+	
+	if count_for_calc == 1:
+		multiplier_factor = 1.0 # El primer pago es el precio base exacto
+		
+	return int(reroll_base_cost * multiplier_factor)
+
+func _update_reroll_button_visuals():
+	# Aquí podrías cambiar el texto de un label si el botón tuviera uno
+	# Ejemplo: reroll_label.text = "Gratis" if _rerolls_this_round == 0 else str(_calculate_reroll_cost())
+	
+	var next_cost = _calculate_reroll_cost()
+	if next_cost == 0:
+		reroll_button.modulate = Color(0.5, 1.0, 0.5) # Verde para gratis
+		reroll_button.tooltip_text = "¡Reroll GRATIS!"
+	else:
+		reroll_button.modulate = Color.WHITE
+		reroll_button.tooltip_text = "Costo: %d" % next_cost
+
+
+# --- FUNCIONES DE PROBABILIDAD ---
 
 # Clasifica las piezas disponibles en un diccionario { RAREZA: [lista_piezas] }
 func _organize_pieces_by_rarity(pieces: Array):
@@ -110,8 +194,6 @@ func _get_random_weighted_piece() -> Resource:
 	var piece = _pick_from_rarity_pool(selected_rarity)
 	
 	# --- SISTEMA DE FALLBACK (Seguridad) ---
-	# Si salió Legendario pero NO tenemos legendarios definidos o disponibles (por max copias),
-	# bajamos de categoría hasta encontrar algo.
 	if piece == null:
 		piece = _pick_from_rarity_pool(PieceRes.PieceRarity.COMUN) # Intento fallback a Común
 	if piece == null:
@@ -147,7 +229,6 @@ func _filter_maxed_items(candidates: Array) -> Array:
 
 func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_scene: PackedScene) -> void:
 	if origin_array.is_empty():
-		# Opcional: Mostrar mensaje de "Agotado" si no queda nada
 		return
 
 	var shuffled = origin_array.duplicate()
@@ -207,10 +288,23 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 			
 			button.pressed.connect(_on_button_pressed.bind(button))
 			
+			# Conectamos el ratón para mostrar/ocultar el tooltip
+			button.mouse_entered.connect(_on_button_mouse_entered.bind(origin_data))
+			button.mouse_exited.connect(_on_button_mouse_exited)
+			
 			item_container.add_child(button)
 			target_zone.add_child(item_container)
 
 		origin_instance.queue_free()
+
+# --- FUNCIONES PARA EL TOOLTIP ---
+func _on_button_mouse_entered(data: Resource) -> void:
+	if tooltip and data:
+		tooltip.show_tooltip(data, 0)
+
+func _on_button_mouse_exited() -> void:
+	if tooltip:
+		tooltip.hide_tooltip()
 
 
 func _on_button_pressed(button: TextureButton) -> void:
@@ -236,7 +330,6 @@ func _on_button_pressed(button: TextureButton) -> void:
 		button.modulate = Color(0.25, 0.25, 0.25, 1.0)
 		print("Compraste %s por %d oro." % [data.resource_name, price])
 		
-		# Actualizamos precios por si subieron al comprar copia
 		_update_all_label_colors()
 	else:
 		print("Error al gastar oro.")
@@ -245,6 +338,9 @@ func _on_button_pressed(button: TextureButton) -> void:
 func _update_all_label_colors(_new_amount: int = 0) -> void:
 	if current_shop_styles.is_empty():
 		return
+	
+	# También actualizamos el botón de reroll por si acaso ahora tenemos dinero (o no)
+	_update_reroll_button_visuals()
 
 	for item in current_shop_styles:
 		var style_box: StyleBoxFlat = item.style
@@ -270,10 +366,8 @@ func _calculate_price(data) -> int:
 	var base_price: int = data.price
 	var count: int = _get_item_count_safe(data)
 	
-	# Seleccionamos el multiplicador correcto según el tipo
 	var multiplier_val: float = 0.0
 	
-	# Detectamos si es pieza o pasiva
 	if data is PieceData:
 		multiplier_val = duplicate_piece_mult
 	elif data is PassiveData:
