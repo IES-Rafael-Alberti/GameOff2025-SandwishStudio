@@ -1,7 +1,7 @@
-# combat_scene.gd
 extends Node2D
 
-signal combat_finished
+# MODIFICADO: La señal ahora lleva un parámetro para saber si ganamos
+signal combat_finished(player_won: bool)
 
 const NPC_SCENE := preload("res://scenes/npc.tscn")
 const PieceAdapter := preload("res://scripts/piece_adapter.gd")
@@ -48,20 +48,13 @@ func _ready() -> void:
 	add_child(start_timer)
 	start_timer.timeout.connect(_begin_combat)
 	
-	# --- ¡CAMBIO REQUERIDO 2!
 	# Spawnea el primer enemigo en cuanto la escena está lista.
 	spawn_enemy_one()
-	# --- FIN DE CAMBIO ---
-
-
 
 func _advance_round() -> void:
-	# (Lo dejamos como estaba)
 	pass
 
-# --- FUNCIÓN MODIFICADA ---
 func on_roulette_combat_requested(piece_resource: Resource) -> void:
-	
 	# --- CASO 1: Giro en VACÍO ---
 	if not piece_resource or not piece_resource is PieceRes:
 		push_error("on_roulette_combat_requested: Recurso nulo o inválido. Saltando combate.")
@@ -75,8 +68,7 @@ func on_roulette_combat_requested(piece_resource: Resource) -> void:
 			if g.position == enemy_battle_slot.position:
 				_move_with_tween(g, enemy_wait_slot.position, 0.5)
 		
-		# ¡YA NO EMITIMOS combat_finished!
-		# gameManager se encarga de gestionar el estado.
+		# gameManager se encarga de gestionar el estado si es vacío
 		return
 		
 	print("Señal de combate global recibida. Aliado: ", piece_resource.display_name)
@@ -113,8 +105,8 @@ func on_roulette_combat_requested(piece_resource: Resource) -> void:
 
 	# 4. Iniciar secuencia
 	_start_pre_battle_sequence()
+
 func _stop_combat() -> void:
-	# ... (toda la lógica de cálculo de oro y parada de timers sigue igual) ...
 	if enemy_npcs.size() > 0 and ally_npcs.is_empty():
 		var w: npc = enemy_npcs[0]
 		if is_instance_valid(w) and w.health > 0.0:
@@ -155,59 +147,41 @@ func _stop_combat() -> void:
 	combat_running = false
 	var msg_timer: Timer = null
 	
-	# --- ¡CAMBIO REQUERIDO 2! ---
-	# Modificamos la lógica de limpieza.
-	# Ya no llamamos a _cleanup_allies_and_enemies()
+	# MODIFICADO: Lógica de victoria/derrota basada en si murió el enemigo
+	var player_won_round = not enemy_alive
 	
-	if (not enemy_alive) and allies_alive:
+	if player_won_round and allies_alive:
 		# Victoria: limpiamos solo aliados
 		msg_timer = _show_round_message("Ronda terminada: ¡Victoria!")
-		# El enemigo muerto ya fue reemplazado por _on_npc_died
 		msg_timer.timeout.connect(_cleanup_allies_and_reset)
 
-	elif enemy_alive and (not allies_alive):
+	elif not player_won_round: # Enemigo vivo
 		# Derrota: gladiador sobrevive
 		msg_timer = _show_round_message("Ronda terminada: El gladiador sobrevivió.")
 		
-		# ¡Hacemos que el enemigo vuelva atrás!
+		# Hacemos que el enemigo vuelva atrás
 		if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 			_move_with_tween(enemy_npcs[0], enemy_wait_slot.position, 0.5)
 			
 		msg_timer.timeout.connect(_cleanup_allies_and_reset)
 
-	elif (not enemy_alive) and (not allies_alive):
+	elif player_won_round and (not allies_alive):
 		# Doble KO
 		msg_timer = _show_round_message("Ronda terminada: doble KO.")
-		# El enemigo muerto ya fue reemplazado, solo limpiamos aliados
 		msg_timer.timeout.connect(_cleanup_allies_and_reset)
 	else:
-		# Imposible
+		# Imposible, fallback
 		msg_timer = _show_round_message("Ronda terminada.")
 		msg_timer.timeout.connect(_cleanup_allies_and_reset)
 	
-	# --- FIN DE CAMBIO ---
-	
 	if msg_timer:
-		msg_timer.timeout.connect(func(): combat_finished.emit())
+		# MODIFICADO: Emitimos el resultado (true = ganamos)
+		msg_timer.timeout.connect(func(): combat_finished.emit(player_won_round))
 	else:
-		# Fallback por si no hay timer
 		_cleanup_allies_and_reset()
-		combat_finished.emit()
+		combat_finished.emit(player_won_round)
 		
-	print("Battle stopped")
-
-# --- NUEVA FUNCIÓN DE LIMPIEZA ---
-# (Esta función ya no la necesitamos, la dejamos comentada
-# o la borramos, ya que ahora solo usamos _cleanup_allies_and_reset)
-#func _cleanup_allies_and_enemies():
-#	_cleanup_allies_and_reset() # Limpia aliados
-#	
-#	# Limpia enemigos
-#	for e in enemy_npcs:
-#		if is_instance_valid(e):
-#			e.queue_free()
-#	enemy_npcs.clear()
-#	print("Limpiando Gladiador...")
+	print("Battle stopped. Player won: ", player_won_round)
 
 func spawn_enemy_one() -> void:
 	if enemy_npcs.size() >= ENEMY_LIMIT:
@@ -284,38 +258,25 @@ func _get_free_ally_slots() -> Array[Marker2D]:
 			free.append(slot)
 	return free
 	
-# NUEVO: Función de ayuda para obtener el número de copias poseídas.
-# NOTA: Debes asegurar que PlayerData.gd existe y tiene el método `get_piece_copies_by_id(piece_id: String) -> int`
 func _get_piece_copies_owned(piece_data: Resource) -> int:
-	var game_manager = get_parent() # Asumimos que CombatScene es hijo directo de Game
+	var game_manager = get_parent() 
 	
 	if game_manager and game_manager.has_method("get_inventory_piece_count"):
-		# Obtenemos el conteo REAL del inventario
 		var count = game_manager.get_inventory_piece_count(piece_data)
-		
-		# Si count es 0 (no está en inventario, quizás es la pieza que acabamos de lanzar),
-		# devolvemos al menos 1 para que el combate funcione con Tier Bronce.
 		return max(1, count)
 	
-	return 1 # Valor por defecto si falla la conexión
+	return 1
 
-# MODIFICADO: Ahora obtiene num_copies y pasa los argumentos requeridos al PieceAdapter
 func spawn_piece(team: int, piece: PieceRes) -> void:
 	if piece == null:
 		return
 		
-	# 1. Obtener el número de copias y el oro.
-	var num_copies: int = 1 # Por defecto
-	var gold_per_enemy: int = 0 # Base: 0 para aliados.
-	
+	var num_copies: int = 1
+	var gold_per_enemy: int = 0 
 	if team == npc.Team.ALLY:
-		# Se asume que PieceRes.id contiene el ID para la búsqueda de copias.
 		num_copies = _get_piece_copies_owned(piece)
 		print(_get_piece_copies_owned(piece))
-		# NOTA: gold_per_enemy se asume 0 ya que esta función spawnea aliados, 
-		# y el oro es más relevante para NPCs enemigos.
 
-	# 2. Llamar al adaptador con los nuevos argumentos.
 	var pack: Dictionary = PieceAdapter.to_npc_res(piece, num_copies, gold_per_enemy)
 	var npc_template: npcRes = pack["res"]
 	var members: int = int(pack["members"])
@@ -345,7 +306,6 @@ func _place_ally_in_slot_with_tween(n: npc, target_pos: Vector2) -> void:
 	n.position = ally_entry_spawn.position
 	_move_with_tween(n, target_pos, 0.8)
 
-# --- ¡CAMBIO REQUERIDO 2!
 func _on_npc_died(n: npc) -> void:
 	# Si el NPC que murió es un enemigo, spawneamos uno nuevo.
 	if n.team == npc.Team.ENEMY:
@@ -355,13 +315,8 @@ func _on_npc_died(n: npc) -> void:
 			print("Reward (death): +", amount, " gold (remaining pool paid).")
 		n.gold_pool = 0
 		
-		# ¡Aquí está la reaparición!
 		print("¡Gladiador murió! Reemplazando...")
 		spawn_enemy_one()
-		
-	# (El 'else' no es necesario, ya que si es aliado
-	# no hacemos nada especial al morir, solo lo que ya hacía)
-# --- FIN DE CAMBIO ---
 
 func _on_npc_exited(n: npc) -> void:
 	if n.team == npc.Team.ALLY:
@@ -505,21 +460,18 @@ func _who(n: npc) -> String:
 	return "%s (%s)" % [res_name, _team_to_str(n.team)]
 	
 func _start_pre_battle_sequence() -> void:
-	# Esta función ya maneja el caso de "no aliados"
-	# y llama a _stop_combat() si es necesario
 	if ally_npcs.is_empty():
 		print("No hay aliados para combatir. Terminando ronda.")
 		_stop_combat()
 		return
 	
-	# Esta comprobación es por si acaso _on_npc_died aún no ha terminado
 	if enemy_npcs.is_empty():
 		print("No hay enemigo. Esperando reaparición...")
 		await get_tree().create_timer(0.1).timeout
 		if enemy_npcs.is_empty():
 			print("¡El enemigo no reapareció! Forzando spawn.")
 			spawn_enemy_one()
-			await get_tree().create_timer(0.1).timeout # Dar tiempo a que se añada
+			await get_tree().create_timer(0.1).timeout
 		
 		if enemy_npcs.is_empty():
 			push_error("¡Fallo crítico al reaparecer enemigo!")
