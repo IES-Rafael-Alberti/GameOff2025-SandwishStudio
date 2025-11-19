@@ -1,12 +1,8 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://cy77sggbt1g0n"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=2 format=3 uid="uid://dormn8rgtb778"]
 
-[ext_resource type="Resource" uid="uid://dormn8rgtb778" path="res://resources/Europea/Satiro_scaling.tres" id="1_7uwfu"]
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_xfa5c"]
 
 [resource]
 script = ExtResource("1_xfa5c")
-id = "europea.satiro"
-display_name = "Sátiro"
-role = "Utilidad/Buffer"
-scaling_profile = ExtResource("1_7uwfu")
+id = "europea.Satiro"
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"

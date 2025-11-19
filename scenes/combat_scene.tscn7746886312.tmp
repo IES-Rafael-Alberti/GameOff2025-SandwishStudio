@@ -1,12 +1,7 @@
-[gd_scene load_steps=9 format=3 uid="uid://0dvayl6271no"]
+[gd_scene load_steps=4 format=3 uid="uid://0dvayl6271no"]
 
 [ext_resource type="Script" uid="uid://bw0d7s71m5dov" path="res://scripts/combat_scene.gd" id="1_ivkwx"]
-[ext_resource type="Script" uid="uid://bd1qpluesymyw" path="res://scripts/npc_res.gd" id="2_0vylu"]
 [ext_resource type="Texture2D" uid="uid://b1laqs7fhlter" path="res://assets/EPelea.png" id="2_ofoda"]
-[ext_resource type="Resource" uid="uid://coeqcim3vx1w7" path="res://resources/warrior/red_warrior.tres" id="3_2edba"]
-[ext_resource type="Resource" uid="uid://b6dek55tm2no8" path="res://resources/warrior/blue_warrior.tres" id="4_6ovae"]
-[ext_resource type="Resource" uid="uid://btb28eu76jyan" path="res://resources/warrior/black_warrior.tres" id="5_ivkwx"]
-[ext_resource type="Resource" uid="uid://bsecr6d6j63jr" path="res://resources/warrior/yellow_warrior.tres" id="6_6sw3s"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ofoda"]
 atlas = ExtResource("2_ofoda")
@@ -16,7 +11,6 @@ region = Rect2(1398.4012, 0, 5124.82, 1521.2389)
 position = Vector2(0, 4)
 scale = Vector2(1.0102993, 1.021862)
 script = ExtResource("1_ivkwx")
-enemy_res = Array[ExtResource("2_0vylu")]([ExtResource("3_2edba"), ExtResource("4_6ovae"), ExtResource("5_ivkwx"), ExtResource("6_6sw3s")])
 
 [node name="TextureRect" type="TextureRect" parent="."]
 offset_left = -480.0

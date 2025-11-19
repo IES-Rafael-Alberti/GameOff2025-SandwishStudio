@@ -1,18 +1,10 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://bpflwuvj3jt4f"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=2 format=3 uid="uid://bpflwuvj3jt4f"]
 
-[ext_resource type="Resource" uid="uid://d24q67wh8wcxa" path="res://resources/Europea/dragon_scaling.tres" id="1_g02va"]
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_x2ot1"]
 
 [resource]
 script = ExtResource("1_x2ot1")
 id = "europea.dragon"
-display_name = "Dragon"
+display_name = "dragon"
 rarity = 3
-role = "Daño Masivo"
-base_max_health = 350.0
-base_damage = 30.0
-critical_chance = 10
-critical_damage = 1.75
-members_per_piece = 1
-scaling_profile = ExtResource("1_g02va")
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"
