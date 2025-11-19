@@ -1,18 +1,7 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://by0quidpu73s0"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=2 format=3 uid="uid://by0quidpu73s0"]
 
-[ext_resource type="Resource" uid="uid://crmec6e3oww41" path="res://resources/Nordica/Draugr_scaling.tres" id="1_hd8bf"]
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_tha16"]
 
 [resource]
 script = ExtResource("1_tha16")
-id = "nordica.draugr"
-display_name = "Draugr"
-race = 0
-role = "DPS Físico"
-base_max_health = 90.0
-base_damage = 2.14
-critical_chance = 10
-critical_damage = 1.6
-members_per_piece = 7
-scaling_profile = ExtResource("1_hd8bf")
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"

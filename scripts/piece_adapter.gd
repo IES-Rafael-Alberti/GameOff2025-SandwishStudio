@@ -2,42 +2,43 @@ extends Node
 class_name PieceAdapter
 const NpcRes = preload("res://scripts/npc_res.gd")
 
-# TIPADO: dicionario de multiplicadores
-static var GLOBAL_MULT: Dictionary = {
-	PieceRes.PiecePowerTier.BRONCE: {"hp": 1.0,  "dmg": 1.0,  "aps": 1.0},
-	PieceRes.PiecePowerTier.PLATA:  {"hp": 1.35, "dmg": 1.20, "aps": 1.10},
-	PieceRes.PiecePowerTier.ORO:    {"hp": 1.75, "dmg": 1.45, "aps": 1.20},
-}
 
-static func _tier_key(t: int) -> String:
-	return ["BRONCE","PLATA","ORO"][t]
+# NUEVO: Función auxiliar para determinar el Tier (PiecePowerTier) basado en el número de copias.
+static func _get_piece_tier(num_copies: int) -> int:
+	# 1 copia = BRONCE, 2 = PLATA, 3+ = ORO
+	var tier: int = PieceRes.PiecePowerTier.BRONCE # 0
+	if num_copies >= 3:
+		tier = PieceRes.PiecePowerTier.ORO # 2
+	elif num_copies >= 2:
+		tier = PieceRes.PiecePowerTier.PLATA # 1
+	# Si num_copies < 1, usa BRONCE (valor por defecto)
+	return tier
 
-static func to_effective_stats(piece: PieceRes) -> Dictionary:
-	var base: Dictionary = {
-		"members": int(piece.members_per_piece),
-		"hp": float(piece.base_max_health),
-		"dmg": float(piece.base_damage),
-		"aps": float(piece.base_attack_speed),
-		"crit_chance": int(piece.critical_chance),
-		"crit_mult": float(piece.critical_damage),
+# MODIFICADO: Ahora requiere el número de copias para determinar el Tier y obtener las stats absolutas.
+static func to_effective_stats(piece: PieceRes, num_copies: int) -> Dictionary:
+	var tier: int = _get_piece_tier(num_copies)
+	
+	# Usamos el nuevo método get_stats_for_tier que devuelve el diccionario de stats del Tier.
+	var stats: Dictionary = piece.get_stats_for_tier(tier)
+	
+	# Estructuramos el diccionario de salida, asegurando tipos correctos y valores por defecto.
+	var effective_stats: Dictionary = {
+		"members": int(stats.get("members", 1)),
+		"hp": float(stats.get("hp", 100.0)),
+		"dmg": float(stats.get("dmg", 10.0)),
+		"aps": float(stats.get("aps", 1.0)),
+		"crit_chance": int(stats.get("crit_chance", 5)),
+		"crit_mult": float(stats.get("crit_mult", 1.5)),
 	}
-	var key: String = _tier_key(piece.power_tier)
+	
+	# Incluimos el tier para que to_npc_res pueda actualizar el campo "rareza"
+	effective_stats["_piece_tier"] = tier 
+	
+	return effective_stats
 
-	if piece.scaling_profile:
-		return piece.scaling_profile.compute_for_tier(key, base)
-	else:
-		var m: Dictionary = GLOBAL_MULT.get(
-			piece.power_tier,
-			GLOBAL_MULT[PieceRes.PiecePowerTier.BRONCE]
-		) as Dictionary
-
-		base["hp"]  = float(base["hp"])  * float(m["hp"])
-		base["dmg"] = float(base["dmg"]) * float(m["dmg"])
-		base["aps"] = float(base["aps"]) * float(m["aps"])
-		return base
-
-static func to_npc_res(piece: PieceRes) -> Dictionary:
-	var eff: Dictionary = to_effective_stats(piece)
+# MODIFICADO: Ahora requiere el número de copias y el oro por enemigo.
+static func to_npc_res(piece: PieceRes, num_copies: int, gold_per_enemy: int) -> Dictionary:
+	var eff: Dictionary = to_effective_stats(piece, num_copies)
 
 	var r := NpcRes.new()
 	r.frames = piece.frames
@@ -49,7 +50,21 @@ static func to_npc_res(piece: PieceRes) -> Dictionary:
 	r.critical_damage = float(eff["crit_mult"])
 	r.description = piece.display_name
 	r.raza = ["Nórdica","Japonesa","Europea"][piece.race]
-	r.rareza = ["Bronce","Plata","Oro"][piece.power_tier]
-	r.gold = int(piece.gold_per_enemy)
+	
+	# Usar el tier calculado
+	var tier: int = int(eff["_piece_tier"])
+	var tier_name = ["Bronce","Plata","Oro"][tier]
+	r.rareza = tier_name
+	
+	# Usamos el nuevo parámetro para el oro
+	r.gold = gold_per_enemy 
+
+	# NUEVO: Feedback visual por consola
+	print("--- Pieza Spawneada ---")
+	print("Nombre: ", piece.display_name)
+	print("Copias poseídas: ", num_copies)
+	print("Tier efectivo (Rareza): ", tier_name)
+	print("Miembros: ", int(eff["members"]))
+	print("-----------------------")
 
 	return {"res": r, "members": int(eff["members"])}

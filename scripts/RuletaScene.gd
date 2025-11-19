@@ -23,14 +23,14 @@ var bouncing := false
 
 var is_interactive := true
 
-# --- ¡NUEVA FUNCIÓN! ---
+# --- ¡NUEVA FUNCIÓN!
 # Se llama cuando el script _ready() esté disponible
 func _ready():
 	# Conectamos la señal de borrado de inventario
 	GlobalSignals.piece_type_deleted.connect(_on_piece_type_deleted)
 
 
-func is_moving(): 
+func is_moving():
 	return state != State.IDLE
 
 func set_interactive(interactive: bool):
@@ -71,6 +71,10 @@ func _input(event):
 			
 			roulette_spin_started.emit()
 
+			# --- ¡NUEVA LÍNEA! ---
+			# Avisamos a todos que la ruleta ha COMENZADO a girar.
+			GlobalSignals.emit_signal("roulette_state_changed", true)
+
 
 func _drag():
 	var mouse = get_global_mouse_position()
@@ -91,11 +95,11 @@ func _spin(delta: float):
 	inertia *= friction
 
 	# --- ¡CAMBIO 3!
-# La ruleta se detiene por fricción ---
+	# La ruleta se detiene por fricción ---
 	# Ya no cambia a 'State.SNAP'
 	if abs(inertia) < 0.05:
 		# Si la inercia es casi cero, paramos, damos recompensa y reseteamos estado.
-		_reward() 
+		_reward()
 		_reset()
 
 
@@ -156,7 +160,7 @@ func _reward():
 	# Usamos 'current_piece_data' del script slot.gd
 	if actual_slot_node and "current_piece_data" in actual_slot_node:
 		
-		var piece = actual_slot_node.current_piece_data 
+		var piece = actual_slot_node.current_piece_data
 		
 		if piece and piece is PieceData and "piece_origin" in piece:
 			
@@ -186,19 +190,18 @@ func _reset():
 	inertia = 0.0
 	bouncing = false
 	state = State.IDLE
-	# ¡Importante!
-# No reseteamos la rotación aquí.
-	
-# --- ¡CAMBIO 5! Nueva función pública ---
-# Esta función será llamada por gameManager para reiniciar la
-# rotación de la ruleta DESPUÉS del combate.
+
+	# --- ¡NUEVA LÍNEA! ---
+	# Avisamos a todos que la ruleta se ha DETENIDO.
+	GlobalSignals.emit_signal("roulette_state_changed", false)
+
+
 func reset_rotation_to_zero():
-	# Solo reseteamos si la ruleta está en reposo (IDLE)
 	if state == State.IDLE:
 		$SpriteRuleta.rotation_degrees = 0.0
 
 
-# --- ¡NUEVA FUNCIÓN DE SEÑAL! ---
+# --- ¡NUEVA FUNCIÓN DE SEÑAL!
 # Se llama cuando GlobalSignals.piece_type_deleted se emite desde inventory.gd
 func _on_piece_type_deleted(piece_data: PieceData):
 	if not piece_data:

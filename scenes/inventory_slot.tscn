@@ -1,16 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://n7qqfs70w4b"]
+[gd_scene load_steps=9 format=3 uid="uid://n7qqfs70w4b"]
 
 [ext_resource type="Texture2D" uid="uid://2d1u5dokd5b8" path="res://assets/piece_1.jpg" id="1_bxqf6"]
 [ext_resource type="Script" uid="uid://bcef074ljqhfa" path="res://scripts/InventorySlot.gd" id="1_hddt5"]
 [ext_resource type="Script" uid="uid://dygaf4ryh3tv5" path="res://scripts/DraggableItem.gd" id="2_hddt5"]
+[ext_resource type="Texture2D" uid="uid://dlehjk7i5msoq" path="res://assets/image-removebg-preview.png" id="2_t1mo2"]
+[ext_resource type="Texture2D" uid="uid://bbvotv5v52v5t" path="res://assets/coinage.png" id="3_st3ap"]
+[ext_resource type="Texture2D" uid="uid://b6hogl04y4oll" path="res://assets/coin 2_0.png" id="4_6eu8d"]
 [ext_resource type="PackedScene" uid="uid://dblnjb14cqaif" path="res://scenes/tooltip.tscn" id="4_bbig2"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hddt5"]
-bg_color = Color(0, 0, 0, 0.6039216)
-expand_margin_left = 3.0
-expand_margin_top = 3.0
-expand_margin_right = 3.0
-expand_margin_bottom = 3.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bbig2"]
 bg_color = Color(0, 0, 0, 0.42745098)
@@ -20,7 +16,6 @@ expand_margin_right = 3.0
 expand_margin_bottom = 3.0
 
 [node name="InventorySlot" type="Control"]
-visible = false
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 3
 anchors_preset = 15
@@ -29,6 +24,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_hddt5")
+tier_bronze_texture = ExtResource("2_t1mo2")
+tier_silver_texture = ExtResource("3_st3ap")
+tier_gold_texture = ExtResource("4_6eu8d")
 
 [node name="TextureButton" type="TextureButton" parent="."]
 layout_mode = 0
@@ -37,16 +35,12 @@ offset_bottom = 40.0
 texture_normal = ExtResource("1_bxqf6")
 script = ExtResource("2_hddt5")
 
-[node name="CountLabel" type="Label" parent="."]
+[node name="CountLabel" type="TextureRect" parent="."]
 layout_mode = 0
 offset_left = 6.0
 offset_top = 6.0
 offset_right = 29.0
 offset_bottom = 29.0
-theme_override_styles/normal = SubResource("StyleBoxFlat_hddt5")
-text = "1"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="UsesLabel" type="Label" parent="."]
 layout_mode = 0
