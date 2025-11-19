@@ -8,6 +8,7 @@ signal combat_finished
 const NPC_SCENE := preload("res://scenes/npc.tscn")
 const PieceAdapter := preload("res://scripts/piece_adapter.gd")
 
+
 const ENEMY_RES := [
 	preload("res://resources/warrior/black_warrior.tres"),
 	preload("res://resources/warrior/blue_warrior.tres"),
@@ -19,7 +20,6 @@ const ENEMY_LIMIT := 1
 
 @onready var enemy_spawn: Marker2D = $GladiatorSpawn
 @onready var round_message: Label = $RoundMessage
-@onready var round_counter: Label = $RoundCounter
 @onready var ally_entry_spawn: Marker2D = $AlliesSpawn
 @onready var enemy_wait_slot: Marker2D = $EnemySlots/EnemyWaitSlot
 @onready var enemy_battle_slot: Marker2D = $EnemySlots/EnemyBattleSlot
@@ -28,11 +28,11 @@ const ALLY_BATTLE_OFSET := Vector2(-880, 0)
 
 @onready var ally_final_slots: Array[Marker2D] = [
 	$AllyFinalSlots/AllyFinalSlot1, $AllyFinalSlots/AllyFinalSlot2,
-	$AllyFinalSlots/AllyFinalSlot3, $AllyFinalSlots/AllyFinalSlot4, 
-	$AllyFinalSlots/AllyFinalSlot5, $AllyFinalSlots/AllyFinalSlot6, 
+	$AllyFinalSlots/AllyFinalSlot3, $AllyFinalSlots/AllyFinalSlot4,
+	$AllyFinalSlots/AllyFinalSlot5, $AllyFinalSlots/AllyFinalSlot6,
 	$AllyFinalSlots/AllyFinalSlot7, $AllyFinalSlots/AllyFinalSlot8,
-	$AllyFinalSlots/AllyFinalSlot9, $AllyFinalSlots/AllyFinalSlot10, 
-	$AllyFinalSlots/AllyFinalSlot11, $AllyFinalSlots/AllyFinalSlot12, 
+	$AllyFinalSlots/AllyFinalSlot9, $AllyFinalSlots/AllyFinalSlot10,
+	$AllyFinalSlots/AllyFinalSlot11, $AllyFinalSlots/AllyFinalSlot12,
 	$AllyFinalSlots/AllyFinalSlot13, $AllyFinalSlots/AllyFinalSlot14
 ]
 
@@ -49,7 +49,6 @@ var round_number := 0
 
 func _ready() -> void:
 	randomize()
-	_update_round_counter()
 	GlobalSignals.combat_requested.connect(on_roulette_combat_requested)
 
 	start_timer = Timer.new()
@@ -57,15 +56,12 @@ func _ready() -> void:
 	add_child(start_timer)
 	start_timer.timeout.connect(_begin_combat)
 	
-	# --- ¡CAMBIO REQUERIDO 2! ---
+	# --- ¡CAMBIO REQUERIDO 2!
 	# Spawnea el primer enemigo en cuanto la escena está lista.
 	spawn_enemy_one()
 	# --- FIN DE CAMBIO ---
 
-func _update_round_counter() -> void:
-	if is_instance_valid(round_counter):
-		# (Lo dejamos como estaba, gameManager gestionará la etiqueta principal)
-		pass
+
 
 func _advance_round() -> void:
 	# (Lo dejamos como estaba)
@@ -289,11 +285,40 @@ func _get_free_ally_slots() -> Array[Marker2D]:
 		if not occupied:
 			free.append(slot)
 	return free
+	
+# NUEVO: Función de ayuda para obtener el número de copias poseídas.
+# NOTA: Debes asegurar que PlayerData.gd existe y tiene el método `get_piece_copies_by_id(piece_id: String) -> int`
+func _get_piece_copies_owned(piece_data: Resource) -> int:
+	var game_manager = get_parent() # Asumimos que CombatScene es hijo directo de Game
+	
+	if game_manager and game_manager.has_method("get_inventory_piece_count"):
+		# Obtenemos el conteo REAL del inventario
+		var count = game_manager.get_inventory_piece_count(piece_data)
+		
+		# Si count es 0 (no está en inventario, quizás es la pieza que acabamos de lanzar),
+		# devolvemos al menos 1 para que el combate funcione con Tier Bronce.
+		return max(1, count)
+	
+	return 1 # Valor por defecto si falla la conexión
 
+# MODIFICADO: Ahora obtiene num_copies y pasa los argumentos requeridos al PieceAdapter
 func spawn_piece(team: int, piece: PieceRes) -> void:
 	if piece == null:
 		return
-	var pack: Dictionary = PieceAdapter.to_npc_res(piece)
+		
+	# 1. Obtener el número de copias y el oro.
+	var num_copies: int = 1 # Por defecto
+	var gold_per_enemy: int = 0 # Base: 0 para aliados.
+	
+	if team == npc.Team.ALLY:
+		# Se asume que PieceRes.id contiene el ID para la búsqueda de copias.
+		num_copies = _get_piece_copies_owned(piece)
+		print(_get_piece_copies_owned(piece))
+		# NOTA: gold_per_enemy se asume 0 ya que esta función spawnea aliados, 
+		# y el oro es más relevante para NPCs enemigos.
+
+	# 2. Llamar al adaptador con los nuevos argumentos.
+	var pack: Dictionary = PieceAdapter.to_npc_res(piece, num_copies, gold_per_enemy)
 	var npc_template: npcRes = pack["res"]
 	var members: int = int(pack["members"])
 
@@ -322,7 +347,7 @@ func _place_ally_in_slot_with_tween(n: npc, target_pos: Vector2) -> void:
 	n.position = ally_entry_spawn.position
 	_move_with_tween(n, target_pos, 0.8)
 
-# --- ¡CAMBIO REQUERIDO 2! ---
+# --- ¡CAMBIO REQUERIDO 2!
 func _on_npc_died(n: npc) -> void:
 	# Si el NPC que murió es un enemigo, spawneamos uno nuevo.
 	if n.team == npc.Team.ENEMY:

@@ -1,10 +1,15 @@
 # DeleteArea.gd
 extends Panel
 
-@onready var sprite: Sprite2D = $Sprite2D 
+@onready var sprite: Sprite2D = $Sprite2D
 
 var normal_color = Color.WHITE
 var hover_color = Color(1.0, 1.0, 1.0, 0.7)
+
+# --- ¡NUEVA LÍNEA! ---
+# Esta variable rastreará el estado de la ruleta
+var _is_roulette_spinning: bool = false
+
 
 func _ready() -> void:
 	# Ya no necesitamos una referencia al 'inventory_manager'.
@@ -18,6 +23,10 @@ func _ready() -> void:
 	
 	self.mouse_exited.connect(_on_mouse_exited)
 
+	# --- ¡NUEVO BLOQUE! ---
+	# Nos conectamos a la señal global de la ruleta.
+	GlobalSignals.roulette_state_changed.connect(_on_roulette_state_changed)
+
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_DRAG_END:
@@ -30,6 +39,13 @@ func _notification(what: int) -> void:
 ## ------------------------------------------------------------------
 
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+	
+	# --- ¡CAMBIO CLAVE! ---
+	# Si la ruleta está girando, no permitimos soltar nada.
+	if _is_roulette_spinning:
+		return false
+	# --- FIN CAMBIO ---
+
 	if sprite:
 		sprite.modulate = hover_color
 		
@@ -49,7 +65,6 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 
 	# ¡CAMBIO CLAVE!
 	# Tenemos que decidir qué emitir basado en qué recibimos.
-	
 	var item_to_delete: Resource = null
 	
 	if data is Dictionary and "data" in data:
@@ -70,4 +85,15 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 
 func _on_mouse_exited() -> void:
 	if sprite:
+		sprite.modulate = normal_color
+
+
+# --- ¡NUEVA FUNCIÓN! ---
+# Se llama cuando GlobalSignals.roulette_state_changed es emitida.
+func _on_roulette_state_changed(is_spinning: bool):
+	_is_roulette_spinning = is_spinning
+	
+	# Opcional: Si la ruleta empieza a girar mientras
+	# el ratón estaba encima, reseteamos el color.
+	if is_spinning and sprite:
 		sprite.modulate = normal_color

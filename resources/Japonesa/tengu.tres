@@ -1,18 +1,9 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://b608x2o53lipk"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=2 format=3 uid="uid://b608x2o53lipk"]
 
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_n3ank"]
-[ext_resource type="Resource" uid="uid://c0vedbt6qwqtc" path="res://resources/Japonesa/tengu_scaling.tres" id="1_pgrif"]
 
 [resource]
 script = ExtResource("1_n3ank")
 id = "japonesa.tengu"
-display_name = "Tengu"
-race = 1
-rarity = 2
-role = "Control/Área"
-base_damage = 9.0
-critical_chance = 15
-critical_damage = 1.7
-members_per_piece = 2
-scaling_profile = ExtResource("1_pgrif")
+display_name = "tengu"
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"
