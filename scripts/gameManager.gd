@@ -31,18 +31,21 @@ var gladiators_defeated: int = 0
 # --- CONFIGURACIÓN ---
 @export var gold_round_base: int = 100
 @export var gold_day_mult: float = 1
-@export var rounds_per_day: int = 10    # Límite de rondas por día
-@export var gladiators_per_day: int = 4 # Objetivo de kills por día
+@export var rounds_per_day: int = 10
+@export var gladiators_per_day: int = 1
 @export var gladiators_mult: int = 1
+@export var max_days: int = 2
 
 # --- UI LABELS ---
 @onready var round_label: Label = $RoundLabel
 @onready var day_label: Label = $DayLabel
 @onready var gladiator_label: Label = $GladiatorLabel
 
-# --- NUEVO: Vista de Fin de Día ---
-# Asegúrate de que este nodo existe en tu escena como hijo de Game
+# --- VISTAS (UI) ---
 @onready var day_finished_view: CanvasLayer = $DayFinished
+@onready var next_day_image: TextureRect = $DayFinished/NextDayImage 
+@onready var game_over_view: CanvasLayer = $GameOver
+@onready var win_view: CanvasLayer = $Win
 
 var pupil_offset: Vector2
 var original_eye_texture: Texture2D
@@ -89,6 +92,9 @@ func _ready():
 	PlayerData.currency_changed.connect(_on_PlayerData_currency_changed)
 	if inventory.has_signal("item_sold"):
 		inventory.item_sold.connect(PlayerData.add_currency)
+		
+	if next_day_image:
+		next_day_image.gui_input.connect(_on_next_day_image_input)
 
 	blink_timer = randf_range(blink_interval_min, blink_interval_max)
 	_on_PlayerData_currency_changed(PlayerData.get_current_currency())
@@ -96,7 +102,6 @@ func _ready():
 	
 	_update_ui_labels()
 
-	# --- Arranque ---
 	if current_round == 1:
 		_give_initial_piece()
 		set_state(GameState.ROULETTE)
@@ -120,7 +125,7 @@ func _process(delta: float) -> void:
 
 func _update_ui_labels() -> void:
 	if is_instance_valid(day_label):
-		day_label.text = "Día " + str(current_day)
+		day_label.text = "Día " + str(current_day) + " / " + str(max_days)
 	
 	if is_instance_valid(gladiator_label):
 		gladiator_label.text = "Gladiadores: %d/%d" % [gladiators_defeated, gladiators_per_day]
@@ -133,7 +138,6 @@ func _update_ui_labels() -> void:
 			GameState.SPINNING: state_text = " - ¡Girando!"
 			GameState.COMBAT: state_text = " - ¡Combate!"
 		
-		# Mostramos Ronda X / Total Rondas Diarias
 		round_label.text = "Ronda %d/%d%s" % [current_round, rounds_per_day, state_text]
 
 ## ------------------------------------------------------------------
@@ -179,60 +183,85 @@ func _on_combat_requested(piece_resource: Resource):
 		_on_combat_finished(false)
 
 func _on_combat_finished(player_won: bool = false):
-	# 1. Recompensa
 	var round_income = int(gold_round_base * gold_day_mult)
 	PlayerData.add_currency(round_income)
-	print("Ronda finalizada. Ingresos: %d" % round_income)
 	
-	# 2. Progreso de gladiadores
 	if player_won:
 		gladiators_defeated += 1
-		print("Gladiador derrotado. Total hoy: ", gladiators_defeated)
 	
-	# 3. COMPROBACIÓN DE FIN DE DÍA
-	# Si hemos llegado al límite de rondas
+	# COMPROBAMOS SI SE ACABÓ EL DÍA
 	if current_round >= rounds_per_day:
-		print("¡Límite de rondas alcanzado! Fin del Día %d." % current_day)
-		_show_day_finished_view()
+		print("¡Fin del Día %d! Verificando cuota..." % current_day)
+		
+		if gladiators_defeated >= gladiators_per_day:
+			# 3. NUEVO: Comprobar si es el último día para GANAR
+			if current_day >= max_days:
+				print("¡Juego Completado! Victoria.")
+				_show_win_view()
+			else:
+				print("Cuota cumplida. Pasando a Siguiente Día.")
+				_show_day_finished_view()
+		else:
+			print("Cuota NO cumplida (%d/%d). GAME OVER." % [gladiators_defeated, gladiators_per_day])
+			_show_game_over_view()
+			
 	else:
-		# Si no, avanzamos de ronda normalmente
 		current_round += 1
 		print("--- Empezando Ronda %d ---" % current_round)
 		_update_ui_labels()
 		set_state(GameState.SHOP)
 		store.generate()
 
-# --- Funciones para manejar el Fin de Día ---
+# --- Funciones de Vistas (DayFinished, GameOver & Win) ---
 
 func _show_day_finished_view() -> void:
 	if day_finished_view:
 		day_finished_view.visible = true
-		# Aquí podrías pausar animaciones si quisieras, o mostrar estadísticas
+		buttonShop.disabled = true
 	else:
-		push_warning("GameManager: No se encontró el nodo 'DayFinished'. Pasando día automáticamente.")
-		_on_next_day_pressed()
+		_advance_to_next_day()
 
-# ¡CONECTA TU BOTÓN 'SIGUIENTE DÍA' A ESTA FUNCIÓN DESDE EL EDITOR!
-func _on_next_day_pressed() -> void:
-	print("Iniciando siguiente día...")
+func _show_game_over_view() -> void:
+	if game_over_view:
+		game_over_view.visible = true
+		buttonShop.disabled = true
+	else:
+		push_error("GameManager: No se encontró el nodo 'GameOver'.")
+
+# 4. NUEVO: Función para mostrar Victoria
+func _show_win_view() -> void:
+	if win_view:
+		win_view.visible = true
+		buttonShop.disabled = true
+		# Aquí podrías detener timers o poner música de victoria
+	else:
+		push_error("GameManager: No se encontró el nodo 'Win'.")
+
+func _on_next_day_image_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		print("Click en imagen de Siguiente Día recibido.")
+		_advance_to_next_day()
+
+func _advance_to_next_day() -> void:
+	print("Iniciando Día %d..." % (current_day + 1))
 	
-	# 1. Resetear variables para el nuevo día
 	current_day += 1
 	current_round = 1
-	gladiators_defeated = 0 # Reseteamos los kills del día anterior
+	gladiators_defeated = 0 
 	
-	# 2. Ocultar vista
 	if day_finished_view:
 		day_finished_view.visible = false
 	
-	# 3. Actualizar UI y volver al juego
+	buttonShop.disabled = false
+	
 	_update_ui_labels()
-	set_state(GameState.SHOP) # O ROULETTE, según prefieras empezar el día
+	set_state(GameState.SHOP)
 	store.generate()
 
 ## ------------------------------------------------------------------
-## Resto de Funciones (Sin cambios mayores)
+## Resto de Funciones
 ## ------------------------------------------------------------------
+# ... (El resto de funciones auxiliares siguen igual) ...
 
 func _on_shop_button_pressed():
 	if anim.is_playing(): return
