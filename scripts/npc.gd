@@ -79,7 +79,7 @@ func _update_healthbar() -> void:
 	health_bar.value = health
 	health_bar.visible = show_healthbar and (not hide_when_full or health < max_health)
 
-func _show_damage_text(amount: float) -> void:
+func _show_damage_text(amount: float, was_crit: bool = false) -> void:
 	# Instanciamos el Label
 	var dmg_label: Label = DAMAGE_TEXT_SCENE.instantiate()
 
@@ -89,11 +89,36 @@ func _show_damage_text(amount: float) -> void:
 
 	# --- Escalado del label según el daño ---
 	var base_font_size := 34.0
-	var size_factor : float = clamp(0.7 + float(dmg_int) / 60.0, 0.7, 2.5)
-	var new_size := int(base_font_size * size_factor)
+	var size_factor: float = clamp(0.7 + float(dmg_int) / 60.0, 0.7, 2.5)
+	var size := int(base_font_size * size_factor)
 
-	# Esta es la forma correcta en Godot 4:
-	dmg_label.add_theme_font_size_override("font_size", new_size)
+	# Si es crítico, un pelín más grande (efecto “negrita” ligero)
+	if was_crit:
+		size = int(size * 1.1)
+
+	dmg_label.add_theme_font_size_override("font_size", size)
+
+	# --- Color según el daño (de rojo a morado intenso) ---
+	var min_color := Color(1.0, 0.0, 0.0, 1.0)   # rojo para poco daño
+	var max_color := Color(0.842, 0.637, 1.0, 1.0)   # morado intenso para mucho daño
+
+	# Daño a partir del cual se considera “máximo morado” (ajusta a tu gusto)
+	var color_damage_cap := 120.0
+	var t : float = clamp(float(dmg_int) / color_damage_cap, 0.0, 1.0)
+
+	var final_color := min_color.lerp(max_color, t)
+
+	# Si es crítico, lo aclaramos un poco para que destaque, pero
+	# el tono base sigue viniendo del daño (no del crítico en sí).
+	if was_crit:
+		final_color = final_color.lightened(0.15)
+
+	dmg_label.modulate = final_color
+
+	# Si quieres remarcar aún más el crítico (“negrita” visual):
+	if was_crit:
+		dmg_label.add_theme_constant_override("outline_size", 2)
+		dmg_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
 
 	# Añadimos el label a la escena raíz
 	var root := get_tree().current_scene
@@ -104,44 +129,35 @@ func _show_damage_text(amount: float) -> void:
 	# --------------------
 	#  POSICIÓN DENTRO DE UN "CONO"
 	# --------------------
-	# Altura máxima del cono (distancia vertical desde el NPC)
 	var max_height := 140.0   # cuanto más grande, más alto pueden aparecer
 	var min_height := 50.0
 
-	# Elegimos una altura aleatoria dentro del cono
-	var h := randf_range(min_height, max_height)  # valor positivo
+	var h := randf_range(min_height, max_height)
 
-	# En esa altura, el ancho del cono es proporcional a h
-	var max_width_at_top := 160.0  # ancho máximo en la parte superior del cono
+	var max_width_at_top := 160.0
 	var half_width := (h / max_height) * (max_width_at_top * 0.5)
 
-	# Offset horizontal aleatorio dentro del cono para esa altura
 	var offset_x := randf_range(-half_width, half_width)
-	# Offset vertical (negativo porque es hacia arriba)
 	var offset_y := -h
 
 	var start_pos := global_position + Vector2(offset_x, offset_y)
-
 	dmg_label.global_position = start_pos
-	dmg_label.modulate = Color(1, 0, 0, 1)
 
 	# --------------------
 	#  ANIMACIÓN SERPENTEANTE
 	# --------------------
-	var total_travel := randf_range(40.0, 90.0)  # cuánto más sube desde la posición inicial
-	var amplitude := randf_range(10.0, 25.0)     # amplitud de la oscilación lateral
-	var waves := randf_range(1.5, 3.0)          # cuántas “eses” hace
-	var move_time := 0.7                        # duración del movimiento
-	var fade_time := 0.3                        # tiempo de desvanecerse (solapado con el final)
+	var total_travel := randf_range(40.0, 90.0)
+	var amplitude := randf_range(10.0, 15.0)
+	var waves := randf_range(1.5, 3.0)
+	var move_time := 0.7
+	var fade_time := 0.3
 
 	var tween := root.create_tween()
 
-	# Movimiento serpenteante usando tween_method con una lambda (Godot 4)
 	tween.tween_method(
 		func(t: float) -> void:
 			if not is_instance_valid(dmg_label):
 				return
-			# t va de 0 a 1
 			var y := -t * total_travel
 			var x := sin(t * TAU * waves) * amplitude
 			dmg_label.global_position = start_pos + Vector2(x, y)
@@ -151,12 +167,10 @@ func _show_damage_text(amount: float) -> void:
 		move_time
 	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
-	# Desvanecer alpha en paralelo
 	tween.parallel().tween_property(
 		dmg_label, "modulate:a", 0.0, fade_time
 	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN).set_delay(move_time - fade_time)
 
-	# Cuando termine, borramos el label
 	tween.finished.connect(func() -> void:
 		if is_instance_valid(dmg_label):
 			dmg_label.queue_free()
@@ -208,7 +222,6 @@ func get_attack_speed() -> float:
 	return val
 
 func get_crit_chance(target: npc) -> int:
-
 	var val := npc_res.critical_chance + bonus_crit_chance
 	
 	for ab in abilities:
@@ -216,7 +229,6 @@ func get_crit_chance(target: npc) -> int:
 	return max (0, val)
 
 func get_crit_mult(target: npc) -> float:
-
 	var val := npc_res.critical_damage + bonus_crit_damage
 	
 	for ab in abilities:
@@ -224,10 +236,10 @@ func get_crit_mult(target: npc) -> float:
 	return max (1.0, val)
 
 # DAMAGE AND EVENTS
-func take_damage(amount: float, from: npc = null) -> void:
+func take_damage(amount: float, from: npc = null, was_crit: bool = false) -> void:
 	if amount <= 0.0: return
 	health = max(0.0, health - amount)
-	_show_damage_text(amount)
+	_show_damage_text(amount, was_crit)
 	for ab in abilities:
 		if ab: ab.on_take_damage(self, amount, from)
 	_update_healthbar()

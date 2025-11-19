@@ -476,7 +476,7 @@ func _do_attack(attacker: npc, defender: npc) -> void:
 	var before_hp := defender.health
 	var target_max_hp := defender.max_health
 	var target_name := _who(defender)
-	defender.take_damage(dmg, attacker)
+	defender.take_damage(dmg, attacker, crit)
 	var after_hp := 0.0
 	if is_instance_valid(defender):
 		after_hp = defender.health
