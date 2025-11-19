@@ -1,14 +1,27 @@
-# combat_scene.gd
 extends Node2D
 
-signal combat_finished
+# Señal que indica si el jugador ganó la ronda (mató al gladiador)
+signal combat_finished(player_won: bool)
 
 const NPC_SCENE := preload("res://scenes/npc.tscn")
 const PieceAdapter := preload("res://scripts/piece_adapter.gd")
 
+@export_group("Configuración de Enemigos")
 @export var enemy_res: Array[npcRes] = []
 const ALLY_LIMIT := 14
 const ENEMY_LIMIT := 1
+
+# --- NUEVO: Variables de Escalado Diario (Scaling) ---
+@export_group("Escalado de Dificultad (Por Día)")
+@export_subgroup("Crecimiento Exponencial")
+@export var scaling_hp_mult: float = 1.4     
+@export var scaling_damage_mult: float = 1.2 
+
+@export_subgroup("Crecimiento Lineal (Plano)")
+@export var scaling_speed_flat: float = 0.1  
+@export var scaling_crit_chance_flat: float = 5.0
+@export var scaling_crit_dmg_flat: float = 0.05  
+# -----------------------------------------------------
 
 @onready var enemy_spawn: Marker2D = $GladiatorSpawn
 @onready var round_message: Label = $RoundMessage
@@ -48,19 +61,17 @@ func _ready() -> void:
 	add_child(start_timer)
 	start_timer.timeout.connect(_begin_combat)
 	
-	# Spawnea el primer enemigo en cuanto la escena está lista.
 	spawn_enemy_one()
 
+func _advance_round() -> void:
+	pass
+
 func on_roulette_combat_requested(piece_resource: Resource) -> void:
-	
 	# --- CASO 1: Giro en VACÍO ---
 	if not piece_resource or not piece_resource is PieceRes:
 		push_error("on_roulette_combat_requested: Recurso nulo o inválido. Saltando combate.")
-		
-		# Limpiamos aliados de la ronda anterior
 		_cleanup_allies_and_reset()
 		
-		# Movemos al enemigo de vuelta SI ESTABA LUCHANDO
 		if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 			var g := enemy_npcs[0]
 			if g.position == enemy_battle_slot.position:
@@ -71,14 +82,9 @@ func on_roulette_combat_requested(piece_resource: Resource) -> void:
 	print("Señal de combate global recibida. Aliado: ", piece_resource.display_name)
 	
 	# --- CASO 2: Combate Normal ---
-	
-	# 1. Limpiar aliados de la ronda anterior
 	_cleanup_allies_and_reset()
-	
-	# 2. Spawnear nuevos aliados
 	spawn_piece(npc.Team.ALLY, piece_resource)
 	
-	# 3. Spawmear enemigo (Si no hay uno)
 	var enemy_alive := false
 	for e in enemy_npcs:
 		if is_instance_valid(e) and e.health > 0.0:
@@ -94,13 +100,11 @@ func on_roulette_combat_requested(piece_resource: Resource) -> void:
 		spawn_enemy_one()
 	else:
 		print("Gladiador de la ronda anterior sigue vivo. Reutilizándolo.")
-		# Aseguramos que esté en la posición de espera
 		if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 			var g := enemy_npcs[0]
 			if g.position != enemy_wait_slot.position:
 				_move_with_tween(g, enemy_wait_slot.position, 0.5)
 
-	# 4. Iniciar secuencia
 	_start_pre_battle_sequence()
 
 func _stop_combat() -> void:
@@ -116,7 +120,7 @@ func _stop_combat() -> void:
 			if payout > 0:
 				PlayerData.add_currency(payout)
 				w.gold_pool = int(w.gold_pool) - payout
-				print("Round reward: +", payout, " gold. Remaining pool=", w.gold_pool)
+				print("Round reward: +", payout)
 	
 	for t in ally_timers:
 		if is_instance_valid(t):
@@ -144,17 +148,20 @@ func _stop_combat() -> void:
 	combat_running = false
 	var msg_timer: Timer = null
 	
-	if (not enemy_alive) and allies_alive:
+	# Lógica de resultado
+	var player_won_round = not enemy_alive
+	
+	if player_won_round and allies_alive:
 		msg_timer = _show_round_message("Ronda terminada: ¡Victoria!")
 		msg_timer.timeout.connect(_cleanup_allies_and_reset)
 
-	elif enemy_alive and (not allies_alive):
+	elif not player_won_round:
 		msg_timer = _show_round_message("Ronda terminada: El gladiador sobrevivió.")
 		if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 			_move_with_tween(enemy_npcs[0], enemy_wait_slot.position, 0.5)
 		msg_timer.timeout.connect(_cleanup_allies_and_reset)
 
-	elif (not enemy_alive) and (not allies_alive):
+	elif player_won_round and (not allies_alive):
 		msg_timer = _show_round_message("Ronda terminada: doble KO.")
 		msg_timer.timeout.connect(_cleanup_allies_and_reset)
 	else:
@@ -162,12 +169,12 @@ func _stop_combat() -> void:
 		msg_timer.timeout.connect(_cleanup_allies_and_reset)
 	
 	if msg_timer:
-		msg_timer.timeout.connect(func(): combat_finished.emit())
+		msg_timer.timeout.connect(func(): combat_finished.emit(player_won_round))
 	else:
 		_cleanup_allies_and_reset()
-		combat_finished.emit()
+		combat_finished.emit(player_won_round)
 		
-	print("Battle stopped")
+	print("Battle stopped. Player won: ", player_won_round)
 
 func spawn_enemy_one() -> void:
 	if enemy_npcs.size() >= ENEMY_LIMIT:
@@ -221,13 +228,67 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 	# ---------------------------------------------
 	
 	add_child(n)
+
 	
+	# --- APLICAR BONUS A ENEMIGOS (Scaling Diario) ---
 	if team == npc.Team.ENEMY:
 		n.gold_pool = int(n.npc_res.gold)
+		# ¡Aquí aplicamos el crecimiento!
+		_apply_enemy_daily_scaling(n)
 	
 	n.died.connect(_on_npc_died)
 	n.tree_exited.connect(_on_npc_exited.bind(n))
 	return n
+
+# --- NUEVA FUNCIÓN: Cálculos de Escalado ---
+func _apply_enemy_daily_scaling(n: npc) -> void:
+	# Intentamos obtener el día actual del GameManager (Padre)
+	var gm = get_parent()
+	if not gm or not "current_day" in gm:
+		return
+	
+	# El día 1 es índice 0 (sin bonus). Día 2 es índice 1, etc.
+	var day_index = max(0, gm.current_day - 1)
+	
+	if day_index == 0:
+		return # No hay escalado en el día 1
+		
+	# 1. CÁLCULO DE MULTIPLICADORES Y SUMAS
+	# Exponencial: Base * (Multiplicador ^ Dias)
+	var total_hp_mult = pow(scaling_hp_mult, day_index)
+	var total_dmg_mult = pow(scaling_damage_mult, day_index)
+	
+	# Lineal: Base + (Incremento * Dias)
+	var added_speed = scaling_speed_flat * day_index
+	var added_crit_chance = scaling_crit_chance_flat * day_index
+	var added_crit_dmg = scaling_crit_dmg_flat * day_index
+	
+	# 2. APLICACIÓN AL NPC
+	# Usamos 'apply_passive_bonuses' asumiendo que acepta:
+	# (hp_percent, damage_percent, speed_flat, crit_chance_flat, crit_damage_flat)
+	
+	# Convertimos el multiplicador a porcentaje de bonus (ej. 1.4 -> +40%)
+	var bonus_hp_percent = (total_hp_mult - 1.0) * 100.0
+	var bonus_dmg_percent = (total_dmg_mult - 1.0) * 100.0
+	
+	if n.has_method("apply_passive_bonuses"):
+		n.apply_passive_bonuses(
+			bonus_hp_percent,
+			bonus_dmg_percent,
+			added_speed,
+			added_crit_chance,
+			added_crit_dmg
+		)
+		# Importante: Actualizamos la vida actual al nuevo máximo
+		n.health = n.max_health
+		
+		print("Enemy Scaled (Day %d): HP +%d%%, DMG +%d%%, SPD +%.2f" % [gm.current_day, int(bonus_hp_percent), int(bonus_dmg_percent), added_speed])
+	else:
+		# Fallback por si no tiene el método (modificamos HP manualmente al menos)
+		n.max_health *= total_hp_mult
+		n.health = n.max_health
+
+# ---------------------------------------------
 
 func _move_with_tween(n: npc, target_pos: Vector2, duration: float = 1.8) -> void:
 	if not is_instance_valid(n):
@@ -273,13 +334,10 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 
 	if team == npc.Team.ALLY:
 		var free_slots_limit := ALLY_LIMIT - ally_npcs.size()
-		if free_slots_limit <= 0:
-			print("ALLY_LIMIT alcanzado, no se spawnea nada.")
-			return
+		if free_slots_limit <= 0: return
 		var free_markers: Array[Marker2D] = _get_free_ally_slots()
-		if free_markers.is_empty():
-			print("No hay slots libres en los aliados")
-			return
+		if free_markers.is_empty(): return
+		
 		var to_spawn: int = min(members, free_slots_limit, free_markers.size())
 		for i in range(to_spawn):
 			var idx: int = randi() % free_markers.size()
@@ -315,11 +373,8 @@ func _on_npc_exited(n: npc) -> void:
 		_stop_combat()
 
 func _on_start_pressed() -> void:
-	if combat_running:
-		return
-	if ally_npcs.is_empty() or enemy_npcs.is_empty():
-		print("You need allies and enemies to start.")
-		return
+	if combat_running: return
+	if ally_npcs.is_empty() or enemy_npcs.is_empty(): return
 	combat_running = true
 	print("Battle starts in 3 seconds")
 	start_timer.start(3.0)
@@ -392,23 +447,17 @@ func _num(x: float, d: int = 2) -> String:
 	return String.num(x, d)
 
 func _team_to_str(t: int) -> String:
-	if t == npc.Team.ALLY:
-		return "ALLY"
-	else:
-		return "ENEMY"
+	return "ALLY" if t == npc.Team.ALLY else "ENEMY"
 
 func _cleanup_allies_and_reset() -> void:
 	for a in ally_npcs:
 		if is_instance_valid(a):
 			a.queue_free()
 	ally_npcs.clear()
-	print("Limpiando aliados...")
 
 func _do_attack(attacker: npc, defender: npc) -> void:
-	if not attacker.can_damage(defender):
-		return
-	if attacker.npc_res == null:
-		return
+	if not attacker.can_damage(defender): return
+	if attacker.npc_res == null: return
 	attacker.notify_before_attack(defender)
 	var base := attacker.get_damage(defender)
 	var dmg := base
@@ -416,11 +465,8 @@ func _do_attack(attacker: npc, defender: npc) -> void:
 	var crit := randf() < (crit_chance / 100.0)
 	var mult := attacker.get_crit_mult(defender) if crit else 1.0
 	dmg *= mult
-	var before_hp := defender.health
-	var target_max_hp := defender.max_health
-	var target_name := _who(defender)
-	defender.take_damage(dmg, attacker)
 	var after_hp := 0.0
+	defender.take_damage(dmg, attacker)
 	if is_instance_valid(defender):
 		after_hp = defender.health
 	attacker.notify_after_attack(defender, dmg, crit)
@@ -431,33 +477,29 @@ func _do_attack(attacker: npc, defender: npc) -> void:
 	# var crit_text := " (no crit)"
 	# if crit: crit_text = " CRIT x" + _num(mult)
 	# print("[HIT] ", _team_to_str(attacker.team), " -> ", target_name, " | dmg=", _num(dmg))
+	var crit_text := " (no crit)"
+	if crit: crit_text = " CRIT x" + _num(mult)
+	print("[HIT] ", _team_to_str(attacker.team), " -> ", _team_to_str(defender.team), " | final=", _num(dmg), crit_text)
 
 func _who(n: npc) -> String:
-	if not is_instance_valid(n):
-		return "[null]"
-	var res_name := ""
+	if not is_instance_valid(n): return "[null]"
+	var res_name := "Unknown"
 	if n.npc_res and n.npc_res.resource_path != "":
 		res_name = n.npc_res.resource_path.get_file().get_basename()
-	else:
-		res_name = "Unknown"
 	return "%s (%s)" % [res_name, _team_to_str(n.team)]
 	
 func _start_pre_battle_sequence() -> void:
 	if ally_npcs.is_empty():
-		print("No hay aliados para combatir. Terminando ronda.")
 		_stop_combat()
 		return
 	
 	if enemy_npcs.is_empty():
-		print("No hay enemigo. Esperando reaparición...")
 		await get_tree().create_timer(0.1).timeout
 		if enemy_npcs.is_empty():
-			print("¡El enemigo no reapareció! Forzando spawn.")
 			spawn_enemy_one()
 			await get_tree().create_timer(0.1).timeout 
 		
 		if enemy_npcs.is_empty():
-			push_error("¡Fallo crítico al reaparecer enemigo!")
 			_stop_combat()
 			return
 
