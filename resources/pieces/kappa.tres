@@ -9,5 +9,5 @@ script = ExtResource("3_d3hwr")
 piece_name = "kappa"
 piece_origin = ExtResource("2_l3xmm")
 icon = ExtResource("1_x1vit")
-price = 665
+price = 3
 metadata/_custom_type_script = "uid://8urlsjkkl8pw"

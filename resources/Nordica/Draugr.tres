@@ -4,6 +4,9 @@
 
 [resource]
 script = ExtResource("1_tha16")
+id = "nordica.Draugr"
+display_name = "Draugr"
+race = 0
 stats = {
 "BRONCE": {
 "aps": 1.1,

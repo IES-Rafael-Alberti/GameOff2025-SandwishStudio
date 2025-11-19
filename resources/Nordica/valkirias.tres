@@ -7,6 +7,7 @@ script = ExtResource("1_wtwdx")
 id = "nordica.valkirias"
 display_name = "valkirias"
 race = 0
+rarity = 1
 stats = {
 "BRONCE": {
 "aps": 1.0,

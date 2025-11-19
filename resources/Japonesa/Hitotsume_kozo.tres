@@ -7,6 +7,7 @@ script = ExtResource("1_ui1fk")
 id = "japonesa.Hitotsume_kozo"
 display_name = "Hitotsume_kozo"
 race = 1
+rarity = 1
 stats = {
 "BRONCE": {
 "aps": 0.9,

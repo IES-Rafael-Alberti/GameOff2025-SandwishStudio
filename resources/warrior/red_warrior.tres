@@ -13,5 +13,5 @@ atack_speed = 2.0
 critical_chance = 20
 critical_damage = 1.25
 raza = "Europeas"
-gold = 350
+gold = 4
 metadata/_custom_type_script = "uid://bd1qpluesymyw"

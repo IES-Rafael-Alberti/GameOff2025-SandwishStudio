@@ -13,5 +13,5 @@ atack_speed = 2.0
 critical_chance = 10
 critical_damage = 1.5
 description = "The easiest enemy"
-gold = 250
+gold = 4
 metadata/_custom_type_script = "uid://bd1qpluesymyw"

@@ -6,6 +6,7 @@
 script = ExtResource("1_n3ank")
 id = "japonesa.tengu"
 display_name = "tengu"
+rarity = 2
 stats = {
 "BRONCE": {
 "aps": 1.1,
