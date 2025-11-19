@@ -28,7 +28,6 @@ var current_round: int = 1
 @export var gold_round_base: int = 100
 @export var gold_day_mult: float = 1
 
-# (Asegúrate de que este nodo Label "RoundLabel" existe en tu escena game.tscn)
 @onready var round_label: Label = $RoundLabel
 
 var pupil_offset: Vector2
@@ -39,7 +38,7 @@ var blink_interval_min := 2.0
 var blink_interval_max := 5.0
 var blink_time := 0.1
 var pause_scene = preload("res://scenes/pause.tscn")
-var is_tended = true # true = tienda cerrada/ruleta visible; false = tienda abierta/ruleta oculta
+var is_tended = true 
 var original_positions = {}
 var blink_tween: Tween = null
 var max_distance: float = 100
@@ -58,7 +57,6 @@ func _ready():
 			original_positions[child] = child.position
 			child.modulate.a = 1.0
 
-	# --- Conexiones de la FSM ---
 	if roulette.has_signal("roulette_spin_started"):
 		roulette.roulette_spin_started.connect(_on_roulette_spin_started)
 	else:
@@ -71,7 +69,6 @@ func _ready():
 	else:
 		push_warning("gameManager.gd: ¡CombatScene.gd necesita la señal 'combat_finished'!")
 
-	# --- Conexiones de UI (Originales) ---
 	anim.connect("animation_finished", Callable(self, "_on_animation_finished"))
 	buttonShop.connect("pressed", Callable(self, "_on_shop_button_pressed"))
 	buttonShop.connect("mouse_entered", Callable(self, "_on_shop_hover"))
@@ -86,7 +83,6 @@ func _ready():
 	_on_PlayerData_currency_changed(PlayerData.get_current_currency())
 	store.generate()
 
-	# --- Arranque del Juego ---
 	if current_round == 1:
 		_give_initial_piece()
 		set_state(GameState.ROULETTE)
@@ -126,14 +122,13 @@ func set_state(new_state: GameState):
 		match current_state:
 			GameState.SHOP:
 				round_label.text = "Ronda " + str(current_round) + " - Tienda"
-				_toggle_store(false) # Abrir tienda
+				_toggle_store(false)
 				buttonShop.disabled = false
 				inventory.set_interactive(true)
-
 			
 			GameState.ROULETTE:
 				round_label.text = "Ronda " + str(current_round) + " - ¡Gira la ruleta!"
-				_toggle_store(true) # Cerrar tienda
+				_toggle_store(true)
 				buttonShop.disabled = false
 				inventory.set_interactive(true)
 				roulette.set_interactive(true)
@@ -150,7 +145,6 @@ func set_state(new_state: GameState):
 				inventory.set_interactive(false)
 				roulette.set_interactive(false)
 	else:
-		# Fallback por si el nodo no existe
 		match current_state:
 			GameState.SHOP:
 				_toggle_store(false)
@@ -170,7 +164,6 @@ func set_state(new_state: GameState):
 				inventory.set_interactive(false)
 				roulette.set_interactive(false)
 
-
 ## ------------------------------------------------------------------
 ## Transiciones de Estado (Señales)
 ## ------------------------------------------------------------------
@@ -187,35 +180,26 @@ func _on_shop_button_pressed():
 func _on_roulette_spin_started():
 	set_state(GameState.SPINNING)
 
-# --- ¡FUNCIÓN CLAVE MODIFICADA! ---
 func _on_combat_requested(piece_resource: Resource):
 	# Comprobamos si el recurso es válido ANTES de cambiar de estado
 	if piece_resource and piece_resource is PieceRes:
-		# 1. Combate Válido
+		# 1. Combate Válido -> Estado COMBAT
 		set_state(GameState.COMBAT)
 	else:
-		# 2. Giro en Vacío
-		# El estado actual es SPINNING.
-		# ¡CAMBIO! Ahora llamamos a _on_combat_finished() para
-		# que incremente la ronda y pase a la tienda.
+		# 2. Giro en Vacío -> Pasamos a siguiente ronda directamente
 		print("Giro en vacío detectado. Pasando a siguiente ronda.")
-		
-		# Esta es la única línea que necesitas cambiar/añadir en el 'else':
 		_on_combat_finished()
 
-# El combate TERMINA (solo se llama si hubo un combate real)
 func _on_combat_finished():
-
 	var round_income = int(gold_round_base * gold_day_mult)
 	PlayerData.add_currency(round_income)
 	print("Ronda finalizada. Ingresos obtenidos: %d" % round_income)
-	# -----------------------------
+	
 	current_round += 1
 	print("--- Fin de la Ronda. Empezando Ronda %d ---" % current_round)
 	
 	set_state(GameState.SHOP)
 	store.generate()
-
 
 ## ------------------------------------------------------------------
 ## Lógica de Arranque (Ronda 1)
@@ -234,11 +218,10 @@ func _give_initial_piece():
 		else:
 			push_warning("Ronda 1: Inventario lleno, no se pudo añadir la pieza inicial.")
 	else:
-		push_warning("Ronda 1: No se pudo obtener una pieza inicial (¿Array 'initial_pieces' vacío en inventory.gd?)")
-
+		push_warning("Ronda 1: No se pudo obtener una pieza inicial.")
 
 ## ------------------------------------------------------------------
-## Funciones de UI (Originales Modificadas)
+## Funciones de UI
 ## ------------------------------------------------------------------
 
 func _toggle_store(close_store: bool):
@@ -265,7 +248,6 @@ func _toggle_store(close_store: bool):
 
 func _on_animation_finished(anim_name: String):
 	roulette.visible = is_tended
-	
 	if anim_name == "roll":
 		store.visible = false
 
@@ -315,7 +297,6 @@ func start_unroll():
 	store.visible = true
 	roulette.visible = false
 	animate_store(false)
-
 	var tween = create_tween()
 	tween.tween_property(mat, "shader_parameter/roll_amount", 0.0, 0.6)
 
@@ -345,14 +326,88 @@ func pausar():
 	
 func get_inventory_piece_count(resource_to_check: Resource) -> int:
 	var item_to_search = resource_to_check
-	
-	# Si nos pasan un PieceData (Tienda), extraemos el PieceRes (Identidad de la unidad)
 	if resource_to_check is PieceData:
 		item_to_search = resource_to_check.piece_origin
-	
-	# Ahora preguntamos al inventario usando siempre el PieceRes
 	if inventory and inventory.has_method("get_item_count"):
 		return inventory.get_item_count(item_to_search)
-		
 	push_error("GameManager: No se pudo acceder a get_item_count en el inventario.")
 	return 0
+
+## ------------------------------------------------------------------
+## SISTEMA DE SINERGIAS (NUEVO)
+## ------------------------------------------------------------------
+
+# Esta función recorre la ruleta, cuenta las piezas únicas y devuelve los niveles de bonus.
+# Se llama desde combat_scene.gd antes de spawnear a los aliados.
+func get_active_synergies() -> Dictionary:
+	var result = {
+		"jap": 0, # Tier Japonés
+		"nor": 0, # Tier Nórdico
+		"eur": 0  # Tier Europeo
+	}
+	
+	# Validaciones de seguridad
+	if not roulette or not roulette.has_node("SpriteRuleta/SlotsContainer"):
+		push_warning("GameManager: No se encontró el contenedor de slots en la ruleta.")
+		return result
+
+	var slots_container = roulette.get_node("SpriteRuleta/SlotsContainer")
+	
+	# Usamos Diccionarios para contar IDs únicos (Set)
+	var unique_ids_jap = {}
+	var unique_ids_nor = {}
+	var unique_ids_eur = {}
+	
+	for slot_root in slots_container.get_children():
+		if not slot_root.has_node("slot"):
+			continue
+			
+		var actual_slot = slot_root.get_node("slot")
+		
+		# Verificamos si hay una pieza válida en el slot
+		if "current_piece_data" in actual_slot and actual_slot.current_piece_data:
+			var piece_data = actual_slot.current_piece_data
+			
+			# Accedemos al PieceRes (donde está la raza y el ID)
+			if "piece_origin" in piece_data and piece_data.piece_origin is PieceRes:
+				var res = piece_data.piece_origin
+				var id = res.id
+				
+				match res.race:
+					PieceRes.PieceRace.JAPONESA:
+						unique_ids_jap[id] = true
+					PieceRes.PieceRace.NORDICA:
+						unique_ids_nor[id] = true
+					PieceRes.PieceRace.EUROPEA:
+						unique_ids_eur[id] = true
+
+	# --- CÁLCULO DE TIERS ---
+	
+	# Japonesas (2 -> +50% Dmg, 4 -> +100% Dmg Primer golpe)
+	var count_jap = unique_ids_jap.size()
+	if count_jap >= 4:
+		result["jap"] = 2
+	elif count_jap >= 2:
+		result["jap"] = 1
+		
+	# Nórdicas (2 -> Cura 50%, 4 -> Cura 75% al bajar de 25% HP)
+	var count_nor = unique_ids_nor.size()
+	if count_nor >= 4:
+		result["nor"] = 2
+	elif count_nor >= 2:
+		result["nor"] = 1
+		
+	# Europeas (2 -> +25% HP, 4 -> +50% HP)
+	var count_eur = unique_ids_eur.size()
+	if count_eur >= 4:
+		result["eur"] = 2
+	elif count_eur >= 2:
+		result["eur"] = 1
+		
+	if count_jap > 0 or count_nor > 0 or count_eur > 0:
+		print("--- Sinergias Activas (Banca) ---")
+		print("Japonesas (Unicas: %d) -> Tier %d" % [count_jap, result["jap"]])
+		print("Nórdicas (Unicas: %d) -> Tier %d" % [count_nor, result["nor"]])
+		print("Europeas (Unicas: %d) -> Tier %d" % [count_eur, result["eur"]])
+	
+	return result
