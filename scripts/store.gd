@@ -300,8 +300,9 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 # --- FUNCIONES PARA EL TOOLTIP ---
 func _on_button_mouse_entered(data: Resource) -> void:
 	if tooltip and data:
-		tooltip.show_tooltip(data, 0)
-
+		var count = _get_item_count_safe(data)
+		tooltip.show_tooltip(data, 0, count)
+		
 func _on_button_mouse_exited() -> void:
 	if tooltip:
 		tooltip.hide_tooltip()

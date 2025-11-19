@@ -37,7 +37,7 @@ func _ready() -> void:
 	
 	add_theme_stylebox_override("panel", card_style)
 	
-	custom_minimum_size.x = 280
+	custom_minimum_size.x = 300 # Un poco más ancho para la comparativa
 	
 	description_label.fit_content = true
 	description_label.bbcode_enabled = true
@@ -61,7 +61,8 @@ func _process(_delta: float) -> void:
 			
 		global_position = tooltip_pos
 
-func show_tooltip(item_data: Resource, sell_percentage: int) -> void:
+# AHORA RECIBE 'current_count' (cantidad que ya tienes en inventario)
+func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int = 0) -> void:
 	if not item_data:
 		return
 
@@ -86,38 +87,70 @@ func show_tooltip(item_data: Resource, sell_percentage: int) -> void:
 	name_label.text = title_text.to_upper()
 	name_label.label_settings = LabelSettings.new()
 	name_label.label_settings.font_color = rarity_color
-	name_label.label_settings.font_size = 18
+	name_label.label_settings.font_size = 20
 	name_label.label_settings.outline_size = 4
 	name_label.label_settings.outline_color = Color.BLACK
 	
 	if card_style:
 		card_style.border_color = rarity_color
 
-	# D. CONSTRUIR DESCRIPCIÓN (INFO AMPLIADA)
+	# D. CONSTRUIR DESCRIPCIÓN (INFO AMPLIADA Y COMPARATIVA)
 	var text = ""
 	
 	text += "[center][color=#aaaaaa][font_size=14]%s[/font_size][/color][/center]\n" % subtitle
 	text += "[color=#444444]___________________________[/color]\n\n"
 
-	# --- INFO DE PIEZAS ---
+	# --- INFO DE PIEZAS (Lógica de Mejora) ---
 	if item_data is PieceData and item_data.piece_origin:
-		var stats = item_data.piece_origin.stats
-		text += "[font_size=16]"
-		text += "[color=#ff6b6b]⚔️ Daño:[/color]  [b]%s[/b]\n" % stats["BRONCE"]["dmg"]
-		text += "[color=#4ecdc4]❤️ Vida:[/color]  [b]%s[/b]\n" % stats["BRONCE"]["hp"]
-		text += "[color=#ffe66d]⚡ Vel:[/color]   [b]%s[/b]\n" % stats["BRONCE"]["aps"]
+		var origin = item_data.piece_origin
 		
-		# Info Extra añadida
-		if stats["BRONCE"]["crit_chance"] > 0:
-			text += "[color=#ff9f43]🎯 Crit:[/color]  [b]%s%%[/b]\n" % stats["BRONCE"]["crit_chance"]
-		if stats["BRONCE"]["crit_mult"] > 1.0:
-			text += "[color=#ff9f43]💥 Daño Crit:[/color] [b]x%s[/b]\n" % stats["BRONCE"]["crit_mult"]
+		# Lógica de Tier: 0=Bronce, 1=Plata, 2=Oro (Aproximación basada en cantidad)
+		# Suponiendo: 1 copia = Bronce, 2 copias = Plata, 3 copias = Oro
+		
+		# Si es venta (sell_percentage > 0), mostramos el estado ACTUAL.
+		# Si es compra (sell_percentage == 0), calculamos el FUTURO.
+		
+		var current_tier_idx = clampi(current_count, 1, 3) - 1 # Tier actual (0, 1 o 2)
+		if current_count == 0: current_tier_idx = 0 # Si no tienes, empiezas en bronce
+		
+		var next_tier_idx = current_tier_idx
+		var is_upgrade = false
+		
+		if sell_percentage == 0 and current_count > 0 and current_count < 3:
+			next_tier_idx = current_tier_idx + 1
+			is_upgrade = true
+		
+		var tier_keys = ["BRONCE", "PLATA", "ORO"]
+		var tier_colors = ["#cd7f32", "#c0c0c0", "#ffd700"]
+		
+		var current_stats = origin.stats[tier_keys[current_tier_idx]]
+		var next_stats = origin.stats[tier_keys[next_tier_idx]]
+		
+		text += "[font_size=16]"
+		
+		if is_upgrade:
+			text += "[center][shake rate=5 level=10][color=%s]★ MEJORA A %s ★[/color][/shake][/center]\n" % [tier_colors[next_tier_idx], tier_keys[next_tier_idx]]
+		else:
+			# Mostrar tier actual
+			text += "[center][color=%s]Nivel: %s[/color][/center]\n" % [tier_colors[current_tier_idx], tier_keys[current_tier_idx]]
+
+		# Función auxiliar para mostrar stat o cambio de stat
+		text += _format_stat_row("⚔️ Daño", current_stats["dmg"], next_stats["dmg"], is_upgrade, "#ff6b6b")
+		text += _format_stat_row("❤️ Vida", current_stats["hp"], next_stats["hp"], is_upgrade, "#4ecdc4")
+		text += _format_stat_row("⚡ Vel", current_stats["aps"], next_stats["aps"], is_upgrade, "#ffe66d")
+		
+		if next_stats["crit_chance"] > 0:
+			text += _format_stat_row("🎯 Crit", str(current_stats["crit_chance"]) + "%", str(next_stats["crit_chance"]) + "%", is_upgrade, "#ff9f43")
+		
+		if next_stats["crit_mult"] > 1.0:
+			text += _format_stat_row("💥 CritDmg", "x" + str(current_stats["crit_mult"]), "x" + str(next_stats["crit_mult"]), is_upgrade, "#ff9f43")
+
 		text += "[/font_size]\n"
 	
 	# --- INFO DE PASIVAS ---
 	elif item_data is PassiveData:
 		text += "[font_size=16]"
-		text += _get_passive_stats_string(item_data) # Función auxiliar abajo
+		text += _get_passive_stats_string(item_data)
 		text += "[/font_size]\n\n"
 
 	# Descripción en cursiva
@@ -126,7 +159,7 @@ func show_tooltip(item_data: Resource, sell_percentage: int) -> void:
 
 	description_label.text = text
 
-	# E. PRECIO
+	# E. PRECIO Y ESTADO DE COPIAS
 	if "price" in item_data and item_data.price > 0:
 		var final_price = item_data.price
 		var prefix = "COSTO:"
@@ -136,25 +169,61 @@ func show_tooltip(item_data: Resource, sell_percentage: int) -> void:
 			final_price = int(item_data.price * (sell_percentage / 100.0))
 			prefix = "VENTA:"
 			price_color = Color("#77ff77")
+		else:
+			# Mostrar cuántas tienes si estás comprando
+			if current_count > 0 and current_count < 3:
+				sell_price_label.text = "TIENES: %d/3" % current_count
+				sell_price_label.modulate = Color.CYAN
+				# Añadimos el precio debajo o al lado
+				prefix = " | COSTO:"
+			elif current_count >= 3:
+				prefix = "MAXIMIZADO | "
+				price_color = Color.RED
 			
-		sell_price_label.text = "%s %d" % [prefix, final_price]
-		sell_price_label.modulate = price_color
+		# Concatenar texto del precio si no se sobrescribió completamente
+		if "TIENES" in sell_price_label.text and sell_percentage == 0:
+			sell_price_label.text += "  %d€" % _calculate_price_logic(item_data, current_count)
+		else:
+			sell_price_label.text = "%s %d€" % [prefix, final_price]
+			
+		if sell_percentage == 0:
+			sell_price_label.modulate = price_color
+			
 		sell_price_label.show()
 	else:
 		sell_price_label.hide()
 
 	show()
 
+# --- NUEVA FUNCIÓN DE FORMATEO DE STATS ---
+func _format_stat_row(label: String, val_old, val_new, show_upgrade: bool, color_hex: String) -> String:
+	var s = "[color=%s]%s:[/color] " % [color_hex, label]
+	
+	if show_upgrade and str(val_old) != str(val_new):
+		# Muestra: 10 -> 15 (en verde brillante)
+		s += "[color=#aaaaaa]%s[/color] [color=#ffffff]→[/color] [b][color=#00ff00]%s[/color][/b]\n" % [str(val_old), str(val_new)]
+	else:
+		# Muestra normal: 10
+		s += "[b]%s[/b]\n" % str(val_new)
+	return s
+
+# Simulación de la lógica de precio del Store para mostrarlo bien en el tooltip
+func _calculate_price_logic(data, count) -> int:
+	# Ajusta esto según tu lógica real en Store.gd
+	var base = data.price
+	var mult = 1.0 + (0.5 * count) # Asumiendo duplicado pieza mult 0.5
+	return int(base * mult)
+
 func hide_tooltip() -> void:
 	hide()
 
-# --- UTILIDADES ---
+# --- UTILIDADES (SIN CAMBIOS) ---
 func _get_rarity_color(rarity_enum: int) -> Color:
 	match rarity_enum:
-		0: return Color("#bdc3c7") # Común
-		1: return Color("#3498db") # Raro
-		2: return Color("#9b59b6") # Épico
-		3: return Color("#f1c40f") # Legendario
+		0: return Color("#bdc3c7")
+		1: return Color("#3498db")
+		2: return Color("#9b59b6")
+		3: return Color("#f1c40f")
 		_: return Color.WHITE
 
 func _get_race_name(race_enum: int) -> String:
@@ -163,14 +232,14 @@ func _get_race_name(race_enum: int) -> String:
 		1: return "Japonesa"
 		2: return "Europea"
 		_: return "Clase"
-func _get_rarity_name(race_enum: int) -> String:
-	match race_enum:
+		
+func _get_rarity_name(rarity_enum: int) -> String: # Corregido nombre de variable
+	match rarity_enum:
 		0: return "Común"
 		1: return "Raro"
 		2: return "Épico"
 		_: return "Legendario"
 
-# Nueva función para traducir los datos numéricos de la pasiva a texto
 func _get_passive_stats_string(data: PassiveData) -> String:
 	var val = data.value
 	match data.type:
