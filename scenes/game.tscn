@@ -15,6 +15,10 @@
 [node name="game" type="Node2D"]
 script = ExtResource("1_lbhrr")
 
+[node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
+position = Vector2(187, 77.99997)
+scale = Vector2(0.35115045, 0.22791663)
+
 [node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
 offset_left = 83.0
 offset_top = 369.0
@@ -39,10 +43,6 @@ prob_comun = null
 prob_raro = null
 prob_epico = null
 prob_legendario = null
-
-[node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
-position = Vector2(187, 77.99997)
-scale = Vector2(0.35115045, 0.22791663)
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
 position = Vector2(130, 299)
