@@ -100,7 +100,7 @@ func _show_damage_text(amount: float, was_crit: bool = false) -> void:
 
 	# --- Color según el daño (de rojo a morado intenso) ---
 	var min_color := Color(1.0, 0.0, 0.0, 1.0)   # rojo para poco daño
-	var max_color := Color(0.842, 0.637, 1.0, 1.0)   # morado intenso para mucho daño
+	var max_color := Color(0.276, 0.005, 0.396, 1.0)   # morado intenso para mucho daño
 
 	# Daño a partir del cual se considera “máximo morado” (ajusta a tu gusto)
 	var color_damage_cap := 120.0

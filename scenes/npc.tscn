@@ -9,6 +9,7 @@
 bg_color = Color(0.39513198, 0.8288472, 0.40690893, 1)
 
 [node name="npc" type="AnimatedSprite2D"]
+scale = Vector2(3, 3)
 sprite_frames = SubResource("SpriteFrames_abqhh")
 script = ExtResource("2_rv78h")
 
