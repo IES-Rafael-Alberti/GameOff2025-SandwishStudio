@@ -98,6 +98,11 @@ func _on_lever_input_event(_viewport, event, _shape_idx):
 		if event.pressed:
 			start_dragging()
 
+# Se llama cuando el script _ready() esté disponible
+func _ready():
+	# Conectamos la señal de borrado de inventario
+	GlobalSignals.piece_type_deleted.connect(_on_piece_type_deleted)
+
 func _input(event):
 	if is_dragging_lever and event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
@@ -114,6 +119,8 @@ func start_dragging():
 	# JUICE: Pop visual
 	var t = create_tween()
 	t.tween_property(lever_sprite, "scale", Vector2(1.1, 1.1), 0.1).set_trans(Tween.TRANS_BACK)
+func is_moving():
+	return state != State.IDLE
 
 func update_lever_drag():
 	var current_mouse_y = get_global_mouse_position().y
@@ -189,8 +196,9 @@ func release_lever():
 		# Tween de escala más largo para evitar que se quede "chica" (0.3s)
 		t.tween_property(lever_sprite, "scale", Vector2.ONE, 0.3)
 
-		# CORRECCIÓN PALANCA: Asegura el reset de la posición del sprite al cancelar.
 		t.chain().tween_callback(func(): lever_sprite.position = lever_origin_pos)
+	  GlobalSignals.emit_signal("roulette_state_changed", true)
+
 
 
 # --- LÓGICA CENTRAL ---
@@ -317,6 +325,17 @@ func _reward():
 	if index >= slots_container.get_child_count():
 		GlobalSignals.emit_signal("combat_requested", null)
 		return
+
+	var winning_slot_root = SlotsContainer.get_child(index)
+	var actual_slot_node = null
+
+	if winning_slot_root and winning_slot_root.has_node("slot"):
+		actual_slot_node = winning_slot_root.get_node("slot")
+
+	# Usamos 'current_piece_data' del script slot.gd
+	if actual_slot_node and "current_piece_data" in actual_slot_node:
+		
+		var piece = actual_slot_node.current_piece_data
 		
 	var winning_slot_root = slots_container.get_child(index)
 	
@@ -385,6 +404,10 @@ func _reset():
 
 # --- UTILIDADES ---
 
+
+	GlobalSignals.emit_signal("roulette_state_changed", false)
+
+
 func reset_rotation_to_zero():
 	if state == State.IDLE:
 		$SpriteRuleta.rotation_degrees = 0.0
@@ -395,10 +418,32 @@ func set_interactive(interactive: bool):
 	if lever_sprite:
 		lever_sprite.modulate = Color.WHITE if interactive else Color(0.5, 0.5, 0.5)
 
-func _on_piece_type_deleted(piece_data):
-	if not piece_data or not slots_container: return
-	for slot_root in slots_container.get_children():
-		if slot_root.has_node("slot"):
-			var slot = slot_root.get_node("slot")
-			if slot and slot.get("current_piece_data") == piece_data:
-				if slot.has_method("clear_slot"): slot.clear_slot()
+
+# --- ¡NUEVA FUNCIÓN DE SEÑAL!
+# Se llama cuando GlobalSignals.piece_type_deleted se emite desde inventory.gd
+func _on_piece_type_deleted(piece_data: PieceData):
+	if not piece_data:
+		return
+		
+	print("... Ruleta ha recibido orden de borrado para: %s" % piece_data.resource_name)
+	
+	# Recorremos todos los slots de la ruleta
+	for slot_root in SlotsContainer.get_children():
+		if not slot_root.has_node("slot"):
+			continue
+			
+		var slot = slot_root.get_node("slot")
+		
+		# Usamos la variable 'current_piece_data' de tu script slot.gd
+		if slot and "current_piece_data" in slot:
+			
+			# Si la pieza en este slot es la que se borró
+			if slot.current_piece_data == piece_data:
+				
+				# Usamos el método 'clear_slot()' de tu script slot.gd
+				if slot.has_method("clear_slot"):
+					print("... ... Limpiando slot %s" % slot.name)
+					slot.clear_slot()
+				else:
+					push_warning("Ruleta: El slot %s no tiene método clear_slot()" % slot.name)
+
