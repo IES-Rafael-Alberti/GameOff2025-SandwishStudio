@@ -49,6 +49,7 @@ var max_distance: float = 100
 ## ------------------------------------------------------------------
 
 func _ready():
+	
 	pupil_offset = pupil.position
 	eye_closed_texture = preload("res://assets/Oculta.png")
 	original_eye_texture = sprite_show.texture
@@ -84,8 +85,7 @@ func _ready():
 
 	blink_timer = randf_range(blink_interval_min, blink_interval_max)
 	_on_PlayerData_currency_changed(PlayerData.get_current_currency())
-	store.generate()
-
+	store.start_new_round()
 	# --- Arranque del Juego ---
 	if current_round == 1:
 		_give_initial_piece()
@@ -214,7 +214,7 @@ func _on_combat_finished():
 	print("--- Fin de la Ronda. Empezando Ronda %d ---" % current_round)
 	
 	set_state(GameState.SHOP)
-	store.generate()
+	store.start_new_round()
 
 
 ## ------------------------------------------------------------------
