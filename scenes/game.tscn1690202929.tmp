@@ -16,6 +16,7 @@
 [node name="game" type="Node2D"]
 script = ExtResource("1_lbhrr")
 rounds_per_day = 1
+gladiators_per_day = 1
 
 [node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
 offset_left = 83.0
@@ -79,10 +80,10 @@ offset_right = 1450.0
 offset_bottom = 380.0
 theme_override_font_sizes/font_size = 28
 
-[node name="GameOver" type="CanvasLayer" parent="."]
+[node name="Game_Over" type="CanvasLayer" parent="."]
 visible = false
 
-[node name="GameOverImage" type="TextureRect" parent="GameOver"]
+[node name="GameOverImage" type="TextureRect" parent="Game_Over"]
 offset_left = -4.0
 offset_top = -2.0
 offset_right = 1681.0
@@ -90,7 +91,7 @@ offset_bottom = 1093.0
 mouse_filter = 0
 texture = ExtResource("12_dinhu")
 
-[node name="Label" type="Label" parent="GameOver"]
+[node name="Label" type="Label" parent="Game_Over"]
 offset_left = 433.0
 offset_top = 294.0
 offset_right = 747.0
@@ -116,22 +117,3 @@ offset_right = 841.0
 offset_bottom = 386.0
 theme_override_font_sizes/font_size = 72
 text = "SIGUIENTE DIA"
-
-[node name="Win" type="CanvasLayer" parent="."]
-visible = false
-
-[node name="WinImage" type="TextureRect" parent="Win"]
-offset_left = -4.0
-offset_top = -2.0
-offset_right = 1681.0
-offset_bottom = 1093.0
-mouse_filter = 0
-texture = ExtResource("12_dinhu")
-
-[node name="Label" type="Label" parent="Win"]
-offset_left = 333.0
-offset_top = 287.0
-offset_right = 841.0
-offset_bottom = 386.0
-theme_override_font_sizes/font_size = 72
-text = "Has ganado crack :)"
