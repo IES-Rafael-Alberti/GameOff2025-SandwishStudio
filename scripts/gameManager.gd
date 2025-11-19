@@ -11,7 +11,7 @@ enum GameState {
 }
 var current_state: GameState
 var current_round: int = 1
-
+var current_day: int = 1
 ## ------------------------------------------------------------------
 ## Nodos
 ## ------------------------------------------------------------------
@@ -27,6 +27,9 @@ var current_round: int = 1
 @onready var combat_scene: Node2D = $combat_scene
 @export var gold_round_base: int = 100
 @export var gold_day_mult: float = 1
+@export var rounds_per_day: int = 10
+@export var gladiators_per_day: int = 4
+@export var gladiators_mult: int = 1
 
 # (Asegúrate de que este nodo Label "RoundLabel" existe en tu escena game.tscn)
 @onready var round_label: Label = $RoundLabel

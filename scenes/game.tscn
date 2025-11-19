@@ -30,15 +30,6 @@ offset_top = 394.0
 offset_right = 416.0
 offset_bottom = 394.0
 scale = Vector2(0.8860778, 0.88381195)
-max_copies = null
-duplicate_piece_mult = null
-duplicate_passive_mult = null
-prob_comun = null
-prob_raro = null
-prob_epico = null
-prob_legendario = null
-COLOR_NORMAL_BG = null
-COLOR_UNAFFORD_BG = null
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
 position = Vector2(187, 70.99997)
@@ -70,4 +61,18 @@ offset_left = 336.0
 offset_top = 342.0
 offset_right = 880.0
 offset_bottom = 381.0
+theme_override_font_sizes/font_size = 28
+
+[node name="DayLabel" type="Label" parent="."]
+offset_left = 1117.0
+offset_top = 344.0
+offset_right = 1416.0
+offset_bottom = 383.0
+theme_override_font_sizes/font_size = 28
+
+[node name="GladiatorLabel" type="Label" parent="."]
+offset_left = 1556.0
+offset_top = 334.0
+offset_right = 1741.0
+offset_bottom = 373.0
 theme_override_font_sizes/font_size = 28
