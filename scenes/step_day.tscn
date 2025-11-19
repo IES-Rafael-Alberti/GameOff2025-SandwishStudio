@@ -1,0 +1,38 @@
+[gd_scene load_steps=2 format=3 uid="uid://brpjmv3oh3q6i"]
+
+[ext_resource type="Texture2D" uid="uid://bp0prob4xwsk5" path="res://assets/Rep (1).png" id="1_l4tbc"]
+
+[node name="StepDay" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Cortinas" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="FillBar" type="TextureProgressBar" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Milestones" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Tracker" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HeadIcon" type="TextureRect" parent="Tracker"]
+layout_mode = 0
+offset_left = 114.0
+offset_top = 152.0
+offset_right = 2643.0
+offset_bottom = 2907.0
+scale = Vector2(0.08974023, 0.08974023)
+texture = ExtResource("1_l4tbc")
