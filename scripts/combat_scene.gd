@@ -30,6 +30,7 @@ const ALLY_BATTLE_OFSET := Vector2(-880, 0)
 
 var ally_npcs: Array[npc] = []
 var enemy_npcs: Array[npc] = []
+var pre_battle_wait_time: float = 1.0
 
 var combat_running := false
 var start_timer: Timer
@@ -299,12 +300,10 @@ func _get_piece_copies_owned(piece_data: Resource) -> int:
 	
 	return 1 # Valor por defecto si falla la conexión
 
-# MODIFICADO: Ahora obtiene num_copies y pasa los argumentos requeridos al PieceAdapter
 func spawn_piece(team: int, piece: PieceRes) -> void:
 	if piece == null:
 		return
 		
-	# 1. Obtener el número de copias y el oro.
 	var num_copies: int = 1 # Por defecto
 	var gold_per_enemy: int = 0 # Base: 0 para aliados.
 	
@@ -312,10 +311,7 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 		# Se asume que PieceRes.id contiene el ID para la búsqueda de copias.
 		num_copies = _get_piece_copies_owned(piece)
 		print(_get_piece_copies_owned(piece))
-		# NOTA: gold_per_enemy se asume 0 ya que esta función spawnea aliados, 
-		# y el oro es más relevante para NPCs enemigos.
 
-	# 2. Llamar al adaptador con los nuevos argumentos.
 	var pack: Dictionary = PieceAdapter.to_npc_res(piece, num_copies, gold_per_enemy)
 	var npc_template: npcRes = pack["res"]
 	var members: int = int(pack["members"])
@@ -325,27 +321,56 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 		if free_slots_limit <= 0:
 			print("ALLY_LIMIT alcanzado, no se spawnea nada.")
 			return
+
 		var free_markers: Array[Marker2D] = _get_free_ally_slots()
 		if free_markers.is_empty():
 			print("No hay slots libres en los aliados")
 			return
+
 		var to_spawn: int = min(members, free_slots_limit, free_markers.size())
+		var delay_per_ally := 0.25
+		var move_segment_time := 0.5     # Cada tramo de tween
+		var total_move_time := move_segment_time * 2.0  # puerta→mid y mid→slot
+
 		for i in range(to_spawn):
 			var idx: int = randi() % free_markers.size()
 			var slot: Marker2D = free_markers[idx]
 			free_markers.remove_at(idx)
+
 			var n: npc = _spawn_npc(team, ally_entry_spawn.position, npc_template)
 			if n:
 				if piece.display_name != "":
 					n.set_display_name(piece.display_name)
 				ally_npcs.append(n)
-				_place_ally_in_slot_with_tween(n, slot.position)
+				_place_ally_in_slot_with_tween(n, slot.position, i)
 
-func _place_ally_in_slot_with_tween(n: npc, target_pos: Vector2) -> void:
+		if to_spawn > 0:
+			var last_index := to_spawn - 1
+			pre_battle_wait_time = last_index * delay_per_ally + total_move_time + 0.2
+		else:
+			pre_battle_wait_time = 0.5
+
+		return
+	# Si fuese un enemigo, simplemente hacemos spawn normal
+	var e := _spawn_npc(team, enemy_spawn.position, npc_template)
+	if e:
+		enemy_npcs.append(e)
+
+func _place_ally_in_slot_with_tween(n: npc, final_pos: Vector2, order_index: int) -> void:
 	n.position = ally_entry_spawn.position
-	_move_with_tween(n, target_pos, 0.8)
 
-# --- ¡CAMBIO REQUERIDO 2!
+	var delay_per_ally := 0.25
+
+	var mid_pos := Vector2(final_pos.x, ally_entry_spawn.position.y)
+
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+	tween.tween_interval(order_index * delay_per_ally)
+
+	tween.tween_property(n, "position", mid_pos, 0.5)
+	tween.tween_property(n, "position", final_pos, 0.5)
+
 func _on_npc_died(n: npc) -> void:
 	# Si el NPC que murió es un enemigo, spawneamos uno nuevo.
 	if n.team == npc.Team.ENEMY:
@@ -355,13 +380,8 @@ func _on_npc_died(n: npc) -> void:
 			print("Reward (death): +", amount, " gold (remaining pool paid).")
 		n.gold_pool = 0
 		
-		# ¡Aquí está la reaparición!
 		print("¡Gladiador murió! Reemplazando...")
 		spawn_enemy_one()
-		
-	# (El 'else' no es necesario, ya que si es aliado
-	# no hacemos nada especial al morir, solo lo que ya hacía)
-# --- FIN DE CAMBIO ---
 
 func _on_npc_exited(n: npc) -> void:
 	if n.team == npc.Team.ALLY:
@@ -528,7 +548,7 @@ func _start_pre_battle_sequence() -> void:
 
 	var t:= Timer.new()
 	t.one_shot = true
-	t.wait_time = 1.0
+	t.wait_time = pre_battle_wait_time
 	add_child(t)
 	t.timeout.connect(_advance_to_battle_and_start)
 	t.start()
