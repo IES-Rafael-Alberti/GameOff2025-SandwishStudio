@@ -66,6 +66,7 @@ var max_distance: float = 100
 ## ------------------------------------------------------------------
 
 func _ready():
+	
 	pupil_offset = pupil.position
 	eye_closed_texture = preload("res://assets/Oculta.png")
 	original_eye_texture = sprite_show.texture
@@ -100,7 +101,7 @@ func _ready():
 	blink_timer = randf_range(blink_interval_min, blink_interval_max)
 	_on_PlayerData_currency_changed(PlayerData.get_current_currency())
 	store.generate()
-	
+	store.start_new_round()
 	_update_ui_labels()
 
 	if current_round == 1:
@@ -200,6 +201,7 @@ func _on_combat_finished(player_won: bool = false):
 	var round_income = int(gold_round_base * gold_day_mult)
 	PlayerData.add_currency(round_income)
 	
+
 	if player_won:
 		gladiators_defeated += 1
 	
@@ -225,6 +227,7 @@ func _on_combat_finished(player_won: bool = false):
 		_update_ui_labels()
 		set_state(GameState.SHOP)
 		store.generate()
+		store.start_new_round()
 
 # --- Funciones de Vistas (DayFinished, GameOver & Win) ---
 
@@ -258,7 +261,6 @@ func _on_next_day_image_input(event: InputEvent) -> void:
 
 func _advance_to_next_day() -> void:
 	print("Iniciando Día %d..." % (current_day + 1))
-	
 	current_day += 1
 	current_round = 1
 	gladiators_defeated = 0 
@@ -271,7 +273,7 @@ func _advance_to_next_day() -> void:
 	_update_ui_labels()
 	set_state(GameState.SHOP)
 	store.generate()
-
+	store.start_new_round()
 ## ------------------------------------------------------------------
 ## Resto de Funciones
 ## ------------------------------------------------------------------
