@@ -10,4 +10,4 @@ piece_name = "draugr"
 piece_origin = ExtResource("2_7trbx")
 icon = ExtResource("1_kqwax")
 uses = 2
-price = 322
+price = 3

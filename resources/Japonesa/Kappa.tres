@@ -7,4 +7,30 @@ script = ExtResource("1_vrrwg")
 id = "japonesa.Kappa"
 display_name = "Kappa"
 race = 1
+stats = {
+"BRONCE": {
+"aps": 1.0,
+"crit_chance": 5,
+"crit_mult": 1.5,
+"dmg": 5.0,
+"hp": 60.0,
+"members": 6
+},
+"ORO": {
+"aps": 1.2,
+"crit_chance": 15,
+"crit_mult": 2.0,
+"dmg": 25.0,
+"hp": 100.0,
+"members": 10
+},
+"PLATA": {
+"aps": 1.1,
+"crit_chance": 7,
+"crit_mult": 1.6,
+"dmg": 1.8,
+"hp": 80.0,
+"members": 10
+}
+}
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"

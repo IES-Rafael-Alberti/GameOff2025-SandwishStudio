@@ -7,4 +7,31 @@ script = ExtResource("1_1t85r")
 id = "japonesa.oni"
 display_name = "oni"
 race = 1
+rarity = 3
+stats = {
+"BRONCE": {
+"aps": 1.0,
+"crit_chance": 10,
+"crit_mult": 1.5,
+"dmg": 16.0,
+"hp": 260.0,
+"members": 2
+},
+"ORO": {
+"aps": 1.2,
+"crit_chance": 15,
+"crit_mult": 2.0,
+"dmg": 25.0,
+"hp": 250.0,
+"members": 2
+},
+"PLATA": {
+"aps": 1.1,
+"crit_chance": 10,
+"crit_mult": 1.6,
+"dmg": 15.0,
+"hp": 150.0,
+"members": 2
+}
+}
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"

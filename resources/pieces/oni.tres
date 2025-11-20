@@ -9,4 +9,4 @@ script = ExtResource("3_jlxpj")
 piece_name = "oni"
 piece_origin = ExtResource("2_8wh7r")
 icon = ExtResource("1_iaiyg")
-price = 322
+price = 10

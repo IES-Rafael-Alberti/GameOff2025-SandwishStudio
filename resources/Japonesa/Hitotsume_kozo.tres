@@ -7,4 +7,31 @@ script = ExtResource("1_ui1fk")
 id = "japonesa.Hitotsume_kozo"
 display_name = "Hitotsume_kozo"
 race = 1
+rarity = 1
+stats = {
+"BRONCE": {
+"aps": 0.9,
+"crit_chance": 3,
+"crit_mult": 1.5,
+"dmg": 4.0,
+"hp": 105.0,
+"members": 4
+},
+"ORO": {
+"aps": 1.2,
+"crit_chance": 15,
+"crit_mult": 2.0,
+"dmg": 25.0,
+"hp": 250.0,
+"members": 10
+},
+"PLATA": {
+"aps": 1.1,
+"crit_chance": 10,
+"crit_mult": 1.6,
+"dmg": 15.0,
+"hp": 150.0,
+"members": 8
+}
+}
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"
