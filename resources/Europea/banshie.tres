@@ -1,9 +1,11 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=2 format=3 uid="uid://cbu5pjmpj8vj2"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://cbu5pjmpj8vj2"]
 
+[ext_resource type="SpriteFrames" uid="uid://gvweoobpn1ha" path="res://resources/allies_Frames/banshiee.tres" id="1_55f7c"]
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_ngv5d"]
 
 [resource]
 script = ExtResource("1_ngv5d")
 id = "europea.banshie"
 display_name = "Banshie"
+frames = ExtResource("1_55f7c")
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"

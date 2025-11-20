@@ -4,7 +4,7 @@ shader_type canvas_item;
 uniform vec3 shock_color : source_color = vec3(1.0, 0.0, 0.0);
 
 // Fuerza inicial del desplazamiento
-uniform float amplitude = 30.0;
+uniform float amplitude = 10.0;
 // Frecuencia del temblor
 uniform float frequency = 10.0;
 

@@ -1,0 +1,18 @@
+[gd_resource type="SpriteFrames" load_steps=3 format=3 uid="uid://gvweoobpn1ha"]
+
+[ext_resource type="Texture2D" uid="uid://bjeo7ufgwd3m8" path="res://assets/allies_scaled/Banshee (1) (1).png" id="1_d3g1g"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_asmvl"]
+atlas = ExtResource("1_d3g1g")
+region = Rect2(0, 0, 236, 251)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_asmvl")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]

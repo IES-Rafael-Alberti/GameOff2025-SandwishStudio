@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://bekys0sh7i1sf"]
+[gd_scene load_steps=8 format=3 uid="uid://bekys0sh7i1sf"]
 
 [ext_resource type="Shader" uid="uid://kl5qcx1hsdjw" path="res://assets/shaders/shock_damage.gdshader" id="1_rv78h"]
-[ext_resource type="SpriteFrames" uid="uid://rjwlxoj38qir" path="res://resources/warrior/red_warrior_animation.tres" id="2_abqhh"]
 [ext_resource type="Script" uid="uid://dkh16s35ytd1p" path="res://scripts/npc.gd" id="2_rv78h"]
+[ext_resource type="SpriteFrames" uid="uid://gvweoobpn1ha" path="res://resources/allies_Frames/banshiee.tres" id="3_rv78h"]
+[ext_resource type="SpriteFrames" uid="uid://dd8aggwqmcxme" path="res://resources/allies_Frames/valkiria_anim.tres" id="4_7n8xq"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7n8xq"]
 shader = ExtResource("1_rv78h")
@@ -12,14 +13,21 @@ shader_parameter/frequency = 10.0
 shader_parameter/shock_time = 0.0
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_abqhh"]
+animations = [{
+"frames": [],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_abqhh"]
 bg_color = Color(0.39513198, 0.8288472, 0.40690893, 1)
 
 [node name="npc" type="AnimatedSprite2D"]
 material = SubResource("ShaderMaterial_7n8xq")
-scale = Vector2(3, 3)
+scale = Vector2(1.8, 1.8)
 sprite_frames = SubResource("SpriteFrames_abqhh")
+animation = &"idle"
 script = ExtResource("2_rv78h")
 
 [node name="healthBar" type="ProgressBar" parent="."]
@@ -35,15 +43,49 @@ grow_horizontal = 2
 theme_override_styles/fill = SubResource("StyleBoxFlat_abqhh")
 show_percentage = false
 
-[node name="red_warrior" type="AnimatedSprite2D" parent="."]
-visible = false
-sprite_frames = ExtResource("2_abqhh")
-animation = &"idle"
-frame_progress = 0.5354015
-
 [node name="NameLabel" type="Label" parent="."]
 offset_left = -136.0
 offset_top = -120.0
 offset_right = -96.0
 offset_bottom = -90.0
 theme_override_font_sizes/font_size = 21
+
+[node name="banshiee" type="AnimatedSprite2D" parent="."]
+visible = false
+scale = Vector2(0.001, 0.001)
+sprite_frames = ExtResource("3_rv78h")
+animation = &"idle"
+
+[node name="dragon" type="AnimatedSprite2D" parent="."]
+visible = false
+scale = Vector2(0.001, 0.001)
+sprite_frames = ExtResource("4_7n8xq")
+animation = &"idle"
+
+[node name="draugr" type="AnimatedSprite2D" parent="."]
+
+[node name="jotuun" type="AnimatedSprite2D" parent="."]
+
+[node name="kappa" type="AnimatedSprite2D" parent="."]
+
+[node name="kozo" type="AnimatedSprite2D" parent="."]
+
+[node name="norna" type="AnimatedSprite2D" parent="."]
+
+[node name="oni" type="AnimatedSprite2D" parent="."]
+
+[node name="satiro" type="AnimatedSprite2D" parent="."]
+
+[node name="tengu" type="AnimatedSprite2D" parent="."]
+
+[node name="trasgu" type="AnimatedSprite2D" parent="."]
+
+[node name="valk" type="AnimatedSprite2D" parent="."]
+
+[node name="Gladiador" type="AnimatedSprite2D" parent="."]
+
+[node name="Gladiador2" type="AnimatedSprite2D" parent="."]
+
+[node name="Gladiador3" type="AnimatedSprite2D" parent="."]
+
+[node name="Gladiador4" type="AnimatedSprite2D" parent="."]
