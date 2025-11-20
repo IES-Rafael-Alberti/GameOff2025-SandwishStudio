@@ -36,6 +36,15 @@ offset_top = 394.0
 offset_right = 416.0
 offset_bottom = 394.0
 scale = Vector2(0.8860778, 0.88381195)
+max_copies = null
+duplicate_piece_mult = null
+duplicate_passive_mult = null
+COLOR_NORMAL_BG = null
+COLOR_UNAFFORD_BG = null
+prob_comun = null
+prob_raro = null
+prob_epico = null
+prob_legendario = null
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
 position = Vector2(130, 299)
