@@ -15,7 +15,7 @@
 
 [node name="game" type="Node2D"]
 script = ExtResource("1_lbhrr")
-rounds_per_day = 1
+rounds_per_day = 3
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
 position = Vector2(187, 77.99997)
@@ -73,18 +73,6 @@ offset_top = 322.0
 offset_right = 880.0
 offset_bottom = 361.0
 theme_override_font_sizes/font_size = 28
-
-[node name="HelpOverLay" parent="."]
-_import_path = NodePath("")
-unique_name_in_owner = false
-process_mode = 0
-process_priority = 0
-process_physics_priority = 0
-process_thread_group = 0
-physics_interpolation_mode = 0
-auto_translate_mode = 0
-editor_description = ""
-script = null
 
 [node name="DayLabel" type="Label" parent="."]
 offset_left = 1515.0

@@ -100,6 +100,7 @@ func _ready():
 
 	blink_timer = randf_range(blink_interval_min, blink_interval_max)
 	_on_PlayerData_currency_changed(PlayerData.get_current_currency())
+	store.generate()
 	store.start_new_round()
 	_update_ui_labels()
 
@@ -225,6 +226,7 @@ func _on_combat_finished(player_won: bool = false):
 		print("--- Empezando Ronda %d ---" % current_round)
 		_update_ui_labels()
 		set_state(GameState.SHOP)
+		store.generate()
 		store.start_new_round()
 
 # --- Funciones de Vistas (DayFinished, GameOver & Win) ---
@@ -259,7 +261,6 @@ func _on_next_day_image_input(event: InputEvent) -> void:
 
 func _advance_to_next_day() -> void:
 	print("Iniciando Día %d..." % (current_day + 1))
-	
 	current_day += 1
 	current_round = 1
 	gladiators_defeated = 0 
@@ -272,7 +273,7 @@ func _advance_to_next_day() -> void:
 	_update_ui_labels()
 	set_state(GameState.SHOP)
 	store.generate()
-
+	store.start_new_round()
 ## ------------------------------------------------------------------
 ## Resto de Funciones
 ## ------------------------------------------------------------------
