@@ -3,36 +3,146 @@ extends Control
 @onready var piece_scene: PackedScene = preload("res://scenes/piece.tscn")
 @onready var passive_scene: PackedScene = preload("res://scenes/passive.tscn")
 
+@onready var tooltip: Control = $Tooltip 
+
 @export_group("Configuración de Items")
 @export var piece_origins: Array[PieceData]
 @export var passive_origins: Array[PassiveData]
-@export var max_copies: int = 3 # Límite para dejar de salir en tienda
+@export var max_copies: int = 3 
 
 @export_group("Economía")
-@export_range(0.0, 2.0) var duplicate_piece_mult: float = 0.5 # 50% extra para Piezas
-@export_range(0.0, 2.0) var duplicate_passive_mult: float = 0.5 # 50% extra para Pasivas
+@export_range(0.0, 2.0) var duplicate_piece_mult: float = 0.5 
+@export_range(0.0, 2.0) var duplicate_passive_mult: float = 0.5 
 @export var COLOR_NORMAL_BG: Color = Color(0, 0, 0, 0.6) 
 @export var COLOR_UNAFFORD_BG: Color = Color(1.0, 0, 0, 0.6)
+
+@export_group("Economía Reroll")
+@export var reroll_base_cost: int = 2
+@export var reroll_cost_multiplier: float = 1.5
 
 @export_group("Probabilidades de Tienda (%)")
 @export_range(0, 100) var prob_comun: int = 70
 @export_range(0, 100) var prob_raro: int = 20
 @export_range(0, 100) var prob_epico: int = 8
 @export_range(0, 100) var prob_legendario: int = 2
+
+# --- SHADER ---
+const OUTLINE_SHADER = preload("res://shaders/outline_highlight.gdshader")
+var highlight_material: ShaderMaterial
+
 var _pieces_by_rarity: Dictionary = {}
+var _rerolls_this_round: int = 0
+var reroll_label: Label
+
 @onready var inventory: Control = $"../inventory"
-@onready var piece_zone: HBoxContainer = $VBoxContainer/piece_zone
-@onready var passive_zone: HBoxContainer = $VBoxContainer/passive_zone
-@onready var reroll_button: TextureButton = $VBoxContainer/HBoxContainer/Reroll
+@onready var piece_zone: HBoxContainer = $piece_zone
+@onready var passive_zone: HBoxContainer = $passive_zone
+@onready var reroll_button: TextureButton = $Reroll
 
 var current_shop_styles: Array = []
 
-
 func _ready() -> void:
+	# Configurar material
+	highlight_material = ShaderMaterial.new()
+	highlight_material.shader = OUTLINE_SHADER
+	highlight_material.set_shader_parameter("width", 3.0)
+	highlight_material.set_shader_parameter("color", Color.WHITE)
+	
 	PlayerData.currency_changed.connect(_update_all_label_colors)
+	
+	# --- HOVER EN REROLL ---
+	if reroll_button:
+		reroll_button.mouse_entered.connect(func(): if not reroll_button.disabled: reroll_button.material = highlight_material)
+		reroll_button.mouse_exited.connect(func(): reroll_button.material = null)
+	
+	reroll_label = Label.new()
+	reroll_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	reroll_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	
+	reroll_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	reroll_label.add_theme_constant_override("outline_size", 6)
+	reroll_label.add_theme_font_size_override("font_size", 24)
+	
+	reroll_button.add_child(reroll_label)
+	
+	reroll_label.layout_mode = 1
+	reroll_label.anchors_preset = Control.PRESET_CENTER_BOTTOM
+	reroll_label.position.y += 10 
+	
+	start_new_round()
 
+# --- CONTROL DE RONDA ---
+
+func start_new_round() -> void:
+	_rerolls_this_round = 0
+	_update_reroll_button_visuals()
+	_refresh_shop_content() 
+
+# --- LÓGICA DEL BOTÓN REROLL (Generate) ---
 
 func generate():
+	var current_cost = _calculate_reroll_cost()
+	
+	if current_cost > 0:
+		if not PlayerData.has_enough_currency(current_cost):
+			print("No tienes suficiente dinero para reroll. Costo: %d" % current_cost)
+			_animate_error_shake(reroll_button)
+			return
+		
+		PlayerData.spend_currency(current_cost)
+		print("Reroll pagado: %d monedas" % current_cost)
+	else:
+		print("Reroll GRATIS usado.")
+
+	_rerolls_this_round += 1
+	_refresh_shop_content()
+	
+	_update_reroll_button_visuals()
+
+# --- FUNCIONES VISUALES Y DE CÁLCULO REROLL ---
+
+func _calculate_reroll_cost() -> int:
+	if _rerolls_this_round == 0:
+		return 0 
+	
+	var paid_uses = _rerolls_this_round 
+	var multiplier = pow(reroll_cost_multiplier, paid_uses - 1)
+	
+	if paid_uses == 1: 
+		multiplier = 1.0
+	
+	return int(reroll_base_cost * multiplier)
+
+func _update_reroll_button_visuals():
+	if not reroll_label: return
+	
+	var cost = _calculate_reroll_cost()
+	
+	if cost == 0:
+		reroll_label.text = "GRATIS"
+		reroll_label.modulate = Color(0.2, 1.0, 0.2) 
+		reroll_button.modulate = Color.WHITE
+	else:
+		reroll_label.text = "-%d €" % cost
+		
+		if PlayerData.has_enough_currency(cost
+		):
+			reroll_label.modulate = Color(1.0, 0.9, 0.4) 
+			reroll_button.modulate = Color.WHITE
+		else:
+			reroll_label.modulate = Color(1.0, 0.2, 0.2) 
+			reroll_button.modulate = Color(0.6, 0.6, 0.6) 
+
+func _animate_error_shake(node: Control):
+	var tween = create_tween()
+	var original_pos = node.position.x
+	tween.tween_property(node, "position:x", original_pos + 10, 0.05)
+	tween.tween_property(node, "position:x", original_pos - 10, 0.05)
+	tween.tween_property(node, "position:x", original_pos, 0.05)
+
+# --- LÓGICA DE GENERACIÓN DE TIENDA ---
+
+func _refresh_shop_content():
 	current_shop_styles.clear()
 	
 	for child in piece_zone.get_children():
@@ -40,114 +150,30 @@ func generate():
 	for child in passive_zone.get_children():
 		child.queue_free()
 
-	# 1. Obtener piezas válidas (que no tengamos 3 copias)
 	var available_pieces = _filter_maxed_items(piece_origins)
-	
-	# 2. Organizarlas por rareza para poder elegir
 	_organize_pieces_by_rarity(available_pieces)
 	
-	# 3. Elegir 3 piezas basadas en probabilidad
 	var selected_pieces: Array = []
 	for i in range(3):
 		var piece = _get_random_weighted_piece()
 		if piece:
 			selected_pieces.append(piece)
 
-	# 4. Generar los botones (Pasamos la lista YA seleccionada)
 	_generate_buttons(selected_pieces, piece_zone, piece_scene)
 	
-	# --- Lógica de Pasivas (Se mantiene aleatoria simple por ahora) ---
 	var available_passives = _filter_maxed_items(passive_origins)
 	if not available_passives.is_empty():
 		var shuffled_passives = available_passives.duplicate()
 		shuffled_passives.shuffle()
-		# Cogemos 3 o menos si no hay suficientes
-		var selected_passives = shuffled_passives.slice(0, min(3, shuffled_passives.size()))
+		var selected_passives = shuffled_passives.slice(0, min(2, shuffled_passives.size()))
 		_generate_buttons(selected_passives, passive_zone, passive_scene)
 	
 	_update_all_label_colors()
 
-# --- NUEVAS FUNCIONES DE PROBABILIDAD ---
-
-# Clasifica las piezas disponibles en un diccionario { RAREZA: [lista_piezas] }
-func _organize_pieces_by_rarity(pieces: Array):
-	_pieces_by_rarity.clear()
-	
-	# Inicializamos arrays vacíos para evitar errores si no hay piezas de un tipo
-	_pieces_by_rarity[PieceRes.PieceRarity.COMUN] = []
-	_pieces_by_rarity[PieceRes.PieceRarity.RARO] = []
-	_pieces_by_rarity[PieceRes.PieceRarity.EPICO] = []
-	_pieces_by_rarity[PieceRes.PieceRarity.LEGENDARIO] = []
-	
-	for p in pieces:
-		# Verificamos que tenga piece_origin y rarity
-		if p is PieceData and p.piece_origin:
-			var rarity = p.piece_origin.rarity
-			if _pieces_by_rarity.has(rarity):
-				_pieces_by_rarity[rarity].append(p)
-
-# Algoritmo de Ruleta para elegir rareza
-func _get_random_weighted_piece() -> Resource:
-	var roll = randi() % 100 + 1 # Número entre 1 y 100
-	var selected_rarity = -1
-	
-	var umbral_comun = prob_comun
-	var umbral_raro = prob_comun + prob_raro
-	var umbral_epico = prob_comun + prob_raro + prob_epico
-	# El resto es legendario
-	
-	# Determinamos qué rareza "tocó"
-	if roll <= umbral_comun:
-		selected_rarity = PieceRes.PieceRarity.COMUN
-	elif roll <= umbral_raro:
-		selected_rarity = PieceRes.PieceRarity.RARO
-	elif roll <= umbral_epico:
-		selected_rarity = PieceRes.PieceRarity.EPICO
-	else:
-		selected_rarity = PieceRes.PieceRarity.LEGENDARIO
-	
-	# Intentamos obtener una pieza de esa rareza
-	var piece = _pick_from_rarity_pool(selected_rarity)
-	
-	# --- SISTEMA DE FALLBACK (Seguridad) ---
-	# Si salió Legendario pero NO tenemos legendarios definidos o disponibles (por max copias),
-	# bajamos de categoría hasta encontrar algo.
-	if piece == null:
-		piece = _pick_from_rarity_pool(PieceRes.PieceRarity.COMUN) # Intento fallback a Común
-	if piece == null:
-		# Si ni siquiera hay comunes, cogemos cualquiera de la lista general flat
-		var all_pools = _pieces_by_rarity.values()
-		for pool in all_pools:
-			if not pool.is_empty():
-				return pool.pick_random()
-				
-	return piece
-
-# Helper simple para sacar una al azar de una lista específica
-func _pick_from_rarity_pool(rarity: int) -> Resource:
-	if _pieces_by_rarity.has(rarity):
-		var pool = _pieces_by_rarity[rarity]
-		if not pool.is_empty():
-			return pool.pick_random()
-	return null
-
-# Nueva función auxiliar para filtrar la pool
-func _filter_maxed_items(candidates: Array) -> Array:
-	var available = []
-	for item in candidates:
-		if item is PieceData:
-			var count = _get_item_count_safe(item)
-			if count < max_copies:
-				available.append(item)
-		else:
-			available.append(item)
-			
-	return available
-
+# --- GENERACIÓN DE BOTONES Y TOOLTIPS ---
 
 func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_scene: PackedScene) -> void:
 	if origin_array.is_empty():
-		# Opcional: Mostrar mensaje de "Agotado" si no queda nada
 		return
 
 	var shuffled = origin_array.duplicate()
@@ -164,32 +190,25 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 				texture_to_use = sprite_node.texture
 
 		if texture_to_use:
-			
 			var item_container = VBoxContainer.new()
 			item_container.alignment = VBoxContainer.ALIGNMENT_CENTER
 
 			if "price" in origin_data:
 				var final_price: int = _calculate_price(origin_data)
-				
 				var price_label = Label.new()
 				price_label.text = str(final_price) + "€"
 				price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 				
 				var style_box = StyleBoxFlat.new()
-				
 				if PlayerData.has_enough_currency(final_price):
 					style_box.bg_color = COLOR_NORMAL_BG
 				else:
 					style_box.bg_color = COLOR_UNAFFORD_BG
 
-				style_box.content_margin_left = 6
-				style_box.content_margin_right = 6
-				style_box.content_margin_top = 2
-				style_box.content_margin_bottom = 2
-				style_box.corner_radius_top_left = 4
-				style_box.corner_radius_top_right = 4
-				style_box.corner_radius_bottom_left = 4
-				style_box.corner_radius_bottom_right = 4
+				style_box.content_margin_left = 6; style_box.content_margin_right = 6
+				style_box.content_margin_top = 2; style_box.content_margin_bottom = 2
+				style_box.corner_radius_top_left = 4; style_box.corner_radius_top_right = 4
+				style_box.corner_radius_bottom_left = 4; style_box.corner_radius_bottom_right = 4
 				
 				price_label.add_theme_stylebox_override("normal", style_box)
 				item_container.add_child(price_label)
@@ -207,16 +226,41 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 			
 			button.pressed.connect(_on_button_pressed.bind(button))
 			
+			button.mouse_entered.connect(_on_button_mouse_entered.bind(origin_data))
+			button.mouse_exited.connect(_on_button_mouse_exited)
+			
+			# --- CONEXIÓN DEL HOVER (SHADER) ---
+			button.mouse_entered.connect(_apply_hover_effect.bind(button))
+			button.mouse_exited.connect(_remove_hover_effect.bind(button))
+			
 			item_container.add_child(button)
 			target_zone.add_child(item_container)
 
 		origin_instance.queue_free()
 
+# --- HELPERS DE HOVER ---
+
+func _apply_hover_effect(btn: TextureButton) -> void:
+	if not btn.disabled:
+		btn.material = highlight_material
+
+func _remove_hover_effect(btn: TextureButton) -> void:
+	btn.material = null
+
+# --- EVENTOS DEL MOUSE (Tooltips) ---
+
+func _on_button_mouse_entered(data: Resource) -> void:
+	if tooltip and data:
+		var count = _get_item_count_safe(data)
+		tooltip.show_tooltip(data, 0, count)
+		
+func _on_button_mouse_exited() -> void:
+	if tooltip:
+		tooltip.hide_tooltip()
 
 func _on_button_pressed(button: TextureButton) -> void:
 	var data = button.get_meta("data")
-	if data == null:
-		return
+	if data == null: return
 
 	var price: int = 0
 	if "price" in data:
@@ -234,18 +278,19 @@ func _on_button_pressed(button: TextureButton) -> void:
 		inventory.add_item(data)
 		button.disabled = true
 		button.modulate = Color(0.25, 0.25, 0.25, 1.0)
+		button.material = null # Quitar shader al comprar
 		print("Compraste %s por %d oro." % [data.resource_name, price])
-		
-		# Actualizamos precios por si subieron al comprar copia
 		_update_all_label_colors()
 	else:
 		print("Error al gastar oro.")
 
+# --- ACTUALIZACIÓN DE COLORES Y PRECIOS ---
 
 func _update_all_label_colors(_new_amount: int = 0) -> void:
-	if current_shop_styles.is_empty():
-		return
+	_update_reroll_button_visuals()
 
+	if current_shop_styles.is_empty(): return
+	
 	for item in current_shop_styles:
 		var style_box: StyleBoxFlat = item.style
 		var data = item.data
@@ -261,19 +306,14 @@ func _update_all_label_colors(_new_amount: int = 0) -> void:
 		else:
 			style_box.bg_color = COLOR_UNAFFORD_BG
 
+# --- PROBABILIDAD Y HELPERS ---
 
-# --- LÓGICA DE PRECIO MEJORADA ---
 func _calculate_price(data) -> int:
-	if not "price" in data:
-		return 0
-
+	if not "price" in data: return 0
 	var base_price: int = data.price
 	var count: int = _get_item_count_safe(data)
-	
-	# Seleccionamos el multiplicador correcto según el tipo
 	var multiplier_val: float = 0.0
 	
-	# Detectamos si es pieza o pasiva
 	if data is PieceData:
 		multiplier_val = duplicate_piece_mult
 	elif data is PassiveData:
@@ -282,8 +322,6 @@ func _calculate_price(data) -> int:
 	var total_mult: float = 1.0 + (multiplier_val * count)
 	return int(base_price * total_mult)
 
-
-# Helper para obtener conteo de forma segura
 func _get_item_count_safe(data) -> int:
 	var game_manager = null
 	if owner and owner.has_method("get_inventory_piece_count"):
@@ -294,3 +332,49 @@ func _get_item_count_safe(data) -> int:
 	if game_manager:
 		return game_manager.get_inventory_piece_count(data)
 	return 0
+
+func _organize_pieces_by_rarity(pieces: Array):
+	_pieces_by_rarity.clear()
+	_pieces_by_rarity[PieceRes.PieceRarity.COMUN] = []
+	_pieces_by_rarity[PieceRes.PieceRarity.RARO] = []
+	_pieces_by_rarity[PieceRes.PieceRarity.EPICO] = []
+	_pieces_by_rarity[PieceRes.PieceRarity.LEGENDARIO] = []
+	
+	for p in pieces:
+		if p is PieceData and p.piece_origin:
+			var rarity = p.piece_origin.rarity
+			if _pieces_by_rarity.has(rarity):
+				_pieces_by_rarity[rarity].append(p)
+
+func _get_random_weighted_piece() -> Resource:
+	var roll = randi() % 100 + 1 
+	var selected_rarity = -1
+	
+	if roll <= prob_comun: selected_rarity = PieceRes.PieceRarity.COMUN
+	elif roll <= prob_comun + prob_raro: selected_rarity = PieceRes.PieceRarity.RARO
+	elif roll <= prob_comun + prob_raro + prob_epico: selected_rarity = PieceRes.PieceRarity.EPICO
+	else: selected_rarity = PieceRes.PieceRarity.LEGENDARIO
+	
+	var piece = _pick_from_rarity_pool(selected_rarity)
+	if piece == null: piece = _pick_from_rarity_pool(PieceRes.PieceRarity.COMUN) 
+	if piece == null:
+		var all_pools = _pieces_by_rarity.values()
+		for pool in all_pools:
+			if not pool.is_empty(): return pool.pick_random()
+	return piece
+
+func _pick_from_rarity_pool(rarity: int) -> Resource:
+	if _pieces_by_rarity.has(rarity):
+		var pool = _pieces_by_rarity[rarity]
+		if not pool.is_empty(): return pool.pick_random()
+	return null
+
+func _filter_maxed_items(candidates: Array) -> Array:
+	var available = []
+	for item in candidates:
+		if item is PieceData:
+			var count = _get_item_count_safe(item)
+			if count < max_copies: available.append(item)
+		else:
+			available.append(item)
+	return available

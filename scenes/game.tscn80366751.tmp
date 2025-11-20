@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://dd8wqmfs2cj1j"]
+[gd_scene load_steps=13 format=3 uid="uid://dd8wqmfs2cj1j"]
 
 [ext_resource type="Script" uid="uid://bpnxk43sopml" path="res://scripts/gameManager.gd" id="1_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://hbcgudcjh0wn" path="res://scenes/inventory.tscn" id="2_lbhrr"]
@@ -12,11 +12,9 @@
 [ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/jotun.tres" id="6_trtic"]
 [ext_resource type="Resource" uid="uid://cxbloivuqkrwe" path="res://resources/pieces/valkirias.tres" id="7_ir15t"]
 [ext_resource type="Texture2D" uid="uid://dycbttp2vpnv1" path="res://assets/Tiny Swords (Free Pack)/Terrain/Water Background color.png" id="12_dinhu"]
-[ext_resource type="PackedScene" uid="uid://cj8n2p21wqyqt" path="res://scenes/help_over_lay.tscn" id="13_kvuet"]
 
 [node name="game" type="Node2D"]
 script = ExtResource("1_lbhrr")
-gold_round_base = 2
 rounds_per_day = 3
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
@@ -38,6 +36,15 @@ offset_top = 394.0
 offset_right = 416.0
 offset_bottom = 394.0
 scale = Vector2(0.8860778, 0.88381195)
+max_copies = null
+duplicate_piece_mult = null
+duplicate_passive_mult = null
+COLOR_NORMAL_BG = null
+COLOR_UNAFFORD_BG = null
+prob_comun = null
+prob_raro = null
+prob_epico = null
+prob_legendario = null
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
 position = Vector2(130, 299)
@@ -55,10 +62,10 @@ offset_bottom = 352.0
 theme_override_font_sizes/font_size = 28
 
 [node name="ButtonShop" parent="." instance=ExtResource("6_p57ef")]
-offset_left = 1627.0
-offset_top = 436.0
-offset_right = 1731.0
-offset_bottom = 819.0
+offset_left = 1638.0
+offset_top = 794.0
+offset_right = 1738.0
+offset_bottom = 886.0
 
 [node name="RoundLabel" type="Label" parent="."]
 offset_left = 336.0
@@ -137,5 +144,3 @@ offset_right = 841.0
 offset_bottom = 386.0
 theme_override_font_sizes/font_size = 72
 text = "Has ganado crack :)"
-
-[node name="HelpOverLay" parent="." instance=ExtResource("13_kvuet")]
