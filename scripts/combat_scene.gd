@@ -228,9 +228,9 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 				push_warning("NPC no tiene metodo apply_synergies")
 	# ---------------------------------------------
 	
-	add_child(n)
+	get_node("npcs").add_child(n)
 
-	
+
 	# --- APLICAR BONUS A ENEMIGOS (Scaling Diario) ---
 	if team == npc.Team.ENEMY:
 		n.gold_pool = int(n.npc_res.gold)
