@@ -60,17 +60,19 @@ func update_count(count: int) -> void:
 		
 		match count:
 			1:
-				count_label.texture = tier_bronze_texture
+				if tier_bronze_texture: count_label.texture = tier_bronze_texture
 			2:
-				count_label.texture = tier_silver_texture
+				if tier_silver_texture: count_label.texture = tier_silver_texture
 			3:
-				count_label.texture = tier_gold_texture
+				if tier_gold_texture: count_label.texture = tier_gold_texture
 			_:
 				# Si es mayor que 3, mantenemos Oro
-				if count > 3:
+				if count > 3 and tier_gold_texture:
 					count_label.texture = tier_gold_texture
 				else:
-					count_label.visible = false
+					# Si no hay textura para este caso o es 0, ocultamos
+					# count_label.visible = false (Opcional, mejor dejar el último válido)
+					pass
 	else:
 		count_label.visible = false
 
@@ -114,7 +116,10 @@ func _on_button_pressed() -> void:
 
 func _on_button_mouse_entered() -> void:
 	if item_data:
-		tooltip.show_tooltip(item_data, sell_percentage)
+		# ¡AQUÍ ESTABA EL ERROR!
+		# Antes solo enviabas (item, porcentaje). Faltaba la cantidad (current_count).
+		# Al no enviarla, el Tooltip asumía que tenías 0 y te mostraba Bronce.
+		tooltip.show_tooltip(item_data, sell_percentage, current_count)
 
 func _on_button_mouse_exited() -> void:
 	tooltip.hide_tooltip()
