@@ -1,11 +1,10 @@
 [gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://by0quidpu73s0"]
 
+[ext_resource type="SpriteFrames" uid="uid://cv78gw7w1hu8y" path="res://resources/allies_Frames/draugr.tres" id="1_hd8bf"]
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_tha16"]
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_tha16"]
 
 [resource]
 script = ExtResource("1_tha16")
 race = 0
-frames = SubResource("SpriteFrames_tha16")
+frames = ExtResource("1_hd8bf")
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"

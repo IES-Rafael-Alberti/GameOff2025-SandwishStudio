@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://ix02fceb4nh1"]
 
-[ext_resource type="SpriteFrames" uid="uid://dd8aggwqmcxme" path="res://resources/allies_Frames/valkiria_anim.tres" id="1_tf6qj"]
+[ext_resource type="SpriteFrames" uid="uid://mp6dpbb2ijl8" path="res://resources/allies_Frames/valk.tres" id="1_tf6qj"]
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_wtwdx"]
 
 [resource]

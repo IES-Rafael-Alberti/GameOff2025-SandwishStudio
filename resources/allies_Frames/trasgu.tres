@@ -1,16 +1,16 @@
 [gd_resource type="SpriteFrames" load_steps=3 format=3 uid="uid://s5dqraogpmma"]
 
-[ext_resource type="Texture2D" uid="uid://bjeo7ufgwd3m8" path="res://assets/allies_scaled/Banshee (1) (1).png" id="1_f8w6d"]
+[ext_resource type="Texture2D" uid="uid://bdvqxioqbg7gc" path="res://assets/Combat_scene/allies_scaled/Trasgu.png" id="1_f8w6d"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_asmvl"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_prk4j"]
 atlas = ExtResource("1_f8w6d")
-region = Rect2(0, 0, 236, 251)
+region = Rect2(0, 0, 407, 274)
 
 [resource]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_asmvl")
+"texture": SubResource("AtlasTexture_prk4j")
 }],
 "loop": true,
 "name": &"idle",

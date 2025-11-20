@@ -1,0 +1,18 @@
+[gd_resource type="SpriteFrames" load_steps=3 format=3 uid="uid://cfn77wm5oqo8k"]
+
+[ext_resource type="Texture2D" uid="uid://06bjj8sbk6go" path="res://assets/Combat_scene/allies_scaled/Dragon.png" id="1_4fhck"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f15ni"]
+atlas = ExtResource("1_4fhck")
+region = Rect2(0, 0, 289, 212)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f15ni")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]

@@ -1,10 +1,12 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=2 format=3 uid="uid://di6l8arc2wa6y"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://di6l8arc2wa6y"]
 
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_7ngc2"]
+[ext_resource type="SpriteFrames" uid="uid://i1ppr1u5ps14" path="res://resources/allies_Frames/jotuun.tres" id="1_k7e38"]
 
 [resource]
 script = ExtResource("1_7ngc2")
 id = "nordica.Jotun"
 display_name = "Jotun"
 race = 0
+frames = ExtResource("1_k7e38")
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"

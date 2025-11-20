@@ -1,8 +1,10 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=2 format=3 uid="uid://dormn8rgtb778"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://cy77sggbt1g0n"]
 
+[ext_resource type="SpriteFrames" uid="uid://cnh48p4hva1em" path="res://resources/allies_Frames/satiro.tres" id="1_7uwfu"]
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_xfa5c"]
 
 [resource]
 script = ExtResource("1_xfa5c")
 id = "europea.Satiro"
+frames = ExtResource("1_7uwfu")
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"

@@ -1,9 +1,11 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=2 format=3 uid="uid://b608x2o53lipk"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://b608x2o53lipk"]
 
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_n3ank"]
+[ext_resource type="SpriteFrames" uid="uid://ci0tv38g8v7at" path="res://resources/allies_Frames/tengu.tres" id="1_pgrif"]
 
 [resource]
 script = ExtResource("1_n3ank")
 id = "japonesa.tengu"
 display_name = "tengu"
+frames = ExtResource("1_pgrif")
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"

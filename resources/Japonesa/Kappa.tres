@@ -1,5 +1,6 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=2 format=3 uid="uid://drk6kcqcj2alx"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://drk6kcqcj2alx"]
 
+[ext_resource type="SpriteFrames" uid="uid://osibphf1sb75" path="res://resources/allies_Frames/kappa.tres" id="1_03by8"]
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_vrrwg"]
 
 [resource]
@@ -7,4 +8,5 @@ script = ExtResource("1_vrrwg")
 id = "japonesa.Kappa"
 display_name = "Kappa"
 race = 1
+frames = ExtResource("1_03by8")
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"

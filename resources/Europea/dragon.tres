@@ -1,5 +1,6 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=2 format=3 uid="uid://bpflwuvj3jt4f"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://bpflwuvj3jt4f"]
 
+[ext_resource type="SpriteFrames" uid="uid://cfn77wm5oqo8k" path="res://resources/allies_Frames/dragon.tres" id="1_g02va"]
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_x2ot1"]
 
 [resource]
@@ -7,4 +8,5 @@ script = ExtResource("1_x2ot1")
 id = "europea.dragon"
 display_name = "dragon"
 rarity = 3
+frames = ExtResource("1_g02va")
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"
