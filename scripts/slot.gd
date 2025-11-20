@@ -12,6 +12,10 @@ extends Panel
 @export var tier_silver_texture: Texture2D
 @export var tier_gold_texture: Texture2D
 
+# --- NUEVO: Shader ---
+const OUTLINE_SHADER = preload("res://shaders/outline_highlight.gdshader")
+var highlight_material: ShaderMaterial
+
 var glow_sprite: Sprite2D
 var particles: CPUParticles2D
 var piece_over: Node = null
@@ -71,6 +75,16 @@ func _ready():
 		
 	self.gui_input.connect(_on_gui_input)
 	
+	# --- NUEVO: Conexiones de Mouse Hover ---
+	mouse_entered.connect(_on_mouse_entered)
+	mouse_exited.connect(_on_mouse_exited)
+	
+	# --- NUEVO: Configurar Material ---
+	highlight_material = ShaderMaterial.new()
+	highlight_material.shader = OUTLINE_SHADER
+	highlight_material.set_shader_parameter("width", 3.0)
+	highlight_material.set_shader_parameter("color", Color.WHITE)
+	
 	# Creación del icono de Tier (Bronce/Plata/Oro)
 	tier_icon = TextureRect.new()
 	tier_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -84,16 +98,25 @@ func _ready():
 	tier_icon.visible = false
 	add_child(tier_icon)
 	
-	# --- ¡NUEVO! Conectar señal para actualizarse en tiempo real ---
+	# Conectar señal para actualizarse en tiempo real
 	GlobalSignals.piece_count_changed.connect(_on_piece_count_changed)
-	
+
+# --- NUEVO: Funciones Hover ---
+func _on_mouse_entered() -> void:
+	# Solo iluminamos si hay una pieza ocupando el slot
+	if occupied and piece_texture_rect:
+		piece_texture_rect.material = highlight_material
+
+func _on_mouse_exited() -> void:
+	if piece_texture_rect:
+		piece_texture_rect.material = null
+
 func _on_piece_count_changed(piece_data: Resource, new_count: int) -> void:
 	# Si el slot está vacío o no tiene datos, ignorar
 	if not occupied or not current_piece_data:
 		return
 		
 	# Verificamos si la pieza que se actualizó es la misma que tenemos aquí.
-	# Comparamos el 'piece_origin' (la unidad base) para asegurar que sean del mismo tipo.
 	if piece_data is PieceData and current_piece_data is PieceData:
 		if piece_data.piece_origin == current_piece_data.piece_origin:
 			print("Slot Ruleta detectó compra de su pieza. Actualizando visual a: %d copias" % new_count)
@@ -128,7 +151,6 @@ func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 	return false
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
-	
 	occupied = true
 	current_piece_data = data.data
 	current_piece_count = 1 
@@ -137,6 +159,10 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 		if current_piece_data.icon:
 			piece_texture_rect.texture = current_piece_data.icon
 			piece_texture_rect.visible = true
+			# Nota: Si sueltas la pieza y el mouse sigue encima, 
+			# el highlight no se activará hasta que salgas y entres, 
+			# a menos que fuerces el material aquí también. 
+			# (Opcional: piece_texture_rect.material = highlight_material)
 	
 	GlobalSignals.piece_placed_on_roulette.emit(current_piece_data)
 	
@@ -180,6 +206,7 @@ func clear_slot():
 	current_piece_count = 0
 	if piece_texture_rect:
 		piece_texture_rect.visible = false
+		piece_texture_rect.material = null # Limpiamos el shader al vaciar
 		
 	if tier_icon:
 		tier_icon.visible = false
