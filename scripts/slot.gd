@@ -71,7 +71,7 @@ func _ready():
 	# 3. Configurar Shader
 	highlight_material = ShaderMaterial.new()
 	highlight_material.shader = OUTLINE_SHADER
-	highlight_material.set_shader_parameter("width", 3.0)
+	highlight_material.set_shader_parameter("width", 5.0)
 	highlight_material.set_shader_parameter("color", Color.WHITE)
 	
 	if GlobalSignals:
