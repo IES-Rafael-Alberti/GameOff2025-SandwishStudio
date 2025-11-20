@@ -282,6 +282,7 @@ func take_damage(amount: float, from: npc = null, was_crit: bool = false) -> voi
 			var heal_amt = (max_health * target_pct) - health
 			if heal_amt > 0:
 				health += heal_amt
+				_show_heal_text(heal_amt)
 				# Opcional: Mostrar texto de cura
 				print("%s se curó por sinergia Nórdica" % name)
 	
@@ -324,3 +325,61 @@ func _process(delta: float) -> void:
 		if shock_timer > 0.3:
 			is_shocked = false
 			shock_material.set_shader_parameter("shock_time", 999.0)
+func _show_heal_text(amount: float) -> void:
+	# Instanciamos la misma escena que el daño
+	var heal_label: Label = DAMAGE_TEXT_SCENE.instantiate()
+	var heal_int := int(round(amount))
+	
+	# Ponemos un "+" para indicar que es positivo
+	heal_label.text = "+" + str(heal_int)
+
+	# Configuración de tamaño (similar al daño)
+	var base_font_size := 34.0
+	var size_factor: float = clamp(0.7 + float(heal_int) / 60.0, 0.7, 2.5)
+	var size := int(base_font_size * size_factor)
+
+	heal_label.add_theme_font_size_override("font_size", size)
+
+	# --- COLOR VERDE BRILLANTE ---
+	heal_label.modulate = Color(0.396, 1.0, 0.376, 1.0) 
+
+	var root := get_tree().current_scene
+	if root == null: return
+	root.add_child(heal_label)
+
+	# --- POSICIONAMIENTO Y ANIMACIÓN (Idéntico al daño) ---
+	var max_height := 140.0
+	var min_height := 50.0
+	var h := randf_range(min_height, max_height)
+	var max_width_at_top := 160.0
+	var half_width := (h / max_height) * (max_width_at_top * 0.5)
+
+	var offset_x := randf_range(-half_width, half_width)
+	var offset_y := -h
+	var start_pos := global_position + Vector2(offset_x, offset_y)
+	
+	heal_label.global_position = start_pos
+
+	var total_travel := randf_range(40.0, 90.0)
+	var amplitude := randf_range(10.0, 15.0)
+	var waves := randf_range(1.5, 3.0)
+	var move_time := 0.7
+	var fade_time := 0.3
+
+	var tween := root.create_tween()
+
+	tween.tween_method(
+		func(t: float) -> void:
+			if not is_instance_valid(heal_label): return
+			var y := -t * total_travel
+			var x := sin(t * TAU * waves) * amplitude
+			heal_label.global_position = start_pos + Vector2(x, y)
+	, 0.0, 1.0, move_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+	tween.parallel().tween_property(
+		heal_label, "modulate:a", 0.0, fade_time
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN).set_delay(move_time - fade_time)
+
+	tween.finished.connect(func() -> void:
+		if is_instance_valid(heal_label): heal_label.queue_free()
+	)

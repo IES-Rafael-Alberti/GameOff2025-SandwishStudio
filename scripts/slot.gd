@@ -12,6 +12,10 @@ extends Panel
 @export var tier_silver_texture: Texture2D
 @export var tier_gold_texture: Texture2D
 
+# --- NUEVO: Shader ---
+const OUTLINE_SHADER = preload("res://shaders/outline_highlight.gdshader")
+var highlight_material: ShaderMaterial
+
 var glow_sprite: Sprite2D
 var particles: CPUParticles2D
 var piece_over: Node = null
@@ -44,6 +48,7 @@ func _on_return_attempt_finished(success: bool):
 		clear_slot()
 
 func _ready():
+	# Configuración visual (Highlight, partículas, etc.)
 	if not has_node("Highlight"):
 		var h = Node2D.new()
 		h.name = "Highlight"
@@ -70,23 +75,52 @@ func _ready():
 		
 	self.gui_input.connect(_on_gui_input)
 	
-	# --- CREACIÓN DEL TEXTURE RECT PARA EL TIER ---
+	# --- NUEVO: Conexiones de Mouse Hover ---
+	mouse_entered.connect(_on_mouse_entered)
+	mouse_exited.connect(_on_mouse_exited)
+	
+	# --- NUEVO: Configurar Material ---
+	highlight_material = ShaderMaterial.new()
+	highlight_material.shader = OUTLINE_SHADER
+	highlight_material.set_shader_parameter("width", 3.0)
+	highlight_material.set_shader_parameter("color", Color.WHITE)
+	
+	# Creación del icono de Tier (Bronce/Plata/Oro)
 	tier_icon = TextureRect.new()
 	tier_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tier_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	tier_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	
-	# Tamaño y posición del icono (ajústalo a tu gusto)
 	tier_icon.custom_minimum_size = Vector2(20, 20)
 	tier_icon.size = Vector2(20, 20)
-	
-	# Anclado arriba a la derecha
 	tier_icon.anchor_left = 1.0
 	tier_icon.anchor_right = 1.0
-	tier_icon.position = Vector2(-20, 0) # Lo movemos a la izquierda su propio ancho
-	
+	tier_icon.position = Vector2(-20, 0)
 	tier_icon.visible = false
 	add_child(tier_icon)
+	
+	# Conectar señal para actualizarse en tiempo real
+	GlobalSignals.piece_count_changed.connect(_on_piece_count_changed)
+
+# --- NUEVO: Funciones Hover ---
+func _on_mouse_entered() -> void:
+	# Solo iluminamos si hay una pieza ocupando el slot
+	if occupied and piece_texture_rect:
+		piece_texture_rect.material = highlight_material
+
+func _on_mouse_exited() -> void:
+	if piece_texture_rect:
+		piece_texture_rect.material = null
+
+func _on_piece_count_changed(piece_data: Resource, new_count: int) -> void:
+	# Si el slot está vacío o no tiene datos, ignorar
+	if not occupied or not current_piece_data:
+		return
+		
+	# Verificamos si la pieza que se actualizó es la misma que tenemos aquí.
+	if piece_data is PieceData and current_piece_data is PieceData:
+		if piece_data.piece_origin == current_piece_data.piece_origin:
+			print("Slot Ruleta detectó compra de su pieza. Actualizando visual a: %d copias" % new_count)
+			_update_tier_visual(new_count)
 
 func _process(delta):
 	if piece_over:
@@ -117,7 +151,6 @@ func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 	return false
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
-	
 	occupied = true
 	current_piece_data = data.data
 	current_piece_count = 1 
@@ -126,6 +159,10 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 		if current_piece_data.icon:
 			piece_texture_rect.texture = current_piece_data.icon
 			piece_texture_rect.visible = true
+			# Nota: Si sueltas la pieza y el mouse sigue encima, 
+			# el highlight no se activará hasta que salgas y entres, 
+			# a menos que fuerces el material aquí también. 
+			# (Opcional: piece_texture_rect.material = highlight_material)
 	
 	GlobalSignals.piece_placed_on_roulette.emit(current_piece_data)
 	
@@ -148,7 +185,7 @@ func _get_total_copies(data: Resource) -> int:
 # --- LÓGICA VISUAL DEL TIER ---
 func _update_tier_visual(count: int) -> void:
 	if not tier_icon: return
-	
+	print("update tier en _update_tier_visual" + str(count))
 	tier_icon.visible = true
 	match count:
 		1:
@@ -169,6 +206,7 @@ func clear_slot():
 	current_piece_count = 0
 	if piece_texture_rect:
 		piece_texture_rect.visible = false
+		piece_texture_rect.material = null # Limpiamos el shader al vaciar
 		
 	if tier_icon:
 		tier_icon.visible = false
