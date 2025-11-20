@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://bv3r20c0gu33v"]
+[gd_scene load_steps=13 format=3 uid="uid://bv3r20c0gu33v"]
 
 [ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_jyskt"]
 [ext_resource type="Texture2D" uid="uid://dmlid2sk24v8v" path="res://assets/palanca.png" id="2_iqt6o"]
@@ -6,6 +6,9 @@
 [ext_resource type="Script" uid="uid://d1s3pk6cls46q" path="res://scripts/RouletteSlice.gd" id="4_jyskt"]
 [ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="4_k6evh"]
 [ext_resource type="Texture2D" uid="uid://qmthj5xqadhq" path="res://assets/Manilla (1).png" id="5_jyskt"]
+[ext_resource type="Texture2D" uid="uid://xr5sxokqvql1" path="res://assets/ADMG.png" id="7_gils2"]
+[ext_resource type="Texture2D" uid="uid://b10j5vwr4mjk4" path="res://assets/Crit.png" id="8_8jefs"]
+[ext_resource type="Texture2D" uid="uid://d32k775bkfw00" path="res://assets/VIDA.png" id="9_ekxsn"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jyskt"]
 size = Vector2(6091.349, 360.72424)
@@ -268,6 +271,55 @@ position = Vector2(-0.8123779, 2.4012146)
 shape = SubResource("CapsuleShape2D_t1x4v")
 
 [node name="Timer" type="Timer" parent="."]
+
+[node name="Europea" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 1111.0
+offset_top = 240.0
+offset_right = 1151.0
+offset_bottom = 280.0
+
+[node name="TextureRect" type="TextureRect" parent="Europea"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.47500002
+offset_left = 92.0
+offset_right = 113.0
+offset_bottom = 64.0
+texture = ExtResource("7_gils2")
+
+[node name="Japonesa" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 1113.0
+offset_top = 362.0
+offset_right = 1153.0
+offset_bottom = 402.0
+
+[node name="TextureRect" type="TextureRect" parent="Japonesa"]
+layout_mode = 0
+offset_left = 74.0
+offset_top = -9.0
+offset_right = 138.0
+offset_bottom = 55.0
+texture = ExtResource("8_8jefs")
+
+[node name="Nordica" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 1112.0
+offset_top = 498.0
+offset_right = 1152.0
+offset_bottom = 538.0
+
+[node name="TextureRect" type="TextureRect" parent="Nordica"]
+layout_mode = 0
+offset_left = 76.0
+offset_top = -27.0
+offset_right = 140.0
+offset_bottom = 35.0
+texture = ExtResource("9_ekxsn")
 
 [connection signal="area_entered" from="Manecilla" to="." method="_on_AreaManecilla_area_entered"]
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]

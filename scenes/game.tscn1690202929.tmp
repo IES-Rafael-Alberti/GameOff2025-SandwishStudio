@@ -16,10 +16,7 @@
 [node name="game" type="Node2D"]
 script = ExtResource("1_lbhrr")
 rounds_per_day = 1
-
-[node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
-position = Vector2(187, 77.99997)
-scale = Vector2(0.35115045, 0.22791663)
+gladiators_per_day = 1
 
 [node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
 offset_left = 83.0
@@ -36,15 +33,10 @@ offset_top = 394.0
 offset_right = 416.0
 offset_bottom = 394.0
 scale = Vector2(0.8860778, 0.88381195)
-max_copies = null
-duplicate_piece_mult = null
-duplicate_passive_mult = null
-COLOR_NORMAL_BG = null
-COLOR_UNAFFORD_BG = null
-prob_comun = null
-prob_raro = null
-prob_epico = null
-prob_legendario = null
+
+[node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
+position = Vector2(187, 70.99997)
+scale = Vector2(0.35700324, 0.2319321)
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
 position = Vector2(130, 299)
@@ -56,54 +48,42 @@ zoom = Vector2(0.7, 0.7)
 
 [node name="gold_label" type="Label" parent="."]
 offset_left = 134.0
-offset_top = 313.0
+offset_top = 323.0
 offset_right = 271.0
-offset_bottom = 352.0
+offset_bottom = 362.0
 theme_override_font_sizes/font_size = 28
 
 [node name="ButtonShop" parent="." instance=ExtResource("6_p57ef")]
 offset_left = 1638.0
-offset_top = 794.0
+offset_top = 793.0
 offset_right = 1738.0
-offset_bottom = 886.0
+offset_bottom = 885.0
 
 [node name="RoundLabel" type="Label" parent="."]
 offset_left = 336.0
-offset_top = 322.0
+offset_top = 342.0
 offset_right = 880.0
-offset_bottom = 361.0
+offset_bottom = 381.0
 theme_override_font_sizes/font_size = 28
 
-[node name="HelpOverLay" parent="."]
-_import_path = NodePath("")
-unique_name_in_owner = false
-process_mode = 0
-process_priority = 0
-process_physics_priority = 0
-process_thread_group = 0
-physics_interpolation_mode = 0
-auto_translate_mode = 0
-editor_description = ""
-script = null
-
 [node name="DayLabel" type="Label" parent="."]
-offset_left = 1515.0
-offset_top = 321.0
-offset_right = 1663.0
-offset_bottom = 360.0
+offset_left = 1576.0
+offset_top = 335.0
+offset_right = 1724.0
+offset_bottom = 374.0
 theme_override_font_sizes/font_size = 28
 
 [node name="GladiatorLabel" type="Label" parent="."]
-offset_left = 1043.0
-offset_top = 327.0
-offset_right = 1417.0
-offset_bottom = 366.0
+offset_left = 1076.0
+offset_top = 341.0
+offset_right = 1450.0
+offset_bottom = 380.0
 theme_override_font_sizes/font_size = 28
 
-[node name="GameOver" type="CanvasLayer" parent="."]
+[node name="Game_Over" type="CanvasLayer" parent="."]
 visible = false
 
-[node name="GameOverImage" type="TextureRect" parent="GameOver"]
+[node name="GameOverImage" type="TextureRect" parent="Game_Over"]
 offset_left = -4.0
 offset_top = -2.0
 offset_right = 1681.0
@@ -111,7 +91,7 @@ offset_bottom = 1093.0
 mouse_filter = 0
 texture = ExtResource("12_dinhu")
 
-[node name="Label" type="Label" parent="GameOver"]
+[node name="Label" type="Label" parent="Game_Over"]
 offset_left = 433.0
 offset_top = 294.0
 offset_right = 747.0
@@ -137,22 +117,3 @@ offset_right = 841.0
 offset_bottom = 386.0
 theme_override_font_sizes/font_size = 72
 text = "SIGUIENTE DIA"
-
-[node name="Win" type="CanvasLayer" parent="."]
-visible = false
-
-[node name="WinImage" type="TextureRect" parent="Win"]
-offset_left = -4.0
-offset_top = -2.0
-offset_right = 1681.0
-offset_bottom = 1093.0
-mouse_filter = 0
-texture = ExtResource("12_dinhu")
-
-[node name="Label" type="Label" parent="Win"]
-offset_left = 333.0
-offset_top = 287.0
-offset_right = 841.0
-offset_bottom = 386.0
-theme_override_font_sizes/font_size = 72
-text = "Has ganado crack :)"
