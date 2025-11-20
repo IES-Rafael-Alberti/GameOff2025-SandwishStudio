@@ -181,7 +181,7 @@ func spawn_enemy_one() -> void:
 		return
 
 	if enemy_res.is_empty():
-		push_error("enemy_res está vacío. Asigna gladiadores.")
+		push_error("enemy_res está vacío en combat_scene.gd.")
 		return
 
 	var pos := enemy_spawn.position
@@ -197,17 +197,38 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 	n.team = team
 	n.position = pos
 	n.npc_res = res_override
-	add_child(n)
 	
-	# --- APLICAR BONUS A ALIADOS (GlobalStats) ---
+	# Aplicar bonos globales (GlobalStats)
 	if team == npc.Team.ALLY and has_node("/root/GlobalStats"):
-		n.apply_passive_bonuses(
-			GlobalStats.get_health_bonus(),
-			GlobalStats.get_damage_bonus(),
-			GlobalStats.get_speed_bonus(),
-			GlobalStats.get_crit_chance_bonus(),
-			GlobalStats.get_crit_damage_bonus()
-		)
+		var health_bonus = GlobalStats.get_health_bonus()
+		var damage_bonus = GlobalStats.get_damage_bonus()
+		var speed_bonus = GlobalStats.get_speed_bonus()
+		var crit_chance_bonus = GlobalStats.get_crit_chance_bonus()
+		var crit_damage_bonus = GlobalStats.get_crit_damage_bonus()
+		if n.has_method("apply_passive_bonuses"):
+			n.apply_passive_bonuses(
+				health_bonus,
+				damage_bonus,
+				speed_bonus,
+				crit_chance_bonus,
+				crit_damage_bonus
+			)
+			
+	# --- APLICAR SINERGIAS DE RULETA (¡NUEVO!) ---
+	if team == npc.Team.ALLY:
+		# Buscamos al GameManager para pedir las sinergias
+		var game_manager = get_parent() # Asumiendo que CombatScene es hijo de Game
+		if game_manager and game_manager.has_method("get_active_synergies"):
+			var active_synergies = game_manager.get_active_synergies()
+			
+			if n.has_method("apply_synergies"):
+				n.apply_synergies(active_synergies)
+			else:
+				push_warning("NPC no tiene metodo apply_synergies")
+	# ---------------------------------------------
+	
+	add_child(n)
+
 	
 	# --- APLICAR BONUS A ENEMIGOS (Scaling Diario) ---
 	if team == npc.Team.ENEMY:
@@ -292,17 +313,17 @@ func _get_free_ally_slots() -> Array[Marker2D]:
 	return free
 	
 func _get_piece_copies_owned(piece_data: Resource) -> int:
-	var game_manager = get_parent() 
+	var game_manager = get_parent()
 	if game_manager and game_manager.has_method("get_inventory_piece_count"):
 		var count = game_manager.get_inventory_piece_count(piece_data)
 		return max(1, count)
-	return 1
+	return 1 
 
 func spawn_piece(team: int, piece: PieceRes) -> void:
 	if piece == null:
 		return
 		
-	var num_copies: int = 1
+	var num_copies: int = 1 
 	var gold_per_enemy: int = 0 
 	if team == npc.Team.ALLY:
 		num_copies = _get_piece_copies_owned(piece)
@@ -338,7 +359,7 @@ func _on_npc_died(n: npc) -> void:
 		var amount: int = int(max(0, n.gold_pool))
 		if amount > 0:
 			PlayerData.add_currency(amount)
-			print("Reward (death): +", amount)
+			print("Reward (death): +", amount, " gold.")
 		n.gold_pool = 0
 		print("¡Gladiador murió! Reemplazando...")
 		spawn_enemy_one()
@@ -452,6 +473,10 @@ func _do_attack(attacker: npc, defender: npc) -> void:
 	if (not is_instance_valid(defender)) or after_hp <= 0.0:
 		attacker.notify_kill(defender)
 	
+	# LOG
+	# var crit_text := " (no crit)"
+	# if crit: crit_text = " CRIT x" + _num(mult)
+	# print("[HIT] ", _team_to_str(attacker.team), " -> ", target_name, " | dmg=", _num(dmg))
 	var crit_text := " (no crit)"
 	if crit: crit_text = " CRIT x" + _num(mult)
 	print("[HIT] ", _team_to_str(attacker.team), " -> ", _team_to_str(defender.team), " | final=", _num(dmg), crit_text)
@@ -472,7 +497,8 @@ func _start_pre_battle_sequence() -> void:
 		await get_tree().create_timer(0.1).timeout
 		if enemy_npcs.is_empty():
 			spawn_enemy_one()
-			await get_tree().create_timer(0.1).timeout
+			await get_tree().create_timer(0.1).timeout 
+		
 		if enemy_npcs.is_empty():
 			_stop_combat()
 			return

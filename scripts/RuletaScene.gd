@@ -283,6 +283,8 @@ func _flash_segment(area: Area2D) -> void:
 			t.chain().tween_property(actual_slot, "modulate", Color.WHITE, flash_time * 2.0)
 
 func _reward(): 
+	get_current_synergies()
+	# Primero, emitimos partículas de victoria
 	if win_particles:
 		win_particles.restart()
 		win_particles.emitting = true
@@ -381,3 +383,61 @@ func _on_piece_type_deleted(piece_data: PieceData):
 					slot.clear_slot()
 				else:
 					push_warning("Ruleta: El slot %s no tiene método clear_slot()" % slot.name)
+func get_current_synergies() -> Dictionary:
+	var result = {
+		"jap": 0, # 0, 1 (bonus 1), o 2 (bonus 2)
+		"nor": 0,
+		"eur": 0
+	}
+	
+	# Usamos diccionarios como Sets para contar IDs únicos
+	var unique_ids_jap = {}
+	var unique_ids_nor = {}
+	var unique_ids_eur = {}
+	
+	# Usamos la referencia 'slots_container' que ya existe en este script
+	if not slots_container:
+		return result
+
+	for slot_root in slots_container.get_children():
+		# Verificamos que el nodo tenga un hijo "slot" (tu estructura actual)
+		if not slot_root.has_node("slot"):
+			continue
+			
+		var actual_slot = slot_root.get_node("slot")
+		
+		# Verificamos si tiene datos de pieza (basado en tu script slot.gd)
+		if "current_piece_data" in actual_slot and actual_slot.current_piece_data:
+			var data = actual_slot.current_piece_data
+			
+			# Verificamos que tenga el recurso original (PieceRes)
+			if "piece_origin" in data and data.piece_origin is PieceRes:
+				var res = data.piece_origin
+				var id = res.id # ID único para no contar repetidos
+				
+				match res.race:
+					PieceRes.PieceRace.JAPONESA:
+						unique_ids_jap[id] = true
+					PieceRes.PieceRace.NORDICA:
+						unique_ids_nor[id] = true
+					PieceRes.PieceRace.EUROPEA:
+						unique_ids_eur[id] = true
+
+	# --- CÁLCULO DE NIVELES (TIERS) ---
+	
+	# Japonesas (2 -> Tier 1, 4 -> Tier 2)
+	var count_jap = unique_ids_jap.size()
+	if count_jap >= 4: result["jap"] = 2
+	elif count_jap >= 2: result["jap"] = 1
+	
+	# Nórdicas (2 -> Tier 1, 4 -> Tier 2)
+	var count_nor = unique_ids_nor.size()
+	if count_nor >= 4: result["nor"] = 2
+	elif count_nor >= 2: result["nor"] = 1
+	
+	# Europeas (2 -> Tier 1, 4 -> Tier 2)
+	var count_eur = unique_ids_eur.size()
+	if count_eur >= 4: result["eur"] = 2
+	elif count_eur >= 2: result["eur"] = 1
+	
+	return result
