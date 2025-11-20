@@ -9,4 +9,5 @@ script = ExtResource("3_8ppth")
 piece_name = "hitotsume"
 piece_origin = ExtResource("2_1qewf")
 icon = ExtResource("1_s0hsi")
+uses = 5
 price = 322

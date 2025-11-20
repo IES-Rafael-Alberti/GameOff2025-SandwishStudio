@@ -179,16 +179,21 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 			
 		return true
 
-	# --- CASO 2: SLOT NUEVO ---
+# --- CASO 2: SLOT NUEVO ---
 	var empty_slot: Node = _find_empty_slot(context.slots)
 	
 	if empty_slot:
 		print("... Item nuevo. Slot vacío encontrado. Asignando %d." % final_amount)
 		
-		# Fix de usos al comprar: Reseteamos a 3 para que se vea lleno
+		# --- CORRECCIÓN ---
+		# Ya NO forzamos data.uses = 3.
+		# En su lugar, guardamos el valor original (el que pusiste en el Inspector)
+		# como "max_uses" para que el shader sepa cuál es el 100%.
 		if data is PieceData:
-			data.uses = 3
-			print("... ¡FIX APLICADO! Reseteando usos a 3.")
+			if not data.has_meta("max_uses"):
+				# Guardamos los usos actuales como el máximo, si no existe la etiqueta.
+				data.set_meta("max_uses", data.uses)
+		# -------------------
 		
 		if empty_slot.has_method("set_item"):
 			empty_slot.set_item(data)
@@ -205,12 +210,11 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 		if context.is_passive:
 			_update_passive_stats_display()
 			
-		# --- ¡NUEVO! Notificar cambio de cantidad (Nuevo Slot) ---
 		if data is PieceData:
 			GlobalSignals.piece_count_changed.emit(data, new_entry["count"])
-		# ---------------------------------------------------------
 			
 		return true
+
 
 	print("... FALLO INESPERADO: No se pudo apilar ni encontrar slot vacío.")
 	return false

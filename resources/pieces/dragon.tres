@@ -9,5 +9,6 @@ script = ExtResource("3_lb71h")
 piece_name = "Dragon"
 piece_origin = ExtResource("2_hinmu")
 icon = ExtResource("1_sujfs")
+uses = 4
 price = 112
 metadata/_custom_type_script = "uid://8urlsjkkl8pw"
