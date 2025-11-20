@@ -44,7 +44,7 @@ var passive_slots: Array[Node] = []
 func _ready() -> void:
 	GlobalSignals.item_deleted.connect(remove_item)
 	GlobalSignals.item_return_to_inventory_requested.connect(_on_item_return_requested)
-	
+
 	# Conexiones para actualizar stats cuando la ruleta cambia
 	GlobalSignals.piece_placed_on_roulette.connect(_on_piece_placed)
 	GlobalSignals.piece_returned_from_roulette.connect(_on_piece_returned)
@@ -134,6 +134,7 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 	var inventory_map = context.map
 	var final_amount = amount
 
+	# --- LÓGICA DE LÍMITE DE COPIAS ---
 	if data is PieceData:
 		var current_count = 0
 		if inventory_map.has(id):
@@ -150,6 +151,7 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 	if final_amount <= 0:
 		print("... FALLO: No hay nada que añadir (probablemente por el límite).")
 		return false
+	# ----------------------------------
 
 	var can_stack = inventory_map.has(id)
 	var has_empty_slot = _find_empty_slot(context.slots) != null
@@ -158,6 +160,7 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 		print("... FALLO: No hay slot vacío para un item nuevo. Inventario probablemente lleno.")
 		return false
 
+	# --- CASO 1: APILAR EN SLOT EXISTENTE ---
 	if inventory_map.has(id):
 		print("... Item ya existe. Apilando %d." % final_amount)
 		var entry = inventory_map[id]
@@ -167,36 +170,49 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 			slot_node.update_count(entry["count"])
 		if context.is_passive:
 			_update_passive_stats_display()
+			
+		# --- ¡NUEVO! Notificar cambio de cantidad (Stack) ---
+		if data is PieceData:
+			GlobalSignals.piece_count_changed.emit(data, entry["count"])
+		# ----------------------------------------------------
+			
 		return true
 
+	# --- CASO 2: SLOT NUEVO ---
 	var empty_slot: Node = _find_empty_slot(context.slots)
 	
 	if empty_slot:
 		print("... Item nuevo. Slot vacío encontrado. Asignando %d." % final_amount)
 		
+		# Fix de usos al comprar
 		if data is PieceData:
 			data.uses = 3
 			print("... ¡FIX APLICADO! Reseteando usos a 3.")
 		
 		if empty_slot.has_method("set_item"):
-			empty_slot.set_item(data) 
+			empty_slot.set_item(data)
 
 		if empty_slot.has_method("update_count"):
-			empty_slot.update_count(final_amount) 
+			empty_slot.update_count(final_amount)
 
 		var new_entry = {
-			"count": final_amount, 
+			"count": final_amount,
 			"data": data,
 			"slot_node": empty_slot 
 		}
 		inventory_map[id] = new_entry
 		if context.is_passive:
 			_update_passive_stats_display()
+			
+		# --- ¡NUEVO! Notificar cambio de cantidad (Nuevo Slot) ---
+		if data is PieceData:
+			GlobalSignals.piece_count_changed.emit(data, new_entry["count"])
+		# ---------------------------------------------------------
+			
 		return true
 
 	print("... FALLO INESPERADO: No se pudo apilar ni encontrar slot vacío.")
 	return false
-
 ## ------------------------------------------------------------------
 ## Funciones de Eliminación de Items
 ## ------------------------------------------------------------------

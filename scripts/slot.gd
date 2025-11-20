@@ -44,6 +44,7 @@ func _on_return_attempt_finished(success: bool):
 		clear_slot()
 
 func _ready():
+	# Configuración visual (Highlight, partículas, etc.)
 	if not has_node("Highlight"):
 		var h = Node2D.new()
 		h.name = "Highlight"
@@ -70,23 +71,33 @@ func _ready():
 		
 	self.gui_input.connect(_on_gui_input)
 	
-	# --- CREACIÓN DEL TEXTURE RECT PARA EL TIER ---
+	# Creación del icono de Tier (Bronce/Plata/Oro)
 	tier_icon = TextureRect.new()
 	tier_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tier_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	tier_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	
-	# Tamaño y posición del icono (ajústalo a tu gusto)
 	tier_icon.custom_minimum_size = Vector2(20, 20)
 	tier_icon.size = Vector2(20, 20)
-	
-	# Anclado arriba a la derecha
 	tier_icon.anchor_left = 1.0
 	tier_icon.anchor_right = 1.0
-	tier_icon.position = Vector2(-20, 0) # Lo movemos a la izquierda su propio ancho
-	
+	tier_icon.position = Vector2(-20, 0)
 	tier_icon.visible = false
 	add_child(tier_icon)
+	
+	# --- ¡NUEVO! Conectar señal para actualizarse en tiempo real ---
+	GlobalSignals.piece_count_changed.connect(_on_piece_count_changed)
+	
+func _on_piece_count_changed(piece_data: Resource, new_count: int) -> void:
+	# Si el slot está vacío o no tiene datos, ignorar
+	if not occupied or not current_piece_data:
+		return
+		
+	# Verificamos si la pieza que se actualizó es la misma que tenemos aquí.
+	# Comparamos el 'piece_origin' (la unidad base) para asegurar que sean del mismo tipo.
+	if piece_data is PieceData and current_piece_data is PieceData:
+		if piece_data.piece_origin == current_piece_data.piece_origin:
+			print("Slot Ruleta detectó compra de su pieza. Actualizando visual a: %d copias" % new_count)
+			_update_tier_visual(new_count)
 
 func _process(delta):
 	if piece_over:
@@ -148,7 +159,7 @@ func _get_total_copies(data: Resource) -> int:
 # --- LÓGICA VISUAL DEL TIER ---
 func _update_tier_visual(count: int) -> void:
 	if not tier_icon: return
-	
+	print("update tier en _update_tier_visual" + str(count))
 	tier_icon.visible = true
 	match count:
 		1:

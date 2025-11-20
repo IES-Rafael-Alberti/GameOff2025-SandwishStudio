@@ -23,3 +23,5 @@ signal piece_returned_from_roulette(piece_data: PieceData)
 # RuletaScene.gd la escucha para limpiar todas las copias de esa pieza.
 signal piece_type_deleted(piece_data: PieceData)
 signal roulette_state_changed(is_spinning: bool)
+# Se emite cuando cambia la cantidad de una pieza en el inventario (ej. al comprar).
+signal piece_count_changed(piece_data: Resource, new_count: int)
