@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://cj8n2p21wqyqt"]
+
+[ext_resource type="Script" uid="uid://5rckgbgfkfc2" path="res://scripts/help_over_lay.gd" id="1_hw84m"]
+[ext_resource type="Texture2D" uid="uid://dthf2y24tgfel" path="res://icon.svg" id="2_62jl0"]
+
+[node name="HelpOverLay" type="CanvasLayer"]
+script = ExtResource("1_hw84m")
+
+[node name="PanelBg" type="TextureRect" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_62jl0")
+
+[node name="HelpButton" type="Button" parent="."]
+offset_right = 44.0
+offset_bottom = 31.0
+pivot_offset = Vector2(20, 20)
+text = "Help"
