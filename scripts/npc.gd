@@ -15,6 +15,11 @@ const ATTACK_SPEED_OVER_FACTOR := 0.3
 # Log
 const DAMAGE_TEXT_SCENE := preload("res://scenes/damage_text.tscn")
 
+# Shader de daño (shock)
+@onready var shock_material: ShaderMaterial = material
+var shock_timer: float = 0.0
+var is_shocked: bool = false
+
 @export var npc_res: npcRes
 @export var show_healthbar: bool = true
 @export var hide_when_full: bool = false
@@ -62,6 +67,8 @@ func _ready() -> void:
 		if sprite_frames.has_animation("idle"):
 			animation = "idle"
 			play()
+	if shock_material:
+		shock_material.set_shader_parameter("shock_time", 999.0)
 	else:
 		push_warning("NPC sin frames en inspector")
 
@@ -86,38 +93,70 @@ func _update_healthbar() -> void:
 	health_bar.value = health
 	health_bar.visible = show_healthbar and (not hide_when_full or health < max_health)
 
-func _show_damage_text(amount: float) -> void:
+func _show_damage_text(amount: float, was_crit: bool = false) -> void:
+	# Instanciamos el Label
 	var dmg_label: Label = DAMAGE_TEXT_SCENE.instantiate()
 	var dmg_int := int(round(amount))
 	dmg_label.text = str(dmg_int)
 
 	var base_font_size := 34.0
-	var size_factor : float = clamp(0.7 + float(dmg_int) / 60.0, 0.7, 2.5)
-	var new_size := int(base_font_size * size_factor)
+	var size_factor: float = clamp(0.7 + float(dmg_int) / 60.0, 0.7, 2.5)
+	var size := int(base_font_size * size_factor)
 
-	dmg_label.add_theme_font_size_override("font_size", new_size)
+	# Si es crítico, un pelín más grande (efecto “negrita” ligero)
+	if was_crit:
+		size = int(size * 1.1)
+
+	dmg_label.add_theme_font_size_override("font_size", size)
+
+	# --- Color según el daño (de rojo a morado intenso) ---
+	var min_color := Color(1.0, 0.0, 0.0, 1.0)   # rojo para poco daño
+	var max_color := Color(0.276, 0.005, 0.396, 1.0)   # morado intenso para mucho daño
+
+	# Daño a partir del cual se considera “máximo morado” (ajusta a tu gusto)
+	var color_damage_cap := 120.0
+	var t : float = clamp(float(dmg_int) / color_damage_cap, 0.0, 1.0)
+
+	var final_color := min_color.lerp(max_color, t)
+
+	# Si es crítico, lo aclaramos un poco para que destaque, pero
+	# el tono base sigue viniendo del daño (no del crítico en sí).
+	if was_crit:
+		final_color = final_color.lightened(0.15)
+
+	dmg_label.modulate = final_color
+
+	# Si quieres remarcar aún más el crítico (“negrita” visual):
+	if was_crit:
+		dmg_label.add_theme_constant_override("outline_size", 2)
+		dmg_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
 
 	var root := get_tree().current_scene
 	if root == null: return
 	root.add_child(dmg_label)
 
-	# Posición del texto
-	var max_height := 140.0   
+	# --------------------
+	#  POSICIÓN DENTRO DE UN "CONO"
+	# --------------------
+	var max_height := 140.0   # cuanto más grande, más alto pueden aparecer
 	var min_height := 50.0
+
 	var h := randf_range(min_height, max_height)
+
 	var max_width_at_top := 160.0
 	var half_width := (h / max_height) * (max_width_at_top * 0.5)
+
 	var offset_x := randf_range(-half_width, half_width)
 	var offset_y := -h
 
 	var start_pos := global_position + Vector2(offset_x, offset_y)
-
 	dmg_label.global_position = start_pos
-	dmg_label.modulate = Color(1, 0, 0, 1)
 
-	# Animación
+	# --------------------
+	#  ANIMACIÓN SERPENTEANTE
+	# --------------------
 	var total_travel := randf_range(40.0, 90.0)
-	var amplitude := randf_range(10.0, 25.0)
+	var amplitude := randf_range(10.0, 15.0)
 	var waves := randf_range(1.5, 3.0)
 	var move_time := 0.7
 	var fade_time := 0.3
@@ -126,7 +165,8 @@ func _show_damage_text(amount: float) -> void:
 
 	tween.tween_method(
 		func(t: float) -> void:
-			if not is_instance_valid(dmg_label): return
+			if not is_instance_valid(dmg_label):
+				return
 			var y := -t * total_travel
 			var x := sin(t * TAU * waves) * amplitude
 			dmg_label.global_position = start_pos + Vector2(x, y)
@@ -221,10 +261,16 @@ func get_crit_mult(target: npc) -> float:
 	return max (1.0, val)
 
 # DAMAGE AND EVENTS
-func take_damage(amount: float, from: npc = null) -> void:
+func take_damage(amount: float, from: npc = null, was_crit: bool = false) -> void:
 	if amount <= 0.0: return
 	health = max(0.0, health - amount)
-	_show_damage_text(amount)
+	if shock_material:
+		shock_timer = 0.0
+		is_shocked = true
+		shock_material.set_shader_parameter("shock_time", shock_timer)
+
+	_show_damage_text(amount, was_crit)
+
 	
 	# LÓGICA NÓRDICA: Curación al 25% HP
 	if synergy_nor_tier > 0 and not nordica_heal_used:
@@ -267,3 +313,14 @@ func notify_after_attack(target: npc, dealt_damage: float, was_crit: bool) -> vo
 func notify_kill(victim: npc) -> void:
 	for ab in abilities:
 		if ab: ab.on_kill(self, victim)
+
+func _process(delta: float) -> void:
+	if is_shocked and shock_material:
+		# Avanzamos el tiempo del efecto
+		shock_timer += delta * 8.0  # sube/baja este 8.0 para cambiar velocidad
+		shock_material.set_shader_parameter("shock_time", shock_timer)
+
+		# Cuando pasa un rato, damos por terminado el efecto
+		if shock_timer > 0.3:
+			is_shocked = false
+			shock_material.set_shader_parameter("shock_time", 999.0)
