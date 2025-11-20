@@ -228,7 +228,8 @@ func _on_combat_finished(player_won: bool = false):
 		set_state(GameState.SHOP)
 		store.generate()
 		store.start_new_round()
-
+		if combat_scene:
+			combat_scene.spawn_enemy_one()
 # --- Funciones de Vistas (DayFinished, GameOver & Win) ---
 
 func _show_day_finished_view() -> void:
@@ -274,12 +275,8 @@ func _advance_to_next_day() -> void:
 	set_state(GameState.SHOP)
 	store.generate()
 	store.start_new_round()
-## ------------------------------------------------------------------
-## Resto de Funciones
-## ------------------------------------------------------------------
-# ... (El resto de funciones auxiliares siguen igual) ...
-
-
+	if combat_scene:
+		combat_scene.spawn_enemy_one()
 
 func _give_initial_piece():
 	if not inventory.has_method("get_random_initial_piece"): return
