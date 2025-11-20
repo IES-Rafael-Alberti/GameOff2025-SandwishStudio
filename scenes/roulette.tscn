@@ -67,10 +67,10 @@ scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot2" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 632.8244
-offset_top = 194.95126
-offset_right = 632.8244
-offset_bottom = 194.95126
+offset_left = 633.47296
+offset_top = 194.95128
+offset_right = 633.47296
+offset_bottom = 194.95128
 rotation = -4.950635
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
@@ -292,10 +292,10 @@ texture = ExtResource("7_gils2")
 [node name="Japonesa" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 0
-offset_left = 1113.0
-offset_top = 362.0
-offset_right = 1153.0
-offset_bottom = 402.0
+offset_left = 1118.0
+offset_top = 366.0
+offset_right = 1158.0
+offset_bottom = 406.0
 
 [node name="TextureRect" type="TextureRect" parent="Japonesa"]
 layout_mode = 0

@@ -1,9 +1,14 @@
-[gd_scene load_steps=5 format=3 uid="uid://htgfpif7ey68"]
+[gd_scene load_steps=8 format=3 uid="uid://htgfpif7ey68"]
 
 [ext_resource type="Script" uid="uid://b31agultlt6fo" path="res://scripts/slot.gd" id="1_maf36"]
 [ext_resource type="Texture2D" uid="uid://dlehjk7i5msoq" path="res://assets/image-removebg-preview.png" id="2_w7ii4"]
 [ext_resource type="Texture2D" uid="uid://bbvotv5v52v5t" path="res://assets/coinage.png" id="3_tvb4g"]
 [ext_resource type="Texture2D" uid="uid://b6hogl04y4oll" path="res://assets/coin 2_0.png" id="4_xak2l"]
+[ext_resource type="Texture2D" uid="uid://cwqtvqvdphf8d" path="res://assets/QuesoVacio9.png" id="5_tvb4g"]
+[ext_resource type="Script" uid="uid://c6rhjw1v1sv7k" path="res://scenes/bitmap.gd" id="6_xak2l"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tvb4g"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
 
 [node name="SlotPiece" type="Control" groups=["slot"]]
 layout_mode = 3
@@ -19,18 +24,51 @@ scale = Vector2(0.29054677, 0.30135566)
 
 [node name="slot" type="Panel" parent="."]
 layout_mode = 0
-offset_top = -10.179945
-offset_right = 68.83572
-offset_bottom = 59.505173
+offset_left = 26.9423
+offset_top = -53.226135
+offset_right = 71.09354
+offset_bottom = 119.41966
+theme_override_styles/panel = SubResource("StyleBoxFlat_tvb4g")
 script = ExtResource("1_maf36")
 tier_bronze_texture = ExtResource("2_w7ii4")
 tier_silver_texture = ExtResource("3_tvb4g")
 tier_gold_texture = ExtResource("4_xak2l")
 
-[node name="PieceTextureRect" type="TextureRect" parent="slot"]
+[node name="ItemIcon" type="TextureRect" parent="slot"]
 layout_mode = 0
-offset_left = 3.4418335
-offset_right = 71.298874
-offset_bottom = 65.57382
-scale = Vector2(0.96370167, 1.0120925)
+offset_left = -61.95216
+offset_top = -6.6366806
+offset_right = 438.04785
+offset_bottom = 572.36334
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("5_tvb4g")
+script = ExtResource("6_xak2l")
+
+[node name="CountLabel" type="TextureRect" parent="slot/ItemIcon"]
+z_index = 5
+layout_mode = 0
+offset_left = 252.39767
+offset_top = 376.07834
+offset_right = 327.39767
+offset_bottom = 451.07834
+mouse_filter = 2
+
+[node name="PieceTextureRect" type="TextureRect" parent="slot/ItemIcon"]
+z_index = 1
+layout_mode = 0
+offset_left = 195.03458
+offset_top = 99.55014
+offset_right = 387.8518
+offset_bottom = 287.5893
+scale = Vector2(0.952, 1)
+mouse_filter = 2
 expand_mode = 1
+
+[node name="TierLabel" type="TextureRect" parent="slot/ItemIcon"]
+z_index = 5
+layout_mode = 0
+offset_left = 413.01437
+offset_top = 110.61127
+offset_right = 453.01437
+offset_bottom = 150.61127
+mouse_filter = 2
