@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="PieceData" load_steps=4 format=3 uid="uid://dateynk6k5fui"]
 
-[ext_resource type="Texture2D" uid="uid://b06eeqgh5e45j" path="res://assets/unnamed (4).jpg" id="1_iaiyg"]
+[ext_resource type="Texture2D" uid="uid://cqo6ui8t25iqu" path="res://assets/piezas/Oni.png" id="1_iaiyg"]
 [ext_resource type="Resource" uid="uid://d2fw815a8jk0d" path="res://resources/Japonesa/oni.tres" id="2_8wh7r"]
 [ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="3_jlxpj"]
 

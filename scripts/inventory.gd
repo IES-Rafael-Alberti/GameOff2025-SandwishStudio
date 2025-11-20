@@ -13,6 +13,7 @@ signal item_sold(refund_amount: int)
 @onready var speed_label: Label = $TextureRect3/VBoxContainer/HBoxContainer/SpeedCOntainer/Label
 @onready var crit_chance_label: Label = $TextureRect3/VBoxContainer/HBoxContainer2/CChance_container/Label
 @onready var crit_damage_label: Label = $TextureRect3/VBoxContainer/HBoxContainer2/CDamage_chance/Label
+
 @export var max_pieces: int = 6
 @export var max_passives: int = 30
 @export var inventory_slot_scene: PackedScene 
@@ -184,7 +185,7 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 	if empty_slot:
 		print("... Item nuevo. Slot vacío encontrado. Asignando %d." % final_amount)
 		
-		# Fix de usos al comprar
+		# Fix de usos al comprar: Reseteamos a 3 para que se vea lleno
 		if data is PieceData:
 			data.uses = 3
 			print("... ¡FIX APLICADO! Reseteando usos a 3.")
@@ -213,6 +214,7 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 
 	print("... FALLO INESPERADO: No se pudo apilar ni encontrar slot vacío.")
 	return false
+
 ## ------------------------------------------------------------------
 ## Funciones de Eliminación de Items
 ## ------------------------------------------------------------------
@@ -438,6 +440,7 @@ func _update_slot_visuals_for_piece(piece_data: PieceData):
 		var entry = piece_counts[id]
 		var slot_node: Node = entry["slot_node"]
 		
+		# Aquí nos aseguramos de llamar a la función del slot que actualiza la imagen (1.png, 2.png...)
 		if slot_node and slot_node.has_method("_update_uses"):
 			slot_node._update_uses(piece_data)
 	else:

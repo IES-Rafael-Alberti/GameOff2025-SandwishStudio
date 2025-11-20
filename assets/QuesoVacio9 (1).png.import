@@ -1,0 +1,16 @@
+[remap]
+
+importer="bitmap"
+type="BitMap"
+uid="uid://cto2cc7vpgcyn"
+path="res://.godot/imported/QuesoVacio9 (1).png-d0cd4d480d1ad60954d4ed29e0102b1d.res"
+
+[deps]
+
+source_file="res://assets/QuesoVacio9 (1).png"
+dest_files=["res://.godot/imported/QuesoVacio9 (1).png-d0cd4d480d1ad60954d4ed29e0102b1d.res"]
+
+[params]
+
+create_from=0
+threshold=0.5

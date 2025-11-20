@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="PieceData" load_steps=4 format=3 uid="uid://db80njsmhmbi6"]
 
-[ext_resource type="Texture2D" uid="uid://bnhxe55gl5lm6" path="res://assets/unnamed (7).jpg" id="1_ssopf"]
+[ext_resource type="Texture2D" uid="uid://bqhfu7xhardes" path="res://assets/piezas/Jotunn.png" id="1_ssopf"]
 [ext_resource type="Resource" uid="uid://di6l8arc2wa6y" path="res://resources/Nordica/Jotun.tres" id="2_wydmh"]
 [ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="3_o1usf"]
 
