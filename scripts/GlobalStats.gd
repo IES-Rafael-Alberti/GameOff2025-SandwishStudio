@@ -1,8 +1,10 @@
-# GlobalStats.gd
 extends Node
 
 # Señal para notificar si algo necesita actualizarse en vivo
 signal stats_updated
+
+# --- NUEVO: Referencia a la Ruleta para que el inventario la encuentre ---
+var roulette_scene_ref: Node = null
 
 # Almacenamos las bonificaciones TOTALES de todas las pasivas
 var total_health: float = 0.0

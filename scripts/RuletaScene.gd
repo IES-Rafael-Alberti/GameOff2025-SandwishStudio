@@ -6,8 +6,8 @@ signal roulette_spin_started
 # --- CONFIGURACIÓN DE FÍSICA ---
 @export_group("Physics")
 @export var friction: float = 0.985
-@export var min_impulse_force: float = 60.0 # Ajustado para un mejor "giro"
-@export var min_impulse_random_range: Vector2 = Vector2(1.0, 1.4) # Rango de impulso mejorado
+@export var min_impulse_force: float = 60.0 
+@export var min_impulse_random_range: Vector2 = Vector2(1.0, 1.4) 
 @export var bounce_angle: float = 12.0
 @export var bounce_time: float = 0.08
 
@@ -16,16 +16,16 @@ signal roulette_spin_started
 @export var lever_max_angle: float = 75.0
 @export var drag_sensitivity: float = 0.6
 @export var activation_threshold: float = 0.75
-@export var ratchet_step_angle: float = 10.0 # Cada cuántos grados suena el "clac"
+@export var ratchet_step_angle: float = 10.0 
 
 # --- CONFIGURACIÓN DE JUICE (DOPAMINA) ---
 @export_group("Visual Juice & FX")
 @export var tension_color: Color = Color(1.5, 0.5, 0.5)
-@export var speed_glow_color: Color = Color(1.2, 1.2, 1.3) # Brillo azulado
-@export var highlight_color: Color = Color.from_hsv(0.1, 0.8, 1.0) # Color base de resalte (ej. naranja/victoria)
-@export var flash_color: Color = Color(5.0, 3.0, 1.0) # Color de parpadeo muy brillante (HDR) - ¡NUEVO!
-@export var flash_time: float = 0.1 # Duración del parpadeo rápido - ¡NUEVO!
-@export var final_highlight_intensity: float = 2.0 # Multiplicador para el resalte del ganador - ¡NUEVO!
+@export var speed_glow_color: Color = Color(1.2, 1.2, 1.3) 
+@export var highlight_color: Color = Color.from_hsv(0.1, 0.8, 1.0) 
+@export var flash_color: Color = Color(5.0, 3.0, 1.0) 
+@export var flash_time: float = 0.1 
+@export var final_highlight_intensity: float = 2.0 
 @export var shake_intensity_lever: float = 3.0
 @export var screen_shake_force: float = 6.0
 @export var zoom_strength: float = 0.05
@@ -36,7 +36,7 @@ signal roulette_spin_started
 
 @export_subgroup("Audio & Camera")
 @export var game_camera: Camera2D
-@export var lever_ratchet_audio: AudioStreamPlayer # ARRASTRA AQUÍ UN SONIDO DE "CLIC" CORTO
+@export var lever_ratchet_audio: AudioStreamPlayer 
 
 # --- REFERENCIAS INTERNAS ---
 @onready var slots_container: Node2D = $SpriteRuleta/SlotsContainer
@@ -50,7 +50,7 @@ signal roulette_spin_started
 @onready var lever_origin_pos: Vector2 = $Lever.position
 @onready var roulette_origin_pos: Vector2 = $SpriteRuleta.position
 var camera_origin_zoom: Vector2 = Vector2.ONE
-var lever_origin_rotation: float = 0.0 # Almacena la rotación inicial inclinada
+var lever_origin_rotation: float = 0.0 
 
 # --- ESTADOS ---
 enum State { IDLE, SPINNING }
@@ -68,13 +68,17 @@ var bouncing: bool = false
 # Variables FX
 var shake_trauma: float = 0.0
 var target_zoom: Vector2 = Vector2.ONE
-var last_ratchet_angle: float = 0.0 # Para controlar el sonido de engranaje
+var last_ratchet_angle: float = 0.0 
 
 # --- INICIO ---
 func _ready() -> void:
+	# --- NUEVO: Registrarse en GlobalStats ---
+	if has_node("/root/GlobalStats"):
+		GlobalStats.roulette_scene_ref = self
+	
 	lever_origin_pos = lever_sprite.position
 	roulette_origin_pos = $SpriteRuleta.position
-	lever_origin_rotation = lever_sprite.rotation_degrees # CAPTURA LA INCLINACIÓN INICIAL
+	lever_origin_rotation = lever_sprite.rotation_degrees 
 	
 	if game_camera:
 		camera_origin_zoom = game_camera.zoom
@@ -89,7 +93,6 @@ func _ready() -> void:
 		
 	if manecilla_area:
 		manecilla_area.area_entered.connect(_on_manecilla_area_entered)
-	GlobalSignals.piece_type_deleted.connect(_on_piece_type_deleted)
 
 # --- INPUT Y PALANCA ---
 func _on_lever_input_event(_viewport, event, _shape_idx):
@@ -98,8 +101,6 @@ func _on_lever_input_event(_viewport, event, _shape_idx):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			start_dragging()
-
-
 
 func _input(event):
 	if is_dragging_lever and event is InputEventMouseButton:
@@ -112,11 +113,11 @@ func _input(event):
 func start_dragging():
 	is_dragging_lever = true
 	drag_start_mouse_y = get_global_mouse_position().y
-	last_ratchet_angle = 0.0 # Reset del ratchet
+	last_ratchet_angle = 0.0 
 	
-	# JUICE: Pop visual
 	var t = create_tween()
 	t.tween_property(lever_sprite, "scale", Vector2(1.1, 1.1), 0.1).set_trans(Tween.TRANS_BACK)
+
 func is_moving():
 	return state != State.IDLE
 
@@ -128,18 +129,13 @@ func update_lever_drag():
 	var target_angle_offset = diff * drag_sensitivity
 	current_lever_rotation = clamp(target_angle_offset, 0.0, lever_max_angle)
 	
-	# La rotación es la inclinación inicial + el arrastre.
 	lever_sprite.rotation_degrees = lever_origin_rotation + current_lever_rotation
 	
-	# --- JUICE: RATCHET AUDIO (CARRACA) ---
-	# Si hemos pasado el umbral de ángulo desde el último clic, sonamos
 	if lever_ratchet_audio and abs(current_lever_rotation - last_ratchet_angle) > ratchet_step_angle:
 		last_ratchet_angle = current_lever_rotation
-		# Variamos ligeramente el pitch para realismo mecánico
 		lever_ratchet_audio.pitch_scale = randf_range(0.9, 1.1)
 		lever_ratchet_audio.play()
 	
-	# JUICE: Feedback visual de tensión
 	var progress = current_lever_rotation / lever_max_angle
 	lever_sprite.modulate = Color.WHITE.lerp(tension_color, progress)
 	
@@ -147,7 +143,6 @@ func update_lever_drag():
 	var squash = 1.0 - (progress * 0.05)
 	lever_sprite.scale = Vector2(squash, stretch)
 	
-	# JUICE: Jitter (tembleque)
 	if progress > 0.9:
 		var shake_offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * shake_intensity_lever * (progress - 0.9) * 10
 		lever_sprite.position = lever_origin_pos + shake_offset
@@ -160,7 +155,6 @@ func release_lever():
 	var percentage_pulled = current_lever_rotation / lever_max_angle
 	
 	if percentage_pulled >= activation_threshold:
-		# --- DISPARAR ---
 		trigger_spin()
 		shake_trauma = 0.6
 		
@@ -170,42 +164,25 @@ func release_lever():
 		
 		var t = create_tween()
 		t.set_parallel(true)
-		
-		# Latigazo más brusco y corto hacia atrás (usando la rotación de origen)
 		t.tween_property(lever_sprite, "rotation_degrees", lever_origin_rotation - 25.0, 0.07).set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
-		
-		# La palanca vuelve a su posición original inclinada (lever_origin_rotation) con rebote elástico.
 		t.chain().tween_property(lever_sprite, "rotation_degrees", lever_origin_rotation, 0.6).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
-		
-		# CORRECCIÓN PALANCA: Asegura el reset de la posición del sprite después de la animación de rotación.
 		t.chain().tween_callback(func(): lever_sprite.position = lever_origin_pos)
-
 		t.parallel().tween_property(lever_sprite, "modulate", Color.WHITE, 0.3)
-		# Tween de escala más largo para evitar que se quede "chica" (0.4s)
 		t.parallel().tween_property(lever_sprite, "scale", Vector2.ONE, 0.4).set_trans(Tween.TRANS_ELASTIC)
 		
 	else:
-		# --- CANCELAR ---
 		var t = create_tween()
 		t.set_parallel(true)
-		# Vuelve a la rotación de origen (inclinada).
 		t.tween_property(lever_sprite, "rotation_degrees", lever_origin_rotation, 0.3).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
 		t.tween_property(lever_sprite, "modulate", Color.WHITE, 0.2)
-		# Tween de escala más largo para evitar que se quede "chica" (0.3s)
 		t.tween_property(lever_sprite, "scale", Vector2.ONE, 0.3)
-
 		t.chain().tween_callback(func(): lever_sprite.position = lever_origin_pos)
 		GlobalSignals.emit_signal("roulette_state_changed", true)
-
-
 
 # --- LÓGICA CENTRAL ---
 
 func trigger_spin():
-	# CORRECCIÓN ILUMINACIÓN (DEFENSIVA): Llamar a _reset() aquí asegura que cualquier luz
-	# residual de la ronda anterior se apague ANTES de empezar el nuevo giro.
 	_reset()
-	
 	state = State.SPINNING
 	_selected_area = null
 	var pull_factor = current_lever_rotation / lever_max_angle
@@ -238,7 +215,7 @@ func _spin(_delta: float):
 
 	if abs(inertia) < 0.05:
 		inertia = 0
-		$SpriteRuleta.modulate = Color.WHITE # Asegurar color normal al parar
+		$SpriteRuleta.modulate = Color.WHITE 
 		_reward()
 		_reset()
 
@@ -261,7 +238,7 @@ func _on_manecilla_area_entered(area: Area2D) -> void:
 	if state != State.SPINNING: return
 	_selected_area = area
 	_bounce()
-	_flash_segment(area) # Flash en el segmento al pasar la manecilla
+	_flash_segment(area) 
 
 func _bounce():
 	if bouncing: return
@@ -276,7 +253,6 @@ func _bounce():
 	spr.modulate = Color(1.5, 1.5, 1.5)
 	
 	if ticker_audio:
-		# Audio turbina
 		var pitch = remap(clamp(inertia, 0, 50), 0, 50, 0.7, 1.3)
 		ticker_audio.pitch_scale = pitch
 		ticker_audio.play()
@@ -301,15 +277,13 @@ func _flash_segment(area: Area2D) -> void:
 	if slot_root and slot_root.has_node("slot"):
 		var actual_slot = slot_root.get_node("slot")
 		if actual_slot is CanvasItem:
-			# Resalte rápido al pasar (flash)
 			var t = create_tween()
 			t.set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
 			t.tween_property(actual_slot, "modulate", flash_color, flash_time)
-			# Vuelve a blanco más lentamente (APAGARSE)
 			t.chain().tween_property(actual_slot, "modulate", Color.WHITE, flash_time * 2.0)
 
-
 func _reward(): 
+	get_current_synergies()
 	# Primero, emitimos partículas de victoria
 	if win_particles:
 		win_particles.restart()
@@ -330,33 +304,19 @@ func _reward():
 	if winning_slot_root and winning_slot_root.has_node("slot"):
 		actual_slot_node = winning_slot_root.get_node("slot")
 
-	# Usamos 'current_piece_data' del script slot.gd
-	if actual_slot_node and "current_piece_data" in actual_slot_node:
-		
-		var piece = actual_slot_node.current_piece_data
-		winning_slot_root = slots_container.get_child(index)
-	
-	# Resalte TEMPORAL de la victoria (ya no es permanente)
 	if winning_slot_root and winning_slot_root.has_node("slot"):
 		var actual_slot = winning_slot_root.get_node("slot")
 		if actual_slot is CanvasItem:
 			var final_highlight_color = highlight_color * final_highlight_intensity
 			
-			# Animación de entrada con efecto elástico
 			var t = create_tween()
 			t.set_trans(Tween.TRANS_ELASTIC)
 			t.tween_property(actual_slot, "modulate", final_highlight_color, 0.3)
-			
-			# Vuelve a blanco para APAGARSE (requerimiento del usuario)
 			t.chain().tween_property(actual_slot, "modulate", Color.WHITE, 0.5) 
 
-			# La lógica de highlight permanente y su loop se ha eliminado.
-			
-			# Aseguramos el reset forzoso en _reset()
 			if winning_slot_root.has_method("kill_highlight_tween"):
 				winning_slot_root.kill_highlight_tween()
 
-		# Lógica de recompensa
 		if actual_slot and "current_piece_data" in actual_slot:
 			var piece = actual_slot.current_piece_data
 			if piece and piece.get("piece_origin"):
@@ -374,24 +334,17 @@ func _reset():
 	shake_trauma = 0.0
 	$SpriteRuleta.position = roulette_origin_pos
 	
-	# CORRECCIÓN PALANCA (FORZOSO): Reset forzoso de la posición y ROTACIÓN del lever
 	lever_sprite.position = lever_origin_pos
-	lever_sprite.rotation_degrees = lever_origin_rotation # Fuerza la rotación a la posición inclinada
+	lever_sprite.rotation_degrees = lever_origin_rotation 
 	
-	# Asegurar que todos los slots vuelven a blanco/color normal
 	for slot_root in slots_container.get_children():
 		if slot_root.has_node("slot"):
 			var actual_slot = slot_root.get_node("slot")
 			if actual_slot is CanvasItem:
-				
-				# Detener cualquier Tween de parpadeo que pudiera existir
 				if slot_root.has_method("kill_highlight_tween"):
 					slot_root.kill_highlight_tween()
-
-				# Resetear el color a la normalidad (Color.WHITE)
 				actual_slot.modulate = Color.WHITE
 	
-	# Detener las partículas de victoria
 	if win_particles:
 		win_particles.emitting = false
 	
@@ -399,11 +352,7 @@ func _reset():
 		var t = create_tween()
 		t.tween_property(game_camera, "zoom", camera_origin_zoom, 0.5).set_trans(Tween.TRANS_CUBIC)
 
-# --- UTILIDADES ---
-
-
 	GlobalSignals.emit_signal("roulette_state_changed", false)
-
 
 func reset_rotation_to_zero():
 	if state == State.IDLE:
@@ -415,31 +364,80 @@ func set_interactive(interactive: bool):
 	if lever_sprite:
 		lever_sprite.modulate = Color.WHITE if interactive else Color(0.5, 0.5, 0.5)
 
-
-# --- ¡NUEVA FUNCIÓN DE SEÑAL!
-# Se llama cuando GlobalSignals.piece_type_deleted se emite desde inventory.gd
 func _on_piece_type_deleted(piece_data: PieceData):
 	if not piece_data:
 		return
 		
 	print("... Ruleta ha recibido orden de borrado para: %s" % piece_data.resource_name)
 	
-	# Recorremos todos los slots de la ruleta
 	for slot_root in slots_container.get_children():
 		if not slot_root.has_node("slot"):
 			continue
 			
 		var slot = slot_root.get_node("slot")
 		
-		# Usamos la variable 'current_piece_data' de tu script slot.gd
 		if slot and "current_piece_data" in slot:
-			
-			# Si la pieza en este slot es la que se borró
 			if slot.current_piece_data == piece_data:
-				
-				# Usamos el método 'clear_slot()' de tu script slot.gd
 				if slot.has_method("clear_slot"):
 					print("... ... Limpiando slot %s" % slot.name)
 					slot.clear_slot()
 				else:
 					push_warning("Ruleta: El slot %s no tiene método clear_slot()" % slot.name)
+func get_current_synergies() -> Dictionary:
+	var result = {
+		"jap": 0, # 0, 1 (bonus 1), o 2 (bonus 2)
+		"nor": 0,
+		"eur": 0
+	}
+	
+	# Usamos diccionarios como Sets para contar IDs únicos
+	var unique_ids_jap = {}
+	var unique_ids_nor = {}
+	var unique_ids_eur = {}
+	
+	# Usamos la referencia 'slots_container' que ya existe en este script
+	if not slots_container:
+		return result
+
+	for slot_root in slots_container.get_children():
+		# Verificamos que el nodo tenga un hijo "slot" (tu estructura actual)
+		if not slot_root.has_node("slot"):
+			continue
+			
+		var actual_slot = slot_root.get_node("slot")
+		
+		# Verificamos si tiene datos de pieza (basado en tu script slot.gd)
+		if "current_piece_data" in actual_slot and actual_slot.current_piece_data:
+			var data = actual_slot.current_piece_data
+			
+			# Verificamos que tenga el recurso original (PieceRes)
+			if "piece_origin" in data and data.piece_origin is PieceRes:
+				var res = data.piece_origin
+				var id = res.id # ID único para no contar repetidos
+				
+				match res.race:
+					PieceRes.PieceRace.JAPONESA:
+						unique_ids_jap[id] = true
+					PieceRes.PieceRace.NORDICA:
+						unique_ids_nor[id] = true
+					PieceRes.PieceRace.EUROPEA:
+						unique_ids_eur[id] = true
+
+	# --- CÁLCULO DE NIVELES (TIERS) ---
+	
+	# Japonesas (2 -> Tier 1, 4 -> Tier 2)
+	var count_jap = unique_ids_jap.size()
+	if count_jap >= 4: result["jap"] = 2
+	elif count_jap >= 2: result["jap"] = 1
+	
+	# Nórdicas (2 -> Tier 1, 4 -> Tier 2)
+	var count_nor = unique_ids_nor.size()
+	if count_nor >= 4: result["nor"] = 2
+	elif count_nor >= 2: result["nor"] = 1
+	
+	# Europeas (2 -> Tier 1, 4 -> Tier 2)
+	var count_eur = unique_ids_eur.size()
+	if count_eur >= 4: result["eur"] = 2
+	elif count_eur >= 2: result["eur"] = 1
+	
+	return result
