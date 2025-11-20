@@ -1,17 +1,8 @@
-[gd_resource type="SpriteFrames" load_steps=3 format=3 uid="uid://c7jd0vdx5p4th"]
-
-[ext_resource type="Texture2D" uid="uid://cuffytq477a2f" path="res://assets/Combat_scene/Gladiadores/3.png" id="1_pwrph"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_pja1x"]
-atlas = ExtResource("1_pwrph")
-region = Rect2(0, 0, 319, 357)
+[gd_resource type="SpriteFrames" format=3 uid="uid://c7jd0vdx5p4th"]
 
 [resource]
 animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_pja1x")
-}],
+"frames": [],
 "loop": false,
 "name": &"idle",
 "speed": 10.0
