@@ -112,7 +112,8 @@ func _ready():
 
 
 func _process(delta: float) -> void:
-	if not is_tended:
+	# MODIFICADO: Ahora el ojo está abierto cuando la tienda está abierta (NOT is_tended)
+	if is_tended:
 		pupil.visible = false
 	else:
 		pupil.visible = true
@@ -139,7 +140,6 @@ func _update_ui_labels() -> void:
 			GameState.ROULETTE: state_text = " - ¡Gira la ruleta!"
 			GameState.SPINNING: state_text = " - ¡Girando!"
 			GameState.COMBAT: state_text = " - ¡Combate!"
-		
 		round_label.text = "Ronda %d/%d%s" % [current_round, rounds_per_day, state_text]
 
 ## ------------------------------------------------------------------
@@ -277,9 +277,6 @@ func _advance_to_next_day() -> void:
 ## ------------------------------------------------------------------
 ## Resto de Funciones
 ## ------------------------------------------------------------------
-# ... (El resto de funciones auxiliares siguen igual) ...
-
-
 
 func _give_initial_piece():
 	if not inventory.has_method("get_random_initial_piece"): return
@@ -311,10 +308,15 @@ func _on_PlayerData_currency_changed(new_amount: int) -> void:
 	if gold_label: gold_label.text = str(new_amount) + "€"
 
 func _toggle_eye_parpadeo() -> void:
-	if not is_tended: return
+	# MODIFICADO: No parpadear si la tienda está cerrada (is_tended)
+	if is_tended: return
+	
 	sprite_show.texture = eye_closed_texture
 	await get_tree().create_timer(0.07).timeout
-	sprite_show.texture = original_eye_texture
+	
+	# Verificar que sigue abierta antes de volver a abrir el ojo
+	if not is_tended:
+		sprite_show.texture = original_eye_texture
 
 func _update_pupil_position():
 	if not pupil.visible or not sprite_show.visible: return
@@ -334,7 +336,8 @@ func _on_shop_exit():
 	sprite_show.modulate.a = 1.0
 
 func _update_eye_state():
-	if is_tended:
+	# MODIFICADO: Tienda abierta (!is_tended) -> Ojo abierto
+	if not is_tended:
 		sprite_show.texture = original_eye_texture
 		pupil.visible = true
 	else:
@@ -378,11 +381,9 @@ func get_inventory_piece_count(resource_to_check: Resource) -> int:
 	return 0
 
 ## ------------------------------------------------------------------
-## SISTEMA DE SINERGIAS (NUEVO)
+## SISTEMA DE SINERGIAS
 ## ------------------------------------------------------------------
 
-# Esta función recorre la ruleta, cuenta las piezas únicas y devuelve los niveles de bonus.
-# Se llama desde combat_scene.gd antes de spawnear a los aliados.
 func get_active_synergies() -> Dictionary:
 	var result = {
 		"jap": 0, # Tier Japonés
