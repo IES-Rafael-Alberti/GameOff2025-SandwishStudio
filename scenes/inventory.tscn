@@ -34,12 +34,13 @@ piece_scene = ExtResource("3_uae8j")
 initial_pieces = Array[ExtResource("4_40feg")]([ExtResource("5_tla8l"), ExtResource("6_w24ly"), ExtResource("7_ohgsq")])
 
 [node name="MarmolMesa" type="TextureRect" parent="."]
+z_index = -2
 layout_mode = 0
 offset_left = -20.0
 offset_right = 3291.0
 offset_bottom = 8000.0
 scale = Vector2(0.65658104, 0.12503731)
-mouse_filter = 0
+mouse_filter = 2
 texture = ExtResource("4_g71ie")
 
 [node name="Alfombra" type="TextureRect" parent="."]

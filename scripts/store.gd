@@ -3,13 +3,12 @@ extends Control
 @onready var piece_scene: PackedScene = preload("res://scenes/piece.tscn")
 @onready var passive_scene: PackedScene = preload("res://scenes/passive.tscn")
 
-# Referencia al tooltip (asegúrate de que el nodo Tooltip existe en la escena)
 @onready var tooltip: Control = $Tooltip 
 
 @export_group("Configuración de Items")
 @export var piece_origins: Array[PieceData]
 @export var passive_origins: Array[PassiveData]
-@export var max_copies: int = 3 # Límite para dejar de salir en tienda
+@export var max_copies: int = 3 
 
 @export_group("Economía")
 @export_range(0.0, 2.0) var duplicate_piece_mult: float = 0.5 
@@ -18,8 +17,8 @@ extends Control
 @export var COLOR_UNAFFORD_BG: Color = Color(1.0, 0, 0, 0.6)
 
 @export_group("Economía Reroll")
-@export var reroll_base_cost: int = 2      # Costo base (ej: 2 monedas)
-@export var reroll_cost_multiplier: float = 1.5 # Cuánto sube el precio (ej: x1.5)
+@export var reroll_base_cost: int = 2
+@export var reroll_cost_multiplier: float = 1.5
 
 @export_group("Probabilidades de Tienda (%)")
 @export_range(0, 100) var prob_comun: int = 70
@@ -27,9 +26,13 @@ extends Control
 @export_range(0, 100) var prob_epico: int = 8
 @export_range(0, 100) var prob_legendario: int = 2
 
+# --- SHADER ---
+const OUTLINE_SHADER = preload("res://shaders/outline_highlight.gdshader")
+var highlight_material: ShaderMaterial
+
 var _pieces_by_rarity: Dictionary = {}
 var _rerolls_this_round: int = 0
-var reroll_label: Label # Variable para guardar la etiqueta de precio del reroll
+var reroll_label: Label
 
 @onready var inventory: Control = $"../inventory"
 @onready var piece_zone: HBoxContainer = $VBoxContainer/piece_zone
@@ -39,27 +42,33 @@ var reroll_label: Label # Variable para guardar la etiqueta de precio del reroll
 var current_shop_styles: Array = []
 
 func _ready() -> void:
+	# Configurar material
+	highlight_material = ShaderMaterial.new()
+	highlight_material.shader = OUTLINE_SHADER
+	highlight_material.set_shader_parameter("width", 3.0)
+	highlight_material.set_shader_parameter("color", Color.WHITE)
+	
 	PlayerData.currency_changed.connect(_update_all_label_colors)
 	
-	# --- CREAR VISUALIZADOR DE PRECIO PARA EL REROLL ---
+	# --- HOVER EN REROLL ---
+	if reroll_button:
+		reroll_button.mouse_entered.connect(func(): if not reroll_button.disabled: reroll_button.material = highlight_material)
+		reroll_button.mouse_exited.connect(func(): reroll_button.material = null)
+	
 	reroll_label = Label.new()
 	reroll_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	reroll_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	
-	# Configuración visual de la etiqueta
 	reroll_label.add_theme_color_override("font_outline_color", Color.BLACK)
 	reroll_label.add_theme_constant_override("outline_size", 6)
 	reroll_label.add_theme_font_size_override("font_size", 24)
 	
-	# Lo añadimos como hijo del botón Reroll
 	reroll_button.add_child(reroll_label)
 	
-	# Lo posicionamos (Center Bottom para que salga abajo)
-	reroll_label.layout_mode = 1 # Anchors
+	reroll_label.layout_mode = 1
 	reroll_label.anchors_preset = Control.PRESET_CENTER_BOTTOM
-	reroll_label.position.y += 10 # Ajuste para no tapar icono
+	reroll_label.position.y += 10 
 	
-	# Inicializamos la ronda
 	start_new_round()
 
 # --- CONTROL DE RONDA ---
@@ -67,7 +76,6 @@ func _ready() -> void:
 func start_new_round() -> void:
 	_rerolls_this_round = 0
 	_update_reroll_button_visuals()
-	# Refrescamos la tienda gratis al entrar
 	_refresh_shop_content() 
 
 # --- LÓGICA DEL BOTÓN REROLL (Generate) ---
@@ -75,34 +83,28 @@ func start_new_round() -> void:
 func generate():
 	var current_cost = _calculate_reroll_cost()
 	
-	# 1. Verificar si podemos pagar (o si es gratis)
 	if current_cost > 0:
 		if not PlayerData.has_enough_currency(current_cost):
 			print("No tienes suficiente dinero para reroll. Costo: %d" % current_cost)
-			_animate_error_shake(reroll_button) # Feedback visual
+			_animate_error_shake(reroll_button)
 			return
 		
-		# Pagar
 		PlayerData.spend_currency(current_cost)
 		print("Reroll pagado: %d monedas" % current_cost)
 	else:
 		print("Reroll GRATIS usado.")
 
-	# 2. Ejecutar el Reroll
 	_rerolls_this_round += 1
 	_refresh_shop_content()
 	
-	# 3. Actualizar visuales para el SIGUIENTE precio
 	_update_reroll_button_visuals()
 
 # --- FUNCIONES VISUALES Y DE CÁLCULO REROLL ---
 
 func _calculate_reroll_cost() -> int:
 	if _rerolls_this_round == 0:
-		return 0 # Gratis
+		return 0 
 	
-	# Fórmula exponencial: Base * (Multi ^ (usos_pagados))
-	# (_rerolls_this_round - 1) porque el primero no cuenta para el exponente
 	var paid_uses = _rerolls_this_round 
 	var multiplier = pow(reroll_cost_multiplier, paid_uses - 1)
 	
@@ -118,7 +120,7 @@ func _update_reroll_button_visuals():
 	
 	if cost == 0:
 		reroll_label.text = "GRATIS"
-		reroll_label.modulate = Color(0.2, 1.0, 0.2) # Verde brillante
+		reroll_label.modulate = Color(0.2, 1.0, 0.2) 
 		reroll_button.modulate = Color.WHITE
 		reroll_button.tooltip_text = "¡Reroll GRATIS!"
 	else:
@@ -126,21 +128,20 @@ func _update_reroll_button_visuals():
 		reroll_button.tooltip_text = "Costo: %d" % cost
 		
 		if PlayerData.has_enough_currency(cost):
-			reroll_label.modulate = Color(1.0, 0.9, 0.4) # Dorado/Normal
+			reroll_label.modulate = Color(1.0, 0.9, 0.4) 
 			reroll_button.modulate = Color.WHITE
 		else:
-			reroll_label.modulate = Color(1.0, 0.2, 0.2) # Rojo
-			reroll_button.modulate = Color(0.6, 0.6, 0.6) # Botón oscurecido
+			reroll_label.modulate = Color(1.0, 0.2, 0.2) 
+			reroll_button.modulate = Color(0.6, 0.6, 0.6) 
 
 func _animate_error_shake(node: Control):
 	var tween = create_tween()
 	var original_pos = node.position.x
-	# Pequeña animación de sacudida derecha-izquierda
 	tween.tween_property(node, "position:x", original_pos + 10, 0.05)
 	tween.tween_property(node, "position:x", original_pos - 10, 0.05)
 	tween.tween_property(node, "position:x", original_pos, 0.05)
 
-# --- LÓGICA DE GENERACIÓN DE TIENDA (Original) ---
+# --- LÓGICA DE GENERACIÓN DE TIENDA ---
 
 func _refresh_shop_content():
 	current_shop_styles.clear()
@@ -150,7 +151,6 @@ func _refresh_shop_content():
 	for child in passive_zone.get_children():
 		child.queue_free()
 
-	# 1. Piezas
 	var available_pieces = _filter_maxed_items(piece_origins)
 	_organize_pieces_by_rarity(available_pieces)
 	
@@ -162,7 +162,6 @@ func _refresh_shop_content():
 
 	_generate_buttons(selected_pieces, piece_zone, piece_scene)
 	
-	# 2. Pasivas
 	var available_passives = _filter_maxed_items(passive_origins)
 	if not available_passives.is_empty():
 		var shuffled_passives = available_passives.duplicate()
@@ -185,7 +184,6 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 	for origin_data in selected:
 		var origin_instance = base_scene.instantiate()
 
-		# Obtener textura (icon o sprite)
 		var texture_to_use: Texture2D = origin_data.icon
 		if texture_to_use == null:
 			var sprite_node = origin_instance.find_child("Sprite2D", true, false)
@@ -196,7 +194,6 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 			var item_container = VBoxContainer.new()
 			item_container.alignment = VBoxContainer.ALIGNMENT_CENTER
 
-			# Etiqueta de precio del Item
 			if "price" in origin_data:
 				var final_price: int = _calculate_price(origin_data)
 				var price_label = Label.new()
@@ -223,7 +220,6 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 					"label": price_label
 				})
 
-			# Botón del Item
 			var button = TextureButton.new()
 			button.texture_normal = texture_to_use
 			button.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
@@ -231,21 +227,33 @@ func _generate_buttons(origin_array: Array, target_zone: HBoxContainer, base_sce
 			
 			button.pressed.connect(_on_button_pressed.bind(button))
 			
-			# Tooltips
 			button.mouse_entered.connect(_on_button_mouse_entered.bind(origin_data))
 			button.mouse_exited.connect(_on_button_mouse_exited)
+			
+			# --- CONEXIÓN DEL HOVER (SHADER) ---
+			button.mouse_entered.connect(_apply_hover_effect.bind(button))
+			button.mouse_exited.connect(_remove_hover_effect.bind(button))
 			
 			item_container.add_child(button)
 			target_zone.add_child(item_container)
 
 		origin_instance.queue_free()
 
+# --- HELPERS DE HOVER ---
+
+func _apply_hover_effect(btn: TextureButton) -> void:
+	if not btn.disabled:
+		btn.material = highlight_material
+
+func _remove_hover_effect(btn: TextureButton) -> void:
+	btn.material = null
+
 # --- EVENTOS DEL MOUSE (Tooltips) ---
 
 func _on_button_mouse_entered(data: Resource) -> void:
 	if tooltip and data:
 		var count = _get_item_count_safe(data)
-		tooltip.show_tooltip(data, 0, count) # Asumiendo que tu tooltip acepta (data, nivel, cantidad)
+		tooltip.show_tooltip(data, 0, count)
 		
 func _on_button_mouse_exited() -> void:
 	if tooltip:
@@ -271,6 +279,7 @@ func _on_button_pressed(button: TextureButton) -> void:
 		inventory.add_item(data)
 		button.disabled = true
 		button.modulate = Color(0.25, 0.25, 0.25, 1.0)
+		button.material = null # Quitar shader al comprar
 		print("Compraste %s por %d oro." % [data.resource_name, price])
 		_update_all_label_colors()
 	else:
@@ -279,10 +288,8 @@ func _on_button_pressed(button: TextureButton) -> void:
 # --- ACTUALIZACIÓN DE COLORES Y PRECIOS ---
 
 func _update_all_label_colors(_new_amount: int = 0) -> void:
-	# 1. Actualizar botón de reroll
 	_update_reroll_button_visuals()
 
-	# 2. Actualizar items de la tienda
 	if current_shop_styles.is_empty(): return
 	
 	for item in current_shop_styles:

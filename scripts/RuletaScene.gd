@@ -46,6 +46,10 @@ signal roulette_spin_started
 @onready var manecilla_sprite: Sprite2D = $Manecilla/SpriteManecilla
 @onready var ticker_audio: AudioStreamPlayer = $Manecilla/AudioStreamPlayer
 
+# --- SHADER ---
+const OUTLINE_SHADER = preload("res://shaders/outline_highlight.gdshader")
+var highlight_material: ShaderMaterial
+
 # --- MEMORIA DE POSICIONES ---
 @onready var lever_origin_pos: Vector2 = $Lever.position
 @onready var roulette_origin_pos: Vector2 = $SpriteRuleta.position
@@ -72,6 +76,12 @@ var last_ratchet_angle: float = 0.0
 
 # --- INICIO ---
 func _ready() -> void:
+	# Configurar material de hover
+	highlight_material = ShaderMaterial.new()
+	highlight_material.shader = OUTLINE_SHADER
+	highlight_material.set_shader_parameter("width", 3.0)
+	highlight_material.set_shader_parameter("color", Color.WHITE)
+
 	# --- NUEVO: Registrarse en GlobalStats ---
 	if has_node("/root/GlobalStats"):
 		GlobalStats.roulette_scene_ref = self
@@ -90,6 +100,9 @@ func _ready() -> void:
 	if lever_area:
 		lever_area.input_pickable = true
 		lever_area.input_event.connect(_on_lever_input_event)
+		# Conexiones para el hover
+		lever_area.mouse_entered.connect(_on_lever_mouse_entered)
+		lever_area.mouse_exited.connect(_on_lever_mouse_exited)
 		
 	if manecilla_area:
 		manecilla_area.area_entered.connect(_on_manecilla_area_entered)
@@ -101,6 +114,13 @@ func _on_lever_input_event(_viewport, event, _shape_idx):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			start_dragging()
+
+func _on_lever_mouse_entered() -> void:
+	if is_interactive and state == State.IDLE:
+		lever_sprite.material = highlight_material
+
+func _on_lever_mouse_exited() -> void:
+	lever_sprite.material = null
 
 func _input(event):
 	if is_dragging_lever and event is InputEventMouseButton:
@@ -114,6 +134,9 @@ func start_dragging():
 	is_dragging_lever = true
 	drag_start_mouse_y = get_global_mouse_position().y
 	last_ratchet_angle = 0.0 
+	
+	# Al arrastrar quitamos el highlight para que no moleste o se quede pegado
+	lever_sprite.material = null
 	
 	var t = create_tween()
 	t.tween_property(lever_sprite, "scale", Vector2(1.1, 1.1), 0.1).set_trans(Tween.TRANS_BACK)
@@ -336,6 +359,7 @@ func _reset():
 	
 	lever_sprite.position = lever_origin_pos
 	lever_sprite.rotation_degrees = lever_origin_rotation 
+	lever_sprite.material = null # Reset shader just in case
 	
 	for slot_root in slots_container.get_children():
 		if slot_root.has_node("slot"):
@@ -383,37 +407,33 @@ func _on_piece_type_deleted(piece_data: PieceData):
 					slot.clear_slot()
 				else:
 					push_warning("Ruleta: El slot %s no tiene método clear_slot()" % slot.name)
+
 func get_current_synergies() -> Dictionary:
 	var result = {
-		"jap": 0, # 0, 1 (bonus 1), o 2 (bonus 2)
+		"jap": 0,
 		"nor": 0,
 		"eur": 0
 	}
 	
-	# Usamos diccionarios como Sets para contar IDs únicos
 	var unique_ids_jap = {}
 	var unique_ids_nor = {}
 	var unique_ids_eur = {}
 	
-	# Usamos la referencia 'slots_container' que ya existe en este script
 	if not slots_container:
 		return result
 
 	for slot_root in slots_container.get_children():
-		# Verificamos que el nodo tenga un hijo "slot" (tu estructura actual)
 		if not slot_root.has_node("slot"):
 			continue
 			
 		var actual_slot = slot_root.get_node("slot")
 		
-		# Verificamos si tiene datos de pieza (basado en tu script slot.gd)
 		if "current_piece_data" in actual_slot and actual_slot.current_piece_data:
 			var data = actual_slot.current_piece_data
 			
-			# Verificamos que tenga el recurso original (PieceRes)
 			if "piece_origin" in data and data.piece_origin is PieceRes:
 				var res = data.piece_origin
-				var id = res.id # ID único para no contar repetidos
+				var id = res.id
 				
 				match res.race:
 					PieceRes.PieceRace.JAPONESA:
@@ -423,19 +443,14 @@ func get_current_synergies() -> Dictionary:
 					PieceRes.PieceRace.EUROPEA:
 						unique_ids_eur[id] = true
 
-	# --- CÁLCULO DE NIVELES (TIERS) ---
-	
-	# Japonesas (2 -> Tier 1, 4 -> Tier 2)
 	var count_jap = unique_ids_jap.size()
 	if count_jap >= 4: result["jap"] = 2
 	elif count_jap >= 2: result["jap"] = 1
 	
-	# Nórdicas (2 -> Tier 1, 4 -> Tier 2)
 	var count_nor = unique_ids_nor.size()
 	if count_nor >= 4: result["nor"] = 2
 	elif count_nor >= 2: result["nor"] = 1
 	
-	# Europeas (2 -> Tier 1, 4 -> Tier 2)
 	var count_eur = unique_ids_eur.size()
 	if count_eur >= 4: result["eur"] = 2
 	elif count_eur >= 2: result["eur"] = 1

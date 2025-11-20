@@ -2,28 +2,35 @@ extends Control
 
 signal item_selected(data: Resource)
 
-# --- CAMBIO: Asegúrate de que en tu escena el nodo CountLabel sea un TextureRect ---
 @onready var button: TextureButton = $TextureButton
 @onready var count_label: TextureRect = $CountLabel 
 @onready var uses_label: Label = $UsesLabel
 @onready var tooltip: PanelContainer = $Tooltip
 
-# --- NUEVO: Arrastra aquí tus imágenes de los círculos ---
 @export_group("Tier Textures")
 @export var tier_bronze_texture: Texture2D
 @export var tier_silver_texture: Texture2D
 @export var tier_gold_texture: Texture2D
+
+# --- SHADER ---
+const OUTLINE_SHADER = preload("res://shaders/outline_highlight.gdshader")
+var highlight_material: ShaderMaterial
 
 var item_data: Resource = null
 var current_count: int = 0
 var sell_percentage: int = 50
 
 func _ready() -> void:
+	# Configurar material de hover
+	highlight_material = ShaderMaterial.new()
+	highlight_material.shader = OUTLINE_SHADER
+	highlight_material.set_shader_parameter("width", 3.0)
+	highlight_material.set_shader_parameter("color", Color.WHITE)
+	
 	button.pressed.connect(_on_button_pressed)
 	button.mouse_entered.connect(_on_button_mouse_entered)
 	button.mouse_exited.connect(_on_button_mouse_exited)
 	
-	# Nos aseguramos de que el TextureRect no bloquee el clic del ratón
 	if count_label:
 		count_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		count_label.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -47,16 +54,14 @@ func set_item(data: Resource) -> void:
 	
 	show()
 
-## Actualiza la textura según la cantidad (Tier)
 func update_count(count: int) -> void:
 	current_count = count
 	
 	if button:
 		button.item_count = current_count
 
-	# --- LÓGICA DE TEXTURAS ---
 	if item_data is PieceData and count_label:
-		count_label.visible = true # Siempre visible, incluso con 1 copia
+		count_label.visible = true
 		
 		match count:
 			1:
@@ -66,12 +71,9 @@ func update_count(count: int) -> void:
 			3:
 				if tier_gold_texture: count_label.texture = tier_gold_texture
 			_:
-				# Si es mayor que 3, mantenemos Oro
 				if count > 3 and tier_gold_texture:
 					count_label.texture = tier_gold_texture
 				else:
-					# Si no hay textura para este caso o es 0, ocultamos
-					# count_label.visible = false (Opcional, mejor dejar el último válido)
 					pass
 	else:
 		count_label.visible = false
@@ -91,6 +93,7 @@ func clear_slot() -> void:
 	tooltip.hide_tooltip()
 	
 	button.modulate = Color.WHITE
+	button.material = null # Limpiar shader
 
 func is_empty() -> bool:
 	return item_data == null
@@ -115,11 +118,14 @@ func _on_button_pressed() -> void:
 		tooltip.hide_tooltip()
 
 func _on_button_mouse_entered() -> void:
+	# --- APLICAR SHADER ---
+	if not button.disabled:
+		button.material = highlight_material
+		
 	if item_data:
-		# ¡AQUÍ ESTABA EL ERROR!
-		# Antes solo enviabas (item, porcentaje). Faltaba la cantidad (current_count).
-		# Al no enviarla, el Tooltip asumía que tenías 0 y te mostraba Bronce.
 		tooltip.show_tooltip(item_data, sell_percentage, current_count)
 
 func _on_button_mouse_exited() -> void:
+	# --- QUITAR SHADER ---
+	button.material = null
 	tooltip.hide_tooltip()
