@@ -123,7 +123,24 @@ func _on_button_mouse_entered() -> void:
 		button.material = highlight_material
 		
 	if item_data:
-		tooltip.show_tooltip(item_data, sell_percentage, current_count)
+		# --- LÓGICA NUEVA: DETECTAR MODO PASIVAS ---
+		# Si es un dato pasivo, asumimos que estamos en un slot de pasivas.
+		# Buscamos el inventario (padre del GridContainer del Slot) para pasar la referencia.
+		if item_data is PassiveData:
+			# Intentamos encontrar el nodo "inventory" subiendo en la jerarquía
+			# Slot -> GridContainer -> Inventory
+			var potential_inventory = get_parent().get_parent()
+			
+			# Verificamos si es realmente el inventario (tiene el diccionario passive_counts)
+			if potential_inventory and "passive_counts" in potential_inventory:
+				# Activamos modo resumen (flag true) y pasamos el inventario
+				tooltip.show_tooltip(item_data, sell_percentage, current_count, true, potential_inventory)
+			else:
+				# Fallback normal si no encuentra el inventario
+				tooltip.show_tooltip(item_data, sell_percentage, current_count)
+		else:
+			# Modo normal para piezas
+			tooltip.show_tooltip(item_data, sell_percentage, current_count)
 
 func _on_button_mouse_exited() -> void:
 	# --- QUITAR SHADER ---
