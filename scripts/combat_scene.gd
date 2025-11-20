@@ -398,8 +398,7 @@ func _on_npc_died(n: npc) -> void:
 			print("Reward (death): +", amount, " gold.")
 		n.gold_pool = 0
 
-		print("¡Gladiador murió! Reemplazando...")
-		spawn_enemy_one()
+		print("¡Gladiador murió!") # Eliminamos "Reemplazando..."
 
 func _on_npc_exited(n: npc) -> void:
 	if n.team == npc.Team.ALLY:
