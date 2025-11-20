@@ -53,10 +53,10 @@ texture = ExtResource("4_uae8j")
 
 [node name="Bandeja" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 1643.0
-offset_top = 80.00001
-offset_right = 6210.0
-offset_bottom = 7080.0
+offset_left = 1587.0
+offset_top = 87.0
+offset_right = 6154.0
+offset_bottom = 7087.0
 rotation = -0.006927715
 scale = Vector2(0.087852575, 0.087852575)
 texture = ExtResource("5_s887n")
@@ -74,10 +74,10 @@ columns = 2
 
 [node name="passive_inventory" type="GridContainer" parent="."]
 layout_mode = 0
-offset_left = 1761.0001
-offset_top = 278.0
-offset_right = 2160.0698
-offset_bottom = 776.3279
+offset_left = 1705.0001
+offset_top = 276.99997
+offset_right = 2104.0698
+offset_bottom = 775.3278
 rotation = -0.0030516738
 scale = Vector2(0.5, 0.5)
 theme_override_constants/h_separation = 28

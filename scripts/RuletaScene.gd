@@ -72,16 +72,15 @@ var bouncing: bool = false
 # Variables FX
 var shake_trauma: float = 0.0
 var target_zoom: Vector2 = Vector2.ONE
-var last_ratchet_angle: float = 0.0 
+var last_ratchet_angle: float = 0.0
 
 # --- INICIO ---
 func _ready() -> void:
 	# Configurar material de hover
 	highlight_material = ShaderMaterial.new()
 	highlight_material.shader = OUTLINE_SHADER
-	highlight_material.set_shader_parameter("width", 3.0)
-	highlight_material.set_shader_parameter("color", Color.WHITE)
-
+	highlight_material.set_shader_parameter("width", 8.0) # Grosor del borde
+	highlight_material.set_shader_parameter("color", Color.GOLDENROD)
 	# --- NUEVO: Registrarse en GlobalStats ---
 	if has_node("/root/GlobalStats"):
 		GlobalStats.roulette_scene_ref = self

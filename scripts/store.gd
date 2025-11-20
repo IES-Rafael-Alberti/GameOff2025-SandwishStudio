@@ -35,9 +35,9 @@ var _rerolls_this_round: int = 0
 var reroll_label: Label
 
 @onready var inventory: Control = $"../inventory"
-@onready var piece_zone: HBoxContainer = $VBoxContainer/piece_zone
-@onready var passive_zone: HBoxContainer = $VBoxContainer/passive_zone
-@onready var reroll_button: TextureButton = $VBoxContainer/HBoxContainer/Reroll
+@onready var piece_zone: HBoxContainer = $piece_zone
+@onready var passive_zone: HBoxContainer = $passive_zone
+@onready var reroll_button: TextureButton = $Reroll
 
 var current_shop_styles: Array = []
 
@@ -122,12 +122,11 @@ func _update_reroll_button_visuals():
 		reroll_label.text = "GRATIS"
 		reroll_label.modulate = Color(0.2, 1.0, 0.2) 
 		reroll_button.modulate = Color.WHITE
-		reroll_button.tooltip_text = "¡Reroll GRATIS!"
 	else:
 		reroll_label.text = "-%d €" % cost
-		reroll_button.tooltip_text = "Costo: %d" % cost
 		
-		if PlayerData.has_enough_currency(cost):
+		if PlayerData.has_enough_currency(cost
+		):
 			reroll_label.modulate = Color(1.0, 0.9, 0.4) 
 			reroll_button.modulate = Color.WHITE
 		else:
@@ -166,7 +165,7 @@ func _refresh_shop_content():
 	if not available_passives.is_empty():
 		var shuffled_passives = available_passives.duplicate()
 		shuffled_passives.shuffle()
-		var selected_passives = shuffled_passives.slice(0, min(3, shuffled_passives.size()))
+		var selected_passives = shuffled_passives.slice(0, min(2, shuffled_passives.size()))
 		_generate_buttons(selected_passives, passive_zone, passive_scene)
 	
 	_update_all_label_colors()
