@@ -31,7 +31,6 @@ var health: float = 1.0
 # Gold pool that unit can drop
 var gold_pool: int = 0
 var display_name: String = ""
-@onready var name_label: Label = $NameLabel
 @onready var health_bar: ProgressBar = $healthBar
 
 # Variables para almacenar las bonificaciones de GlobalStats
@@ -83,16 +82,6 @@ func _ready() -> void:
 	for ab in abilities:
 		if ab: ab.on_spwan(self)
 
-func set_display_name(text: String) -> void:
-	display_name = text
-	_update_name_label()
-
-func _update_name_label() -> void:
-	if not is_instance_valid(name_label):
-		return
-	name_label.text = display_name
-	name_label.visible = display_name != ""
-
 func _update_healthbar() -> void:
 	if not is_instance_valid(health_bar): return
 	health_bar.max_value = max_health
@@ -116,9 +105,9 @@ func _show_damage_text(amount: float, was_crit: bool = false) -> void:
 	dmg_label.add_theme_font_size_override("font_size", size)
 
 	# --- Color según el daño (de rojo a morado intenso) ---
-	var min_color := Color(1.0, 0.0, 0.0, 1.0)   # rojo para poco daño
-	var max_color := Color(0.276, 0.005, 0.396, 1.0)   # morado intenso para mucho daño
-
+	var min_color := Color(1.0, 0.0, 0.0, 1.0)
+	var max_color := Color(0.276, 0.005, 0.396, 1.0)
+	
 	# Daño a partir del cual se considera “máximo morado” (ajusta a tu gusto)
 	var color_damage_cap := 120.0
 	var t : float = clamp(float(dmg_int) / color_damage_cap, 0.0, 1.0)

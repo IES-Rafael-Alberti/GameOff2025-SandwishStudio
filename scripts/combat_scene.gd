@@ -353,8 +353,8 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 			return
 
 		var to_spawn: int = min(members, free_slots_limit, free_markers.size())
-		var delay_per_ally := 0.25
-		var move_segment_time := 0.5
+		var delay_per_ally := 0.10
+		var move_segment_time := 0.4
 		var total_move_time := move_segment_time * 2.0
 
 		for i in range(to_spawn):
@@ -364,8 +364,6 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 
 			var n: npc = _spawn_npc(team, ally_entry_spawn.position, npc_template)
 			if n:
-				if piece.display_name != "":
-					n.set_display_name(piece.display_name)
 				ally_npcs.append(n)
 
 				# USAMOS EL CONTADOR GLOBAL, NO 'i'
@@ -391,7 +389,7 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 func _place_ally_in_slot_with_tween(n: npc, final_pos: Vector2, order_index: int) -> void:
 	n.position = ally_entry_spawn.position
 
-	var delay_per_ally := 0.25
+	var delay_per_ally := 0.10
 
 	var mid_pos := Vector2(final_pos.x, ally_entry_spawn.position.y)
 
