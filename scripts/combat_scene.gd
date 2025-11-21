@@ -200,6 +200,11 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 	n.position = pos
 	n.npc_res = res_override
 	
+	if n is AnimatedSprite2D:
+		if team == npc.Team.ALLY:
+			n.flip_h = true
+		else:
+			n.flip_h = false
 	# Aplicar bonos globales (GlobalStats)
 	if team == npc.Team.ALLY and has_node("/root/GlobalStats"):
 		var health_bonus = GlobalStats.get_health_bonus()
