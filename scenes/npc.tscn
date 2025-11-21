@@ -70,37 +70,44 @@ visible = false
 scale = Vector2(0.001, 0.001)
 sprite_frames = ExtResource("3_rv78h")
 animation = &"idle"
+flip_h = true
 
 [node name="dragon" type="AnimatedSprite2D" parent="."]
 visible = false
 scale = Vector2(0.001, 0.001)
 sprite_frames = ExtResource("4_nyaq3")
 animation = &"idle"
+flip_h = true
 
 [node name="draugr" type="AnimatedSprite2D" parent="."]
 visible = false
 sprite_frames = ExtResource("5_4wlns")
 animation = &"idle"
+flip_h = true
 
 [node name="jotuun" type="AnimatedSprite2D" parent="."]
 visible = false
 sprite_frames = ExtResource("6_tl2vt")
 animation = &"idle"
+flip_h = true
 
 [node name="kappa" type="AnimatedSprite2D" parent="."]
 visible = false
 sprite_frames = ExtResource("7_gl1un")
 animation = &"idle"
+flip_h = true
 
 [node name="kozo" type="AnimatedSprite2D" parent="."]
 visible = false
 sprite_frames = ExtResource("8_wuru7")
 animation = &"idle"
+flip_h = true
 
 [node name="norna" type="AnimatedSprite2D" parent="."]
 visible = false
 sprite_frames = ExtResource("9_nyaq3")
 animation = &"idle"
+flip_h = true
 
 [node name="oni" type="AnimatedSprite2D" parent="."]
 visible = false
@@ -111,21 +118,25 @@ animation = &"idle"
 visible = false
 sprite_frames = ExtResource("11_8gbmn")
 animation = &"idle"
+flip_h = true
 
 [node name="tengu" type="AnimatedSprite2D" parent="."]
 visible = false
 sprite_frames = ExtResource("12_pvipr")
 animation = &"idle"
+flip_h = true
 
 [node name="trasgu" type="AnimatedSprite2D" parent="."]
 visible = false
 sprite_frames = ExtResource("13_wuru7")
 animation = &"idle"
+flip_h = true
 
 [node name="valk" type="AnimatedSprite2D" parent="."]
 visible = false
 sprite_frames = ExtResource("14_nyaq3")
 animation = &"idle"
+flip_h = true
 
 [node name="redGladiador" type="AnimatedSprite2D" parent="."]
 visible = false
