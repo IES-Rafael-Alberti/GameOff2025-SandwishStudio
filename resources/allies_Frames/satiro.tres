@@ -1,0 +1,18 @@
+[gd_resource type="SpriteFrames" load_steps=3 format=3 uid="uid://cnh48p4hva1em"]
+
+[ext_resource type="Texture2D" uid="uid://ckd5yp5d85800" path="res://assets/Combat_scene/allies_scaled/Satiro.png" id="1_nv7d1"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x48ul"]
+atlas = ExtResource("1_nv7d1")
+region = Rect2(0, 0, 161, 261)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x48ul")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]

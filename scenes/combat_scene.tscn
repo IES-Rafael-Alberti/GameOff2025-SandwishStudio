@@ -3,13 +3,13 @@
 [ext_resource type="Script" uid="uid://bw0d7s71m5dov" path="res://scripts/combat_scene.gd" id="1_ivkwx"]
 [ext_resource type="Script" uid="uid://bd1qpluesymyw" path="res://scripts/npc_res.gd" id="2_0vylu"]
 [ext_resource type="Texture2D" uid="uid://b1laqs7fhlter" path="res://assets/EPelea.png" id="2_ofoda"]
-[ext_resource type="Resource" uid="uid://coeqcim3vx1w7" path="res://resources/warrior/red_warrior.tres" id="3_2edba"]
-[ext_resource type="Resource" uid="uid://b6dek55tm2no8" path="res://resources/warrior/blue_warrior.tres" id="4_6ovae"]
-[ext_resource type="Resource" uid="uid://btb28eu76jyan" path="res://resources/warrior/black_warrior.tres" id="5_ivkwx"]
-[ext_resource type="Resource" uid="uid://bsecr6d6j63jr" path="res://resources/warrior/yellow_warrior.tres" id="6_6sw3s"]
-[ext_resource type="Texture2D" uid="uid://cutrq81untdgo" path="res://assets/Combat_scene/unnamed.png" id="7_ivkwx"]
-[ext_resource type="Texture2D" uid="uid://cm1hl2evn33uh" path="res://assets/Combat_scene/OL (2).png" id="8_6sw3s"]
-[ext_resource type="Texture2D" uid="uid://bqswvveb5bl3y" path="res://assets/Combat_scene/EPeleaDef (1).png" id="9_g0m11"]
+[ext_resource type="Resource" uid="uid://coeqcim3vx1w7" path="res://resources/warrior/red_gladiator.tres" id="3_2edba"]
+[ext_resource type="Resource" uid="uid://b6dek55tm2no8" path="res://resources/warrior/trident_gladiator.tres" id="4_6ovae"]
+[ext_resource type="Resource" uid="uid://btb28eu76jyan" path="res://resources/warrior/purple_gladiator.tres" id="5_ivkwx"]
+[ext_resource type="Resource" uid="uid://bsecr6d6j63jr" path="res://resources/warrior/armor_gladiator.tres" id="6_6sw3s"]
+[ext_resource type="Texture2D" uid="uid://cutrq81untdgo" path="res://assets/Combat_scene/Fondos/unnamed.png" id="7_ivkwx"]
+[ext_resource type="Texture2D" uid="uid://cm1hl2evn33uh" path="res://assets/Combat_scene/Fondos/OL (2).png" id="8_6sw3s"]
+[ext_resource type="Texture2D" uid="uid://bqswvveb5bl3y" path="res://assets/Combat_scene/Fondos/EPeleaDef (1).png" id="9_g0m11"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ofoda"]
 atlas = ExtResource("2_ofoda")
@@ -30,7 +30,12 @@ scale = Vector2(1.3205202, 1.7730533)
 texture = ExtResource("7_ivkwx")
 metadata/_edit_use_anchors_ = true
 
+[node name="npcs" type="Node2D" parent="."]
+z_index = 1
+scale = Vector2(0.99999994, 0.99999994)
+
 [node name="Doors" type="TextureRect" parent="."]
+z_index = 2
 offset_left = -291.00287
 offset_top = -250.52309
 offset_right = 3215.997
@@ -39,12 +44,32 @@ scale = Vector2(1.3205202, 1.7730533)
 texture = ExtResource("8_6sw3s")
 metadata/_edit_use_anchors_ = true
 
+[node name="pillars" type="TextureRect" parent="."]
+z_index = 3
+offset_left = -1074.9287
+offset_top = -715.3606
+offset_right = 3190.0713
+offset_bottom = 820.6394
+scale = Vector2(1.3763828, 1.8348737)
+texture = ExtResource("9_g0m11")
+metadata/_edit_use_anchors_ = true
+
+[node name="UI" type="TextureRect" parent="."]
+z_index = 4
+offset_left = -480.98975
+offset_top = -242.75356
+offset_right = 4643.0103
+offset_bottom = 1278.2465
+scale = Vector2(0.9726642, 1.0203406)
+texture = SubResource("AtlasTexture_ofoda")
+metadata/_edit_use_anchors_ = true
+
 [node name="GladiatorSpawn" type="Marker2D" parent="."]
-position = Vector2(-480.05573, 787.77765)
+position = Vector2(-483.02518, 747.6548)
 scale = Vector2(0.99999994, 0.99999994)
 
 [node name="AlliesSpawn" type="Marker2D" parent="."]
-position = Vector2(4260.1235, 763.31244)
+position = Vector2(4307.634, 763.31244)
 scale = Vector2(0.99999994, 0.99999994)
 
 [node name="AllyFinalSlots" type="Node2D" parent="."]
@@ -55,45 +80,46 @@ scale = Vector2(0.99999994, 0.99999994)
 position = Vector2(3419.7783, 457.98746)
 
 [node name="AllyFinalSlot2" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3666.2402, 520.6182)
+position = Vector2(3668.2202, 567.5914)
 
 [node name="AllyFinalSlot3" type="Marker2D" parent="AllyFinalSlots"]
 position = Vector2(3421.758, 694.81)
 
 [node name="AllyFinalSlot4" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3452.4424, 982.52014)
+position = Vector2(3256.4612, 825.9433)
 
 [node name="AllyFinalSlot5" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3880.038, 525.5113)
+position = Vector2(3810.7524, 567.5914)
 
 [node name="AllyFinalSlot6" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3666.2402, 777.9915)
+position = Vector2(3581.1174, 802.4568)
 
 [node name="AllyFinalSlot7" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3903.7937, 771.1413)
+position = Vector2(3897.8552, 700.68176)
 
 [node name="AllyFinalSlot8" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3864.2014, 982.52014)
+position = Vector2(3779.0786, 841.60095)
 
 [node name="AllyFinalSlot9" type="Marker2D" parent="AllyFinalSlots"]
 position = Vector2(4179.9487, 811.26416)
 
 [node name="AllyFinalSlot10" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(4109.6733, 614.5644)
+position = Vector2(4079.9797, 567.5914)
 
 [node name="AllyFinalSlot11" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(4093.836, 974.6913)
+position = Vector2(4024.5503, 825.9433)
 
 [node name="AllyFinalSlot12" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(4331.3896, 935.54706)
+position = Vector2(4309.6143, 849.4299)
 
 [node name="AllyFinalSlot13" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(4299.716, 583.249)
+position = Vector2(4285.859, 661.53754)
 
 [node name="AllyFinalSlot14" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(4370.982, 708.5105)
+position = Vector2(4357.125, 747.65485)
 
 [node name="RoundMessage" type="Label" parent="."]
+z_index = 4
 offset_left = 756.99994
 offset_top = 601.99994
 offset_right = 1032.0
@@ -105,25 +131,7 @@ metadata/_edit_use_anchors_ = true
 scale = Vector2(0.99999994, 0.99999994)
 
 [node name="EnemyWaitSlot" type="Marker2D" parent="EnemySlots"]
-position = Vector2(319.0102, 787)
+position = Vector2(316.73785, 747.65485)
 
 [node name="EnemyBattleSlot" type="Marker2D" parent="EnemySlots"]
 position = Vector2(1690, 707)
-
-[node name="pillars" type="TextureRect" parent="."]
-offset_left = -1074.9287
-offset_top = -715.36066
-offset_right = 3190.0713
-offset_bottom = 820.63934
-scale = Vector2(1.3763828, 1.8348737)
-texture = ExtResource("9_g0m11")
-metadata/_edit_use_anchors_ = true
-
-[node name="UI" type="TextureRect" parent="."]
-offset_left = -480.98978
-offset_top = -242.75357
-offset_right = 4643.0103
-offset_bottom = 1278.2465
-scale = Vector2(0.9726642, 1.0203406)
-texture = SubResource("AtlasTexture_ofoda")
-metadata/_edit_use_anchors_ = true

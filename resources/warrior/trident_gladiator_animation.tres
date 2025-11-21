@@ -1,0 +1,18 @@
+[gd_resource type="SpriteFrames" load_steps=3 format=3 uid="uid://c7jd0vdx5p4th"]
+
+[ext_resource type="Texture2D" uid="uid://cuffytq477a2f" path="res://assets/Combat_scene/Gladiadores/3.png" id="1_s5bl4"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_iro54"]
+atlas = ExtResource("1_s5bl4")
+region = Rect2(0, 0, 319, 357)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_iro54")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 10.0
+}]

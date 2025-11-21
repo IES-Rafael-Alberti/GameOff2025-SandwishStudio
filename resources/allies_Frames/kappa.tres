@@ -1,0 +1,18 @@
+[gd_resource type="SpriteFrames" load_steps=3 format=3 uid="uid://osibphf1sb75"]
+
+[ext_resource type="Texture2D" uid="uid://du44wv6v1u53l" path="res://assets/Combat_scene/allies_scaled/Kappa.png" id="1_sswhy"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_whdc8"]
+atlas = ExtResource("1_sswhy")
+region = Rect2(0, 0, 249, 383)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_whdc8")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]

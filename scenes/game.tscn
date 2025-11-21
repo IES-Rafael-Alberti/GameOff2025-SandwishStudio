@@ -24,6 +24,7 @@ position = Vector2(187, 77.99997)
 scale = Vector2(0.35115045, 0.22791663)
 
 [node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
+z_index = 4
 offset_left = 83.0
 offset_top = 369.0
 offset_right = 83.0
@@ -33,6 +34,7 @@ initial_pieces = Array[ExtResource("3_kvpfn")]([ExtResource("4_dinhu"), ExtResou
 
 [node name="Store" parent="." instance=ExtResource("3_iywne")]
 visible = false
+z_index = 4
 offset_left = 416.0
 offset_top = 394.0
 offset_right = 416.0
@@ -40,6 +42,7 @@ offset_bottom = 394.0
 scale = Vector2(0.8860778, 0.88381195)
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
+z_index = 4
 position = Vector2(130, 299)
 scale = Vector2(0.8845031, 0.8845031)
 
@@ -48,6 +51,7 @@ position = Vector2(902, 590)
 zoom = Vector2(0.7, 0.7)
 
 [node name="gold_label" type="Label" parent="."]
+z_index = 4
 offset_left = 134.0
 offset_top = 313.0
 offset_right = 271.0
@@ -61,6 +65,7 @@ offset_right = 1731.0
 offset_bottom = 819.0
 
 [node name="RoundLabel" type="Label" parent="."]
+z_index = 4
 offset_left = 336.0
 offset_top = 322.0
 offset_right = 880.0
@@ -68,6 +73,7 @@ offset_bottom = 361.0
 theme_override_font_sizes/font_size = 28
 
 [node name="DayLabel" type="Label" parent="."]
+z_index = 4
 offset_left = 1515.0
 offset_top = 321.0
 offset_right = 1663.0
@@ -75,6 +81,7 @@ offset_bottom = 360.0
 theme_override_font_sizes/font_size = 28
 
 [node name="GladiatorLabel" type="Label" parent="."]
+z_index = 4
 offset_left = 1043.0
 offset_top = 327.0
 offset_right = 1417.0
@@ -85,6 +92,7 @@ theme_override_font_sizes/font_size = 28
 visible = false
 
 [node name="GameOverImage" type="TextureRect" parent="GameOver"]
+z_index = 4
 offset_left = -4.0
 offset_top = -2.0
 offset_right = 1681.0
@@ -93,6 +101,7 @@ mouse_filter = 0
 texture = ExtResource("12_dinhu")
 
 [node name="Label" type="Label" parent="GameOver"]
+z_index = 4
 offset_left = 433.0
 offset_top = 294.0
 offset_right = 747.0
@@ -104,6 +113,7 @@ text = "CAGASTE"
 visible = false
 
 [node name="NextDayImage" type="TextureRect" parent="DayFinished"]
+z_index = 4
 offset_left = -4.0
 offset_top = -2.0
 offset_right = 1681.0
@@ -112,6 +122,7 @@ mouse_filter = 0
 texture = ExtResource("12_dinhu")
 
 [node name="Label" type="Label" parent="DayFinished"]
+z_index = 4
 offset_left = 333.0
 offset_top = 287.0
 offset_right = 841.0
@@ -123,6 +134,7 @@ text = "SIGUIENTE DIA"
 visible = false
 
 [node name="WinImage" type="TextureRect" parent="Win"]
+z_index = 4
 offset_left = -4.0
 offset_top = -2.0
 offset_right = 1681.0
@@ -131,6 +143,7 @@ mouse_filter = 0
 texture = ExtResource("12_dinhu")
 
 [node name="Label" type="Label" parent="Win"]
+z_index = 4
 offset_left = 333.0
 offset_top = 287.0
 offset_right = 841.0

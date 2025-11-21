@@ -60,7 +60,13 @@ func _ready() -> void:
 		max_health = 1.0
 		health = 1.0
 		gold_pool = 0
-		
+
+	if material:
+		material = material.duplicate()
+		shock_material = material
+	else:
+		shock_material = null
+
 	# Frames + animation
 	if npc_res and npc_res.frames:
 		sprite_frames = npc_res.frames
@@ -73,7 +79,7 @@ func _ready() -> void:
 		push_warning("NPC sin frames en inspector")
 
 	_update_healthbar()
-	
+
 	for ab in abilities:
 		if ab: ab.on_spwan(self)
 
@@ -265,13 +271,13 @@ func take_damage(amount: float, from: npc = null, was_crit: bool = false) -> voi
 	if amount <= 0.0: return
 	health = max(0.0, health - amount)
 	if shock_material:
-		shock_timer = 0.0
-		is_shocked = true
-		shock_material.set_shader_parameter("shock_time", shock_timer)
-
+		var min_flash_gap := 0.08
+		if (not is_shocked) or shock_timer > min_flash_gap:
+			shock_timer = 0.0
+			is_shocked = true
+			shock_material.set_shader_parameter("shock_time", shock_timer)
 	_show_damage_text(amount, was_crit)
 
-	
 	# LÓGICA NÓRDICA: Curación al 25% HP
 	if synergy_nor_tier > 0 and not nordica_heal_used:
 		if health > 0 and (health / max_health) <= 0.25:

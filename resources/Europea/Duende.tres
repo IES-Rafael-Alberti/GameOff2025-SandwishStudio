@@ -1,8 +1,10 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=2 format=3 uid="uid://bofvibofokgrl"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://bofvibofokgrl"]
 
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_1f5fn"]
+[ext_resource type="SpriteFrames" uid="uid://s5dqraogpmma" path="res://resources/allies_Frames/trasgu.tres" id="1_c8iob"]
 
 [resource]
 script = ExtResource("1_1f5fn")
 id = "europea.Duende"
+frames = ExtResource("1_c8iob")
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"
