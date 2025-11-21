@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b4bl7jr41p7bk"
-path="res://.godot/imported/Inventario.png-368f4160c94cb9deed4bc1a622b2ece3.ctex"
+uid="uid://bnarhlk7ktg1q"
+path="res://.godot/imported/Mesa (1).png-0c3982dba29346c67becdb594183a12e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Inventario.png"
-dest_files=["res://.godot/imported/Inventario.png-368f4160c94cb9deed4bc1a622b2ece3.ctex"]
+source_file="res://assets/inventario/Mesa (1).png"
+dest_files=["res://.godot/imported/Mesa (1).png-0c3982dba29346c67becdb594183a12e.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d32k775bkfw00"
-path="res://.godot/imported/VIDA.png-d905f08a6cba4e753a0dcbf97ad0a83b.ctex"
+uid="uid://dgjstvaqfykdq"
+path="res://.godot/imported/ASPEED.png-8f4fc49c2b4d230e8edfb5c8830f5e06.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/VIDA.png"
-dest_files=["res://.godot/imported/VIDA.png-d905f08a6cba4e753a0dcbf97ad0a83b.ctex"]
+source_file="res://assets/inventario/ASPEED.png"
+dest_files=["res://.godot/imported/ASPEED.png-8f4fc49c2b4d230e8edfb5c8830f5e06.ctex"]
 
 [params]
 

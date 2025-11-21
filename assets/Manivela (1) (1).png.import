@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b3gvhhihiil78"
-path="res://.godot/imported/Bandeja.png-1653ef078d6aefc23ce8d0bd5ddc124c.ctex"
+uid="uid://dpcgv05fqqjag"
+path="res://.godot/imported/Manivela (1) (1).png-ad5d7a6159352cd3ac0a84868b97fdde.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Bandeja.png"
-dest_files=["res://.godot/imported/Bandeja.png-1653ef078d6aefc23ce8d0bd5ddc124c.ctex"]
+source_file="res://assets/Manivela (1) (1).png"
+dest_files=["res://.godot/imported/Manivela (1) (1).png-ad5d7a6159352cd3ac0a84868b97fdde.ctex"]
 
 [params]
 

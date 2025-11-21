@@ -8,11 +8,11 @@ signal item_sold(refund_amount: int)
 @onready var piece_inventory: GridContainer = $piece_inventory
 @onready var passive_inventory: GridContainer = $passive_inventory
 @onready var refund_percent: int = 50
-@onready var health_label: Label = $TextureRect3/VBoxContainer/HBoxContainer/Health_container/Label
-@onready var damage_label: Label = $TextureRect3/VBoxContainer/HBoxContainer/Damage_container/Label
-@onready var speed_label: Label = $TextureRect3/VBoxContainer/HBoxContainer/SpeedCOntainer/Label
-@onready var crit_chance_label: Label = $TextureRect3/VBoxContainer/HBoxContainer2/CChance_container/Label
-@onready var crit_damage_label: Label = $TextureRect3/VBoxContainer/HBoxContainer2/CDamage_chance/Label
+@onready var health_label: Label = $TextureRect3/Health_container/Label
+@onready var damage_label: Label = $TextureRect3/Damage_container/Label
+@onready var speed_label: Label = $TextureRect3/SpeedCOntainer/Label
+@onready var crit_chance_label: Label = $TextureRect3/CChance_container/Label
+@onready var crit_damage_label: Label = $TextureRect3/CDamage_chance/Label
 
 @export var max_pieces: int = 6
 @export var max_passives: int = 30

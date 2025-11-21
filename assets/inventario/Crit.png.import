@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c3la6l5jf54v6"
-path="res://.godot/imported/Mesa.png-e7c643492c61a0cabf29b2026099856e.ctex"
+uid="uid://b10j5vwr4mjk4"
+path="res://.godot/imported/Crit.png-fedc8ff87d599d9009bd57f4c59b5ed2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Mesa.png"
-dest_files=["res://.godot/imported/Mesa.png-e7c643492c61a0cabf29b2026099856e.ctex"]
+source_file="res://assets/inventario/Crit.png"
+dest_files=["res://.godot/imported/Crit.png-fedc8ff87d599d9009bd57f4c59b5ed2.ctex"]
 
 [params]
 

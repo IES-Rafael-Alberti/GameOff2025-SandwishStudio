@@ -5,19 +5,19 @@
 [ext_resource type="PackedScene" uid="uid://7erbtxd030w2" path="res://scenes/piece.tscn" id="3_uae8j"]
 [ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="4_40feg"]
 [ext_resource type="Texture2D" uid="uid://boul6livclehs" path="res://assets/unnamed (1).jpg" id="4_53g1v"]
-[ext_resource type="Texture2D" uid="uid://dvhj1vcqtnvgl" path="res://assets/Tex_Marble_White_02-512x512.png" id="4_g71ie"]
-[ext_resource type="Texture2D" uid="uid://b4bl7jr41p7bk" path="res://assets/Inventario.png" id="4_uae8j"]
+[ext_resource type="Texture2D" uid="uid://b4bl7jr41p7bk" path="res://assets/inventario/Inventario.png" id="4_uae8j"]
 [ext_resource type="Script" uid="uid://cm67y0q4u1ot5" path="res://scripts/DeleteArea.gd" id="4_yyk2a"]
-[ext_resource type="Texture2D" uid="uid://b3gvhhihiil78" path="res://assets/Bandeja.png" id="5_s887n"]
+[ext_resource type="Texture2D" uid="uid://b3gvhhihiil78" path="res://assets/inventario/Bandeja.png" id="5_s887n"]
 [ext_resource type="Resource" uid="uid://57d6mtngeb8t" path="res://resources/pieces/draugr.tres" id="5_tla8l"]
 [ext_resource type="Resource" uid="uid://b065ie430glv1" path="res://resources/pieces/banshie.tres" id="6_w24ly"]
 [ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/jotun.tres" id="7_ohgsq"]
-[ext_resource type="Texture2D" uid="uid://dycbttp2vpnv1" path="res://assets/Tiny Swords (Free Pack)/Terrain/Water Background color.png" id="8_g71ie"]
-[ext_resource type="Texture2D" uid="uid://d32k775bkfw00" path="res://assets/VIDA.png" id="9_ylenm"]
-[ext_resource type="Texture2D" uid="uid://xr5sxokqvql1" path="res://assets/ADMG.png" id="10_0df5h"]
-[ext_resource type="Texture2D" uid="uid://dgjstvaqfykdq" path="res://assets/ASPEED.png" id="11_fiysm"]
-[ext_resource type="Texture2D" uid="uid://b10j5vwr4mjk4" path="res://assets/Crit.png" id="12_0df5h"]
-[ext_resource type="Texture2D" uid="uid://tl8h73xfj25t" path="res://assets/CritDMG.png" id="12_brsb2"]
+[ext_resource type="Texture2D" uid="uid://bnarhlk7ktg1q" path="res://assets/inventario/Mesa (1).png" id="8_40feg"]
+[ext_resource type="Texture2D" uid="uid://d32k775bkfw00" path="res://assets/inventario/VIDA.png" id="9_ylenm"]
+[ext_resource type="Texture2D" uid="uid://xr5sxokqvql1" path="res://assets/inventario/ADMG.png" id="10_0df5h"]
+[ext_resource type="Texture2D" uid="uid://dgjstvaqfykdq" path="res://assets/inventario/ASPEED.png" id="11_fiysm"]
+[ext_resource type="Texture2D" uid="uid://b10j5vwr4mjk4" path="res://assets/inventario/Crit.png" id="12_0df5h"]
+[ext_resource type="Texture2D" uid="uid://tl8h73xfj25t" path="res://assets/inventario/CritDMG.png" id="12_brsb2"]
+[ext_resource type="Texture2D" uid="uid://b7nsdsys80ot7" path="res://assets/inventario/Stats.png" id="13_40feg"]
 
 [node name="inventory" type="Control"]
 layout_mode = 3
@@ -36,27 +36,28 @@ initial_pieces = Array[ExtResource("4_40feg")]([ExtResource("5_tla8l"), ExtResou
 [node name="MarmolMesa" type="TextureRect" parent="."]
 z_index = -2
 layout_mode = 0
-offset_left = -20.0
-offset_right = 3291.0
+offset_left = -16.0
+offset_right = 3295.0
 offset_bottom = 8000.0
-scale = Vector2(0.65658104, 0.12503731)
+scale = Vector2(0.6684356, 0.13833442)
 mouse_filter = 2
-texture = ExtResource("4_g71ie")
+texture = ExtResource("8_40feg")
 
 [node name="Alfombra" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = -20.0
-offset_right = 3291.0
-offset_bottom = 8000.0
+offset_left = 20.0
+offset_top = -18.000002
+offset_right = 3331.0
+offset_bottom = 7982.0
 scale = Vector2(0.143898, 0.12514244)
 texture = ExtResource("4_uae8j")
 
 [node name="Bandeja" type="TextureRect" parent="."]
 layout_mode = 0
 offset_left = 1587.0
-offset_top = 87.0
+offset_top = 41.0
 offset_right = 6154.0
-offset_bottom = 7087.0
+offset_bottom = 7041.0
 rotation = -0.006927715
 scale = Vector2(0.087852575, 0.087852575)
 texture = ExtResource("5_s887n")
@@ -64,10 +65,10 @@ flip_v = true
 
 [node name="piece_inventory" type="GridContainer" parent="."]
 layout_mode = 0
-offset_left = 18.0
-offset_top = 22.0
-offset_right = 423.0
-offset_bottom = 666.0
+offset_left = 50.0
+offset_top = 69.0
+offset_right = 455.0
+offset_bottom = 713.0
 theme_override_constants/h_separation = 80
 theme_override_constants/v_separation = 115
 columns = 2
@@ -75,9 +76,9 @@ columns = 2
 [node name="passive_inventory" type="GridContainer" parent="."]
 layout_mode = 0
 offset_left = 1705.0001
-offset_top = 276.99997
+offset_top = 211.99997
 offset_right = 2104.0698
-offset_bottom = 775.3278
+offset_bottom = 710.3278
 rotation = -0.0030516738
 scale = Vector2(0.5, 0.5)
 theme_override_constants/h_separation = 28
@@ -87,9 +88,9 @@ columns = 3
 [node name="delete" type="Panel" parent="."]
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 0
-offset_left = 167.0
+offset_left = 205.0
 offset_top = 741.0
-offset_right = 267.0
+offset_right = 305.0
 offset_bottom = 841.0
 script = ExtResource("4_yyk2a")
 
@@ -99,11 +100,12 @@ texture = ExtResource("4_53g1v")
 
 [node name="TextureRect3" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 1249.0
-offset_top = 819.0
-offset_right = 2158.0
-offset_bottom = 997.0
-texture = ExtResource("8_g71ie")
+offset_left = 1430.0
+offset_top = 657.00006
+offset_right = 4509.0
+offset_bottom = 2478.0
+scale = Vector2(0.25786263, 0.17371413)
+texture = ExtResource("13_40feg")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="TextureRect3"]
 layout_mode = 0
@@ -117,78 +119,103 @@ theme_override_constants/separation = 27
 layout_mode = 2
 alignment = 1
 
-[node name="Health_container" type="HBoxContainer" parent="TextureRect3/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 4
-
-[node name="TextureRect" type="TextureRect" parent="TextureRect3/VBoxContainer/HBoxContainer/Health_container"]
-layout_mode = 2
-texture = ExtResource("9_ylenm")
-stretch_mode = 2
-
-[node name="Label" type="Label" parent="TextureRect3/VBoxContainer/HBoxContainer/Health_container"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 30
-text = "+0"
-
-[node name="Damage_container" type="HBoxContainer" parent="TextureRect3/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="TextureRect" type="TextureRect" parent="TextureRect3/VBoxContainer/HBoxContainer/Damage_container"]
-layout_mode = 2
-texture = ExtResource("10_0df5h")
-stretch_mode = 2
-
-[node name="Label" type="Label" parent="TextureRect3/VBoxContainer/HBoxContainer/Damage_container"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 30
-text = "+0"
-
-[node name="SpeedCOntainer" type="HBoxContainer" parent="TextureRect3/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="TextureRect" type="TextureRect" parent="TextureRect3/VBoxContainer/HBoxContainer/SpeedCOntainer"]
-layout_mode = 2
-texture = ExtResource("11_fiysm")
-stretch_mode = 2
-
-[node name="Label" type="Label" parent="TextureRect3/VBoxContainer/HBoxContainer/SpeedCOntainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 30
-text = "+0"
-
 [node name="HBoxContainer2" type="HBoxContainer" parent="TextureRect3/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 alignment = 1
 
-[node name="CChance_container" type="HBoxContainer" parent="TextureRect3/VBoxContainer/HBoxContainer2"]
-layout_mode = 2
+[node name="Health_container" type="HBoxContainer" parent="TextureRect3"]
+layout_mode = 0
+offset_left = 186.14563
+offset_top = 736.84265
+offset_right = 306.14563
+offset_bottom = 800.8426
+scale = Vector2(5, 5)
 size_flags_horizontal = 3
+theme_override_constants/separation = 4
 
-[node name="TextureRect" type="TextureRect" parent="TextureRect3/VBoxContainer/HBoxContainer2/CChance_container"]
+[node name="TextureRect" type="TextureRect" parent="TextureRect3/Health_container"]
 layout_mode = 2
-texture = ExtResource("12_0df5h")
+texture = ExtResource("9_ylenm")
 stretch_mode = 2
 
-[node name="Label" type="Label" parent="TextureRect3/VBoxContainer/HBoxContainer2/CChance_container"]
+[node name="Label" type="Label" parent="TextureRect3/Health_container"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "+0"
 
-[node name="CDamage_chance" type="HBoxContainer" parent="TextureRect3/VBoxContainer/HBoxContainer2"]
-layout_mode = 2
+[node name="Damage_container" type="HBoxContainer" parent="TextureRect3"]
+layout_mode = 0
+offset_left = 899.7039
+offset_top = 736.8426
+offset_right = 1019.7039
+offset_bottom = 800.8426
+scale = Vector2(5, 5)
 size_flags_horizontal = 3
 
-[node name="TextureRect" type="TextureRect" parent="TextureRect3/VBoxContainer/HBoxContainer2/CDamage_chance"]
+[node name="TextureRect" type="TextureRect" parent="TextureRect3/Damage_container"]
+layout_mode = 2
+texture = ExtResource("10_0df5h")
+stretch_mode = 2
+
+[node name="Label" type="Label" parent="TextureRect3/Damage_container"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "+0"
+
+[node name="SpeedCOntainer" type="HBoxContainer" parent="TextureRect3"]
+layout_mode = 0
+offset_left = 1644.2863
+offset_top = 690.7899
+offset_right = 1764.2863
+offset_bottom = 754.7899
+scale = Vector2(5, 5)
+size_flags_horizontal = 3
+
+[node name="TextureRect" type="TextureRect" parent="TextureRect3/SpeedCOntainer"]
+layout_mode = 2
+texture = ExtResource("11_fiysm")
+stretch_mode = 2
+
+[node name="Label" type="Label" parent="TextureRect3/SpeedCOntainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "+0"
+
+[node name="CChance_container" type="HBoxContainer" parent="TextureRect3"]
+layout_mode = 0
+offset_left = 558.437
+offset_top = 1289.4749
+offset_right = 678.437
+offset_bottom = 1353.4749
+scale = Vector2(5, 5)
+size_flags_horizontal = 3
+
+[node name="TextureRect" type="TextureRect" parent="TextureRect3/CChance_container"]
+layout_mode = 2
+texture = ExtResource("12_0df5h")
+stretch_mode = 2
+
+[node name="Label" type="Label" parent="TextureRect3/CChance_container"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "+0"
+
+[node name="CDamage_chance" type="HBoxContainer" parent="TextureRect3"]
+layout_mode = 0
+offset_left = 1427.1165
+offset_top = 1289.4749
+offset_right = 1547.1165
+offset_bottom = 1353.4749
+scale = Vector2(5, 5)
+size_flags_horizontal = 3
+
+[node name="TextureRect" type="TextureRect" parent="TextureRect3/CDamage_chance"]
 layout_mode = 2
 texture = ExtResource("12_brsb2")
 stretch_mode = 2
 
-[node name="Label" type="Label" parent="TextureRect3/VBoxContainer/HBoxContainer2/CDamage_chance"]
+[node name="Label" type="Label" parent="TextureRect3/CDamage_chance"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "+0"
