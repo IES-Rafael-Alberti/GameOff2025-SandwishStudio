@@ -9,4 +9,5 @@ script = ExtResource("3_r2f30")
 piece_name = "valkyria"
 piece_origin = ExtResource("2_c118a")
 icon = ExtResource("1_idy3k")
-price = 322
+uses = 3
+price = 5

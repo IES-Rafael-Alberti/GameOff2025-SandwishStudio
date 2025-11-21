@@ -9,4 +9,4 @@ type = 4
 value = 1.7
 name_passive = "Increased Damage"
 icon = ExtResource("1_c2a1e")
-price = 89
+price = 5
