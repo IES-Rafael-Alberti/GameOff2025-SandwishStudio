@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_jyskt"]
 [ext_resource type="Texture2D" uid="uid://dmlid2sk24v8v" path="res://assets/palanca.png" id="2_iqt6o"]
 [ext_resource type="Texture2D" uid="uid://go30fno5akpc" path="res://assets/ruleta.png" id="2_jyskt"]
-[ext_resource type="Script" uid="uid://d1s3pk6cls46q" path="res://scripts/RouletteSlice.gd" id="4_jyskt"]
+[ext_resource type="Script" path="res://scripts/RouletteSlice.gd" id="4_jyskt"]
 [ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="4_k6evh"]
 [ext_resource type="Texture2D" uid="uid://qmthj5xqadhq" path="res://assets/Manilla (1).png" id="5_jyskt"]
 [ext_resource type="Texture2D" uid="uid://xr5sxokqvql1" path="res://assets/ADMG.png" id="7_gils2"]
@@ -58,82 +58,82 @@ position = Vector2(-5660.5967, -3469.207)
 scale = Vector2(11.164885, 11.083728)
 
 [node name="Slot1" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 518.6744
-offset_top = 138.89458
-offset_right = 518.6744
-offset_bottom = 138.89458
-rotation = 0.4090624
+offset_left = 497.27127
+offset_top = 160.65776
+offset_right = 497.27127
+offset_bottom = 160.65776
+rotation = 0.30001003
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot2" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 632.8244
-offset_top = 194.95126
-offset_right = 632.8244
-offset_bottom = 194.95126
-rotation = -4.950635
+offset_left = 650.336
+offset_top = 277.38757
+offset_right = 650.336
+offset_bottom = 277.38757
+rotation = -4.610842
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot3" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 681.4678
-offset_top = 298.49118
-offset_right = 681.4678
-offset_bottom = 298.49118
-rotation = -4.37515
+offset_left = 593.90967
+offset_top = 192.31331
+offset_right = 593.90967
+offset_bottom = 192.31331
+rotation = -5.301232
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot4" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 645.1474
-offset_top = 414.56155
-offset_right = 645.1474
-offset_bottom = 414.56155
-rotation = 2.5536208
+offset_left = 640.60736
+offset_top = 380.268
+offset_right = 640.60736
+offset_bottom = 380.268
+rotation = 2.3388958
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot5" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 554.9949
-offset_top = 481.8295
-offset_right = 554.9949
-offset_bottom = 481.8295
-rotation = -3.1087315
+offset_left = 568.61505
+offset_top = 453.4715
+offset_right = 568.61505
+offset_bottom = 453.4715
+rotation = -3.2135346
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot6" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 434.359
-offset_top = 470.61816
-offset_right = 434.359
-offset_bottom = 470.61816
-rotation = -2.3468013
+offset_left = 463.5452
+offset_top = 460.06644
+offset_right = 463.5452
+offset_bottom = 460.06644
+rotation = -2.489944
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot7" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 352.6381
-offset_top = 381.58704
-offset_right = 352.6381
-offset_bottom = 381.58704
-rotation = -1.6455827
+offset_left = 385.7157
+offset_top = 395.43634
+offset_right = 385.7157
+offset_bottom = 395.43634
+rotation = -1.8156565
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot8" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 347.44943
-offset_top = 274.0901
-offset_right = 347.44943
-offset_bottom = 274.0901
-rotation = -1.1515385
+offset_left = 355.88095
+offset_top = 295.19382
+offset_right = 355.88095
+offset_bottom = 295.19382
+rotation = -1.1389939
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot9" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 411.01022
-offset_top = 177.80449
-offset_right = 411.01022
-offset_bottom = 177.80449
+offset_left = 402.5787
+offset_top = 201.54619
+offset_right = 402.5787
+offset_bottom = 201.54619
 rotation = -0.40124413
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
@@ -292,10 +292,10 @@ texture = ExtResource("7_gils2")
 [node name="Japonesa" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 0
-offset_left = 1113.0
-offset_top = 362.0
-offset_right = 1153.0
-offset_bottom = 402.0
+offset_left = 1118.0
+offset_top = 366.0
+offset_right = 1158.0
+offset_bottom = 406.0
 
 [node name="TextureRect" type="TextureRect" parent="Japonesa"]
 layout_mode = 0

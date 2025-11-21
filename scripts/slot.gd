@@ -6,13 +6,13 @@ extends Panel
 @export var attraction_radius := 120.0
 @export var highlight_speed := 10.0
 
-# --- NUEVO: Arrastra aquí tus imágenes ---
+# --- TEXTURAS DE TIER ---
 @export_group("Tier Textures")
 @export var tier_bronze_texture: Texture2D
 @export var tier_silver_texture: Texture2D
 @export var tier_gold_texture: Texture2D
 
-# --- NUEVO: Shader ---
+# --- SHADER ---
 const OUTLINE_SHADER = preload("res://shaders/outline_highlight.gdshader")
 var highlight_material: ShaderMaterial
 
@@ -22,33 +22,16 @@ var piece_over: Node = null
 var occupied := false
 var current_piece_data: Resource = null 
 var current_piece_count: int = 0
+
+# Referencias a la jerarquía
 @onready var ruleta: Node = get_parent().get_parent().get_parent().get_parent()
-@onready var piece_texture_rect: TextureRect = $PieceTextureRect
-
-# El icono visual que crearemos por código
-var tier_icon: TextureRect
-
-func _on_gui_input(event: InputEvent) -> void:
-	if not (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed):
-		return
-
-	if not occupied:
-		return
-		
-	if ruleta and ruleta.has_method("is_moving"):
-		if ruleta.is_moving() or not ruleta.is_interactive:
-			print("No se puede devolver la pieza: ¡La ruleta está girando o el juego está en combate!")
-			return
-
-	GlobalSignals.piece_returned_from_roulette.emit(current_piece_data)
-	clear_slot()
-
-func _on_return_attempt_finished(success: bool):
-	if success:
-		clear_slot()
+@onready var item_icon: TextureRect = $ItemIcon
+@onready var piece_texture_rect: TextureRect = $ItemIcon/PieceTextureRect
+@onready var count_label: TextureRect = $ItemIcon/CountLabel
+@onready var tier_label: TextureRect = $ItemIcon/TierLabel
 
 func _ready():
-	# Configuración visual (Highlight, partículas, etc.)
+	# 1. Configuración Visual del Highlight
 	if not has_node("Highlight"):
 		var h = Node2D.new()
 		h.name = "Highlight"
@@ -68,59 +51,181 @@ func _ready():
 		glow_sprite = get_node("Highlight/Glow")
 		particles = get_node("Highlight/Particles")
 
+	# 2. Configuración de la imagen
+	if not item_icon:
+		push_error("RouletteSlot: ¡No se encontró el nodo 'ItemIcon'!")
+	else:
+		item_icon.visible = false # Ocultamos al inicio
+	
 	if not piece_texture_rect:
 		push_error("RouletteSlot: ¡No se encontró el nodo hijo 'PieceTextureRect'!")
 	else:
-		piece_texture_rect.visible = false
+		piece_texture_rect.visible = false 
+		piece_texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		piece_texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		
 	self.gui_input.connect(_on_gui_input)
-	
-	# --- NUEVO: Conexiones de Mouse Hover ---
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
 	
-	# --- NUEVO: Configurar Material ---
+	# 3. Configurar Shader
 	highlight_material = ShaderMaterial.new()
 	highlight_material.shader = OUTLINE_SHADER
-	highlight_material.set_shader_parameter("width", 3.0)
+	highlight_material.set_shader_parameter("width", 5.0)
 	highlight_material.set_shader_parameter("color", Color.WHITE)
 	
-	# Creación del icono de Tier (Bronce/Plata/Oro)
-	tier_icon = TextureRect.new()
-	tier_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	tier_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	tier_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	tier_icon.custom_minimum_size = Vector2(20, 20)
-	tier_icon.size = Vector2(20, 20)
-	tier_icon.anchor_left = 1.0
-	tier_icon.anchor_right = 1.0
-	tier_icon.position = Vector2(-20, 0)
-	tier_icon.visible = false
-	add_child(tier_icon)
-	
-	# Conectar señal para actualizarse en tiempo real
-	GlobalSignals.piece_count_changed.connect(_on_piece_count_changed)
+	if GlobalSignals:
+		GlobalSignals.piece_count_changed.connect(_on_piece_count_changed)
 
-# --- NUEVO: Funciones Hover ---
+	clear_slot()
+
+func _on_gui_input(event: InputEvent) -> void:
+	if not (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed):
+		return
+
+	if not occupied:
+		return
+		
+	if ruleta and ruleta.has_method("is_moving"):
+		if ruleta.is_moving() or not ruleta.is_interactive:
+			return
+
+	GlobalSignals.piece_returned_from_roulette.emit(current_piece_data)
+	clear_slot()
+
 func _on_mouse_entered() -> void:
-	# Solo iluminamos si hay una pieza ocupando el slot
-	if occupied and piece_texture_rect:
-		piece_texture_rect.material = highlight_material
+	if occupied and item_icon:
+		item_icon.material = highlight_material
 
 func _on_mouse_exited() -> void:
-	if piece_texture_rect:
-		piece_texture_rect.material = null
+	if item_icon:
+		item_icon.material = null
 
-func _on_piece_count_changed(piece_data: Resource, new_count: int) -> void:
-	# Si el slot está vacío o no tiene datos, ignorar
+# --- DRAG & DROP ---
+
+func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+	if ruleta and ruleta.has_method("is_moving"):
+		if ruleta.is_moving() or not ruleta.is_interactive:
+			return false
+	
+	if occupied:
+		return false
+		
+	if data is Dictionary and "data" in data:
+		if data.data is PieceData:
+			return data.data.uses > 0
+	return false
+
+func _drop_data(_at_position: Vector2, data: Variant) -> void:
+	occupied = true
+	current_piece_data = data.data
+	
+	# --- CAMBIO: Extraer la cantidad del paquete de arrastre ---
+	if "count" in data:
+		current_piece_count = data.count
+	else:
+		current_piece_count = 1 # Fallback por seguridad
+	# -----------------------------------------------------------
+	
+	if current_piece_data and "icon" in current_piece_data:
+		if current_piece_data.icon:
+			piece_texture_rect.texture = current_piece_data.icon
+			piece_texture_rect.visible = true 
+			
+			# Hacemos visible el contenedor principal
+			if item_icon:
+				item_icon.visible = true 
+	
+	GlobalSignals.piece_placed_on_roulette.emit(current_piece_data)
+	
+	# Actualizar visuales inmediatamente usando el count que acabamos de recibir
+	_refresh_visuals()
+
+# --- ACTUALIZACIÓN DE DATOS ---
+
+func _on_piece_count_changed(piece_data: Resource, _new_count: int) -> void:
 	if not occupied or not current_piece_data:
 		return
 		
-	# Verificamos si la pieza que se actualizó es la misma que tenemos aquí.
 	if piece_data is PieceData and current_piece_data is PieceData:
+		# Comprobamos si es la misma pieza (usando piece_origin como identificador único)
 		if piece_data.piece_origin == current_piece_data.piece_origin:
-			print("Slot Ruleta detectó compra de su pieza. Actualizando visual a: %d copias" % new_count)
-			_update_tier_visual(new_count)
+			# --- CAMBIO: Actualizar la cantidad localmente ---
+			current_piece_count = _new_count
+			_refresh_visuals()
+func _refresh_visuals():
+	if not current_piece_data: return
+	
+	# Salvaguarda: Aseguramos que el ItemIcon sea visible si hay datos
+	if item_icon and not item_icon.visible:
+		item_icon.visible = true
+		
+	# --- CAMBIO: Usar la variable local current_piece_count ---
+	# Ya no llamamos a _get_total_copies aquí
+	_update_tier_and_members(current_piece_count)
+	# ----------------------------------------------------------
+func _get_total_copies(data: Resource) -> int:
+	var inventory_node = get_tree().root.find_child("Inventory", true, false)
+	if inventory_node and inventory_node.has_method("get_item_count"):
+		return inventory_node.get_item_count(data)
+	return 1
+
+# --- LÓGICA VISUAL (Tier + Members) ---
+
+func _update_tier_and_members(count: int) -> void:
+	if not current_piece_data: return
+	
+	# A. ACTUALIZAR TIER (Marco de rareza) - Lógica reforzada
+	if tier_label:
+		tier_label.visible = true
+		if count == 1:
+			tier_label.texture = tier_bronze_texture
+		elif count == 2:
+			tier_label.texture = tier_silver_texture
+		elif count >= 3:
+			tier_label.texture = tier_gold_texture
+		else:
+			# Si count es 0 o negativo (error), ocultamos
+			tier_label.visible = false
+	
+	# B. ACTUALIZAR MEMBERS (Número de unidades)
+	if count_label and current_piece_data is PieceData:
+		count_label.visible = true
+		
+		var tier_key = "BRONCE"
+		if count == 2: tier_key = "PLATA"
+		elif count >= 3: tier_key = "ORO"
+		
+		var members_num = 1
+		if current_piece_data.piece_origin and "stats" in current_piece_data.piece_origin:
+			var stats = current_piece_data.piece_origin.stats
+			if stats.has(tier_key) and stats[tier_key].has("members"):
+				members_num = stats[tier_key]["members"]
+		
+		var visual_num = clampi(members_num, 1, 14)
+		var path = "res://assets/numeros/%d.png" % visual_num
+		
+		if ResourceLoader.exists(path):
+			count_label.texture = load(path)
+		else:
+			count_label.visible = false
+
+func clear_slot():
+	occupied = false
+	current_piece_data = null
+	current_piece_count = 0
+	
+	# Ocultamos todo el contenedor
+	if item_icon:
+		item_icon.visible = false
+		item_icon.material = null
+	
+	if piece_texture_rect:
+		piece_texture_rect.visible = false
+		piece_texture_rect.texture = null
+		
+	if tier_label: tier_label.visible = false
+	if count_label: count_label.visible = false
 
 func _process(delta):
 	if piece_over:
@@ -134,79 +239,3 @@ func _process(delta):
 		glow_sprite.modulate.a = lerp(float(glow_sprite.modulate.a), 0.0, delta * highlight_speed)
 		glow_sprite.scale = glow_sprite.scale.lerp(Vector2(min_scale, min_scale), delta * highlight_speed)
 		particles.emitting = false
-		
-func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
-	if ruleta and ruleta.has_method("is_moving"):
-		if ruleta.is_moving() or not ruleta.is_interactive:
-			return false
-	
-	if occupied:
-		return false
-		
-	if data is Dictionary and "data" in data and "count" in data:
-		if data.data is PieceData:
-			return data.data.uses > 0
-		return false
-
-	return false
-
-func _drop_data(_at_position: Vector2, data: Variant) -> void:
-	occupied = true
-	current_piece_data = data.data
-	current_piece_count = 1 
-	
-	if current_piece_data and "icon" in current_piece_data:
-		if current_piece_data.icon:
-			piece_texture_rect.texture = current_piece_data.icon
-			piece_texture_rect.visible = true
-			# Nota: Si sueltas la pieza y el mouse sigue encima, 
-			# el highlight no se activará hasta que salgas y entres, 
-			# a menos que fuerces el material aquí también. 
-			# (Opcional: piece_texture_rect.material = highlight_material)
-	
-	GlobalSignals.piece_placed_on_roulette.emit(current_piece_data)
-	
-	# --- Actualizar Tier Visual ---
-	if current_piece_data is PieceData:
-		var total_copies = _get_total_copies(current_piece_data)
-		_update_tier_visual(total_copies)
-
-func _get_total_copies(data: Resource) -> int:
-	var manager = null
-	if owner and owner.has_method("get_inventory_piece_count"):
-		manager = owner
-	elif get_tree().current_scene.has_method("get_inventory_piece_count"):
-		manager = get_tree().current_scene
-	
-	if manager:
-		return manager.get_inventory_piece_count(data)
-	return 1
-
-# --- LÓGICA VISUAL DEL TIER ---
-func _update_tier_visual(count: int) -> void:
-	if not tier_icon: return
-	print("update tier en _update_tier_visual" + str(count))
-	tier_icon.visible = true
-	match count:
-		1:
-			tier_icon.texture = tier_bronze_texture
-		2:
-			tier_icon.texture = tier_silver_texture
-		3: 
-			tier_icon.texture = tier_gold_texture
-		_:
-			if count > 3:
-				tier_icon.texture = tier_gold_texture
-			else:
-				tier_icon.visible = false
-
-func clear_slot():
-	occupied = false
-	current_piece_data = null
-	current_piece_count = 0
-	if piece_texture_rect:
-		piece_texture_rect.visible = false
-		piece_texture_rect.material = null # Limpiamos el shader al vaciar
-		
-	if tier_icon:
-		tier_icon.visible = false

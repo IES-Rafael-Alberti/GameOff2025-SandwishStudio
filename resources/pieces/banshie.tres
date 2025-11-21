@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="PieceData" load_steps=4 format=3 uid="uid://b065ie430glv1"]
 
-[ext_resource type="Texture2D" uid="uid://dew52rfnphoit" path="res://assets/unnamed (11).jpg" id="1_ot8qb"]
+[ext_resource type="Texture2D" uid="uid://csl7aya5724wo" path="res://assets/piezas/Banshee.png" id="1_ot8qb"]
 [ext_resource type="Resource" uid="uid://cbu5pjmpj8vj2" path="res://resources/Europea/banshie.tres" id="2_6vs4s"]
 [ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="3_366k6"]
 
