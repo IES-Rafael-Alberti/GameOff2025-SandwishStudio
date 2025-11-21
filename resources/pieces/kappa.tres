@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="PieceData" load_steps=4 format=3 uid="uid://bjcjwt742by0m"]
 
-[ext_resource type="Texture2D" uid="uid://ctb23480jji3m" path="res://assets/unnamed (6).jpg" id="1_x1vit"]
+[ext_resource type="Texture2D" uid="uid://b73fvdewf6v4d" path="res://assets/piezas/Kappa.png" id="1_x1vit"]
 [ext_resource type="Resource" uid="uid://drk6kcqcj2alx" path="res://resources/Japonesa/Kappa.tres" id="2_l3xmm"]
 [ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="3_d3hwr"]
 

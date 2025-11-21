@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="PieceData" load_steps=4 format=3 uid="uid://cxbloivuqkrwe"]
 
-[ext_resource type="Texture2D" uid="uid://d3i7twr8f085r" path="res://assets/unnamed (122).jpg" id="1_idy3k"]
+[ext_resource type="Texture2D" uid="uid://drj50pfb56yyc" path="res://assets/piezas/Valk.png" id="1_idy3k"]
 [ext_resource type="Resource" uid="uid://ix02fceb4nh1" path="res://resources/Nordica/valkirias.tres" id="2_c118a"]
 [ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="3_r2f30"]
 

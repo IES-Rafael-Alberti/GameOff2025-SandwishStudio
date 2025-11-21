@@ -4,11 +4,11 @@
 [ext_resource type="Texture2D" uid="uid://c2fa30p75xeed" path="res://assets/Pupil.png" id="2_nx6ja"]
 
 [node name="ButtonShop" type="Button"]
-offset_right = 8.0
-offset_bottom = 8.0
+offset_right = 101.0
+offset_bottom = 420.0
 
 [node name="EyeSprite" type="Sprite2D" parent="."]
-position = Vector2(51.310158, 45.437504)
+position = Vector2(53, 205)
 scale = Vector2(0.03470083, 0.034700837)
 texture = ExtResource("1_wvo3v")
 

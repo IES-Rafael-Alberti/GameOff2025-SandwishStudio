@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b6lkdumbriu3y"
-path="res://.godot/imported/QuesoVacio__1_-removebg-preview.png-da195d9a40d9596b8a15987940abdfa0.ctex"
+uid="uid://d10bx8m2mx4st"
+path="res://.godot/imported/2.png-313d8b0d9304c1730c808ef1896eb714.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/QuesoVacio__1_-removebg-preview.png"
-dest_files=["res://.godot/imported/QuesoVacio__1_-removebg-preview.png-da195d9a40d9596b8a15987940abdfa0.ctex"]
+source_file="res://assets/numeros/2.png"
+dest_files=["res://.godot/imported/2.png-313d8b0d9304c1730c808ef1896eb714.ctex"]
 
 [params]
 

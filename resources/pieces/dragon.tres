@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="PieceData" load_steps=4 format=3 uid="uid://cd2vljit13au2"]
 
-[ext_resource type="Texture2D" uid="uid://c0b5mxtedp6s4" path="res://assets/piece_2.jpg" id="1_sujfs"]
+[ext_resource type="Texture2D" uid="uid://cavq5yt2lwla3" path="res://assets/piezas/Dragon.png" id="1_sujfs"]
 [ext_resource type="Resource" uid="uid://bpflwuvj3jt4f" path="res://resources/Europea/dragon.tres" id="2_hinmu"]
 [ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="3_lb71h"]
 
@@ -9,5 +9,6 @@ script = ExtResource("3_lb71h")
 piece_name = "Dragon"
 piece_origin = ExtResource("2_hinmu")
 icon = ExtResource("1_sujfs")
+uses = 4
 price = 112
 metadata/_custom_type_script = "uid://8urlsjkkl8pw"
