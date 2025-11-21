@@ -18,6 +18,7 @@
 script = ExtResource("1_lbhrr")
 gold_round_base = 2
 rounds_per_day = 3
+gladiators_per_day = 2
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
 position = Vector2(187, 77.99997)
