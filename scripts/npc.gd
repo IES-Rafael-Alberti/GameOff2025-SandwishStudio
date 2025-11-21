@@ -60,7 +60,13 @@ func _ready() -> void:
 		max_health = 1.0
 		health = 1.0
 		gold_pool = 0
-		
+
+	if material:
+		material = material.duplicate()
+		shock_material = material
+	else:
+		shock_material = null
+
 	# Frames + animation
 	if npc_res and npc_res.frames:
 		sprite_frames = npc_res.frames
