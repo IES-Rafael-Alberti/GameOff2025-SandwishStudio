@@ -67,20 +67,20 @@ scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot2" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 650.336
-offset_top = 277.38757
-offset_right = 650.336
-offset_bottom = 277.38757
-rotation = -4.610842
+offset_left = 592.6125
+offset_top = 190.33485
+offset_right = 592.6125
+offset_bottom = 190.33485
+rotation = -5.3285394
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot3" parent="SpriteRuleta/SlotsContainer" instance=ExtResource("4_k6evh")]
-offset_left = 593.90967
-offset_top = 192.31331
-offset_right = 593.90967
-offset_bottom = 192.31331
-rotation = -5.301232
+offset_left = 646.4445
+offset_top = 275.4091
+offset_right = 646.4445
+offset_bottom = 275.4091
+rotation = -4.6630945
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
@@ -125,7 +125,7 @@ offset_left = 355.88095
 offset_top = 295.19382
 offset_right = 355.88095
 offset_bottom = 295.19382
-rotation = -1.1389939
+rotation = -1.1164145
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
@@ -134,7 +134,7 @@ offset_left = 402.5787
 offset_top = 201.54619
 offset_right = 402.5787
 offset_bottom = 201.54619
-rotation = -0.40124413
+rotation = -0.3996745
 scale = Vector2(1, 1)
 metadata/_edit_use_anchors_ = true
 
