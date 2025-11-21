@@ -1,37 +1,12 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=2 format=3 uid="uid://d2fw815a8jk0d"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://d2fw815a8jk0d"]
 
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_1t85r"]
+[ext_resource type="SpriteFrames" uid="uid://liwdmac0s7io" path="res://resources/allies_Frames/oni.tres" id="1_3wukw"]
 
 [resource]
 script = ExtResource("1_1t85r")
 id = "japonesa.oni"
 display_name = "oni"
 race = 1
-rarity = 3
-stats = {
-"BRONCE": {
-"aps": 1.0,
-"crit_chance": 10,
-"crit_mult": 1.5,
-"dmg": 16.0,
-"hp": 260.0,
-"members": 2
-},
-"ORO": {
-"aps": 1.2,
-"crit_chance": 15,
-"crit_mult": 2.0,
-"dmg": 25.0,
-"hp": 250.0,
-"members": 2
-},
-"PLATA": {
-"aps": 1.1,
-"crit_chance": 10,
-"crit_mult": 1.6,
-"dmg": 15.0,
-"hp": 150.0,
-"members": 2
-}
-}
+frames = ExtResource("1_3wukw")
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"

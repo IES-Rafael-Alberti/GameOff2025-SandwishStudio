@@ -64,12 +64,12 @@ flip_v = true
 
 [node name="piece_inventory" type="GridContainer" parent="."]
 layout_mode = 0
-offset_left = 41.0
-offset_top = 85.0
-offset_right = 397.0
-offset_bottom = 649.0
-theme_override_constants/h_separation = 126
-theme_override_constants/v_separation = 71
+offset_left = 18.0
+offset_top = 22.0
+offset_right = 423.0
+offset_bottom = 666.0
+theme_override_constants/h_separation = 80
+theme_override_constants/v_separation = 115
 columns = 2
 
 [node name="passive_inventory" type="GridContainer" parent="."]

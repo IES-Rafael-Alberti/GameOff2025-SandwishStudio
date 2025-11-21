@@ -1,8 +1,23 @@
-[gd_scene load_steps=7 format=3 uid="uid://bekys0sh7i1sf"]
+[gd_scene load_steps=22 format=3 uid="uid://bekys0sh7i1sf"]
 
 [ext_resource type="Shader" uid="uid://kl5qcx1hsdjw" path="res://assets/shaders/shock_damage.gdshader" id="1_rv78h"]
-[ext_resource type="SpriteFrames" uid="uid://rjwlxoj38qir" path="res://resources/warrior/red_warrior_animation.tres" id="2_abqhh"]
 [ext_resource type="Script" uid="uid://dkh16s35ytd1p" path="res://scripts/npc.gd" id="2_rv78h"]
+[ext_resource type="SpriteFrames" uid="uid://gvweoobpn1ha" path="res://resources/allies_Frames/banshiee.tres" id="3_rv78h"]
+[ext_resource type="SpriteFrames" uid="uid://cfn77wm5oqo8k" path="res://resources/allies_Frames/dragon.tres" id="4_nyaq3"]
+[ext_resource type="SpriteFrames" uid="uid://cv78gw7w1hu8y" path="res://resources/allies_Frames/draugr.tres" id="5_4wlns"]
+[ext_resource type="SpriteFrames" uid="uid://i1ppr1u5ps14" path="res://resources/allies_Frames/jotuun.tres" id="6_tl2vt"]
+[ext_resource type="SpriteFrames" uid="uid://osibphf1sb75" path="res://resources/allies_Frames/kappa.tres" id="7_gl1un"]
+[ext_resource type="SpriteFrames" uid="uid://cq1jiipx7vdys" path="res://resources/allies_Frames/kozo.tres" id="8_wuru7"]
+[ext_resource type="SpriteFrames" uid="uid://8sg5xcm4pv0q" path="res://resources/allies_Frames/norna.tres" id="9_nyaq3"]
+[ext_resource type="SpriteFrames" uid="uid://liwdmac0s7io" path="res://resources/allies_Frames/oni.tres" id="10_yf2ql"]
+[ext_resource type="SpriteFrames" uid="uid://cnh48p4hva1em" path="res://resources/allies_Frames/satiro.tres" id="11_8gbmn"]
+[ext_resource type="SpriteFrames" uid="uid://ci0tv38g8v7at" path="res://resources/allies_Frames/tengu.tres" id="12_pvipr"]
+[ext_resource type="SpriteFrames" uid="uid://s5dqraogpmma" path="res://resources/allies_Frames/trasgu.tres" id="13_wuru7"]
+[ext_resource type="SpriteFrames" uid="uid://mp6dpbb2ijl8" path="res://resources/allies_Frames/valk.tres" id="14_nyaq3"]
+[ext_resource type="SpriteFrames" uid="uid://rjwlxoj38qir" path="res://resources/warrior/red_gladiator_animation.tres" id="15_yf2ql"]
+[ext_resource type="SpriteFrames" uid="uid://binkgvqygxeqd" path="res://resources/warrior/purple_gladiator_animation.tres" id="16_pvipr"]
+[ext_resource type="SpriteFrames" uid="uid://dxylk5lisg7lo" path="res://resources/warrior/armor_gladiator_animation.tres" id="17_n0klm"]
+[ext_resource type="SpriteFrames" uid="uid://c7jd0vdx5p4th" path="res://resources/warrior/trident_gladiator_animation.tres" id="18_n0klm"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7n8xq"]
 shader = ExtResource("1_rv78h")
@@ -12,14 +27,21 @@ shader_parameter/frequency = 10.0
 shader_parameter/shock_time = 0.0
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_abqhh"]
+animations = [{
+"frames": [],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_abqhh"]
 bg_color = Color(0.39513198, 0.8288472, 0.40690893, 1)
 
 [node name="npc" type="AnimatedSprite2D"]
 material = SubResource("ShaderMaterial_7n8xq")
-scale = Vector2(3, 3)
+scale = Vector2(1.8, 1.8)
 sprite_frames = SubResource("SpriteFrames_abqhh")
+animation = &"idle"
 script = ExtResource("2_rv78h")
 
 [node name="healthBar" type="ProgressBar" parent="."]
@@ -28,22 +50,110 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -136.0
-offset_top = -88.0
+offset_top = -201.88892
 offset_right = -56.0
-offset_bottom = -61.0
+offset_bottom = -174.88892
 grow_horizontal = 2
 theme_override_styles/fill = SubResource("StyleBoxFlat_abqhh")
 show_percentage = false
 
-[node name="red_warrior" type="AnimatedSprite2D" parent="."]
-visible = false
-sprite_frames = ExtResource("2_abqhh")
-animation = &"idle"
-frame_progress = 0.5354015
-
 [node name="NameLabel" type="Label" parent="."]
+visible = false
 offset_left = -136.0
 offset_top = -120.0
 offset_right = -96.0
 offset_bottom = -90.0
 theme_override_font_sizes/font_size = 21
+
+[node name="banshiee" type="AnimatedSprite2D" parent="."]
+visible = false
+scale = Vector2(0.001, 0.001)
+sprite_frames = ExtResource("3_rv78h")
+animation = &"idle"
+flip_h = true
+
+[node name="dragon" type="AnimatedSprite2D" parent="."]
+visible = false
+scale = Vector2(0.001, 0.001)
+sprite_frames = ExtResource("4_nyaq3")
+animation = &"idle"
+flip_h = true
+
+[node name="draugr" type="AnimatedSprite2D" parent="."]
+visible = false
+sprite_frames = ExtResource("5_4wlns")
+animation = &"idle"
+flip_h = true
+
+[node name="jotuun" type="AnimatedSprite2D" parent="."]
+visible = false
+sprite_frames = ExtResource("6_tl2vt")
+animation = &"idle"
+flip_h = true
+
+[node name="kappa" type="AnimatedSprite2D" parent="."]
+visible = false
+sprite_frames = ExtResource("7_gl1un")
+animation = &"idle"
+flip_h = true
+
+[node name="kozo" type="AnimatedSprite2D" parent="."]
+visible = false
+sprite_frames = ExtResource("8_wuru7")
+animation = &"idle"
+flip_h = true
+
+[node name="norna" type="AnimatedSprite2D" parent="."]
+visible = false
+sprite_frames = ExtResource("9_nyaq3")
+animation = &"idle"
+flip_h = true
+
+[node name="oni" type="AnimatedSprite2D" parent="."]
+visible = false
+sprite_frames = ExtResource("10_yf2ql")
+animation = &"idle"
+
+[node name="satiro" type="AnimatedSprite2D" parent="."]
+visible = false
+sprite_frames = ExtResource("11_8gbmn")
+animation = &"idle"
+flip_h = true
+
+[node name="tengu" type="AnimatedSprite2D" parent="."]
+visible = false
+sprite_frames = ExtResource("12_pvipr")
+animation = &"idle"
+flip_h = true
+
+[node name="trasgu" type="AnimatedSprite2D" parent="."]
+visible = false
+sprite_frames = ExtResource("13_wuru7")
+animation = &"idle"
+flip_h = true
+
+[node name="valk" type="AnimatedSprite2D" parent="."]
+visible = false
+sprite_frames = ExtResource("14_nyaq3")
+animation = &"idle"
+flip_h = true
+
+[node name="redGladiador" type="AnimatedSprite2D" parent="."]
+visible = false
+sprite_frames = ExtResource("15_yf2ql")
+animation = &"idle"
+
+[node name="PurpleGladiador" type="AnimatedSprite2D" parent="."]
+visible = false
+sprite_frames = ExtResource("16_pvipr")
+animation = &"idle"
+
+[node name="ArmorGladiador" type="AnimatedSprite2D" parent="."]
+visible = false
+sprite_frames = ExtResource("17_n0klm")
+animation = &"idle"
+
+[node name="tridentGladiador" type="AnimatedSprite2D" parent="."]
+visible = false
+sprite_frames = ExtResource("18_n0klm")
+animation = &"idle"

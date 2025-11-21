@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="PieceData" load_steps=4 format=3 uid="uid://57d6mtngeb8t"]
 
-[ext_resource type="Texture2D" uid="uid://noh3xnh6o0k1" path="res://assets/unnamed (10).jpg" id="1_kqwax"]
+[ext_resource type="Texture2D" uid="uid://c8imtdkdnsjca" path="res://assets/piezas/Draugr.png" id="1_kqwax"]
 [ext_resource type="Resource" uid="uid://by0quidpu73s0" path="res://resources/Nordica/Draugr.tres" id="2_7trbx"]
 [ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="3_crlh6"]
 
@@ -10,4 +10,4 @@ piece_name = "draugr"
 piece_origin = ExtResource("2_7trbx")
 icon = ExtResource("1_kqwax")
 uses = 2
-price = 3
+price = 322

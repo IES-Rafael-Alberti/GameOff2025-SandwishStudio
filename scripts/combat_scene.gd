@@ -44,6 +44,7 @@ const ALLY_BATTLE_OFSET := Vector2(-880, 0)
 var ally_npcs: Array[npc] = []
 var enemy_npcs: Array[npc] = []
 var pre_battle_wait_time: float = 1.0
+var ally_spawn_order_counter: int = 0
 
 var combat_running := false
 var start_timer: Timer
@@ -199,6 +200,11 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 	n.position = pos
 	n.npc_res = res_override
 	
+	if n is AnimatedSprite2D:
+		if team == npc.Team.ALLY:
+			n.flip_h = true
+		else:
+			n.flip_h = false
 	# Aplicar bonos globales (GlobalStats)
 	if team == npc.Team.ALLY and has_node("/root/GlobalStats"):
 		var health_bonus = GlobalStats.get_health_bonus()
@@ -228,9 +234,9 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 				push_warning("NPC no tiene metodo apply_synergies")
 	# ---------------------------------------------
 	
-	add_child(n)
+	get_node("npcs").add_child(n)
 
-	
+
 	# --- APLICAR BONUS A ENEMIGOS (Scaling Diario) ---
 	if team == npc.Team.ENEMY:
 		n.gold_pool = int(n.npc_res.gold)
@@ -324,8 +330,8 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 	if piece == null:
 		return
 		
-	var num_copies: int = 1 # Por defecto
-	var gold_per_enemy: int = 0 # Base: 0 para aliados.
+	var num_copies: int = 1
+	var gold_per_enemy: int = 0
 	
 	if team == npc.Team.ALLY:
 		num_copies = _get_piece_copies_owned(piece)
@@ -348,8 +354,8 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 
 		var to_spawn: int = min(members, free_slots_limit, free_markers.size())
 		var delay_per_ally := 0.25
-		var move_segment_time := 0.5     # Cada tramo de tween
-		var total_move_time := move_segment_time * 2.0  # puerta→mid y mid→slot
+		var move_segment_time := 0.5
+		var total_move_time := move_segment_time * 2.0
 
 		for i in range(to_spawn):
 			var idx: int = randi() % free_markers.size()
@@ -361,16 +367,23 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 				if piece.display_name != "":
 					n.set_display_name(piece.display_name)
 				ally_npcs.append(n)
-				_place_ally_in_slot_with_tween(n, slot.position, i)
 
-		if to_spawn > 0:
-			var last_index := to_spawn - 1
+				# USAMOS EL CONTADOR GLOBAL, NO 'i'
+				var order_index := ally_spawn_order_counter
+				ally_spawn_order_counter += 1
+
+				_place_ally_in_slot_with_tween(n, slot.position, order_index)
+
+		if ally_spawn_order_counter > 0:
+			# El último que saldrá tiene índice ally_spawn_order_counter - 1
+			var last_index := ally_spawn_order_counter - 1
 			pre_battle_wait_time = last_index * delay_per_ally + total_move_time + 0.2
 		else:
 			pre_battle_wait_time = 0.5
 
 		return
-	# Si fuese un enemigo, simplemente hacemos spawn normal
+
+	# Enemigos:
 	var e := _spawn_npc(team, enemy_spawn.position, npc_template)
 	if e:
 		enemy_npcs.append(e)
@@ -490,6 +503,7 @@ func _cleanup_allies_and_reset() -> void:
 		if is_instance_valid(a):
 			a.queue_free()
 	ally_npcs.clear()
+	ally_spawn_order_counter = 0
 
 func _do_attack(attacker: npc, defender: npc) -> void:
 	if not attacker.can_damage(defender): return

@@ -1,0 +1,18 @@
+[gd_resource type="SpriteFrames" load_steps=3 format=3 uid="uid://mp6dpbb2ijl8"]
+
+[ext_resource type="Texture2D" uid="uid://crq634eeutu73" path="res://assets/Combat_scene/allies_scaled/Valk.png" id="1_31vhs"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qh7nu"]
+atlas = ExtResource("1_31vhs")
+region = Rect2(0, 0, 250, 269)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qh7nu")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]

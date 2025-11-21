@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="npcRes" load_steps=3 format=3 uid="uid://b6dek55tm2no8"]
+
+[ext_resource type="SpriteFrames" uid="uid://c7jd0vdx5p4th" path="res://resources/warrior/trident_gladiator_animation.tres" id="1_1cl5e"]
+[ext_resource type="Script" uid="uid://bd1qpluesymyw" path="res://scripts/npc_res.gd" id="2_up70c"]
+
+[resource]
+script = ExtResource("2_up70c")
+frames = ExtResource("1_1cl5e")
+max_health = 3000.0
+health = 3000.0
+damage = 10.0
+atack_speed = 2.0
+critical_chance = 20
+critical_damage = 1.25
+raza = "Nordicas"
+gold = 300
+metadata/_custom_type_script = "uid://bd1qpluesymyw"

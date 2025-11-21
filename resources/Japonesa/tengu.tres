@@ -1,36 +1,11 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=2 format=3 uid="uid://b608x2o53lipk"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://b608x2o53lipk"]
 
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_n3ank"]
+[ext_resource type="SpriteFrames" uid="uid://ci0tv38g8v7at" path="res://resources/allies_Frames/tengu.tres" id="1_pgrif"]
 
 [resource]
 script = ExtResource("1_n3ank")
 id = "japonesa.tengu"
 display_name = "tengu"
-rarity = 2
-stats = {
-"BRONCE": {
-"aps": 1.1,
-"crit_chance": 10,
-"crit_mult": 1.5,
-"dmg": 10.0,
-"hp": 95.0,
-"members": 4
-},
-"ORO": {
-"aps": 1.2,
-"crit_chance": 15,
-"crit_mult": 2.0,
-"dmg": 25.0,
-"hp": 250.0,
-"members": 10
-},
-"PLATA": {
-"aps": 1.1,
-"crit_chance": 10,
-"crit_mult": 1.6,
-"dmg": 15.0,
-"hp": 150.0,
-"members": 8
-}
-}
+frames = ExtResource("1_pgrif")
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"

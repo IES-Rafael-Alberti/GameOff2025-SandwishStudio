@@ -1,0 +1,18 @@
+[gd_resource type="SpriteFrames" load_steps=3 format=3 uid="uid://ci0tv38g8v7at"]
+
+[ext_resource type="Texture2D" uid="uid://5hd1trsnn0no" path="res://assets/Combat_scene/allies_scaled/Tengu.png" id="1_cm7fe"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r35s1"]
+atlas = ExtResource("1_cm7fe")
+region = Rect2(0, 0, 250, 270)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r35s1")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]

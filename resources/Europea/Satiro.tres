@@ -1,34 +1,10 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=2 format=3 uid="uid://dormn8rgtb778"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://cy77sggbt1g0n"]
 
+[ext_resource type="SpriteFrames" uid="uid://cnh48p4hva1em" path="res://resources/allies_Frames/satiro.tres" id="1_7uwfu"]
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_xfa5c"]
 
 [resource]
 script = ExtResource("1_xfa5c")
 id = "europea.Satiro"
-stats = {
-"BRONCE": {
-"aps": 1.4,
-"crit_chance": 8,
-"crit_mult": 1.5,
-"dmg": 4.0,
-"hp": 45.0,
-"members": 6
-},
-"ORO": {
-"aps": 1.2,
-"crit_chance": 15,
-"crit_mult": 2.0,
-"dmg": 25.0,
-"hp": 250.0,
-"members": 10
-},
-"PLATA": {
-"aps": 1.1,
-"crit_chance": 10,
-"crit_mult": 1.6,
-"dmg": 15.0,
-"hp": 150.0,
-"members": 8
-}
-}
+frames = ExtResource("1_7uwfu")
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"

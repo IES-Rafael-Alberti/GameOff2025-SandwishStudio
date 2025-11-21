@@ -1,5 +1,6 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=2 format=3 uid="uid://ix02fceb4nh1"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://ix02fceb4nh1"]
 
+[ext_resource type="SpriteFrames" uid="uid://mp6dpbb2ijl8" path="res://resources/allies_Frames/valk.tres" id="1_tf6qj"]
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_wtwdx"]
 
 [resource]
@@ -7,31 +8,5 @@ script = ExtResource("1_wtwdx")
 id = "nordica.valkirias"
 display_name = "valkirias"
 race = 0
-rarity = 1
-stats = {
-"BRONCE": {
-"aps": 1.0,
-"crit_chance": 8,
-"crit_mult": 1.5,
-"dmg": 7.0,
-"hp": 95.0,
-"members": 5
-},
-"ORO": {
-"aps": 1.2,
-"crit_chance": 15,
-"crit_mult": 2.0,
-"dmg": 25.0,
-"hp": 250.0,
-"members": 10
-},
-"PLATA": {
-"aps": 1.1,
-"crit_chance": 10,
-"crit_mult": 1.6,
-"dmg": 15.0,
-"hp": 150.0,
-"members": 8
-}
-}
+frames = ExtResource("1_tf6qj")
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"
