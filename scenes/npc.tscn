@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=3 uid="uid://bekys0sh7i1sf"]
+[gd_scene load_steps=44 format=3 uid="uid://bekys0sh7i1sf"]
 
 [ext_resource type="Shader" uid="uid://kl5qcx1hsdjw" path="res://assets/shaders/shock_damage.gdshader" id="1_rv78h"]
 [ext_resource type="Script" uid="uid://dkh16s35ytd1p" path="res://scripts/npc.gd" id="2_rv78h"]
@@ -12,7 +12,7 @@
 [ext_resource type="Texture2D" uid="uid://cxhtyg5j77yqb" path="res://assets/Combat_scene/allies_scaled/Oni.png" id="10_gc4mq"]
 [ext_resource type="Texture2D" uid="uid://ckd5yp5d85800" path="res://assets/Combat_scene/allies_scaled/Satiro.png" id="11_2gr28"]
 [ext_resource type="Texture2D" uid="uid://5hd1trsnn0no" path="res://assets/Combat_scene/allies_scaled/Tengu.png" id="12_tkdcp"]
-[ext_resource type="Texture2D" uid="uid://u3j4b7li5x2d" path="res://assets/Combat_scene/allies_final/Trasgu.png" id="13_15fp6"]
+[ext_resource type="SpriteFrames" uid="uid://drxe6ftchok7c" path="res://resources/allies_Frames/trasgu.tres" id="13_wuru7"]
 [ext_resource type="Texture2D" uid="uid://cbtylxcnsv7kh" path="res://assets/Combat_scene/allies_final/Valk.png" id="14_bll4x"]
 [ext_resource type="SpriteFrames" uid="uid://rjwlxoj38qir" path="res://resources/warrior/red_gladiator_animation.tres" id="15_yf2ql"]
 [ext_resource type="SpriteFrames" uid="uid://binkgvqygxeqd" path="res://resources/warrior/purple_gladiator_animation.tres" id="16_pvipr"]
@@ -187,21 +187,6 @@ animations = [{
 "speed": 5.0
 }]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_jw2dm"]
-atlas = ExtResource("13_15fp6")
-region = Rect2(0, 0, 204, 137)
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_pea3f"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_jw2dm")
-}],
-"loop": true,
-"name": &"idle",
-"speed": 5.0
-}]
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_31vhs"]
 atlas = ExtResource("14_bll4x")
 region = Rect2(0, 0, 188, 202)
@@ -308,7 +293,7 @@ flip_h = true
 
 [node name="trasgu" type="AnimatedSprite2D" parent="."]
 visible = false
-sprite_frames = SubResource("SpriteFrames_pea3f")
+sprite_frames = ExtResource("13_wuru7")
 animation = &"idle"
 flip_h = true
 
