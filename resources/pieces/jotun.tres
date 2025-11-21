@@ -9,5 +9,5 @@ script = ExtResource("3_o1usf")
 piece_name = "jotun"
 piece_origin = ExtResource("2_wydmh")
 icon = ExtResource("1_ssopf")
-price = 344
+price = 10
 metadata/_custom_type_script = "uid://8urlsjkkl8pw"

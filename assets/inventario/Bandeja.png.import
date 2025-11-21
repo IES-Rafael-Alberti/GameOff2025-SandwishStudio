@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://tl8h73xfj25t"
-path="res://.godot/imported/CritDMG.png-a5c5f50252d5ca858797e66e8bc81ef3.ctex"
+uid="uid://b3gvhhihiil78"
+path="res://.godot/imported/Bandeja.png-d3b95768bfb38f14c77d3653d741f775.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/CritDMG.png"
-dest_files=["res://.godot/imported/CritDMG.png-a5c5f50252d5ca858797e66e8bc81ef3.ctex"]
+source_file="res://assets/inventario/Bandeja.png"
+dest_files=["res://.godot/imported/Bandeja.png-d3b95768bfb38f14c77d3653d741f775.ctex"]
 
 [params]
 

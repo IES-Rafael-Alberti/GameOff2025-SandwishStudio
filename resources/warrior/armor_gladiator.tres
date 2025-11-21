@@ -6,12 +6,12 @@
 [resource]
 script = ExtResource("2_2xtdc")
 frames = ExtResource("1_73cgy")
-max_health = 3000.0
-health = 3000.0
-damage = 10.0
+max_health = 200.0
+health = 200.0
+damage = 25.0
 atack_speed = 2.0
-critical_chance = 20
+critical_chance = 5
 critical_damage = 1.25
 raza = "Japonesas"
-gold = 450
+gold = 4
 metadata/_custom_type_script = "uid://bd1qpluesymyw"

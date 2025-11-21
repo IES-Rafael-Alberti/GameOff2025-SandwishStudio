@@ -1,8 +1,7 @@
-[gd_scene load_steps=12 format=3 uid="uid://0dvayl6271no"]
+[gd_scene load_steps=10 format=3 uid="uid://0dvayl6271no"]
 
 [ext_resource type="Script" uid="uid://bw0d7s71m5dov" path="res://scripts/combat_scene.gd" id="1_ivkwx"]
 [ext_resource type="Script" uid="uid://bd1qpluesymyw" path="res://scripts/npc_res.gd" id="2_0vylu"]
-[ext_resource type="Texture2D" uid="uid://b1laqs7fhlter" path="res://assets/EPelea.png" id="2_ofoda"]
 [ext_resource type="Resource" uid="uid://coeqcim3vx1w7" path="res://resources/warrior/red_gladiator.tres" id="3_2edba"]
 [ext_resource type="Resource" uid="uid://b6dek55tm2no8" path="res://resources/warrior/trident_gladiator.tres" id="4_6ovae"]
 [ext_resource type="Resource" uid="uid://btb28eu76jyan" path="res://resources/warrior/purple_gladiator.tres" id="5_ivkwx"]
@@ -11,22 +10,18 @@
 [ext_resource type="Texture2D" uid="uid://cm1hl2evn33uh" path="res://assets/Combat_scene/Fondos/OL (2).png" id="8_6sw3s"]
 [ext_resource type="Texture2D" uid="uid://bqswvveb5bl3y" path="res://assets/Combat_scene/Fondos/EPeleaDef (1).png" id="9_g0m11"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_ofoda"]
-atlas = ExtResource("2_ofoda")
-region = Rect2(1398.4012, 0, 5124.82, 1521.2389)
-
 [node name="combat_scene" type="Node2D"]
-position = Vector2(0, 4)
+position = Vector2(-24.999998, 4)
 scale = Vector2(1.0102993, 1.021862)
 script = ExtResource("1_ivkwx")
 enemy_res = Array[ExtResource("2_0vylu")]([ExtResource("3_2edba"), ExtResource("4_6ovae"), ExtResource("5_ivkwx"), ExtResource("6_6sw3s")])
 
 [node name="BattleField" type="TextureRect" parent="."]
 offset_left = -291.00287
-offset_top = -250.52309
+offset_top = -227.0365
 offset_right = 3215.997
-offset_bottom = 488.47693
-scale = Vector2(1.3205202, 1.7730533)
+offset_bottom = 511.9635
+scale = Vector2(1.373091, 2.1140316)
 texture = ExtResource("7_ivkwx")
 metadata/_edit_use_anchors_ = true
 
@@ -36,32 +31,26 @@ scale = Vector2(0.99999994, 0.99999994)
 
 [node name="Doors" type="TextureRect" parent="."]
 z_index = 2
-offset_left = -291.00287
-offset_top = -250.52309
-offset_right = 3215.997
-offset_bottom = 488.47693
-scale = Vector2(1.3205202, 1.7730533)
+offset_left = -292.98248
+offset_top = -230.95087
+offset_right = 3214.0176
+offset_bottom = 508.04913
+scale = Vector2(1.373091, 2.1140316)
 texture = ExtResource("8_6sw3s")
 metadata/_edit_use_anchors_ = true
 
-[node name="pillars" type="TextureRect" parent="."]
-z_index = 3
-offset_left = -1074.9287
-offset_top = -715.3606
-offset_right = 3190.0713
-offset_bottom = 820.6394
-scale = Vector2(1.3763828, 1.8348737)
-texture = ExtResource("9_g0m11")
-metadata/_edit_use_anchors_ = true
+[node name="npcs" type="Node2D" parent="."]
+z_index = 1
+scale = Vector2(0.99999994, 0.99999994)
 
-[node name="UI" type="TextureRect" parent="."]
-z_index = 4
-offset_left = -480.98975
-offset_top = -242.75356
-offset_right = 4643.0103
-offset_bottom = 1278.2465
-scale = Vector2(0.9726642, 1.0203406)
-texture = SubResource("AtlasTexture_ofoda")
+[node name="pillars" type="TextureRect" parent="."]
+z_index = 2
+offset_left = -1141.2458
+offset_top = -966.8625
+offset_right = 3123.7542
+offset_bottom = 569.1375
+scale = Vector2(1.4378277, 2.2151363)
+texture = ExtResource("9_g0m11")
 metadata/_edit_use_anchors_ = true
 
 [node name="GladiatorSpawn" type="Marker2D" parent="."]

@@ -9,4 +9,4 @@ type = 3
 value = 1.2
 name_passive = "Increased Attack Speed"
 icon = ExtResource("1_jokap")
-price = 50
+price = 5

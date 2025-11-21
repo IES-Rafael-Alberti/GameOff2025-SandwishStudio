@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b10j5vwr4mjk4"
-path="res://.godot/imported/Crit.png-3dc37214b793e02aba65b26a43ac37fa.ctex"
+uid="uid://b4bl7jr41p7bk"
+path="res://.godot/imported/Inventario.png-0f047d35428a9929a09d35e9846d0dee.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Crit.png"
-dest_files=["res://.godot/imported/Crit.png-3dc37214b793e02aba65b26a43ac37fa.ctex"]
+source_file="res://assets/inventario/Inventario.png"
+dest_files=["res://.godot/imported/Inventario.png-0f047d35428a9929a09d35e9846d0dee.ctex"]
 
 [params]
 

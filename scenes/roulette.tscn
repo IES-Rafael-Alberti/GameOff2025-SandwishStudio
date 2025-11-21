@@ -1,17 +1,17 @@
 [gd_scene load_steps=13 format=3 uid="uid://bv3r20c0gu33v"]
 
 [ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_jyskt"]
-[ext_resource type="Texture2D" uid="uid://dmlid2sk24v8v" path="res://assets/palanca.png" id="2_iqt6o"]
+[ext_resource type="Texture2D" uid="uid://dpcgv05fqqjag" path="res://assets/Manivela (1) (1).png" id="2_gils2"]
 [ext_resource type="Texture2D" uid="uid://go30fno5akpc" path="res://assets/ruleta.png" id="2_jyskt"]
 [ext_resource type="Script" path="res://scripts/RouletteSlice.gd" id="4_jyskt"]
 [ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="4_k6evh"]
 [ext_resource type="Texture2D" uid="uid://qmthj5xqadhq" path="res://assets/Manilla (1).png" id="5_jyskt"]
-[ext_resource type="Texture2D" uid="uid://xr5sxokqvql1" path="res://assets/ADMG.png" id="7_gils2"]
-[ext_resource type="Texture2D" uid="uid://b10j5vwr4mjk4" path="res://assets/Crit.png" id="8_8jefs"]
-[ext_resource type="Texture2D" uid="uid://d32k775bkfw00" path="res://assets/VIDA.png" id="9_ekxsn"]
+[ext_resource type="Texture2D" uid="uid://xr5sxokqvql1" path="res://assets/inventario/ADMG.png" id="7_gils2"]
+[ext_resource type="Texture2D" uid="uid://b10j5vwr4mjk4" path="res://assets/inventario/Crit.png" id="8_8jefs"]
+[ext_resource type="Texture2D" uid="uid://d32k775bkfw00" path="res://assets/inventario/VIDA.png" id="9_ekxsn"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jyskt"]
-size = Vector2(8624.092, 368.5628)
+size = Vector2(8624.092, 436.06683)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nqo7r"]
 size = Vector2(544.9423, 240.75171)
@@ -23,16 +23,16 @@ height = 92.0
 script = ExtResource("1_jyskt")
 
 [node name="Lever" type="Sprite2D" parent="."]
-position = Vector2(893.56085, 238.00085)
+position = Vector2(878.9862, 259.94424)
 rotation = 0.6235494
-scale = Vector2(0.92160326, 1.0670819)
-texture = ExtResource("2_iqt6o")
-offset = Vector2(-3.5906982, -90.26892)
+scale = Vector2(0.873, 1)
+texture = ExtResource("2_gils2")
+offset = Vector2(0.06488037, -87.56839)
 
 [node name="AreaLever" type="Area2D" parent="Lever"]
 
 [node name="CollisionLever" type="CollisionShape2D" parent="Lever/AreaLever"]
-position = Vector2(-3.1746216, -90.42563)
+position = Vector2(0.6539917, -88.23706)
 rotation = -3.1415925
 scale = Vector2(0.0049869088, -0.6095414)
 shape = SubResource("RectangleShape2D_jyskt")
