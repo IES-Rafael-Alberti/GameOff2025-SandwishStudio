@@ -118,7 +118,7 @@ metadata/_edit_use_anchors_ = true
 scale = Vector2(0.99999994, 0.99999994)
 
 [node name="EnemyWaitSlot" type="Marker2D" parent="EnemySlots"]
-position = Vector2(539.44415, 982.52026)
+position = Vector2(594.8733, 872.9164)
 
 [node name="EnemyBattleSlot" type="Marker2D" parent="EnemySlots"]
 position = Vector2(1798.477, 880.74524)

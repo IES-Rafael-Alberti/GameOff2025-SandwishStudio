@@ -14,7 +14,9 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 	var preview = TextureRect.new()
 	preview.texture = self.texture_normal
 	preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	preview.size = Vector2(75, 75) 
+	preview.size = Vector2(75, 75)
+	preview.z_as_relative = false
+	preview.z_index = 1000
 	set_drag_preview(preview)
 	
 	self.modulate = Color(0.5, 0.5, 0.5) 
