@@ -9,4 +9,4 @@ type = 2
 value = 2.0
 name_passive = "Increased Critical Chance"
 icon = ExtResource("1_bigkk")
-price = 40
+price = 5

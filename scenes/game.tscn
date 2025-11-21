@@ -16,8 +16,8 @@
 
 [node name="game" type="Node2D"]
 script = ExtResource("1_lbhrr")
-rounds_per_day = 3
-gladiators_per_day = 2
+gold_round_base = 2
+gladiators_per_day = 4
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
 position = Vector2(182.00002, 77.99997)
