@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3 uid="uid://bwh1obe7043i"]
+[gd_scene load_steps=34 format=3 uid="uid://bwh1obe7043i"]
 
 [ext_resource type="Script" uid="uid://boom6onvffdah" path="res://scripts/store.gd" id="1_atuvt"]
 [ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="2_n3io3"]
@@ -23,9 +23,11 @@
 [ext_resource type="Resource" uid="uid://nytgdhu2kh46" path="res://resources/passives/passive_6.tres" id="15_5xsmt"]
 [ext_resource type="Shader" uid="uid://0gvrjar422gt" path="res://shaders/store.gdshader" id="16_3ro5p"]
 [ext_resource type="Texture2D" uid="uid://bht4fapjev55r" path="res://assets/Tienda.png" id="16_abbvk"]
+[ext_resource type="Texture2D" uid="uid://f2vw4p7fdno6" path="res://assets/lock_open.png" id="21_y1dpo"]
+[ext_resource type="Texture2D" uid="uid://byfhs562gleus" path="res://assets/lock_closed.png" id="22_rky2c"]
 [ext_resource type="Texture2D" uid="uid://clucu0hyocvrs" path="res://assets/CONTINUENEGRO.png" id="24_816qq"]
 [ext_resource type="Texture2D" uid="uid://dro10dcj34d2s" path="res://assets/REROLLBLANCO.png" id="25_7pi7j"]
-[ext_resource type="Texture2D" uid="uid://dthf2y24tgfel" path="res://icon.svg" id="26_7pi7j"]
+[ext_resource type="Texture2D" uid="uid://c0bn00jg5b5cb" path="res://assets/ELJETAS (1).png" id="26_7pi7j"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_3ro5p"]
 shader = ExtResource("16_3ro5p")
@@ -93,6 +95,8 @@ mouse_filter = 2
 script = ExtResource("1_atuvt")
 piece_origins = Array[ExtResource("2_n3io3")]([ExtResource("3_abbvk"), ExtResource("4_3ro5p"), ExtResource("8_5xsmt"), ExtResource("6_5xsmt"), ExtResource("7_burfl"), ExtResource("5_klwl8"), ExtResource("9_wk1we"), ExtResource("6_h7duq"), ExtResource("11_ht5i3"), ExtResource("12_816qq"), ExtResource("13_7pi7j"), ExtResource("14_ttn3v")])
 passive_origins = Array[ExtResource("9_n3io3")]([ExtResource("10_abbvk"), ExtResource("11_3ro5p"), ExtResource("12_klwl8"), ExtResource("14_burfl"), ExtResource("15_5xsmt")])
+texture_unlocked = ExtResource("21_y1dpo")
+texture_locked = ExtResource("22_rky2c")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 material = SubResource("ShaderMaterial_3ro5p")
@@ -154,7 +158,7 @@ offset_bottom = 609.31726
 size_flags_horizontal = 4
 texture_normal = ExtResource("25_7pi7j")
 
-[node name="Exit" type="TextureButton" parent="."]
+[node name="Lock" type="TextureButton" parent="."]
 layout_mode = 0
 offset_left = 1363.0494
 offset_top = 645.06433
@@ -174,8 +178,8 @@ grow_horizontal = 1
 grow_vertical = 1
 
 [node name="jetas" type="Sprite2D" parent="."]
-position = Vector2(1112.4419, 583.7781)
-scale = Vector2(2.642138, 2.577852)
+position = Vector2(1208.6299, 578.57306)
+scale = Vector2(0.3, 0.3)
 texture = ExtResource("26_7pi7j")
 
 [connection signal="pressed" from="Reroll" to="." method="generate"]

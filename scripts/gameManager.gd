@@ -100,7 +100,6 @@ func _ready():
 
 	blink_timer = randf_range(blink_interval_min, blink_interval_max)
 	_on_PlayerData_currency_changed(PlayerData.get_current_currency())
-	store.generate()
 	store.start_new_round()
 	_update_ui_labels()
 
@@ -226,7 +225,6 @@ func _on_combat_finished(player_won: bool = false):
 		print("--- Empezando Ronda %d ---" % current_round)
 		_update_ui_labels()
 		set_state(GameState.SHOP)
-		store.generate()
 		store.start_new_round()
 		if combat_scene:
 			combat_scene.spawn_enemy_one()
