@@ -45,7 +45,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(0.114, 0.09)]
+"values": [Vector2(1.7, 1.342)]
 }
 
 [sub_resource type="Animation" id="Animation_abbvk"]
@@ -60,7 +60,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0, 1),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(0.114, 0.09), Vector2(1e-05, 0.09)]
+"values": [Vector2(1.7, 1.342), Vector2(0, 1.342)]
 }
 
 [sub_resource type="Animation" id="Animation_3ro5p"]
@@ -72,10 +72,10 @@ tracks/0/path = NodePath("Sprite2D:scale")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 1),
+"times": PackedFloat32Array(0.033333335, 1),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(1e-05, 0.09), Vector2(0.114, 0.09)]
+"values": [Vector2(0, 1.342), Vector2(1.7, 1.342)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_h7duq"]
@@ -96,10 +96,10 @@ passive_origins = Array[ExtResource("9_n3io3")]([ExtResource("10_abbvk"), ExtRes
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 material = SubResource("ShaderMaterial_3ro5p")
-position = Vector2(1763.1869, 392.99298)
-scale = Vector2(0.114, 0.09)
+position = Vector2(822.581, 429.71207)
+scale = Vector2(1.7, 1.342)
 texture = ExtResource("16_abbvk")
-offset = Vector2(-7887.7275, 421.19434)
+offset = Vector2(1, 1)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
