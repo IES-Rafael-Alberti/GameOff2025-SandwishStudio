@@ -12,6 +12,7 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 		return null
 		
 	var preview = TextureRect.new()
+	preview.z_index = 4096
 	preview.texture = self.texture_normal
 	preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	preview.size = Vector2(75, 75) 
