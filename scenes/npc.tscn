@@ -1,9 +1,9 @@
-[gd_scene load_steps=42 format=3 uid="uid://bekys0sh7i1sf"]
+[gd_scene load_steps=40 format=3 uid="uid://bekys0sh7i1sf"]
 
 [ext_resource type="Shader" uid="uid://kl5qcx1hsdjw" path="res://assets/shaders/shock_damage.gdshader" id="1_rv78h"]
 [ext_resource type="Script" uid="uid://dkh16s35ytd1p" path="res://scripts/npc.gd" id="2_rv78h"]
 [ext_resource type="Texture2D" uid="uid://bjeo7ufgwd3m8" path="res://assets/Combat_scene/allies_final/Banshee.png" id="3_n0klm"]
-[ext_resource type="Texture2D" uid="uid://06bjj8sbk6go" path="res://assets/Combat_scene/allies_final/Dragon.png" id="4_u2tho"]
+[ext_resource type="SpriteFrames" uid="uid://cfn77wm5oqo8k" path="res://resources/allies_Frames/dragon.tres" id="4_n0klm"]
 [ext_resource type="Texture2D" uid="uid://dvwgmmdg5h61o" path="res://assets/Combat_scene/allies_final/Draugr.png" id="5_ca6vw"]
 [ext_resource type="Texture2D" uid="uid://cuwm3qv7oa501" path="res://assets/Combat_scene/allies_final/Jotunn.png" id="6_t8u8m"]
 [ext_resource type="SpriteFrames" uid="uid://osibphf1sb75" path="res://resources/allies_Frames/kappa.tres" id="7_n0klm"]
@@ -46,21 +46,6 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_asmvl")
-}],
-"loop": true,
-"name": &"idle",
-"speed": 5.0
-}]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_f15ni"]
-atlas = ExtResource("4_u2tho")
-region = Rect2(0, 0, 289, 212)
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_u8ld7"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_f15ni")
 }],
 "loop": true,
 "name": &"idle",
@@ -225,7 +210,7 @@ flip_h = true
 [node name="dragon" type="AnimatedSprite2D" parent="."]
 visible = false
 scale = Vector2(0.001, 0.001)
-sprite_frames = SubResource("SpriteFrames_u8ld7")
+sprite_frames = ExtResource("4_n0klm")
 animation = &"idle"
 flip_h = true
 

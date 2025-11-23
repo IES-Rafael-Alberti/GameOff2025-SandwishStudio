@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://dd8wqmfs2cj1j"]
+[gd_scene load_steps=15 format=3 uid="uid://dd8wqmfs2cj1j"]
 
 [ext_resource type="Script" uid="uid://bpnxk43sopml" path="res://scripts/gameManager.gd" id="1_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://hbcgudcjh0wn" path="res://scenes/inventory.tscn" id="2_lbhrr"]
@@ -12,6 +12,7 @@
 [ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/jotun.tres" id="6_trtic"]
 [ext_resource type="Resource" uid="uid://cxbloivuqkrwe" path="res://resources/pieces/valkirias.tres" id="7_ir15t"]
 [ext_resource type="Texture2D" uid="uid://dycbttp2vpnv1" path="res://assets/Tiny Swords (Free Pack)/Terrain/Water Background color.png" id="12_dinhu"]
+[ext_resource type="Texture2D" uid="uid://bse428jrn0sbc" path="res://assets/Waves.png" id="12_trtic"]
 [ext_resource type="PackedScene" uid="uid://cj8n2p21wqyqt" path="res://scenes/help_over_lay.tscn" id="13_kvuet"]
 
 [node name="game" type="Node2D"]
@@ -74,6 +75,15 @@ offset_right = 882.0
 offset_bottom = 373.0
 theme_override_font_sizes/font_size = 28
 
+[node name="TextureRect" type="TextureRect" parent="RoundLabel"]
+layout_mode = 0
+offset_left = -57.999992
+offset_top = -6.0
+offset_right = 1717.0
+offset_bottom = 1621.0
+scale = Vector2(0.030910943, 0.029605173)
+texture = ExtResource("12_trtic")
+
 [node name="DayLabel" type="Label" parent="."]
 z_index = 4
 offset_left = 925.0
@@ -85,10 +95,10 @@ theme_override_font_sizes/font_size = 28
 
 [node name="GladiatorLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 820.0
-offset_top = 53.0
-offset_right = 940.0
-offset_bottom = 92.0
+offset_left = 824.0
+offset_top = 40.0
+offset_right = 944.0
+offset_bottom = 79.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 
