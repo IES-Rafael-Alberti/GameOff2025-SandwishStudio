@@ -3,7 +3,7 @@ extends Node
 
 signal currency_changed(new_amount: int)
 
-@export var initial_currency: int = 1000
+@export var initial_currency: int = 10
 var current_currency: int = 0
 
 func _ready() -> void:
