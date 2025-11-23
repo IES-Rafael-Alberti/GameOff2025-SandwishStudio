@@ -25,10 +25,10 @@ scale = Vector2(0.35115045, 0.22791663)
 
 [node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
 z_index = 4
-offset_left = 54.000004
-offset_top = 368.0
-offset_right = 54.000004
-offset_bottom = 768.0
+offset_left = 56.0
+offset_top = 380.0
+offset_right = 56.0
+offset_bottom = 780.0
 scale = Vector2(0.77105117, 0.77105117)
 initial_pieces = Array[ExtResource("3_kvpfn")]([ExtResource("4_dinhu"), ExtResource("5_kvuet"), ExtResource("6_trtic"), ExtResource("7_ir15t")])
 
@@ -43,7 +43,7 @@ scale = Vector2(0.8860778, 0.88381195)
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
 z_index = 4
-position = Vector2(130, 349.00003)
+position = Vector2(132, 361.00003)
 scale = Vector2(0.8845031, 0.8845031)
 
 [node name="Camera2D" type="Camera2D" parent="."]
@@ -52,43 +52,43 @@ zoom = Vector2(0.7, 0.7)
 
 [node name="gold_label" type="Label" parent="."]
 z_index = 4
-offset_left = 176.0
-offset_top = 376.0
-offset_right = 313.0
-offset_bottom = 415.0
+offset_left = 178.0
+offset_top = 388.0
+offset_right = 315.0
+offset_bottom = 427.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 
 [node name="ButtonShop" parent="." instance=ExtResource("6_p57ef")]
 z_index = 4
-offset_left = 1627.0
-offset_top = 436.0
-offset_right = 1731.0
-offset_bottom = 819.0
+offset_left = 1629.0
+offset_top = 448.0
+offset_right = 1733.0
+offset_bottom = 831.0
 
 [node name="RoundLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 336.0
-offset_top = 322.0
-offset_right = 880.0
-offset_bottom = 361.0
+offset_left = 338.0
+offset_top = 334.0
+offset_right = 882.0
+offset_bottom = 373.0
 theme_override_font_sizes/font_size = 28
 
 [node name="DayLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 923.0
-offset_top = 37.0
-offset_right = 1071.0
-offset_bottom = 76.0
+offset_left = 925.0
+offset_top = 49.0
+offset_right = 1073.0
+offset_bottom = 88.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 
 [node name="GladiatorLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 818.0
-offset_top = 41.0
-offset_right = 938.0
-offset_bottom = 80.0
+offset_left = 820.0
+offset_top = 53.0
+offset_right = 940.0
+offset_bottom = 92.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 
@@ -120,19 +120,34 @@ visible = false
 z_index = 4
 offset_left = -4.0
 offset_top = -2.0
-offset_right = 1681.0
-offset_bottom = 1093.0
+offset_right = 1165.0
+offset_bottom = 766.0
 mouse_filter = 0
 texture = ExtResource("12_dinhu")
 
-[node name="Label" type="Label" parent="DayFinished"]
+[node name="NextDayLabel" type="Label" parent="DayFinished"]
 z_index = 4
-offset_left = 333.0
-offset_top = 287.0
-offset_right = 841.0
-offset_bottom = 386.0
+offset_left = 367.0
+offset_top = 142.0
+offset_right = 875.0
+offset_bottom = 241.0
 theme_override_font_sizes/font_size = 72
-text = "SIGUIENTE DIA"
+
+[node name="HSlider" type="HSlider" parent="DayFinished"]
+z_index = 4
+offset_left = 358.0
+offset_top = 334.0
+offset_right = 857.0
+offset_bottom = 350.0
+
+[node name="InfoLabel" type="Label" parent="DayFinished"]
+z_index = 4
+anchors_preset = -1
+anchor_bottom = 0.015000001
+offset_left = 469.0
+offset_top = 369.0
+offset_right = 743.0
+offset_bottom = 683.6
 
 [node name="Win" type="CanvasLayer" parent="."]
 visible = false
