@@ -9,6 +9,7 @@ id = "japonesa.oni"
 display_name = "oni"
 race = 1
 rarity = 3
+health_bar_offset = Vector2(0, -100)
 frames = ExtResource("1_3wukw")
 stats = {
 "BRONCE": {

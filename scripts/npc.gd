@@ -87,17 +87,7 @@ func _update_healthbar() -> void:
 	if not is_instance_valid(health_bar): return
 	health_bar.max_value = max_health
 	health_bar.value = health
-	var ratio := 0.0
-	if max_health > 0.0:
-		ratio = clamp(health / max_health, 0.0, 1.0)
-	# Colors
-	var color_empty := Color(1.0, 0.0, 0.0)
-	var color_full := Color(0.0, 1.0, 0.0)
-	var final_color := color_empty.lerp(color_full, ratio)
 	
-	health_bar.modulate = final_color
-	
-	health_bar.visible = show_healthbar and ( not hide_when_full or health < max_health)
 func _show_damage_text(amount: float, was_crit: bool = false) -> void:
 	# Instanciamos el Label
 	var dmg_label: Label = DAMAGE_TEXT_SCENE.instantiate()
