@@ -8,6 +8,7 @@ script = ExtResource("1_vrrwg")
 id = "japonesa.Kappa"
 display_name = "Kappa"
 race = 1
+health_bar_offset = Vector2(-40, -100)
 frames = ExtResource("1_03by8")
 stats = {
 "BRONCE": {
