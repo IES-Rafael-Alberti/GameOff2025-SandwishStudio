@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bpvm2wcd1jg3r"
-path="res://.godot/imported/Draugr.png-c9aa1076d3285b30fa29a57516719279.ctex"
+uid="uid://cuwm3qv7oa501"
+path="res://.godot/imported/Jotunn.png-3bace8e7eaaf45425f0f7f2cab7f04cf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Combat_scene/allies_scaled/Draugr.png"
-dest_files=["res://.godot/imported/Draugr.png-c9aa1076d3285b30fa29a57516719279.ctex"]
+source_file="res://assets/Combat_scene/allies_final/Jotunn.png"
+dest_files=["res://.godot/imported/Jotunn.png-3bace8e7eaaf45425f0f7f2cab7f04cf.ctex"]
 
 [params]
 

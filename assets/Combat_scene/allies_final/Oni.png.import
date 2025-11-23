@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://06bjj8sbk6go"
-path="res://.godot/imported/Dragon.png-4c684510bcf00cec34856b650cd91a61.ctex"
+uid="uid://cxhtyg5j77yqb"
+path="res://.godot/imported/Oni.png-498a07e5287b4babd7b68266e02f0fa0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Combat_scene/allies_scaled/Dragon.png"
-dest_files=["res://.godot/imported/Dragon.png-4c684510bcf00cec34856b650cd91a61.ctex"]
+source_file="res://assets/Combat_scene/allies_final/Oni.png"
+dest_files=["res://.godot/imported/Oni.png-498a07e5287b4babd7b68266e02f0fa0.ctex"]
 
 [params]
 

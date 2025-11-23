@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://du44wv6v1u53l"
-path="res://.godot/imported/Kappa.png-f9abc99fba3dcb53b773832a2bcd66e8.ctex"
+uid="uid://06bjj8sbk6go"
+path="res://.godot/imported/Dragon.png-c9a4d62890488f75ed70cc1c4cdb349e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Combat_scene/allies_scaled/Kappa.png"
-dest_files=["res://.godot/imported/Kappa.png-f9abc99fba3dcb53b773832a2bcd66e8.ctex"]
+source_file="res://assets/Combat_scene/allies_final/Dragon.png"
+dest_files=["res://.godot/imported/Dragon.png-c9a4d62890488f75ed70cc1c4cdb349e.ctex"]
 
 [params]
 

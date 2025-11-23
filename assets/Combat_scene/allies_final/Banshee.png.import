@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bj8uierm6xb51"
-path="res://.godot/imported/Dragon.png-33a26f68eab57c0bf5d6806659baa2f4.ctex"
+uid="uid://bjeo7ufgwd3m8"
+path="res://.godot/imported/Banshee.png-14d0055e7eee5423f2aedf1fecc08fb7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Combat_scene/allies/Dragon.png"
-dest_files=["res://.godot/imported/Dragon.png-33a26f68eab57c0bf5d6806659baa2f4.ctex"]
+source_file="res://assets/Combat_scene/allies_final/Banshee.png"
+dest_files=["res://.godot/imported/Banshee.png-14d0055e7eee5423f2aedf1fecc08fb7.ctex"]
 
 [params]
 

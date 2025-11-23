@@ -30,7 +30,6 @@ var max_health: float = 1.0
 var health: float = 1.0
 # Gold pool that unit can drop
 var gold_pool: int = 0
-var display_name: String = ""
 @onready var health_bar: ProgressBar = $healthBar
 
 # Variables para almacenar las bonificaciones de GlobalStats
@@ -78,6 +77,7 @@ func _ready() -> void:
 		push_warning("NPC sin frames en inspector")
 
 	_update_healthbar()
+	_apply_healthbar_offset_from_res()
 
 	for ab in abilities:
 		if ab: ab.on_spwan(self)
@@ -378,3 +378,11 @@ func _show_heal_text(amount: float) -> void:
 	tween.finished.connect(func() -> void:
 		if is_instance_valid(heal_label): heal_label.queue_free()
 	)
+
+func _apply_healthbar_offset_from_res() -> void:
+	if not is_instance_valid(health_bar):
+		return
+	if npc_res == null:
+		return
+
+	health_bar.position = npc_res.health_bar_offset

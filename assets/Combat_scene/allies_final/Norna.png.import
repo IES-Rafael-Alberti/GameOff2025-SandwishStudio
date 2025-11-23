@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ds8v0y2cf7tc2"
-path="res://.godot/imported/Kappa.png-8e118c549cfc4579516ca9296d7a54e4.ctex"
+uid="uid://dit6xt6dt02md"
+path="res://.godot/imported/Norna.png-c31d0055c3a62a29db4ae62b6a57ef14.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Combat_scene/allies/Kappa.png"
-dest_files=["res://.godot/imported/Kappa.png-8e118c549cfc4579516ca9296d7a54e4.ctex"]
+source_file="res://assets/Combat_scene/allies_final/Norna.png"
+dest_files=["res://.godot/imported/Norna.png-c31d0055c3a62a29db4ae62b6a57ef14.ctex"]
 
 [params]
 

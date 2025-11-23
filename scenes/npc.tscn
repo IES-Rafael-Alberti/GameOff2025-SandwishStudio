@@ -1,17 +1,17 @@
-[gd_scene load_steps=44 format=3 uid="uid://bekys0sh7i1sf"]
+[gd_scene load_steps=42 format=3 uid="uid://bekys0sh7i1sf"]
 
 [ext_resource type="Shader" uid="uid://kl5qcx1hsdjw" path="res://assets/shaders/shock_damage.gdshader" id="1_rv78h"]
 [ext_resource type="Script" uid="uid://dkh16s35ytd1p" path="res://scripts/npc.gd" id="2_rv78h"]
-[ext_resource type="Texture2D" uid="uid://bjeo7ufgwd3m8" path="res://assets/Combat_scene/allies_scaled/Banshee (1) (1).png" id="3_n0klm"]
-[ext_resource type="Texture2D" uid="uid://06bjj8sbk6go" path="res://assets/Combat_scene/allies_scaled/Dragon.png" id="4_u2tho"]
+[ext_resource type="Texture2D" uid="uid://bjeo7ufgwd3m8" path="res://assets/Combat_scene/allies_final/Banshee.png" id="3_n0klm"]
+[ext_resource type="Texture2D" uid="uid://06bjj8sbk6go" path="res://assets/Combat_scene/allies_final/Dragon.png" id="4_u2tho"]
 [ext_resource type="Texture2D" uid="uid://dvwgmmdg5h61o" path="res://assets/Combat_scene/allies_final/Draugr.png" id="5_ca6vw"]
-[ext_resource type="Texture2D" uid="uid://cuwm3qv7oa501" path="res://assets/Combat_scene/allies_scaled/Jotunn.png" id="6_t8u8m"]
-[ext_resource type="Texture2D" uid="uid://du44wv6v1u53l" path="res://assets/Combat_scene/allies_scaled/Kappa.png" id="7_d56e8"]
-[ext_resource type="Texture2D" uid="uid://t7qcd3si4vrn" path="res://assets/Combat_scene/allies_scaled/Kozo.png" id="8_ewlk4"]
-[ext_resource type="Texture2D" uid="uid://dit6xt6dt02md" path="res://assets/Combat_scene/allies_scaled/Norna.png" id="9_bw2c7"]
-[ext_resource type="Texture2D" uid="uid://cxhtyg5j77yqb" path="res://assets/Combat_scene/allies_scaled/Oni.png" id="10_gc4mq"]
-[ext_resource type="Texture2D" uid="uid://ckd5yp5d85800" path="res://assets/Combat_scene/allies_scaled/Satiro.png" id="11_2gr28"]
-[ext_resource type="Texture2D" uid="uid://5hd1trsnn0no" path="res://assets/Combat_scene/allies_scaled/Tengu.png" id="12_tkdcp"]
+[ext_resource type="Texture2D" uid="uid://cuwm3qv7oa501" path="res://assets/Combat_scene/allies_final/Jotunn.png" id="6_t8u8m"]
+[ext_resource type="SpriteFrames" uid="uid://osibphf1sb75" path="res://resources/allies_Frames/kappa.tres" id="7_n0klm"]
+[ext_resource type="Texture2D" uid="uid://t7qcd3si4vrn" path="res://assets/Combat_scene/allies_final/Kozo.png" id="8_ewlk4"]
+[ext_resource type="Texture2D" uid="uid://dit6xt6dt02md" path="res://assets/Combat_scene/allies_final/Norna.png" id="9_bw2c7"]
+[ext_resource type="Texture2D" uid="uid://cxhtyg5j77yqb" path="res://assets/Combat_scene/allies_final/Oni.png" id="10_gc4mq"]
+[ext_resource type="Texture2D" uid="uid://ckd5yp5d85800" path="res://assets/Combat_scene/allies_final/Satiro.png" id="11_2gr28"]
+[ext_resource type="Texture2D" uid="uid://5hd1trsnn0no" path="res://assets/Combat_scene/allies_final/Tengu.png" id="12_tkdcp"]
 [ext_resource type="SpriteFrames" uid="uid://drxe6ftchok7c" path="res://resources/allies_Frames/trasgu.tres" id="13_wuru7"]
 [ext_resource type="Texture2D" uid="uid://cbtylxcnsv7kh" path="res://assets/Combat_scene/allies_final/Valk.png" id="14_bll4x"]
 [ext_resource type="SpriteFrames" uid="uid://rjwlxoj38qir" path="res://resources/warrior/red_gladiator_animation.tres" id="15_yf2ql"]
@@ -91,21 +91,6 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_va3n3")
-}],
-"loop": true,
-"name": &"idle",
-"speed": 5.0
-}]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_whdc8"]
-atlas = ExtResource("7_d56e8")
-region = Rect2(0, 0, 249, 383)
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_8hjb1"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_whdc8")
 }],
 "loop": true,
 "name": &"idle",
@@ -258,7 +243,7 @@ flip_h = true
 
 [node name="kappa" type="AnimatedSprite2D" parent="."]
 visible = false
-sprite_frames = SubResource("SpriteFrames_8hjb1")
+sprite_frames = ExtResource("7_n0klm")
 animation = &"idle"
 flip_h = true
 

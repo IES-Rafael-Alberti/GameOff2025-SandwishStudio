@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cuwm3qv7oa501"
-path="res://.godot/imported/Jotunn.png-f6d06ca66085f91fcb05f1ca17daf1bf.ctex"
+uid="uid://5hd1trsnn0no"
+path="res://.godot/imported/Tengu.png-3f8871158365318c1699eb88e9c4b184.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Combat_scene/allies_scaled/Jotunn.png"
-dest_files=["res://.godot/imported/Jotunn.png-f6d06ca66085f91fcb05f1ca17daf1bf.ctex"]
+source_file="res://assets/Combat_scene/allies_final/Tengu.png"
+dest_files=["res://.godot/imported/Tengu.png-3f8871158365318c1699eb88e9c4b184.ctex"]
 
 [params]
 
