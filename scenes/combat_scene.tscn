@@ -30,7 +30,6 @@ z_index = 1
 scale = Vector2(0.99999994, 0.99999994)
 
 [node name="Doors" type="TextureRect" parent="."]
-visible = false
 z_index = 2
 offset_left = -292.98248
 offset_top = -230.95087
@@ -41,7 +40,6 @@ texture = ExtResource("8_6sw3s")
 metadata/_edit_use_anchors_ = true
 
 [node name="pillars" type="TextureRect" parent="."]
-visible = false
 z_index = 2
 offset_left = -1141.2458
 offset_top = -966.8625
