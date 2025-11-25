@@ -90,8 +90,15 @@ func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int 
 		bg_tint = Color(0.1, 0.1, 0.05, 0.95)
 
 	# --- C. STYLES ---
+	
 	name_label.text = title_text.to_upper()
-	name_label.label_settings = LabelSettings.new()
+	var theme_font := get_theme_default_font() # Godot 4
+	var ls := LabelSettings.new()
+	ls.font = theme_font
+	ls.font_color = rarity_color
+	ls.font_size = 22
+	ls.outline_size = 4
+	name_label.label_settings = ls
 	name_label.label_settings.font_color = rarity_color
 	name_label.label_settings.font_size = 22
 	name_label.label_settings.outline_size = 6

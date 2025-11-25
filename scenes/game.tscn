@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://dd8wqmfs2cj1j"]
+[gd_scene load_steps=16 format=3 uid="uid://dd8wqmfs2cj1j"]
 
 [ext_resource type="Script" uid="uid://bpnxk43sopml" path="res://scripts/gameManager.gd" id="1_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://hbcgudcjh0wn" path="res://scenes/inventory.tscn" id="2_lbhrr"]
@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://bse428jrn0sbc" path="res://assets/Waves.png" id="12_trtic"]
 [ext_resource type="PackedScene" uid="uid://cj8n2p21wqyqt" path="res://scenes/help_over_lay.tscn" id="13_kvuet"]
 [ext_resource type="PackedScene" uid="uid://bbfqm8pblt056" path="res://scenes/el_jetas.tscn" id="13_trtic"]
+[ext_resource type="Texture2D" uid="uid://ca521tx5dgil" path="res://assets/GladsIcon (1).png" id="15_ir15t"]
 
 [node name="game" type="Node2D"]
 script = ExtResource("1_lbhrr")
@@ -21,7 +22,7 @@ gold_round_base = 2
 gladiators_per_day = 4
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
-position = Vector2(182.00002, 77.99997)
+position = Vector2(182.00002, 88.99997)
 scale = Vector2(0.35115045, 0.22791663)
 
 [node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
@@ -91,21 +92,24 @@ texture = ExtResource("12_trtic")
 
 [node name="DayLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 902.0
-offset_top = 36.0
-offset_right = 1050.0
-offset_bottom = 84.0
+offset_left = 895.0
+offset_top = 38.0
+offset_right = 1043.0
+offset_bottom = 86.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="GladiatorLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 776.0
-offset_top = 36.0
-offset_right = 896.0
-offset_bottom = 84.0
+offset_left = 807.0
+offset_top = 37.0
+offset_right = 885.0
+offset_bottom = 85.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
+vertical_alignment = 1
 
 [node name="GameOver" type="CanvasLayer" parent="."]
 visible = false
@@ -191,3 +195,13 @@ text = "Has ganado crack :)"
 z_index = 5
 position = Vector2(1682.9999, 540.00006)
 rotation = -0.7558317
+
+[node name="gladiatorLabel" type="TextureRect" parent="."]
+z_index = 4
+offset_left = 770.0
+offset_top = 41.0
+offset_right = 801.0
+offset_bottom = 86.0
+texture = ExtResource("15_ir15t")
+expand_mode = 1
+stretch_mode = 4

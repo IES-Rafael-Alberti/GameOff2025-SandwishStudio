@@ -137,7 +137,7 @@ func _process(delta: float) -> void:
 
 func _update_ui_labels() -> void:
 	if is_instance_valid(day_label):
-		day_label.text = "Día " + str(current_day) + " / " + str(max_days)
+		day_label.text = "Day " + str(current_day) + " / " + str(max_days)
 	
 	if is_instance_valid(gladiator_label):
 		gladiator_label.text = "%d/%d" % [gladiators_defeated, gladiators_per_day]
