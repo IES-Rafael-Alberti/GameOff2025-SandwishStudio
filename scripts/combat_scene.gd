@@ -13,7 +13,21 @@ const ALLY_LIMIT := 14
 const ENEMY_LIMIT := 1
 
 var round_gold_loot: int = 0
-# --- NUEVO: Variables de Escalado Diario (Scaling) ---
+# Animacion de golpear 
+@export_group("Animación de Ataque")
+@export_subgroup("Aliados (PieceRes)")
+@export var ally_attack_offset: Vector2 = Vector2(-25, 10) # Izquierda + un pelín hacia abajo
+@export var ally_attack_rotation_deg: float = -8.0          # Gira hacia la izquierda/abajo
+
+@export_subgroup("Gladiador (npcRes)")
+@export var enemy_attack_offset: Vector2 = Vector2(25, 10)  # Derecha + un pelín hacia abajo
+@export var enemy_attack_rotation_deg: float = 8.0          # Gira hacia la derecha/abajo
+
+@export_subgroup("Tiempos")
+@export var attack_lunge_duration: float = 0.08             # Ida
+@export var attack_return_duration: float = 0.12            # Vuelta
+
+# Variables de Escalado Diario (Scaling)
 @export_group("Escalado de Dificultad (Por Día)")
 @export_subgroup("Crecimiento Exponencial")
 @export var scaling_hp_mult: float = 1.4      
@@ -472,9 +486,48 @@ func _cleanup_allies_and_reset() -> void:
 	ally_npcs.clear()
 	ally_spawn_order_counter = 0
 
+func _play_attack_anim(attacker: npc) -> void:
+	if not is_instance_valid(attacker):
+		return
+	var original_pos: Vector2 = attacker.position
+	var original_rot_deg: float = attacker.rotation_degrees
+	
+	var offset := Vector2.ZERO
+	var target_rot_deg := original_rot_deg
+	
+	if attacker.team == npc.Team.ALLY:
+		offset = ally_attack_offset
+		target_rot_deg = original_rot_deg + ally_attack_rotation_deg
+	else:
+		offset = enemy_attack_offset
+		target_rot_deg + enemy_attack_rotation_deg
+		
+	if attacker.has_meta("attack_tween"):
+		var old_tween: Tween = attacker.get_meta("attack_tween")
+		if is_instance_valid(old_tween):
+			old_tween.kill()
+	
+	var tween := create_tween()
+	attacker.set_meta("attacker", tween)
+	
+	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	
+	var forward_pos := original_pos + offset
+	
+	# Animacion
+	tween.tween_property(attacker, "position", forward_pos, attack_lunge_duration)
+	tween.parallel().tween_property(attacker, "rotation_degrees", target_rot_deg, attack_return_duration)
+	# Pos despues
+	tween.chain().tween_property(attacker, "position", original_pos, attack_return_duration)
+	tween.parallel().tween_property(attacker, "rotation_degrees", original_rot_deg, attack_return_duration)
+
 func _do_attack(attacker: npc, defender: npc) -> void:
 	if not attacker.can_damage(defender): return
 	if attacker.npc_res == null: return
+	
+	# Mostrar animacion
+	_play_attack_anim(attacker)
+	
 	attacker.notify_before_attack(defender)
 	var base := attacker.get_damage(defender)
 	var dmg := base

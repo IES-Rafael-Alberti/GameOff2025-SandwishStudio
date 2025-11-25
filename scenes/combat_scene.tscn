@@ -17,11 +17,11 @@ script = ExtResource("1_ivkwx")
 enemy_res = Array[ExtResource("2_0vylu")]([ExtResource("3_2edba"), ExtResource("4_6ovae"), ExtResource("5_ivkwx"), ExtResource("6_6sw3s")])
 
 [node name="BattleField" type="TextureRect" parent="."]
-offset_left = -291.00287
-offset_top = -227.0365
-offset_right = 3215.997
-offset_bottom = 511.9635
-scale = Vector2(1.373091, 2.1140316)
+offset_left = -346.43198
+offset_top = -209.42166
+offset_right = 3160.568
+offset_bottom = 529.57837
+scale = Vector2(1.3923745, 2.1140316)
 texture = ExtResource("7_ivkwx")
 metadata/_edit_use_anchors_ = true
 
@@ -31,21 +31,21 @@ scale = Vector2(0.99999994, 0.99999994)
 
 [node name="Doors" type="TextureRect" parent="."]
 z_index = 2
-offset_left = -292.98248
-offset_top = -230.95087
-offset_right = 3214.0176
-offset_bottom = 508.04913
-scale = Vector2(1.373091, 2.1140316)
+offset_left = -348.41174
+offset_top = -213.33603
+offset_right = 3158.5884
+offset_bottom = 525.66394
+scale = Vector2(1.3923745, 2.1140316)
 texture = ExtResource("8_6sw3s")
 metadata/_edit_use_anchors_ = true
 
 [node name="pillars" type="TextureRect" parent="."]
 z_index = 2
-offset_left = -1141.2458
+offset_left = -1167.9706
 offset_top = -966.8625
-offset_right = 3123.7542
+offset_right = 3097.0293
 offset_bottom = 569.1375
-scale = Vector2(1.4378277, 2.2151363)
+scale = Vector2(1.447367, 2.4740453)
 texture = ExtResource("9_g0m11")
 metadata/_edit_use_anchors_ = true
 
