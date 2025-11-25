@@ -327,33 +327,32 @@ func show_synergy_tooltip(race_name: String, current_count: int, max_count: int,
 	sell_price_label.hide()
 	show()
 
-# ==============================================================================
-# 3. NUEVO: TOOLTIP DE LISTA DE PASIVAS (ESTILO TABLA)
-# ==============================================================================
 func show_passive_list_tooltip(active_passives: Dictionary) -> void:
 	_ensure_units_grid_exists()
 	for child in units_grid.get_children(): child.queue_free()
 	
-	# Estilo
-	name_label.text = "MEJORAS ACTIVAS"
+	# --- ESTILO DEL PANEL ---
+	name_label.text = "ESTADÍSTICAS"
 	name_label.label_settings = LabelSettings.new()
 	name_label.label_settings.font_color = Color("#FFD700") # Dorado
-	name_label.label_settings.font_size = 26
+	name_label.label_settings.font_size = 24
 	name_label.label_settings.outline_size = 6
 	name_label.label_settings.outline_color = Color(0, 0, 0, 1)
 	
 	if card_style:
 		card_style.border_color = Color("#FFD700")
-		card_style.bg_color = Color(0.08, 0.08, 0.12, 0.98) 
+		card_style.bg_color = Color(0.08, 0.08, 0.1, 0.98) # Fondo oscuro sólido
 
 	var text = ""
 	
 	if active_passives.is_empty():
-		text += "\n[center][color=#888888][i]Inventario vacío...[/i][/color][/center]\n"
+		text += "\n[center][color=#666666][i]Inventario vacío[/i][/color][/center]\n"
 	else:
-		text += "[center][color=#aaaaaa]Efectos Acumulados:[/color][/center]\n"
+		text += "[center][color=#aaaaaa]Bonificaciones actuales:[/color][/center]\n"
 		text += "[color=#444444]━━━━━━━━━━━━━━━━━━[/color]\n"
-		text += "[table=2]" # Tabla: Columna 1 (Nombre+Stack) | Columna 2 (Valor Total)
+		
+		# Tabla de 3 columnas: Icono+Nombre | Cantidad | Total
+		text += "[table=3]"
 		
 		var keys = active_passives.keys()
 		keys.sort()
@@ -365,22 +364,43 @@ func show_passive_list_tooltip(active_passives: Dictionary) -> void:
 			
 			if not p_data: continue
 			
-			# Icono visual simple
-			var type_icon = "🔸"
+			# 1. SELECCIÓN DE ICONO REAL Y COLOR
+			var icon_path = ""
+			var name_color = "#ffffff"
+			
 			match p_data.type:
-				PassiveData.PassiveType.HEALTH_INCREASE: type_icon = "❤️"
-				PassiveData.PassiveType.CRITICAL_DAMAGE_INCREASE: type_icon = "💥"
-				PassiveData.PassiveType.CRITICAL_CHANCE_INCREASE: type_icon = "🎯"
-				PassiveData.PassiveType.ATTACK_SPEED_INCREASE: type_icon = "⚡"
-				PassiveData.PassiveType.BASE_DAMAGE_INCREASE: type_icon = "⚔️"
+				PassiveData.PassiveType.HEALTH_INCREASE: 
+					icon_path = "res://assets/inventario/VIDA.png"
+					name_color = "#ff5555" # Rojo Vida
+				PassiveData.PassiveType.CRITICAL_DAMAGE_INCREASE: 
+					icon_path = "res://assets/inventario/CritDMG.png"
+					name_color = "#ff9f43" # Naranja
+				PassiveData.PassiveType.CRITICAL_CHANCE_INCREASE: 
+					icon_path = "res://assets/inventario/Crit.png"
+					name_color = "#fab1a0" # Salmón
+				PassiveData.PassiveType.ATTACK_SPEED_INCREASE: 
+					icon_path = "res://assets/inventario/ASPEED.png"
+					name_color = "#feca57" # Amarillo
+				PassiveData.PassiveType.BASE_DAMAGE_INCREASE: 
+					icon_path = "res://assets/inventario/ADMG.png"
+					name_color = "#ee5253" # Rojo Daño
 			
-			# Nombre y Stack
-			var name_str = "[cell][font_size=18][color=#ffffff]%s %s[/color]" % [type_icon, p_data.name_passive]
-			if count > 1:
-				name_str += " [color=#ffd700]x%d[/color]" % count
-			name_str += "[/font_size][/cell]"
+			# Creamos el tag de imagen bbcode. [img=ancho]ruta[/img]
+			var icon_bbcode = ""
+			if ResourceLoader.exists(icon_path):
+				# Ajusta el tamaño (24px) para que cuadre con el texto
+				icon_bbcode = "[img=24]%s[/img]" % icon_path 
+			else:
+				icon_bbcode = "🔸" # Fallback si falla la carga
 			
-			# Cálculo
+			# 2. COLUMNA 1: Icono + Nombre
+			# Usamos [valign] si está disponible o simplemente el icono inline
+			text += "[cell][font_size=18][color=%s] %s %s  [/color][/font_size][/cell]" % [name_color, icon_bbcode, p_data.name_passive]
+			
+			# 3. COLUMNA 2: Cantidad (Estilo Badge/Etiqueta)
+			text += "[cell][center][color=#666666]x[/color][b][font_size=18][color=#ffffff]%d[/color][/font_size][/b][/center][/cell]" % count
+			
+			# 4. COLUMNA 3: Valor Total Calculado
 			var base_val = float(p_data.value)
 			var total_val = base_val * count
 			var val_str = ""
@@ -392,8 +412,7 @@ func show_passive_list_tooltip(active_passives: Dictionary) -> void:
 			else:
 				val_str = "+%.1f" % total_val
 				
-			var desc_str = "[cell][p align=right][font_size=18][b][color=#55efc4]%s[/color][/b][/font_size][/p][/cell]" % val_str
-			text += name_str + desc_str
+			text += "[cell][p align=right][b][font_size=18][color=#55efc4]%s[/color][/font_size][/b][/p][/cell]" % val_str
 			
 		text += "[/table]"
 		text += "\n[color=#444444]━━━━━━━━━━━━━━━━━━[/color]"

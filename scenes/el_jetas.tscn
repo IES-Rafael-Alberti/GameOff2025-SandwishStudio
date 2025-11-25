@@ -3,22 +3,6 @@
 [ext_resource type="Texture2D" uid="uid://c0bn00jg5b5cb" path="res://assets/ELJETAS (1).png" id="1_5ctqt"]
 [ext_resource type="PackedScene" uid="uid://bevacqmdtykqr" path="res://scenes/button_shop.tscn" id="2_qgppr"]
 
-[sub_resource type="Animation" id="Animation_5ctqt"]
-resource_name = "show"
-length = 3.0
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 1, 2.015254, 3),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 0,
-"values": [Vector2(1890, 482.99985), Vector2(1790, 528.0001), Vector2(1693, 538), Vector2(1693, 538)]
-}
-
 [sub_resource type="Animation" id="Animation_qgppr"]
 length = 0.001
 tracks/0/type = "value"
@@ -44,10 +28,26 @@ tracks/0/path = NodePath(".:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 1.0310602, 2.0333333, 3.0345976, 4.030508, 4.9326854),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"times": PackedFloat32Array(0, 1.0310602, 2.0333333, 3.0345976),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 0,
-"values": [Vector2(1890, 482.99985), Vector2(1980, 528.00006), Vector2(1890, 482.99985), Vector2(1776, 835.0001), Vector2(1724, 790), Vector2(1734, 931)]
+"values": [Vector2(1890, 482.99985), Vector2(1980, 528.00006), Vector2(1890, 482.99985), Vector2(1776, 835.0001)]
+}
+
+[sub_resource type="Animation" id="Animation_5ctqt"]
+resource_name = "show"
+length = 3.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1, 2.015254, 3),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(1890, 482.99985), Vector2(1790, 528.0001), Vector2(1693, 538), Vector2(1693, 538)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_qgppr"]

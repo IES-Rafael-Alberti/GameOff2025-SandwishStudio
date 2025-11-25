@@ -108,6 +108,7 @@ offset = Vector2(-486.9471, -7.8739624)
 libraries = {
 &"": SubResource("AnimationLibrary_h7duq")
 }
+speed_scale = 0.5
 
 [node name="piece_label" type="Label" parent="."]
 layout_mode = 0

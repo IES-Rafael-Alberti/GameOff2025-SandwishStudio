@@ -10,7 +10,6 @@ extends Control
 @onready var passive_zone: HBoxContainer = $passive_zone
 @onready var reroll_button: TextureButton = $Reroll
 
-# Referencia al Botón de Candado
 @onready var lock_button: TextureButton = $Lock 
 
 # --- CONFIGURACIÓN ---
@@ -35,7 +34,7 @@ extends Control
 @export_range(0, 100) var prob_epico: int = 8
 @export_range(0, 100) var prob_legendario: int = 2
 
-# --- SISTEMA DE BLOQUEO (LOCK) ---
+# --- SISTEMA DE BLOQUEO ---
 @export_group("Sistema de Bloqueo")
 @export var texture_unlocked: Texture2D 
 @export var texture_locked: Texture2D   
@@ -50,11 +49,18 @@ var _rerolls_this_round: int = 0
 var reroll_label: Label
 var current_passive_buttons: Array = []
 
+var is_rerolling: bool = false
+
 func _ready() -> void:
 	highlight_material = ShaderMaterial.new()
 	highlight_material.shader = OUTLINE_SHADER
 	highlight_material.set_shader_parameter("width", 3.0)
 	highlight_material.set_shader_parameter("color", Color.WHITE)
+	
+	if piece_zone.custom_minimum_size.y < 200:
+		piece_zone.custom_minimum_size.y = 200
+	if passive_zone.custom_minimum_size.y < 100:
+		passive_zone.custom_minimum_size.y = 100
 	
 	PlayerData.currency_changed.connect(_update_shop_visuals)
 	
@@ -62,57 +68,47 @@ func _ready() -> void:
 		reroll_button.mouse_entered.connect(func(): if not reroll_button.disabled: reroll_button.material = highlight_material)
 		reroll_button.mouse_exited.connect(func(): reroll_button.material = null)
 	
-	# Configuración del Candado
 	if lock_button:
 		_update_lock_visuals()
 		lock_button.pressed.connect(_on_lock_pressed)
 	
 	_setup_reroll_label()
-	
-	# Al iniciar, determinamos si restaurar o generar
 	start_new_round()
 
 # --- LÓGICA DEL CANDADO ---
 func _update_lock_visuals() -> void:
 	if not lock_button: return
-	
 	if PlayerData.is_shop_locked:
 		if texture_locked: lock_button.texture_normal = texture_locked
 	else:
 		if texture_unlocked: lock_button.texture_normal = texture_unlocked
 
 func _on_lock_pressed() -> void:
+	if is_rerolling: return 
 	PlayerData.is_shop_locked = not PlayerData.is_shop_locked
 	_update_lock_visuals()
 	_update_reroll_button_visuals()
-	
-	# Si acabamos de bloquear, asegurémonos de guardar el estado actual EXACTO
 	if PlayerData.is_shop_locked:
 		_save_current_shop_state()
 
-# --- CAMBIO DE RONDA (Lógica Principal) ---
+# --- CAMBIO DE RONDA ---
 func start_new_round() -> void:
 	_rerolls_this_round = 0
 	_update_reroll_button_visuals()
 
-	# 1. Si está bloqueado, RESTAURAMOS y SALIMOS (Return)
 	if PlayerData.is_shop_locked:
-		print("Tienda Bloqueada: Restaurando items...")
 		_restore_shop_from_save()
 		_update_shop_visuals()
 		return 
 
-	# 2. Si NO está bloqueado, GENERAMOS NUEVOS
+	is_rerolling = false 
 	_refresh_shop_content() 
 
-# --- GUARDAR Y RESTAURAR (CORREGIDO PARA PASIVAS) ---
-
+# --- GUARDAR Y RESTAURAR ---
 func _save_current_shop_state() -> void:
 	PlayerData.shop_items_saved.clear()
-	
-	# 1. GUARDAR PIEZAS
 	for slot in piece_zone.get_children():
-		if slot is StoreSlot:
+		if "item_data" in slot: 
 			var data_packet = {
 				"type": "piece",
 				"data": slot.item_data,
@@ -121,32 +117,29 @@ func _save_current_shop_state() -> void:
 			}
 			PlayerData.shop_items_saved.append(data_packet)
 	
-	# 2. GUARDAR PASIVAS (¡NUEVO!)
-	# Iteramos sobre los contenedores VBoxContainer en passive_zone
 	for wrapper in passive_zone.get_children():
-		# Buscamos el botón dentro del contenedor
-		var button = null
-		for child in wrapper.get_children():
-			if child is TextureButton:
-				button = child
-				break
-		
+		var button = _find_texture_button_recursive(wrapper)
 		if button:
 			var data_packet = {
 				"type": "passive",
 				"data": button.get_meta("data"),
 				"price": button.get_meta("price"),
-				"purchased": button.disabled # Usamos 'disabled' para saber si se compró
+				"purchased": button.disabled
 			}
 			PlayerData.shop_items_saved.append(data_packet)
 
+func _find_texture_button_recursive(node: Node) -> TextureButton:
+	if node is TextureButton: return node
+	for child in node.get_children():
+		var res = _find_texture_button_recursive(child)
+		if res: return res
+	return null
+
 func _restore_shop_from_save() -> void:
-	# 1. LIMPIEZA TOTAL
 	for child in piece_zone.get_children(): child.queue_free()
 	for child in passive_zone.get_children(): child.queue_free()
 	current_passive_buttons.clear()
 	
-	# 2. RECONSTRUCCIÓN
 	for packet in PlayerData.shop_items_saved:
 		var type = packet.type
 		var data = packet.data
@@ -154,31 +147,26 @@ func _restore_shop_from_save() -> void:
 		var purchased = packet.purchased
 		
 		if type == "piece":
-			var slot = store_slot_scene.instantiate() as StoreSlot
+			var slot = store_slot_scene.instantiate()
 			piece_zone.add_child(slot)
-			
 			var can_afford = PlayerData.has_enough_currency(price)
 			var current_count = _get_item_count_safe(data)
-			
-			slot.set_item(data, price, highlight_material, can_afford, current_count)
-			
-			if purchased:
-				slot.disable_interaction()
-			elif current_count >= max_copies:
-				slot.set_maxed_state(true)
-				
-			slot.slot_pressed.connect(_on_piece_slot_pressed)
-			slot.slot_hovered.connect(_on_hover_item)
-			slot.slot_exited.connect(_on_exit_item)
+			if slot.has_method("set_item"):
+				slot.set_item(data, price, highlight_material, can_afford, current_count)
+				if purchased: slot.disable_interaction()
+				elif current_count >= max_copies: slot.set_maxed_state(true)
+				slot.slot_pressed.connect(_on_piece_slot_pressed)
+				slot.slot_hovered.connect(_on_hover_item)
+				slot.slot_exited.connect(_on_exit_item)
 			
 		elif type == "passive":
-			# Reconstruimos la pasiva manualmente para respetar el precio/estado guardado
 			_create_single_passive_button(data, price, purchased)
 
-# Función auxiliar para crear UN botón de pasiva (usada al restaurar)
+# --- CREACIÓN DE PASIVAS ---
 func _create_single_passive_button(data, price: int, is_purchased: bool) -> void:
 	var item_container = VBoxContainer.new()
 	item_container.alignment = VBoxContainer.ALIGNMENT_CENTER
+	item_container.add_theme_constant_override("separation", 5) 
 	
 	var price_label = Label.new()
 	price_label.text = str(price) + "€"
@@ -200,48 +188,54 @@ func _create_single_passive_button(data, price: int, is_purchased: bool) -> void
 	price_label.add_theme_stylebox_override("normal", style_box)
 	item_container.add_child(price_label)
 
-	var button = TextureButton.new()
 	var tex = data.icon
 	if tex == null:
-		# Fallback si no tiene icono (instanciar escena temp)
 		var instance = passive_scene.instantiate()
 		var sprite = instance.find_child("Sprite2D", true, false)
 		if sprite: tex = sprite.texture
 		instance.queue_free()
-		
+	
+	var holder = Control.new()
+	holder.mouse_filter = Control.MOUSE_FILTER_PASS
+	if tex:
+		holder.custom_minimum_size = tex.get_size()
+	else:
+		holder.custom_minimum_size = Vector2(64, 64)
+	
+	var button = TextureButton.new()
 	button.texture_normal = tex
 	button.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
-	
-	# Metadatos críticos
+	button.set_anchors_preset(Control.PRESET_FULL_RECT) 
 	button.set_meta("data", data)
 	button.set_meta("price", price)
-	
-	# Conexiones
 	button.pressed.connect(_on_passive_button_pressed.bind(button))
 	button.mouse_entered.connect(_on_hover_item.bind(data))
 	button.mouse_entered.connect(func(): if not button.disabled: button.material = highlight_material)
 	button.mouse_exited.connect(_on_exit_item)
 	button.mouse_exited.connect(func(): button.material = null)
 	
-	# Estado comprado
 	if is_purchased:
 		button.disabled = true
 		button.modulate = Color(0.25, 0.25, 0.25, 1.0)
 	
-	item_container.add_child(button)
+	holder.add_child(button)
+	item_container.add_child(holder)
 	passive_zone.add_child(item_container)
 	
+	if is_rerolling:
+		item_container.modulate.a = 0.0
+	
 	current_passive_buttons.append({
-		"button": button,
-		"label": price_label,
-		"style": style_box,
-		"price": price
+		"button": button, "holder": holder, "container": item_container,
+		"label": price_label, "style": style_box, "price": price
 	})
 
-# --- GENERACIÓN / REROLL ---
+# ========================================================
+# --- SISTEMA DE ANIMACIÓN AVANZADO (GHOST SYSTEM) ---
+# ========================================================
 
 func generate():
-	if PlayerData.is_shop_locked:
+	if is_rerolling or PlayerData.is_shop_locked:
 		_animate_error_shake(reroll_button)
 		return
 
@@ -250,30 +244,175 @@ func generate():
 		if not PlayerData.has_enough_currency(current_cost):
 			_animate_error_shake(reroll_button)
 			return
-		PlayerData.spend_currency(current_cost)
-
+	
+	is_rerolling = true
+	reroll_button.disabled = true 
+	
+	# ---------------------------------------------------------
+	# FASE 1: SALIDA (ANIMAR ITEMS EXISTENTES CAYENDO)
+	# ---------------------------------------------------------
+	var exit_tween = create_tween().set_parallel(true)
+	var items_exiting = false
+	
+	# PASO CLAVE: Capturar posiciones y nodos ANTES de reparentar
+	var exit_snapshots = []
+	
+	# Capturar Piezas
+	for child in piece_zone.get_children():
+		if is_instance_valid(child) and child is Control:
+			exit_snapshots.append({"node": child, "pos": child.global_position, "size": child.size})
+			
+	# Capturar Pasivas
+	for child in passive_zone.get_children():
+		if is_instance_valid(child) and child is Control:
+			exit_snapshots.append({"node": child, "pos": child.global_position, "size": child.size})
+	
+	# Ejecutar animación de salida usando las posiciones capturadas
+	for snap in exit_snapshots:
+		items_exiting = true
+		_detach_and_animate_drop_safe(snap.node, snap.pos, snap.size, exit_tween)
+	
+	if items_exiting:
+		await exit_tween.finished
+		await get_tree().create_timer(0.1).timeout 
+	
+	# ---------------------------------------------------------
+	# FASE 2: REFRESCO LÓGICO (CREAR NUEVOS ITEMS INVISIBLES)
+	# ---------------------------------------------------------
+	if current_cost > 0: PlayerData.spend_currency(current_cost)
 	_rerolls_this_round += 1
-	_refresh_shop_content()
 	_update_reroll_button_visuals()
+	
+	_refresh_shop_content() # Crea items con modulate.a = 0
+	
+	# Esperar 2 frames para que el HBoxContainer calcule posiciones
+	await get_tree().process_frame
+	await get_tree().process_frame 
+	
+	# ---------------------------------------------------------
+	# FASE 3: ENTRADA (FANTASMAS CAEN EN HUECOS RESERVADOS)
+	# ---------------------------------------------------------
+	var entry_tween = create_tween().set_parallel(true)
+	var delay = 0.0
+	var drop_height = 150.0 # Más arriba para que se vea bien la caída
+	
+	# --- PIEZAS ---
+	for slot in piece_zone.get_children():
+		if not "item_data" in slot: continue
+		
+		slot.modulate.a = 0.0 
+		
+		# 1. Crear Fantasma y añadirlo a la raíz (self)
+		var ghost = store_slot_scene.instantiate()
+		add_child(ghost)
+		
+		# 2. CRÍTICO: Desactivar Layout/Anclajes para permitir control por posición
+		ghost.set_anchors_preset(Control.PRESET_TOP_LEFT) 
+		
+		# 3. Configurar
+		var d = slot.item_data
+		ghost.set_item(d, slot.current_price, highlight_material, slot.can_afford_status, _get_item_count_safe(d))
+		if slot.is_maxed: ghost.set_maxed_state(true)
+		
+		# 4. Posicionamiento inicial y final
+		var target_pos = slot.global_position
+		var start_pos = target_pos - Vector2(0, drop_height)
+		
+		ghost.global_position = start_pos
+		ghost.scale = Vector2(0.8, 0.8)
+		ghost.z_index = 10 
+		
+		# 5. Tween
+		entry_tween.tween_property(ghost, "global_position", target_pos, 0.5)\
+			.set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT).set_delay(delay)
+		entry_tween.tween_property(ghost, "scale", Vector2.ONE, 0.4).set_delay(delay)
+		
+		# 6. Al terminar: Mostrar Real y Borrar Fantasma
+		entry_tween.parallel().tween_callback(func():
+			if is_instance_valid(slot): slot.modulate.a = 1.0
+			if is_instance_valid(ghost): ghost.queue_free()
+		).set_delay(delay + 0.45)
+		
+		delay += 0.1
+		
+	# --- PASIVAS ---
+	for container in passive_zone.get_children():
+		if not is_instance_valid(container): continue
+		container.modulate.a = 0.0
+		
+		# Clonar para el fantasma
+		var ghost = container.duplicate(0)
+		add_child(ghost)
+		
+		# CRÍTICO: Desactivar Layout/Anclajes en el fantasma
+		ghost.set_anchors_preset(Control.PRESET_TOP_LEFT)
+		
+		var target_pos = container.global_position
+		var start_pos = target_pos - Vector2(0, drop_height)
+		
+		ghost.global_position = start_pos
+		ghost.scale = Vector2(0.8, 0.8)
+		ghost.z_index = 10
+		
+		entry_tween.tween_property(ghost, "global_position", target_pos, 0.5)\
+			.set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT).set_delay(delay)
+		entry_tween.tween_property(ghost, "scale", Vector2.ONE, 0.4).set_delay(delay)
+		
+		entry_tween.parallel().tween_callback(func():
+			if is_instance_valid(container): container.modulate.a = 1.0
+			if is_instance_valid(ghost): ghost.queue_free()
+		).set_delay(delay + 0.45)
+		
+		delay += 0.1
+
+	await entry_tween.finished
+	is_rerolling = false
+	reroll_button.disabled = false
+	_save_current_shop_state()
+
+# Helper para "robar" un nodo de su HBox y animarlo cayendo
+func _detach_and_animate_drop_safe(node: Control, old_global_pos: Vector2, old_size: Vector2, tween: Tween):
+	# 1. Reparentar al root para sacarlo del HBox
+	node.reparent(self)
+	
+	# 2. CRÍTICO: Desactivar el layout para permitir la animación libre
+	node.set_anchors_preset(Control.PRESET_TOP_LEFT) 
+	
+	# 3. Restaurar la posición global y tamaño guardados
+	node.size = old_size
+	node.global_position = old_global_pos
+	node.z_index = 5 
+	
+	# 4. Animar caída: Corregido el easing para que se vea como una caída acelerada.
+	var drop_duration = 0.4
+	var drop_distance = 250.0 
+	
+	tween.tween_property(node, "position:y", drop_distance, drop_duration).as_relative()\
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN) # Transición más adecuada para una caída
+	
+	# Desvanecer al mismo tiempo
+	tween.tween_property(node, "modulate:a", 0.0, 0.2).set_delay(0.1) 
+	
+	# 5. Borrar al terminar
+	tween.tween_callback(node.queue_free).set_delay(drop_duration)
+
+# ========================================================
 
 func _refresh_shop_content():
-	# Limpiar zonas
 	for child in piece_zone.get_children(): child.queue_free()
 	for child in passive_zone.get_children(): child.queue_free()
 	current_passive_buttons.clear()
 
-	# 1. GENERAR PIEZAS
+	# 1. PIEZAS
 	var available_pieces = _filter_maxed_items(piece_origins)
 	_organize_pieces_by_rarity(available_pieces)
-	
 	var selected_pieces: Array = []
 	for i in range(3):
 		var piece = _get_random_weighted_piece()
 		if piece: selected_pieces.append(piece)
-
 	_generate_piece_slots(selected_pieces)
 	
-	# 2. GENERAR PASIVAS
+	# 2. PASIVAS
 	var available_passives = _filter_maxed_items(passive_origins) 
 	if not available_passives.is_empty():
 		var shuffled = available_passives.duplicate()
@@ -281,60 +420,56 @@ func _refresh_shop_content():
 		var selected = shuffled.slice(0, min(2, shuffled.size()))
 		_generate_passive_buttons(selected)
 	
-	# GUARDAR: Guardamos inmediatamente lo que acabamos de generar
-	_save_current_shop_state()
+	if not is_rerolling:
+		_save_current_shop_state()
 
 func _generate_piece_slots(items: Array) -> void:
 	for data in items:
-		var slot = store_slot_scene.instantiate() as StoreSlot
+		var slot = store_slot_scene.instantiate()
 		piece_zone.add_child(slot)
 		
 		var price = _calculate_price(data)
 		var can_afford = PlayerData.has_enough_currency(price)
 		var current_count = _get_item_count_safe(data)
 		
-		slot.set_item(data, price, highlight_material, can_afford, current_count)
-		slot.slot_pressed.connect(_on_piece_slot_pressed)
-		slot.slot_hovered.connect(_on_hover_item)
-		slot.slot_exited.connect(_on_exit_item)
+		if slot.has_method("set_item"):
+			slot.set_item(data, price, highlight_material, can_afford, current_count)
+			slot.slot_pressed.connect(_on_piece_slot_pressed)
+			slot.slot_hovered.connect(_on_hover_item)
+			slot.slot_exited.connect(_on_exit_item)
+			if current_count >= max_copies: slot.set_maxed_state(true)
 		
-		if current_count >= max_copies:
-			slot.set_maxed_state(true)
+		if is_rerolling:
+			slot.modulate.a = 0.0
 
 # --- INTERACCIÓN ---
 
-func _on_piece_slot_pressed(slot: StoreSlot) -> void:
+func _on_piece_slot_pressed(slot) -> void:
+	if is_rerolling: return 
 	var data = slot.item_data
 	var price = slot.current_price
 	
 	if slot.is_purchased:
-		_animate_error_shake(slot.texture_button)
+		_animate_error_shake(slot.get_node("TextureButton"))
 		return
-	
 	var current_count = _get_item_count_safe(data)
 	if current_count >= max_copies:
-		_animate_error_shake(slot.texture_button)
+		_animate_error_shake(slot.get_node("TextureButton"))
 		return
-
 	if not PlayerData.has_enough_currency(price):
-		_animate_error_shake(slot.texture_button)
+		_animate_error_shake(slot.get_node("TextureButton"))
 		return
-
 	if not inventory.can_add_item(data):
-		_animate_error_shake(slot.texture_button)
+		_animate_error_shake(slot.get_node("TextureButton"))
 		return
 
 	if PlayerData.spend_currency(price):
 		inventory.add_item(data)
 		slot.disable_interaction()
 		_update_shop_visuals()
-		
-		# Actualizamos el guardado al comprar
 		_save_current_shop_state()
 	else:
-		_animate_error_shake(slot.texture_button)
-
-# --- RESTO DE FUNCIONES AUXILIARES ---
+		_animate_error_shake(slot.get_node("TextureButton"))
 
 func _setup_reroll_label():
 	reroll_label = Label.new()
@@ -357,13 +492,11 @@ func _calculate_reroll_cost() -> int:
 
 func _update_reroll_button_visuals():
 	if not reroll_label: return
-	
 	if PlayerData.is_shop_locked:
 		reroll_label.text = "BLOQ."
 		reroll_label.modulate = Color(0.5, 0.5, 0.5)
 		reroll_button.modulate = Color(0.7, 0.7, 0.7)
 		return
-
 	var cost = _calculate_reroll_cost()
 	if cost == 0:
 		reroll_label.text = "GRATIS"
@@ -379,61 +512,51 @@ func _update_reroll_button_visuals():
 			reroll_button.modulate = Color(0.6, 0.6, 0.6) 
 
 func _animate_error_shake(node: Control):
+	if not node: return
 	var tween = create_tween()
-	var original_pos = node.position.x
-	tween.tween_property(node, "position:x", original_pos + 10, 0.05)
-	tween.tween_property(node, "position:x", original_pos - 10, 0.05)
-	tween.tween_property(node, "position:x", original_pos, 0.05)
+	node.pivot_offset = node.size / 2
+	tween.tween_property(node, "rotation_degrees", 5, 0.05)
+	tween.tween_property(node, "rotation_degrees", -5, 0.05)
+	tween.tween_property(node, "rotation_degrees", 0, 0.05)
 
-# Generación normal de pasivas (usada al hacer reroll/generar)
 func _generate_passive_buttons(items: Array) -> void:
 	for data in items:
 		var final_price = _calculate_price(data)
-		# Creamos el botón "limpio"
 		_create_single_passive_button(data, final_price, false)
 
 func _on_passive_button_pressed(button: TextureButton) -> void:
+	if is_rerolling: return
 	var data = button.get_meta("data")
 	var price = button.get_meta("price")
-	
 	if not PlayerData.has_enough_currency(price):
 		_animate_error_shake(button)
 		return
-		
 	if PlayerData.spend_currency(price):
 		inventory.add_item(data)
 		button.disabled = true
 		button.modulate = Color(0.25, 0.25, 0.25, 1.0)
 		button.material = null
 		_update_shop_visuals()
-		
-		# Actualizamos guardado
 		_save_current_shop_state()
 
 func _update_shop_visuals(_new_amount: int = 0) -> void:
 	_update_reroll_button_visuals()
-	
 	for slot in piece_zone.get_children():
-		if slot is StoreSlot:
+		if slot.has_method("update_count_visuals"):
 			var current_count = _get_item_count_safe(slot.item_data)
 			slot.update_count_visuals(slot.item_data, current_count)
-			
 			if slot.is_purchased: continue
-			
 			if slot.item_data is PieceData and current_count >= max_copies:
 				slot.set_maxed_state(true)
 			else:
 				slot.set_maxed_state(false)
 				var can = PlayerData.has_enough_currency(slot.current_price)
 				slot.update_affordability(can)
-
 	for item_info in current_passive_buttons:
 		var btn = item_info.button
 		if btn.disabled: continue
-		
 		var price = item_info.price
 		var style = item_info.style
-		
 		if PlayerData.has_enough_currency(price):
 			style.bg_color = COLOR_NORMAL_BG
 		else:
