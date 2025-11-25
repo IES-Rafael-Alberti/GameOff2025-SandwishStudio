@@ -1,9 +1,9 @@
 [gd_scene load_steps=8 format=3 uid="uid://htgfpif7ey68"]
 
 [ext_resource type="Script" uid="uid://b31agultlt6fo" path="res://scripts/slot.gd" id="1_maf36"]
-[ext_resource type="Texture2D" uid="uid://dlehjk7i5msoq" path="res://assets/image-removebg-preview.png" id="2_w7ii4"]
-[ext_resource type="Texture2D" uid="uid://bbvotv5v52v5t" path="res://assets/coinage.png" id="3_tvb4g"]
-[ext_resource type="Texture2D" uid="uid://b6hogl04y4oll" path="res://assets/coin 2_0.png" id="4_xak2l"]
+[ext_resource type="Texture2D" uid="uid://d0al5yh7duq6o" path="res://assets/Cobre.png" id="2_xak2l"]
+[ext_resource type="Texture2D" uid="uid://cppy60udk4jof" path="res://assets/Plata.png" id="3_fwdjn"]
+[ext_resource type="Texture2D" uid="uid://k13roxfvtox4" path="res://assets/Oro.png" id="4_xtxh1"]
 [ext_resource type="Texture2D" uid="uid://cwqtvqvdphf8d" path="res://assets/QuesoVacio9.png" id="5_tvb4g"]
 [ext_resource type="Script" uid="uid://c6rhjw1v1sv7k" path="res://scenes/bitmap.gd" id="6_xak2l"]
 
@@ -30,9 +30,9 @@ offset_right = 71.09354
 offset_bottom = 119.41966
 theme_override_styles/panel = SubResource("StyleBoxFlat_tvb4g")
 script = ExtResource("1_maf36")
-tier_bronze_texture = ExtResource("2_w7ii4")
-tier_silver_texture = ExtResource("3_tvb4g")
-tier_gold_texture = ExtResource("4_xak2l")
+tier_bronze_texture = ExtResource("2_xak2l")
+tier_silver_texture = ExtResource("3_fwdjn")
+tier_gold_texture = ExtResource("4_xtxh1")
 
 [node name="ItemIcon" type="TextureRect" parent="slot"]
 layout_mode = 0
@@ -67,8 +67,9 @@ expand_mode = 1
 [node name="TierLabel" type="TextureRect" parent="slot/ItemIcon"]
 z_index = 5
 layout_mode = 0
-offset_left = 413.01437
-offset_top = 110.61127
-offset_right = 453.01437
-offset_bottom = 150.61127
+offset_left = 68.835724
+offset_top = 55.305634
+offset_right = 493.32272
+offset_bottom = 586.23975
 mouse_filter = 2
+expand_mode = 1

@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" uid="uid://bcef074ljqhfa" path="res://scripts/InventorySlot.gd" id="1_hddt5"]
 [ext_resource type="Script" uid="uid://dygaf4ryh3tv5" path="res://scripts/DraggableItem.gd" id="2_hddt5"]
-[ext_resource type="Texture2D" uid="uid://dlehjk7i5msoq" path="res://assets/image-removebg-preview.png" id="2_t1mo2"]
-[ext_resource type="Texture2D" uid="uid://bbvotv5v52v5t" path="res://assets/coinage.png" id="3_st3ap"]
-[ext_resource type="Texture2D" uid="uid://b6hogl04y4oll" path="res://assets/coin 2_0.png" id="4_6eu8d"]
+[ext_resource type="Texture2D" uid="uid://d0al5yh7duq6o" path="res://assets/Cobre.png" id="2_t1mo2"]
+[ext_resource type="Texture2D" uid="uid://cppy60udk4jof" path="res://assets/Plata.png" id="3_st3ap"]
+[ext_resource type="Texture2D" uid="uid://k13roxfvtox4" path="res://assets/Oro.png" id="4_6eu8d"]
 [ext_resource type="PackedScene" uid="uid://dblnjb14cqaif" path="res://scenes/tooltip.tscn" id="4_bbig2"]
 [ext_resource type="Texture2D" uid="uid://cwqtvqvdphf8d" path="res://assets/QuesoVacio9.png" id="5_6eu8d"]
 
@@ -33,10 +33,11 @@ script = ExtResource("2_hddt5")
 
 [node name="TierLabel" type="TextureRect" parent="TextureButton"]
 layout_mode = 0
-offset_left = 405.0
-offset_top = 95.0
-offset_right = 451.0
-offset_bottom = 142.0
+offset_left = 75.0
+offset_top = 55.0
+offset_right = 492.49994
+offset_bottom = 569.99994
+expand_mode = 1
 
 [node name="ItemIcon" type="TextureRect" parent="TextureButton"]
 layout_mode = 0
