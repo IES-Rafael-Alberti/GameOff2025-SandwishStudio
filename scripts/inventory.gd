@@ -6,8 +6,12 @@ signal item_sold(refund_amount: int)
 ## Nodos y Exportaciones
 ## ------------------------------------------------------------------
 @onready var piece_inventory: GridContainer = $piece_inventory
-@onready var passive_inventory: GridContainer = $passive_inventory
+@onready var passive_inventory: Control = $passive_inventory 
 @onready var refund_percent: int = 50
+# Asegúrate de que la ruta al Tooltip sea correcta. Si es hijo directo de Inventory: $Tooltip
+@onready var tooltip = $passive_inventory/Tooltip 
+
+# Etiquetas de Stats
 @onready var health_label: Label = $TextureRect3/Health_container/Label
 @onready var damage_label: Label = $TextureRect3/Damage_container/Label
 @onready var speed_label: Label = $TextureRect3/SpeedCOntainer/Label
@@ -15,28 +19,26 @@ signal item_sold(refund_amount: int)
 @onready var crit_damage_label: Label = $TextureRect3/CDamage_chance/Label
 
 @export var max_pieces: int = 6
-@export var max_passives: int = 30
+# @export var max_passives: int = 30 # YA NO SE USA PARA INSTANCIAR
 @export var inventory_slot_scene: PackedScene 
 @export var piece_scene: PackedScene
 
 @export var max_piece_copies: int = 3
 @export var initial_pieces: Array[PieceData] 
 
-# --- NUEVO: Configuración de Pasivas Graduable ---
 @export_group("Passive Logic")
-# Cuánto se suma al multiplicador por cada slot vacío.
-# 1.0 significa que cada hueco vacío añade un 100% más de stats (x2, x3, etc).
-# 0.5 significaría que añade un 50% (x1.5, x2.0, etc).
 @export var empty_slot_bonus_per_slot: float = 1.0 
 
 ## ------------------------------------------------------------------
 ## Datos del Inventario
 ## ------------------------------------------------------------------
 var piece_counts: Dictionary = {}
-var passive_counts: Dictionary = {}
+# passive_counts ahora es un espejo de PlayerData.owned_passives para cálculos locales de stats
+var passive_counts: Dictionary = {} 
 
 var piece_slots: Array[Node] = []
-var passive_slots: Array[Node] = []
+# var passive_visual_slots: Array[TextureRect] = [] # YA NO SE USA (Son estáticos)
+var passive_nodes_map: Dictionary = {}
 
 ## ------------------------------------------------------------------
 ## Funciones de Godot
@@ -50,15 +52,80 @@ func _ready() -> void:
 	GlobalSignals.piece_placed_on_roulette.connect(_on_piece_placed)
 	GlobalSignals.piece_returned_from_roulette.connect(_on_piece_returned)
 	
-	_update_passive_stats_display()
 	if not inventory_slot_scene:
 		push_error("¡La variable 'Inventory Slot Scene' no está asignada en el script Inventory.gd!")
 		return
 
-	_initialize_slots(piece_inventory, piece_slots, max_pieces, refund_percent)
-	_initialize_slots(passive_inventory, passive_slots, max_passives, 0)
+	# 1. Inicializar Slots de Piezas (Grid dinámico estándar)
+	_initialize_piece_slots(piece_inventory, piece_slots, max_pieces, refund_percent)
+	
+	# 2. Configurar Pasivas Estáticas (Mapeo y Señales)
+	_setup_passive_nodes()
+	
+	# 3. Restaurar estado visual de pasivas desde PlayerData (Persistencia)
+	_sync_passives_from_global()
+	
+	_update_passive_stats_display()
+	
+	print("Inventory _ready: Generados %d slots de piezas." % [piece_slots.size()])
 
-	print("Inventory _ready: Generados %d slots de piezas y %d slots de pasivos." % [piece_slots.size(), passive_slots.size()])
+
+## ------------------------------------------------------------------
+## Inicialización y Sincronización (MODIFICADO)
+## ------------------------------------------------------------------
+
+func _initialize_piece_slots(container: GridContainer, slot_array: Array, count: int, sell_perc: int) -> void:
+	for i in range(count):
+		var new_slot = inventory_slot_scene.instantiate()
+		if sell_perc > 0:
+			new_slot.sell_percentage = sell_perc
+		container.add_child(new_slot)
+		slot_array.append(new_slot) 
+		if new_slot.has_signal("item_selected"):
+			new_slot.item_selected.connect(_on_item_selected_from_slot)
+
+# --- NUEVO: Configuración de Nodos Estáticos ---
+func _setup_passive_nodes() -> void:
+	# Vinculamos el Enum con el nodo en la escena
+	# NOTA: Asegúrate de que estos nodos existen en tu escena dentro de 'passive_inventory'
+	passive_nodes_map = {
+		PassiveData.PassiveType.HEALTH_INCREASE: $passive_inventory/health,
+		PassiveData.PassiveType.BASE_DAMAGE_INCREASE: $passive_inventory/damage,
+		PassiveData.PassiveType.ATTACK_SPEED_INCREASE: $passive_inventory/aspeed,
+		PassiveData.PassiveType.CRITICAL_CHANCE_INCREASE: $passive_inventory/cchance,
+		PassiveData.PassiveType.CRITICAL_DAMAGE_INCREASE: $passive_inventory/cdamage
+	}
+	
+	# Configuración inicial: Ocultar y conectar Tooltip
+	for type in passive_nodes_map:
+		var node = passive_nodes_map[type]
+		if node:
+			node.visible = false # Los ocultamos al inicio
+			node.mouse_filter = Control.MOUSE_FILTER_STOP # Asegurar que detecta el ratón
+			
+			# Conectamos las señales para el Tooltip de resumen
+			if not node.mouse_entered.is_connected(_on_passive_inventory_mouse_entered):
+				node.mouse_entered.connect(_on_passive_inventory_mouse_entered)
+			if not node.mouse_exited.is_connected(_on_passive_inventory_mouse_exited):
+				node.mouse_exited.connect(_on_passive_inventory_mouse_exited)
+
+func _sync_passives_from_global() -> void:
+	# Copiamos datos de PlayerData
+	passive_counts = PlayerData.owned_passives.duplicate(true)
+	
+	# Reconstruimos visuales
+	for id in passive_counts:
+		var entry = passive_counts[id]
+		var data = entry["data"]
+		# Si tenemos al menos 1, activamos su icono correspondiente
+		if entry["count"] > 0:
+			_activate_passive_visual(data.type)
+
+func _activate_passive_visual(type: int) -> void:
+	if passive_nodes_map.has(type):
+		var node = passive_nodes_map[type]
+		if node:
+			node.visible = true
 
 ## ------------------------------------------------------------------
 ## Funciones Públicas 
@@ -78,27 +145,36 @@ func set_interactive(is_interactive: bool):
 			slot.get_node("TextureButton").disabled = not is_interactive
 
 func can_add_item(data: Resource) -> bool:
-	var context = _get_inventory_context(data)
-	if not context:
-		return false
-
 	var id: String = _get_item_id(data)
 	
 	if data is PieceData:
+		var context = _get_inventory_context(data)
+		if not context: return false
+		
 		if context.map.has(id):
 			var current_count = context.map[id]["count"]
 			if current_count >= max_piece_copies:
 				return false
 
-	var can_stack = context.map.has(id)
-	var has_empty_slot = _find_empty_slot(context.slots) != null
-	
-	return can_stack or has_empty_slot
+		var can_stack = context.map.has(id)
+		var has_empty_slot = _find_empty_slot(context.slots) != null
+		
+		return can_stack or has_empty_slot
+
+	elif data is PassiveData:
+		# Lógica Pasivas: Siempre se pueden comprar (se apilan stats)
+		return true 
+			
+	return false
 
 func get_item_count(target_res: Resource) -> int:
-	if not target_res:
-		return 0
+	if not target_res: return 0
 	
+	# 1. Comprobación de PASIVAS
+	if target_res is PassiveData:
+		return PlayerData.get_passive_count_global(target_res)
+	
+	# 2. Comprobación de PIEZAS
 	var search_res = target_res
 	if target_res is PieceData:
 		search_res = target_res.piece_origin
@@ -108,17 +184,6 @@ func get_item_count(target_res: Resource) -> int:
 			var entry = piece_counts[id]
 			var data = entry["data"]
 			if data is PieceData and data.piece_origin == search_res:
-				return entry["count"]
-
-	elif target_res is PassiveData:
-		var target_id = _get_item_id(target_res)
-		if passive_counts.has(target_id):
-			return passive_counts[target_id]["count"]
-		
-		for id in passive_counts:
-			var entry = passive_counts[id]
-			var data = entry["data"]
-			if data == target_res: 
 				return entry["count"]
 	
 	return 0
@@ -130,69 +195,74 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 		
 	print("--- add_item() llamado con: %s (Cantidad: %d) ---" % [data.resource_name, amount])
 
-	var context = _get_inventory_context(data)
 	var id: String = _get_item_id(data)
+
+	# --- LÓGICA DE PASIVAS (MODIFICADA) ---
+	if data is PassiveData:
+		# 1. Guardar en PlayerData (Base de datos global)
+		PlayerData.add_passive_global(data, amount)
+		
+		# 2. Actualizar espejo local
+		if passive_counts.has(id):
+			passive_counts[id]["count"] += amount
+		else:
+			passive_counts[id] = { "data": data, "count": amount }
+			# Es nueva, activamos el nodo visual estático
+			_activate_passive_visual(data.type)
+			
+		_update_passive_stats_display()
+		
+		# Si el ratón ya está encima, actualizamos el tooltip al momento
+		if tooltip and tooltip.visible:
+			_on_passive_inventory_mouse_entered()
+			
+		return true
+
+	# --- LÓGICA DE PIEZAS (ORIGINAL) ---
+	var context = _get_inventory_context(data)
+	if not context: return false
+	
 	var inventory_map = context.map
 	var final_amount = amount
 
-	# --- LÓGICA DE LÍMITE DE COPIAS ---
-	if data is PieceData:
-		var current_count = 0
-		if inventory_map.has(id):
-			current_count = inventory_map[id]["count"]
-		
-		if current_count >= max_piece_copies:
-			print("... FALLO: Límite de %d copias ya alcanzado." % max_piece_copies)
-			return false
-		
-		if (current_count + amount) > max_piece_copies:
-			final_amount = max_piece_copies - current_count
-			print("... ADVERTENCIA: Se comprarán %d en lugar de %d para no superar el límite." % [final_amount, amount])
-
-	if final_amount <= 0:
-		print("... FALLO: No hay nada que añadir (probablemente por el límite).")
+	# Límite de copias
+	var current_count = 0
+	if inventory_map.has(id):
+		current_count = inventory_map[id]["count"]
+	
+	if current_count >= max_piece_copies:
+		print("... FALLO: Límite de %d copias ya alcanzado." % max_piece_copies)
 		return false
-	# ----------------------------------
+	
+	if (current_count + amount) > max_piece_copies:
+		final_amount = max_piece_copies - current_count
+		print("... ADVERTENCIA: Se comprarán %d en lugar de %d para no superar el límite." % [final_amount, amount])
 
-	var can_stack = inventory_map.has(id)
-	var has_empty_slot = _find_empty_slot(context.slots) != null
+	if final_amount <= 0: return false
 
-	if not can_stack and not has_empty_slot:
-		print("... FALLO: No hay slot vacío para un item nuevo. Inventario probablemente lleno.")
-		return false
-
-	# --- CASO 1: APILAR EN SLOT EXISTENTE ---
+	# Caso 1: Apilar
 	if inventory_map.has(id):
 		print("... Item ya existe. Apilando %d." % final_amount)
 		var entry = inventory_map[id]
 		entry["count"] += final_amount
 		var slot_node: Node = entry["slot_node"]
+		
 		if slot_node and slot_node.has_method("update_count"):
 			slot_node.update_count(entry["count"])
-		if context.is_passive:
-			_update_passive_stats_display()
 			
-		# --- ¡NUEVO! Notificar cambio de cantidad (Stack) ---
-		if data is PieceData:
-			GlobalSignals.piece_count_changed.emit(data, entry["count"])
-		# ----------------------------------------------------
-			
+		GlobalSignals.piece_count_changed.emit(data, entry["count"])
 		return true
 
-	# --- CASO 2: SLOT NUEVO ---
+	# Caso 2: Slot Nuevo
 	var empty_slot: Node = _find_empty_slot(context.slots)
 	
 	if empty_slot:
-		print("... Item nuevo. Slot vacío encontrado. Asignando %d." % final_amount)
-		
-		if data is PieceData:
-			# Aseguramos que tenemos la referencia de cuántos usos son el máximo
-			if not data.has_meta("max_uses"):
-				data.set_meta("max_uses", data.uses)
+		print("... Item nuevo. Slot vacío encontrado.")
+		if not data.has_meta("max_uses"):
+			data.set_meta("max_uses", data.uses)
 		
 		if empty_slot.has_method("set_item"):
 			empty_slot.set_item(data)
-
 		if empty_slot.has_method("update_count"):
 			empty_slot.update_count(final_amount)
 
@@ -202,142 +272,105 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 			"slot_node": empty_slot 
 		}
 		inventory_map[id] = new_entry
-		if context.is_passive:
-			_update_passive_stats_display()
-			
-		if data is PieceData:
-			GlobalSignals.piece_count_changed.emit(data, new_entry["count"])
-			
+		GlobalSignals.piece_count_changed.emit(data, new_entry["count"])
 		return true
-
 
 	print("... FALLO INESPERADO: No se pudo apilar ni encontrar slot vacío.")
 	return false
 
+# --- FUNCIONES DE VISUALES PASIVAS (Ya no usamos _display_passive_visual dinámica) ---
+# (Función eliminada porque usamos _activate_passive_visual con el mapa estático)
+
 ## ------------------------------------------------------------------
-## Funciones de Eliminación de Items
+## Funciones de Eliminación de Items (SOLO PIEZAS)
 ## ------------------------------------------------------------------
 
 func decrement_item(data: Resource):
-	var context = _get_inventory_context(data)
-	if not context:
-		push_warning("decrement_item: Tipo de data no reconocido.")
+	if data is PassiveData:
 		return false
+		
+	var context = _get_inventory_context(data)
+	if not context: return false
 
 	var id: String = _get_item_id(data)
 	var inventory_map = context.map
 
 	if not inventory_map.has(id):
-		push_error("decrement_item: Se intentó decrementar un item ('%s') que no está en el inventario." % id)
+		push_error("decrement_item: Item '%s' no encontrado." % id)
 		return false
 
 	var entry = inventory_map[id]
 	entry["count"] -= 1
 	
-	print("... Item encontrado. Reduciendo contador a: %d" % entry["count"])
-
+	print("... Reduciendo contador a: %d" % entry["count"])
 	var slot_node: Node = entry["slot_node"]
 
 	if entry["count"] > 0:
 		if slot_node and slot_node.has_method("update_count"):
 			slot_node.update_count(entry["count"])
-		else:
-			push_error("decrement_item: El slot_node es inválido o no tiene update_count().")
 	else:
 		if slot_node and slot_node.has_method("clear_slot"):
 			slot_node.clear_slot()
-		else:
-			push_error("decrement_item: El slot_node es inválido o no tiene clear_slot().")
-		
 		inventory_map.erase(id)
-		print("... Contador a cero. Eliminando item del diccionario.")
-		
-		if context.is_passive:
-			_compact_passive_slots()
-			_update_passive_stats_display()
+		print("... Contador a cero. Eliminado.")
 
 	return true
 
 func remove_item(item_data: Resource):
+	if item_data is PassiveData:
+		print("remove_item: Ignorado para pasiva.")
+		return false
 	return _remove_item_stack(item_data, true)
 
 func remove_item_no_money(item_data: Resource):
-	push_warning("inventory.gd: remove_item_no_money() fue llamada.")
+	if item_data is PassiveData:
+		return false
 	return _remove_item_stack(item_data, false)
-
 
 ## ------------------------------------------------------------------
 ## Funciones Privadas / Auxiliares
 ## ------------------------------------------------------------------
 
 func _remove_item_stack(item_data: Resource, with_refund: bool) -> bool:
+	if not (item_data is PieceData): return false
+
 	var context = _get_inventory_context(item_data)
-	if not context:
-		push_warning("_remove_item_stack: Tipo de data no reconocido.")
-		return false
+	if not context: return false
 
 	var id: String = _get_item_id(item_data)
 	var inventory_map = context.map
 
 	if not inventory_map.has(id):
-		push_error("_remove_item_stack: Se intentó eliminar un item ('%s') que no está en el inventario." % id)
+		push_error("_remove_item_stack: Item no encontrado.")
 		return false
 
 	var entry = inventory_map[id]
 	var total_count = entry["count"]
 	
-	print("... Item encontrado. Eliminando %d copias." % total_count)
+	print("... Eliminando %d copias." % total_count)
 
 	if with_refund and "price" in item_data and item_data.price > 0:
 		var refund_amount = (int(item_data.price * (refund_percent / 100.0)) * total_count)
 		item_sold.emit(refund_amount)
-		print("... Reembolsados %d de oro (%d%% de %d x %d copias)" % [refund_amount, refund_percent, item_data.price, total_count])
-	else:
-		print("... Eliminando sin reembolso.")
+		print("... Reembolsados %d de oro." % refund_amount)
 
 	var slot_node: Node = entry["slot_node"]
-
 	if slot_node and slot_node.has_method("clear_slot"):
 		slot_node.clear_slot()
-	else:
-		push_error("_remove_item_stack: El slot_node es inválido o no tiene clear_slot().")
 	
 	inventory_map.erase(id)
-	print("... Contador a cero. Eliminando item del diccionario.")
 	
-	if item_data is PieceData:
-		# --- CORRECCIÓN: RESETEAR USOS AL VENDER ---
-		if item_data.has_meta("max_uses"):
-			item_data.uses = item_data.get_meta("max_uses")
-			print("... Usos de la pieza reseteados a %d (Máximo) tras la venta." % item_data.uses)
-		# -------------------------------------------
+	# Resetear usos al vender/eliminar
+	if item_data.has_meta("max_uses"):
+		item_data.uses = item_data.get_meta("max_uses")
 		
-		GlobalSignals.piece_type_deleted.emit(item_data)
-	
-	if context.is_passive:
-		_compact_passive_slots()
-		_update_passive_stats_display()
+	GlobalSignals.piece_type_deleted.emit(item_data)
 	return true
 
 func _get_inventory_context(data: Resource) -> Dictionary:
 	if data is PieceData: 
-		return { "map": piece_counts, "slots": piece_slots, "is_passive": false }
-	elif data is PassiveData:
-		return { "map": passive_counts, "slots": passive_slots, "is_passive": true }
-	
+		return { "map": piece_counts, "slots": piece_slots }
 	return {}
-
-func _initialize_slots(container: GridContainer, slot_array: Array, count: int, sell_perc: int) -> void:
-	for i in range(count):
-		var new_slot = inventory_slot_scene.instantiate()
-		if sell_perc > 0:
-			new_slot.sell_percentage = sell_perc
-			
-		container.add_child(new_slot)
-		slot_array.append(new_slot) 
-		
-		if new_slot.has_signal("item_selected"):
-			new_slot.item_selected.connect(_on_item_selected_from_slot)
 
 func _find_empty_slot(slot_array: Array) -> Node:
 	for slot in slot_array:
@@ -350,45 +383,6 @@ func _get_item_id(data: Resource) -> String:
 		return data.resource_path
 	return "%s_%d" % [data.get_class(), data.get_instance_id()]
 
-func _compact_passive_slots() -> void:
-	print("--- Compactando slots de pasivos... ---")
-	
-	for i in range(passive_slots.size() - 1):
-		var current_slot: Node = passive_slots[i]
-		
-		if not current_slot.is_empty():
-			continue
-			
-		var next_item_slot: Node = null
-		var next_item_index = -1
-		
-		for j in range(i + 1, passive_slots.size()):
-			if not passive_slots[j].is_empty():
-				next_item_slot = passive_slots[j]
-				next_item_index = j
-				break
-		
-		if next_item_slot:
-			print("... Moviendo item del slot %d al slot %d" % [next_item_index, i])
-			
-			var item_data_to_move: Resource = next_item_slot.item_data
-			var item_count: int = next_item_slot.current_count
-			
-			current_slot.set_item(item_data_to_move)
-			current_slot.update_count(item_count)
-			
-			next_item_slot.clear_slot()
-			
-			var id = _get_item_id(item_data_to_move)
-			if passive_counts.has(id):
-				passive_counts[id]["slot_node"] = current_slot
-			else:
-				push_warning("Compactar: El item movido no estaba en passive_counts.")
-				
-		else:
-			print("... No se encontraron más items. Compactado finalizado.")
-			break
-
 ## ------------------------------------------------------------------
 ## Conexiones de Señales
 ## ------------------------------------------------------------------
@@ -399,9 +393,7 @@ func _on_item_selected_from_slot(data: Resource) -> void:
 
 func _on_item_return_requested(item_data_packet: Variant, on_complete_callback: Callable):
 	if not (item_data_packet is Dictionary and "data" in item_data_packet and "count" in item_data_packet):
-		push_error("item_return_requested: Se recibieron datos inválidos.")
-		if on_complete_callback.is_valid():
-			on_complete_callback.call(false) 
+		if on_complete_callback.is_valid(): on_complete_callback.call(false) 
 		return
 
 	var item_data: Resource = item_data_packet.data
@@ -420,11 +412,9 @@ func _on_piece_placed(piece_data: PieceData):
 	if not piece_data is PieceData: return
 
 	piece_data.uses = max(0, piece_data.uses - 1)
-	print("... Pieza '%s' colocada. Usos restantes: %d" % [piece_data.resource_name, piece_data.uses])
+	print("... Pieza colocada. Usos restantes: %d" % piece_data.uses)
 
 	_update_slot_visuals_for_piece(piece_data)
-	
-	# Diferimos la actualización para dar tiempo a que la variable 'occupied' del slot cambie
 	call_deferred("_update_passive_stats_display")
 
 func _on_piece_returned(piece_data: PieceData):
@@ -432,10 +422,9 @@ func _on_piece_returned(piece_data: PieceData):
 	if not piece_data is PieceData: return
 		
 	piece_data.uses += 1
-	print("... Pieza '%s' devuelta. Usos restantes: %d" % [piece_data.resource_name, piece_data.uses])
+	print("... Pieza devuelta. Usos restantes: %d" % piece_data.uses)
 
 	_update_slot_visuals_for_piece(piece_data)
-	
 	call_deferred("_update_passive_stats_display")
 
 
@@ -445,14 +434,10 @@ func _update_slot_visuals_for_piece(piece_data: PieceData):
 		var entry = piece_counts[id]
 		var slot_node: Node = entry["slot_node"]
 		
-		# Aquí nos aseguramos de llamar a la función del slot que actualiza la imagen (1.png, 2.png...)
 		if slot_node and slot_node.has_method("_update_uses"):
 			slot_node._update_uses(piece_data)
-	else:
-		push_error("_update_slot_visuals_for_piece: La pieza no se encontró en piece_counts.")
 
-
-# --- MODIFICADO: Cálculo de Stats con Multiplicador Graduable ---
+# --- CÁLCULO DE STATS ---
 func _update_passive_stats_display() -> void:
 	
 	var total_health: float = 0.0
@@ -461,11 +446,7 @@ func _update_passive_stats_display() -> void:
 	var total_crit_chance: float = 0.0
 	var total_crit_damage: float = 0.0
 
-	# 1. Contar huecos vacíos
 	var empty_slots_count = float(_get_empty_roulette_slots())
-	
-	# 2. Calcular multiplicador
-	# Fórmula: Base (1.0) + (Huecos * Bonus)
 	var multiplier: float = 1.0 + (empty_slots_count * empty_slot_bonus_per_slot)
 
 	for item_id in passive_counts:
@@ -473,13 +454,8 @@ func _update_passive_stats_display() -> void:
 		var data: PassiveData = entry.data
 		var count: int = entry.count
 		
-		if not data:
-			continue
+		if not data: continue
 		
-		if not data is PassiveData:
-			continue
-		
-		# 3. Aplicar la fórmula: (ValorBase * CantidadItems) * Multiplicador
 		var total_value_for_item = (data.value * count) * multiplier
 		
 		match data.type:
@@ -511,13 +487,11 @@ func _update_passive_stats_display() -> void:
 	if has_node("/root/GlobalStats"):
 		GlobalStats.update_stats(stats_payload)
 
-# --- Función auxiliar para contar slots ---
 func _get_empty_roulette_slots() -> int:
 	if not has_node("/root/GlobalStats") or not is_instance_valid(GlobalStats.roulette_scene_ref):
 		return 0
 	
 	var ruleta = GlobalStats.roulette_scene_ref
-	
 	if not "slots_container" in ruleta or not ruleta.slots_container:
 		return 0
 		
@@ -531,3 +505,18 @@ func _get_empty_roulette_slots() -> int:
 				empty_count += 1
 				
 	return empty_count
+
+# --- HANDLERS DEL TOOLTIP (CONECTADOS EN _setup_passive_nodes) ---
+func _on_passive_inventory_mouse_entered() -> void:
+	if not tooltip: return
+	
+	# 1. Recalcular el multiplicador actual al vuelo
+	var empty_slots_count = float(_get_empty_roulette_slots())
+	var multiplier: float = 1.0 + (empty_slots_count * empty_slot_bonus_per_slot)
+	
+	# 2. Llamar a la nueva función del Tooltip pasando todos los datos
+	tooltip.show_passive_summary(passive_counts, multiplier)
+
+func _on_passive_inventory_mouse_exited() -> void:
+	if tooltip:
+		tooltip.hide_tooltip()

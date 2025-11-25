@@ -9,8 +9,6 @@ extends Control
 @onready var piece_zone: HBoxContainer = $piece_zone
 @onready var passive_zone: HBoxContainer = $passive_zone
 @onready var reroll_button: TextureButton = $Reroll
-
-# Referencia al Botón de Candado
 @onready var lock_button: TextureButton = $Lock 
 
 # --- CONFIGURACIÓN ---
@@ -74,44 +72,35 @@ func _ready() -> void:
 func _update_lock_visuals() -> void:
 	if not lock_button: return
 	
-	# Leemos directamente de PlayerData (la "caja fuerte")
 	if PlayerData.is_shop_locked:
 		if texture_locked: lock_button.texture_normal = texture_locked
 	else:
 		if texture_unlocked: lock_button.texture_normal = texture_unlocked
 
 func _on_lock_pressed() -> void:
-	# Actualizamos la variable global
 	PlayerData.is_shop_locked = not PlayerData.is_shop_locked
 	_update_lock_visuals()
 
-# --- CAMBIO DE RONDA (Lógica Principal) ---
+# --- CAMBIO DE RONDA ---
 func start_new_round() -> void:
 	_rerolls_this_round = 0
 	_update_reroll_button_visuals()
 
-	# 1. Verificamos si la tienda se quedó bloqueada en la ronda anterior
 	if PlayerData.is_shop_locked:
 		print("Tienda Bloqueada: Restaurando items guardados...")
 		
-		# A. Restauramos los items exactos que teníamos
 		_restore_shop_from_save()
 		
-		# B. Gestionamos si el candado se abre o se queda cerrado
 		if not keep_lock_on_new_day:
 			PlayerData.is_shop_locked = false
 			_update_lock_visuals()
 		
-		# C. Actualizamos colores (dinero/maxed) pero NO generamos nada nuevo
 		_update_shop_visuals()
 		return 
 
-	# 2. Si no había candado, generamos tienda nueva normalmente
 	_refresh_shop_content() 
 
 # --- GUARDAR Y RESTAURAR ---
-
-# Esta función guarda lo que hay en pantalla dentro de PlayerData
 func _save_current_shop_state() -> void:
 	PlayerData.shop_items_saved.clear()
 	
@@ -122,18 +111,12 @@ func _save_current_shop_state() -> void:
 				"data": slot.item_data,
 				"price": slot.current_price,
 				"purchased": slot.is_purchased
-				# No hace falta guardar 'is_maxed' o 'can_afford', eso se recalcula
 			}
 			PlayerData.shop_items_saved.append(data_packet)
-			
-	# Nota: Si también quieres guardar las pasivas, habría que añadir lógica similar aquí.
 
-# Esta función reconstruye la tienda desde PlayerData
 func _restore_shop_from_save() -> void:
-	# Limpiar zona
 	for child in piece_zone.get_children(): child.queue_free()
 	
-	# Recrear slots
 	for packet in PlayerData.shop_items_saved:
 		if packet.type == "piece":
 			var data = packet.data
@@ -143,17 +126,13 @@ func _restore_shop_from_save() -> void:
 			var slot = store_slot_scene.instantiate() as StoreSlot
 			piece_zone.add_child(slot)
 			
-			# Calculamos estado actual (dinero y copias)
 			var can_afford = PlayerData.has_enough_currency(price)
 			var current_count = _get_item_count_safe(data)
 			
 			slot.set_item(data, price, highlight_material, can_afford, current_count)
 			
-			# Si estaba comprado, lo marcamos como Agotado inmediatamente
 			if purchased:
 				slot.disable_interaction()
-			
-			# Si ya tienes el máximo, lo marcamos como Maxed
 			elif current_count >= max_copies:
 				slot.set_maxed_state(true)
 				
@@ -161,7 +140,7 @@ func _restore_shop_from_save() -> void:
 			slot.slot_hovered.connect(_on_hover_item)
 			slot.slot_exited.connect(_on_exit_item)
 
-# --- GENERACIÓN (Modificada para guardar al final) ---
+# --- GENERACIÓN ---
 
 func generate():
 	var current_cost = _calculate_reroll_cost()
@@ -193,14 +172,13 @@ func _refresh_shop_content():
 	_generate_piece_slots(selected_pieces)
 	
 	# 2. GENERAR PASIVAS
-	var available_passives = _filter_maxed_items(passive_origins) 
+	var available_passives = passive_origins # Sin filtro de maxed, son acumulables
 	if not available_passives.is_empty():
 		var shuffled = available_passives.duplicate()
 		shuffled.shuffle()
 		var selected = shuffled.slice(0, min(2, shuffled.size()))
 		_generate_passive_buttons(selected)
 	
-	# ¡IMPORTANTE! Guardamos el estado recién generado
 	_save_current_shop_state()
 
 func _generate_piece_slots(items: Array) -> void:
@@ -245,15 +223,13 @@ func _on_piece_slot_pressed(slot: StoreSlot) -> void:
 
 	if PlayerData.spend_currency(price):
 		inventory.add_item(data)
-		slot.disable_interaction() # Marca visualmente como Agotado
+		slot.disable_interaction() 
 		_update_shop_visuals()
-		
-		# ¡IMPORTANTE! Actualizamos el guardado porque ahora este item está comprado
 		_save_current_shop_state()
 	else:
 		_animate_error_shake(slot.texture_button)
 
-# --- RESTO DE FUNCIONES AUXILIARES (Sin cambios importantes) ---
+# --- FUNCIONES AUXILIARES (UI y Lógica) ---
 
 func _setup_reroll_label():
 	reroll_label = Label.new()
@@ -361,6 +337,11 @@ func _on_passive_button_pressed(button: TextureButton) -> void:
 		_animate_error_shake(button)
 		return
 		
+	# Verificación de hueco visual para pasivas
+	if not inventory.can_add_item(data):
+		_animate_error_shake(button)
+		return
+
 	if PlayerData.spend_currency(price):
 		inventory.add_item(data)
 		button.disabled = true
@@ -415,6 +396,11 @@ func _calculate_price(data) -> int:
 	return int(base * (1.0 + (mult * count)))
 
 func _get_item_count_safe(data) -> int:
+	# Si es Pasiva, preguntamos a PlayerData
+	if data is PassiveData:
+		return PlayerData.get_passive_count_global(data)
+		
+	# Si es Pieza, preguntamos al inventario de la escena
 	var gm = null
 	if owner and owner.has_method("get_inventory_piece_count"): gm = owner
 	elif get_tree().current_scene and get_tree().current_scene.has_method("get_inventory_piece_count"): gm = get_tree().current_scene

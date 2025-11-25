@@ -41,6 +41,18 @@ offset_top = 394.0
 offset_right = 416.0
 offset_bottom = 394.0
 scale = Vector2(0.8860778, 0.88381195)
+max_copies = null
+duplicate_piece_mult = null
+duplicate_passive_mult = null
+COLOR_NORMAL_BG = null
+COLOR_UNAFFORD_BG = null
+reroll_base_cost = null
+reroll_cost_multiplier = null
+prob_comun = null
+prob_raro = null
+prob_epico = null
+prob_legendario = null
+keep_lock_on_new_day = null
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
 z_index = 4
@@ -176,6 +188,6 @@ text = "Has ganado crack :)"
 [node name="HelpOverLay" parent="." instance=ExtResource("13_kvuet")]
 
 [node name="elJetas" parent="." instance=ExtResource("13_trtic")]
-z_index = 4
+z_index = 5
 position = Vector2(1682.9999, 540.00006)
 rotation = -0.7558317
