@@ -153,5 +153,5 @@ text = "Has ganado crack :)"
 
 [node name="elJetas" parent="." instance=ExtResource("13_trtic")]
 z_index = 4
-position = Vector2(1729.0001, 534.99994)
-rotation = -1.2796826
+position = Vector2(1682.9999, 540.00006)
+rotation = -0.7558317

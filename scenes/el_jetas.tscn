@@ -9,8 +9,8 @@ scale = Vector2(0.30778688, 0.30778688)
 texture = ExtResource("1_5ctqt")
 
 [node name="ButtonShop" parent="." instance=ExtResource("2_qgppr")]
-offset_left = -107.21725
-offset_top = -246.92427
-offset_right = 77.97587
-offset_bottom = -107.21724
+offset_left = -152.70326
+offset_top = -289.1613
+offset_right = 32.489853
+offset_bottom = -149.45425
 disabled = false
