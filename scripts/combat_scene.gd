@@ -16,7 +16,7 @@ var round_gold_loot: int = 0
 # Animacion de golpear 
 @export_group("Animación de Ataque")
 @export_subgroup("Aliados (PieceRes)")
-@export var ally_attack_offset: Vector2 = Vector2(-25, 10) # Izquierda + un pelín hacia abajo
+@export var ally_attack_offset: Vector2 = Vector2(-125, -35) # Movimiento izquierda + salto
 @export var ally_attack_rotation_deg: float = -8.0          # Gira hacia la izquierda/abajo
 
 @export_subgroup("Gladiador (npcRes)")
@@ -489,35 +489,49 @@ func _cleanup_allies_and_reset() -> void:
 func _play_attack_anim(attacker: npc) -> void:
 	if not is_instance_valid(attacker):
 		return
+
 	var original_pos: Vector2 = attacker.position
 	var original_rot_deg: float = attacker.rotation_degrees
-	
-	var offset := Vector2.ZERO
-	var target_rot_deg := original_rot_deg
-	
-	if attacker.team == npc.Team.ALLY:
-		offset = ally_attack_offset
-		target_rot_deg = original_rot_deg + ally_attack_rotation_deg
-	else:
-		offset = enemy_attack_offset
-		target_rot_deg + enemy_attack_rotation_deg
-		
+
+	# Limpiar tween anterior si existe
 	if attacker.has_meta("attack_tween"):
 		var old_tween: Tween = attacker.get_meta("attack_tween")
 		if is_instance_valid(old_tween):
 			old_tween.kill()
-	
+
 	var tween := create_tween()
-	attacker.set_meta("attacker", tween)
-	
+	attacker.set_meta("attack_tween", tween)
 	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	
+
+	#   ANIMACIÓN ALIADOS
+	if attacker.team == npc.Team.ALLY:
+		# POSICIÓN EN EL "AIRE"
+		var jump_pos := original_pos + ally_attack_offset
+		var target_rot_deg := original_rot_deg + ally_attack_rotation_deg
+
+		# Salto hacia la izquierda
+		tween.tween_property(attacker, "position", jump_pos, attack_lunge_duration)
+
+		# En el aire, girar hasta la rotación de golpe
+		tween.chain().tween_property(attacker, "rotation_degrees", target_rot_deg, attack_lunge_duration)
+
+		# Siguen en el aire, volver a la rotación normal
+		tween.chain().tween_property(attacker, "rotation_degrees", original_rot_deg, attack_lunge_duration)
+
+		# Caer de vuelta a su posición original
+		tween.chain().tween_property(attacker, "position", original_pos, attack_return_duration)
+
+		return
+	#ANIMACIÓN GLADIADORES
+	var offset := enemy_attack_offset
+	var target_rot_deg := original_rot_deg + enemy_attack_rotation_deg
 	var forward_pos := original_pos + offset
-	
-	# Animacion
+
+	# 1) Empuje hacia delante + giro
 	tween.tween_property(attacker, "position", forward_pos, attack_lunge_duration)
-	tween.parallel().tween_property(attacker, "rotation_degrees", target_rot_deg, attack_return_duration)
-	# Pos despues
+	tween.parallel().tween_property(attacker, "rotation_degrees", target_rot_deg, attack_lunge_duration)
+
+	# 2) Volver a sitio y rotación original
 	tween.chain().tween_property(attacker, "position", original_pos, attack_return_duration)
 	tween.parallel().tween_property(attacker, "rotation_degrees", original_rot_deg, attack_return_duration)
 

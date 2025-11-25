@@ -221,6 +221,7 @@ animation = &"idle"
 flip_h = true
 
 [node name="jotuun" type="AnimatedSprite2D" parent="."]
+visible = false
 sprite_frames = SubResource("SpriteFrames_y1ua7")
 animation = &"idle"
 flip_h = true
