@@ -1,7 +1,8 @@
 extends Node2D
 
 # Señal que indica si el jugador ganó la ronda (mató al gladiador)
-signal combat_finished(player_won: bool)
+# Devuelve bool (victoria) y int (oro obtenido en la ronda)
+signal combat_finished(player_won: bool, gold_looted: int)
 
 const NPC_SCENE := preload("res://scenes/npc.tscn")
 const PieceAdapter := preload("res://scripts/piece_adapter.gd")
@@ -15,13 +16,13 @@ var round_gold_loot: int = 0
 # --- NUEVO: Variables de Escalado Diario (Scaling) ---
 @export_group("Escalado de Dificultad (Por Día)")
 @export_subgroup("Crecimiento Exponencial")
-@export var scaling_hp_mult: float = 1.4     
+@export var scaling_hp_mult: float = 1.4      
 @export var scaling_damage_mult: float = 1.2 
 
 @export_subgroup("Crecimiento Lineal (Plano)")
-@export var scaling_speed_flat: float = 0.1  
+@export var scaling_speed_flat: float = 0.1   
 @export var scaling_crit_chance_flat: float = 5.0
-@export var scaling_crit_dmg_flat: float = 0.05  
+@export var scaling_crit_dmg_flat: float = 0.05   
 
 @onready var enemy_spawn: Marker2D = $GladiatorSpawn
 @onready var ally_entry_spawn: Marker2D = $AlliesSpawn
@@ -55,7 +56,8 @@ var round_number := 0
 
 func _ready() -> void:
 	randomize()
-	GlobalSignals.combat_requested.connect(on_roulette_combat_requested)
+	if GlobalSignals:
+		GlobalSignals.combat_requested.connect(on_roulette_combat_requested)
 
 	start_timer = Timer.new()
 	start_timer.one_shot = true
@@ -153,36 +155,19 @@ func _stop_combat() -> void:
 
 	combat_running = false
 
-	var msg_timer: Timer = null
-	
 	var player_won_round = not enemy_alive
 	
-	if player_won_round and allies_alive:
-		msg_timer = _show_round_message("Ronda terminada: ¡Victoria!")
-		msg_timer.timeout.connect(_cleanup_allies_and_reset)
-
 	# Resultado de la ronda
-	var player_won_round := not enemy_alive
-
 	# Si el gladiador sobrevive, lo mandamos al slot de espera
 	if not player_won_round:
 		if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 			_move_with_tween(enemy_npcs[0], enemy_wait_slot.position, 0.5)
 
-
-	elif player_won_round and (not allies_alive):
-		msg_timer = _show_round_message("Ronda terminada: doble KO.")
-		msg_timer.timeout.connect(_cleanup_allies_and_reset)
-	else:
-		msg_timer = _show_round_message("Ronda terminada.")
-		msg_timer.timeout.connect(_cleanup_allies_and_reset)
+	# MODIFICADO: Esperamos un poco y enviamos la señal directamente sin _show_round_message
+	await get_tree().create_timer(1.0).timeout
 	
-	# MODIFICADO: Enviamos el oro recolectado (round_gold_loot) en la señal
-	if msg_timer:
-		msg_timer.timeout.connect(func(): combat_finished.emit(player_won_round, round_gold_loot))
-	else:
-		_cleanup_allies_and_reset()
-		combat_finished.emit(player_won_round, round_gold_loot)
+	_cleanup_allies_and_reset()
+	combat_finished.emit(player_won_round, round_gold_loot)
 		
 	print("Battle stopped. Player won: ", player_won_round, " Loot: ", round_gold_loot)
 
@@ -500,20 +485,19 @@ func _do_attack(attacker: npc, defender: npc) -> void:
 	var before_hp := defender.health
 	var target_max_hp := defender.max_health
 	var target_name := _who(defender)
+	
+	# SOLO UNA LLAMADA A TAKE_DAMAGE (Aquí estaba el bug que lo llamaba dos veces)
 	defender.take_damage(dmg, attacker, crit)
 
 	var after_hp := 0.0
-	defender.take_damage(dmg, attacker)
 	if is_instance_valid(defender):
 		after_hp = defender.health
+	
 	attacker.notify_after_attack(defender, dmg, crit)
+	
 	if (not is_instance_valid(defender)) or after_hp <= 0.0:
 		attacker.notify_kill(defender)
 	
-	# LOG
-	# var crit_text := " (no crit)"
-	# if crit: crit_text = " CRIT x" + _num(mult)
-	# print("[HIT] ", _team_to_str(attacker.team), " -> ", target_name, " | dmg=", _num(dmg))
 	var crit_text := " (no crit)"
 	if crit: crit_text = " CRIT x" + _num(mult)
 	print("[HIT] ", _team_to_str(attacker.team), " -> ", _team_to_str(defender.team), " | final=", _num(dmg), crit_text)
