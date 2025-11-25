@@ -105,6 +105,10 @@ func _save_current_shop_state() -> void:
 	PlayerData.shop_items_saved.clear()
 	
 	for slot in piece_zone.get_children():
+		# --- AGREGA ESTA LÍNEA ---
+		if slot.is_queued_for_deletion(): continue
+		# -------------------------
+		
 		if slot is StoreSlot:
 			var data_packet = {
 				"type": "piece",
@@ -113,7 +117,6 @@ func _save_current_shop_state() -> void:
 				"purchased": slot.is_purchased
 			}
 			PlayerData.shop_items_saved.append(data_packet)
-
 func _restore_shop_from_save() -> void:
 	for child in piece_zone.get_children(): child.queue_free()
 	
