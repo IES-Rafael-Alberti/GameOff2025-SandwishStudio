@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c30h2v6rvg35n"
-path="res://.godot/imported/passive_4.jpg-50547e401ebc063b6fc74b3e1b2dfc3a.ctex"
+uid="uid://v7nekwjyhuij"
+path="res://.godot/imported/Manzana.png-a5ce37321c067b83e196d1f4735d5a32.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/passive_4.jpg"
-dest_files=["res://.godot/imported/passive_4.jpg-50547e401ebc063b6fc74b3e1b2dfc3a.ctex"]
+source_file="res://assets/Manzana.png"
+dest_files=["res://.godot/imported/Manzana.png-a5ce37321c067b83e196d1f4735d5a32.ctex"]
 
 [params]
 

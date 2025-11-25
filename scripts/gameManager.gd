@@ -17,9 +17,9 @@ var gladiators_defeated: int = 0
 ## ------------------------------------------------------------------
 ## Nodos
 ## ------------------------------------------------------------------
-@onready var buttonShop: Button = $ButtonShop
-@onready var sprite_show: Sprite2D = $ButtonShop/EyeSprite
-@onready var pupil: Sprite2D = $ButtonShop/EyeSprite/Pupil
+@onready var buttonShop: Button = $elJetas/ButtonShop
+@onready var sprite_show: Sprite2D = $elJetas/ButtonShop/EyeSprite
+@onready var pupil: Sprite2D = $elJetas/ButtonShop/EyeSprite/Pupil
 @onready var mat = $Store/Sprite2D.material
 @onready var anim = $Store/AnimationPlayer
 @onready var gold_label: Label = $gold_label

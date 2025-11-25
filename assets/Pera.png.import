@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bijmbbow6q1wm"
-path="res://.godot/imported/passive_1.jpg-3ca39873bd4b1f6664deea511e538775.ctex"
+uid="uid://8i8g3joejru0"
+path="res://.godot/imported/Pera.png-53685a622da03fa5e954a39a82692a68.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/passive_1.jpg"
-dest_files=["res://.godot/imported/passive_1.jpg-3ca39873bd4b1f6664deea511e538775.ctex"]
+source_file="res://assets/Pera.png"
+dest_files=["res://.godot/imported/Pera.png-53685a622da03fa5e954a39a82692a68.ctex"]
 
 [params]
 

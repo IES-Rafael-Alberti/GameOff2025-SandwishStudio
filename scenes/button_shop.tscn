@@ -1,15 +1,36 @@
-[gd_scene load_steps=3 format=3 uid="uid://bevacqmdtykqr"]
+[gd_scene load_steps=8 format=3 uid="uid://bevacqmdtykqr"]
 
 [ext_resource type="Texture2D" uid="uid://bq5j0k20aml4l" path="res://assets/Mostrada.png" id="1_wvo3v"]
 [ext_resource type="Texture2D" uid="uid://c2fa30p75xeed" path="res://assets/Pupil.png" id="2_nx6ja"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wvo3v"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_nx6ja"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wdxp6"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_kcehh"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lcqbf"]
+
 [node name="ButtonShop" type="Button"]
-offset_right = 101.0
-offset_bottom = 420.0
+offset_top = 158.0
+offset_right = 182.0
+offset_bottom = 303.0
+rotation = -0.002028451
+scale = Vector2(1.4113777, 1.4113777)
+theme_override_styles/normal = SubResource("StyleBoxEmpty_wvo3v")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_nx6ja")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_wdxp6")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_kcehh")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_lcqbf")
+disabled = true
+shortcut_feedback = false
+shortcut_in_tooltip = false
 
 [node name="EyeSprite" type="Sprite2D" parent="."]
-position = Vector2(53, 205)
-scale = Vector2(0.03470083, 0.034700837)
+position = Vector2(91.319855, 69.28125)
+scale = Vector2(0.058143836, 0.056065775)
 texture = ExtResource("1_wvo3v")
 
 [node name="Pupil" type="Sprite2D" parent="EyeSprite"]

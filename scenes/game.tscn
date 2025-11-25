@@ -8,12 +8,12 @@
 [ext_resource type="Resource" uid="uid://57d6mtngeb8t" path="res://resources/pieces/draugr.tres" id="4_dinhu"]
 [ext_resource type="PackedScene" uid="uid://bv3r20c0gu33v" path="res://scenes/roulette.tscn" id="5_iywne"]
 [ext_resource type="Resource" uid="uid://b065ie430glv1" path="res://resources/pieces/banshie.tres" id="5_kvuet"]
-[ext_resource type="PackedScene" uid="uid://bevacqmdtykqr" path="res://scenes/button_shop.tscn" id="6_p57ef"]
 [ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/jotun.tres" id="6_trtic"]
 [ext_resource type="Resource" uid="uid://cxbloivuqkrwe" path="res://resources/pieces/valkirias.tres" id="7_ir15t"]
 [ext_resource type="Texture2D" uid="uid://dycbttp2vpnv1" path="res://assets/Tiny Swords (Free Pack)/Terrain/Water Background color.png" id="12_dinhu"]
 [ext_resource type="Texture2D" uid="uid://bse428jrn0sbc" path="res://assets/Waves.png" id="12_trtic"]
 [ext_resource type="PackedScene" uid="uid://cj8n2p21wqyqt" path="res://scenes/help_over_lay.tscn" id="13_kvuet"]
+[ext_resource type="PackedScene" uid="uid://bbfqm8pblt056" path="res://scenes/el_jetas.tscn" id="13_trtic"]
 
 [node name="game" type="Node2D"]
 script = ExtResource("1_lbhrr")
@@ -59,13 +59,6 @@ offset_right = 315.0
 offset_bottom = 427.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
-
-[node name="ButtonShop" parent="." instance=ExtResource("6_p57ef")]
-z_index = 4
-offset_left = 1629.0
-offset_top = 448.0
-offset_right = 1733.0
-offset_bottom = 831.0
 
 [node name="RoundLabel" type="Label" parent="."]
 z_index = 4
@@ -181,3 +174,8 @@ theme_override_font_sizes/font_size = 72
 text = "Has ganado crack :)"
 
 [node name="HelpOverLay" parent="." instance=ExtResource("13_kvuet")]
+
+[node name="elJetas" parent="." instance=ExtResource("13_trtic")]
+z_index = 4
+position = Vector2(1682.9999, 540.00006)
+rotation = -0.7558317
