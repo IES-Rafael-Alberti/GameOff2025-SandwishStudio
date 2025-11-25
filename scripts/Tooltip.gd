@@ -311,3 +311,67 @@ func _get_passive_stats_string(data: PassiveData) -> String:
 		PassiveData.PassiveType.BASE_DAMAGE_INCREASE:
 			return "[color=#ff6b6b]⚔️ Daño Base:[/color] [b]+%s[/b]" % val
 	return ""
+func show_passive_summary(passive_counts: Dictionary, multiplier: float) -> void:
+	if passive_counts.is_empty():
+		return # No mostramos nada si no hay pasivas
+
+	# 1. Configurar Título y Estilo
+	name_label.text = "RESUMEN DE MEJORAS"
+	name_label.label_settings = LabelSettings.new()
+	name_label.label_settings.font_color = Color("#FFD700") # Dorado
+	name_label.label_settings.font_size = 22
+	name_label.label_settings.outline_size = 6
+	name_label.label_settings.outline_color = Color(0, 0, 0, 1)
+	
+	if card_style:
+		card_style.border_color = Color("#FFD700")
+		card_style.bg_color = Color(0.1, 0.1, 0.05, 0.98) # Fondo verdoso oscuro
+
+	# 2. Construir Texto (BBCode)
+	var text = ""
+	
+	# Mostrar el Multiplicador Actual destacado
+	var mult_color = "#ffffff"
+	if multiplier > 1.0: mult_color = "#00ff00" # Verde si hay bonus
+	
+	text += "[center][color=#aaaaaa]Multiplicador de Huecos vacios:[/color] [b][color=%s]x%.2f[/color][/b][/center]\n" % [mult_color, multiplier]
+	text += "[center][color=#444444]━━━━━━━━━━━━━━━━━━[/color][/center]\n"
+	
+	text += "[font_size=16]"
+	
+	# Iterar sobre todas las pasivas
+	for id in passive_counts:
+		var entry = passive_counts[id]
+		var data: PassiveData = entry["data"]
+		var count: int = entry["count"]
+		
+		if not data: continue
+		
+		# Calcular el total real que recibe el jugador
+		var total_value = (data.value * count) * multiplier
+		
+		# Formatear línea: Nombre (xCount) : +Total Stat
+		var name_str = data.name_passive if not data.name_passive.is_empty() else "Pasiva"
+		var stat_str = _get_passive_stat_label(data.type, total_value)
+		
+		text += "• [color=#ffcc00]%s[/color] [color=#888888](x%d)[/color]\n" % [name_str, count]
+		text += "   └ %s\n" % stat_str
+		
+	text += "[/font_size]"
+	
+	description_label.text = text
+	
+	# Ocultar precio ya que es un resumen
+	sell_price_label.hide()
+	
+	show()
+func _get_passive_stat_label(type: int, total_val: float) -> String:
+	# Redondeamos a 1 o 2 decimales para que se vea limpio
+	var val_str = str(snapped(total_val, 0.1))
+	match type:
+		PassiveData.PassiveType.HEALTH_INCREASE: return "[color=#4ecdc4]+%s Vida Max[/color]" % val_str
+		PassiveData.PassiveType.CRITICAL_DAMAGE_INCREASE: return "[color=#ff9f43]+%s Daño Crítico[/color]" % val_str
+		PassiveData.PassiveType.CRITICAL_CHANCE_INCREASE: return "[color=#ff9f43]+%s%% Prob. Crit[/color]" % val_str
+		PassiveData.PassiveType.ATTACK_SPEED_INCREASE: return "[color=#ffe66d]+%s Vel. Ataque[/color]" % val_str
+		PassiveData.PassiveType.BASE_DAMAGE_INCREASE: return "[color=#ff6b6b]+%s Daño Base[/color]" % val_str
+	return ""

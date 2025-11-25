@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://hbcgudcjh0wn"]
+[gd_scene load_steps=25 format=3 uid="uid://hbcgudcjh0wn"]
 
 [ext_resource type="Script" uid="uid://cmqqk0nk7sejg" path="res://scripts/inventory.gd" id="1_hj2ta"]
 [ext_resource type="PackedScene" uid="uid://n7qqfs70w4b" path="res://scenes/inventory_slot.tscn" id="2_ty45s"]
@@ -23,6 +23,7 @@
 [ext_resource type="Texture2D" uid="uid://cqc4rwgluigvv" path="res://assets/Uvas.png" id="13_iqxo6"]
 [ext_resource type="Texture2D" uid="uid://d1vgubqe84mhy" path="res://assets/Granada.png" id="14_y2qpb"]
 [ext_resource type="Texture2D" uid="uid://v7nekwjyhuij" path="res://assets/Manzana.png" id="15_5kq8a"]
+[ext_resource type="PackedScene" uid="uid://dblnjb14cqaif" path="res://scenes/tooltip.tscn" id="16_jc13p"]
 
 [node name="inventory" type="Control"]
 layout_mode = 3
@@ -88,7 +89,6 @@ rotation = -0.0030516738
 scale = Vector2(0.5, 0.5)
 
 [node name="cchance" type="TextureRect" parent="passive_inventory"]
-visible = false
 layout_mode = 0
 offset_left = 293.09378
 offset_top = 220.46413
@@ -98,7 +98,6 @@ texture = ExtResource("11_5mlvw")
 stretch_mode = 4
 
 [node name="health" type="TextureRect" parent="passive_inventory"]
-visible = false
 layout_mode = 0
 offset_left = 42.203724
 offset_top = 511.69983
@@ -108,7 +107,6 @@ texture = ExtResource("12_jc13p")
 stretch_mode = 4
 
 [node name="aspeed" type="TextureRect" parent="passive_inventory"]
-visible = false
 layout_mode = 0
 offset_left = 136.4292
 offset_top = 437.98703
@@ -118,7 +116,6 @@ texture = ExtResource("13_iqxo6")
 stretch_mode = 4
 
 [node name="damage" type="TextureRect" parent="passive_inventory"]
-visible = false
 layout_mode = 0
 offset_left = 263.61676
 offset_top = 704.37646
@@ -128,7 +125,6 @@ texture = ExtResource("14_y2qpb")
 stretch_mode = 4
 
 [node name="cdamage" type="TextureRect" parent="passive_inventory"]
-visible = false
 layout_mode = 0
 offset_left = 71.23516
 offset_top = 173.78687
@@ -136,6 +132,10 @@ offset_right = 350.3377
 offset_bottom = 475.49274
 texture = ExtResource("15_5kq8a")
 stretch_mode = 4
+
+[node name="Tooltip" parent="passive_inventory" instance=ExtResource("16_jc13p")]
+layout_mode = 0
+anchors_preset = 0
 
 [node name="delete" type="Panel" parent="."]
 custom_minimum_size = Vector2(100, 100)
@@ -271,3 +271,6 @@ stretch_mode = 2
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "+0"
+
+[connection signal="mouse_entered" from="passive_inventory" to="." method="_on_passive_inventory_mouse_entered"]
+[connection signal="mouse_exited" from="passive_inventory" to="." method="_on_passive_inventory_mouse_exited"]

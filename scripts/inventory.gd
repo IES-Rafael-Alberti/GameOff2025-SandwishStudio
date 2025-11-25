@@ -8,6 +8,8 @@ signal item_sold(refund_amount: int)
 @onready var piece_inventory: GridContainer = $piece_inventory
 @onready var passive_inventory: Control = $passive_inventory 
 @onready var refund_percent: int = 50
+# Asegúrate de que la ruta al Tooltip sea correcta. Si es hijo directo de Inventory: $Tooltip
+@onready var tooltip = $passive_inventory/Tooltip 
 
 # Etiquetas de Stats
 @onready var health_label: Label = $TextureRect3/Health_container/Label
@@ -35,7 +37,8 @@ var piece_counts: Dictionary = {}
 var passive_counts: Dictionary = {} 
 
 var piece_slots: Array[Node] = []
-var passive_visual_slots: Array[TextureRect] = [] # Aquí guardaremos referencias a los 5 TextureRect fijos
+# var passive_visual_slots: Array[TextureRect] = [] # YA NO SE USA (Son estáticos)
+var passive_nodes_map: Dictionary = {}
 
 ## ------------------------------------------------------------------
 ## Funciones de Godot
@@ -56,19 +59,19 @@ func _ready() -> void:
 	# 1. Inicializar Slots de Piezas (Grid dinámico estándar)
 	_initialize_piece_slots(piece_inventory, piece_slots, max_pieces, refund_percent)
 	
-	# 2. Inicializar Slots de Pasivas (Referencias a los nodos visuales fijos)
-	_initialize_passive_visuals()
+	# 2. Configurar Pasivas Estáticas (Mapeo y Señales)
+	_setup_passive_nodes()
 	
 	# 3. Restaurar estado visual de pasivas desde PlayerData (Persistencia)
 	_sync_passives_from_global()
 	
 	_update_passive_stats_display()
 	
-	print("Inventory _ready: Generados %d slots de piezas. Pasivas gestionadas visualmente." % [piece_slots.size()])
+	print("Inventory _ready: Generados %d slots de piezas." % [piece_slots.size()])
 
 
 ## ------------------------------------------------------------------
-## Inicialización y Sincronización (NUEVO)
+## Inicialización y Sincronización (MODIFICADO)
 ## ------------------------------------------------------------------
 
 func _initialize_piece_slots(container: GridContainer, slot_array: Array, count: int, sell_perc: int) -> void:
@@ -81,15 +84,30 @@ func _initialize_piece_slots(container: GridContainer, slot_array: Array, count:
 		if new_slot.has_signal("item_selected"):
 			new_slot.item_selected.connect(_on_item_selected_from_slot)
 
-func _initialize_passive_visuals() -> void:
-	# Recogemos los TextureRect que ya existen en la escena dentro de passive_inventory
-	# Suponemos que son hijos directos y son de tipo TextureRect
-	for child in passive_inventory.get_children():
-		if child is TextureRect:
-			passive_visual_slots.append(child)
-			# Los ocultamos o limpiamos inicialmente
-			child.texture = null
-			child.visible = false 
+# --- NUEVO: Configuración de Nodos Estáticos ---
+func _setup_passive_nodes() -> void:
+	# Vinculamos el Enum con el nodo en la escena
+	# NOTA: Asegúrate de que estos nodos existen en tu escena dentro de 'passive_inventory'
+	passive_nodes_map = {
+		PassiveData.PassiveType.HEALTH_INCREASE: $passive_inventory/health,
+		PassiveData.PassiveType.BASE_DAMAGE_INCREASE: $passive_inventory/damage,
+		PassiveData.PassiveType.ATTACK_SPEED_INCREASE: $passive_inventory/aspeed,
+		PassiveData.PassiveType.CRITICAL_CHANCE_INCREASE: $passive_inventory/cchance,
+		PassiveData.PassiveType.CRITICAL_DAMAGE_INCREASE: $passive_inventory/cdamage
+	}
+	
+	# Configuración inicial: Ocultar y conectar Tooltip
+	for type in passive_nodes_map:
+		var node = passive_nodes_map[type]
+		if node:
+			node.visible = false # Los ocultamos al inicio
+			node.mouse_filter = Control.MOUSE_FILTER_STOP # Asegurar que detecta el ratón
+			
+			# Conectamos las señales para el Tooltip de resumen
+			if not node.mouse_entered.is_connected(_on_passive_inventory_mouse_entered):
+				node.mouse_entered.connect(_on_passive_inventory_mouse_entered)
+			if not node.mouse_exited.is_connected(_on_passive_inventory_mouse_exited):
+				node.mouse_exited.connect(_on_passive_inventory_mouse_exited)
 
 func _sync_passives_from_global() -> void:
 	# Copiamos datos de PlayerData
@@ -99,9 +117,15 @@ func _sync_passives_from_global() -> void:
 	for id in passive_counts:
 		var entry = passive_counts[id]
 		var data = entry["data"]
-		# Mostramos visualmente la pasiva si tenemos al menos 1
+		# Si tenemos al menos 1, activamos su icono correspondiente
 		if entry["count"] > 0:
-			_display_passive_visual(data)
+			_activate_passive_visual(data.type)
+
+func _activate_passive_visual(type: int) -> void:
+	if passive_nodes_map.has(type):
+		var node = passive_nodes_map[type]
+		if node:
+			node.visible = true
 
 ## ------------------------------------------------------------------
 ## Funciones Públicas 
@@ -138,12 +162,8 @@ func can_add_item(data: Resource) -> bool:
 		return can_stack or has_empty_slot
 
 	elif data is PassiveData:
-		# Lógica Pasivas: Siempre se pueden comprar para stats, 
-		# pero visualmente solo si ya la tenemos O si hay hueco visual libre.
-		if passive_counts.has(id):
-			return true # Ya la tenemos, solo sube stack
-		else:
-			return _has_empty_visual_passive_slot()
+		# Lógica Pasivas: Siempre se pueden comprar (se apilan stats)
+		return true 
 			
 	return false
 
@@ -155,7 +175,6 @@ func get_item_count(target_res: Resource) -> int:
 		return PlayerData.get_passive_count_global(target_res)
 	
 	# 2. Comprobación de PIEZAS
-	# Recuperamos la lógica original que permite buscar tanto por PieceData como por PieceRes
 	var search_res = target_res
 	if target_res is PieceData:
 		search_res = target_res.piece_origin
@@ -164,7 +183,6 @@ func get_item_count(target_res: Resource) -> int:
 		for id in piece_counts:
 			var entry = piece_counts[id]
 			var data = entry["data"]
-			# Comparamos el origen (definition) para encontrar coincidencias
 			if data is PieceData and data.piece_origin == search_res:
 				return entry["count"]
 	
@@ -179,7 +197,7 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 
 	var id: String = _get_item_id(data)
 
-	# --- LÓGICA DE PASIVAS (NUEVA) ---
+	# --- LÓGICA DE PASIVAS (MODIFICADA) ---
 	if data is PassiveData:
 		# 1. Guardar en PlayerData (Base de datos global)
 		PlayerData.add_passive_global(data, amount)
@@ -189,10 +207,15 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 			passive_counts[id]["count"] += amount
 		else:
 			passive_counts[id] = { "data": data, "count": amount }
-			# Es nueva, activamos visual
-			_display_passive_visual(data)
+			# Es nueva, activamos el nodo visual estático
+			_activate_passive_visual(data.type)
 			
 		_update_passive_stats_display()
+		
+		# Si el ratón ya está encima, actualizamos el tooltip al momento
+		if tooltip and tooltip.visible:
+			_on_passive_inventory_mouse_entered()
+			
 		return true
 
 	# --- LÓGICA DE PIEZAS (ORIGINAL) ---
@@ -255,34 +278,15 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 	print("... FALLO INESPERADO: No se pudo apilar ni encontrar slot vacío.")
 	return false
 
-# --- VISUALES DE PASIVAS (NUEVO) ---
-func _has_empty_visual_passive_slot() -> bool:
-	for slot in passive_visual_slots:
-		if not slot.visible or slot.texture == null:
-			return true
-	return false
-
-func _display_passive_visual(data: PassiveData) -> void:
-	# 1. Chequear si ya está mostrada
-	for slot in passive_visual_slots:
-		if slot.visible and slot.texture == data.icon:
-			return # Ya está, no hacer nada
-
-	# 2. Buscar hueco libre
-	for slot in passive_visual_slots:
-		if not slot.visible or slot.texture == null:
-			slot.texture = data.icon
-			slot.visible = true
-			return
+# --- FUNCIONES DE VISUALES PASIVAS (Ya no usamos _display_passive_visual dinámica) ---
+# (Función eliminada porque usamos _activate_passive_visual con el mapa estático)
 
 ## ------------------------------------------------------------------
 ## Funciones de Eliminación de Items (SOLO PIEZAS)
 ## ------------------------------------------------------------------
 
 func decrement_item(data: Resource):
-	# PROTECCIÓN: No decrementar pasivas
 	if data is PassiveData:
-		print("decrement_item: Ignorado para pasiva.")
 		return false
 		
 	var context = _get_inventory_context(data)
@@ -433,7 +437,7 @@ func _update_slot_visuals_for_piece(piece_data: PieceData):
 		if slot_node and slot_node.has_method("_update_uses"):
 			slot_node._update_uses(piece_data)
 
-# --- CÁLCULO DE STATS (MODIFICADO para leer de PlayerData/Espejo) ---
+# --- CÁLCULO DE STATS ---
 func _update_passive_stats_display() -> void:
 	
 	var total_health: float = 0.0
@@ -442,13 +446,9 @@ func _update_passive_stats_display() -> void:
 	var total_crit_chance: float = 0.0
 	var total_crit_damage: float = 0.0
 
-	# 1. Contar huecos vacíos
 	var empty_slots_count = float(_get_empty_roulette_slots())
-	
-	# 2. Calcular multiplicador
 	var multiplier: float = 1.0 + (empty_slots_count * empty_slot_bonus_per_slot)
 
-	# 3. Iteramos sobre passive_counts (que sincronizamos con PlayerData)
 	for item_id in passive_counts:
 		var entry = passive_counts[item_id]
 		var data: PassiveData = entry.data
@@ -505,3 +505,18 @@ func _get_empty_roulette_slots() -> int:
 				empty_count += 1
 				
 	return empty_count
+
+# --- HANDLERS DEL TOOLTIP (CONECTADOS EN _setup_passive_nodes) ---
+func _on_passive_inventory_mouse_entered() -> void:
+	if not tooltip: return
+	
+	# 1. Recalcular el multiplicador actual al vuelo
+	var empty_slots_count = float(_get_empty_roulette_slots())
+	var multiplier: float = 1.0 + (empty_slots_count * empty_slot_bonus_per_slot)
+	
+	# 2. Llamar a la nueva función del Tooltip pasando todos los datos
+	tooltip.show_passive_summary(passive_counts, multiplier)
+
+func _on_passive_inventory_mouse_exited() -> void:
+	if tooltip:
+		tooltip.hide_tooltip()
