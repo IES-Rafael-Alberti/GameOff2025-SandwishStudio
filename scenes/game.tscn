@@ -75,41 +75,43 @@ theme_override_font_sizes/font_size = 28
 
 [node name="RoundLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 338.0
-offset_top = 334.0
-offset_right = 882.0
-offset_bottom = 373.0
+offset_left = 920.0
+offset_top = 40.0
+offset_right = 1041.0
+offset_bottom = 88.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 
 [node name="TextureRect" type="TextureRect" parent="RoundLabel"]
 layout_mode = 0
-offset_left = -57.999992
-offset_top = -6.0
-offset_right = 1717.0
-offset_bottom = 1621.0
+offset_left = -53.0
+offset_top = 8.999999
+offset_right = 1305.7422
+offset_bottom = 1399.5548
 scale = Vector2(0.030910943, 0.029605173)
 texture = ExtResource("12_trtic")
-
-[node name="DayLabel" type="Label" parent="."]
-z_index = 4
-offset_left = 895.0
-offset_top = 38.0
-offset_right = 1043.0
-offset_bottom = 86.0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 28
-horizontal_alignment = 1
-vertical_alignment = 1
+stretch_mode = 4
 
 [node name="GladiatorLabel" type="Label" parent="."]
 z_index = 4
 offset_left = 807.0
-offset_top = 37.0
-offset_right = 885.0
-offset_bottom = 85.0
+offset_top = 40.0
+offset_right = 869.0
+offset_bottom = 88.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 vertical_alignment = 1
+
+[node name="gladiatorLabel" type="TextureRect" parent="GladiatorLabel"]
+z_index = 4
+layout_mode = 0
+offset_left = -46.0
+offset_top = 4.0
+offset_right = -7.0
+offset_bottom = 49.0
+texture = ExtResource("15_ir15t")
+expand_mode = 1
+stretch_mode = 4
 
 [node name="GameOver" type="CanvasLayer" parent="."]
 visible = false
@@ -195,13 +197,3 @@ text = "Has ganado crack :)"
 z_index = 5
 position = Vector2(1682.9999, 540.00006)
 rotation = -0.7558317
-
-[node name="gladiatorLabel" type="TextureRect" parent="."]
-z_index = 4
-offset_left = 770.0
-offset_top = 41.0
-offset_right = 801.0
-offset_bottom = 86.0
-texture = ExtResource("15_ir15t")
-expand_mode = 1
-stretch_mode = 4

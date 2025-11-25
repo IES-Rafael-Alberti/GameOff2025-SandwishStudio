@@ -27,7 +27,7 @@ var gladiators_defeated: int = 0
 @onready var inventory: Control = $inventory
 @onready var roulette: Node2D = $Roulette
 @onready var combat_scene: Node2D = $combat_scene
-
+@onready var announcement_label: Label = $AnnouncementLabel
 # --- CONFIGURACIÓN ---
 @export var gold_round_base: int = 100
 @export var gold_day_mult: float = 1
@@ -143,14 +143,8 @@ func _update_ui_labels() -> void:
 		gladiator_label.text = "%d/%d" % [gladiators_defeated, gladiators_per_day]
 	
 	if is_instance_valid(round_label):
-		var state_text = ""
-		match current_state:
-			GameState.SHOP: state_text = " - Tienda"
-			GameState.ROULETTE: state_text = " - ¡Gira la ruleta!"
-			GameState.SPINNING: state_text = " - ¡Girando!"
-			GameState.COMBAT: state_text = " - ¡Combate!"
-		
-		round_label.text = "Waves %d/%d%s" % [current_round, rounds_per_day, state_text]
+		var state_text = ""	
+		round_label.text = "Wave %d/%d" % [current_round, rounds_per_day]
 
 
 ## ------------------------------------------------------------------
