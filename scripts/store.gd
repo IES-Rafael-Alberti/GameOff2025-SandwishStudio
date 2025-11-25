@@ -49,6 +49,7 @@ var reroll_label: Label
 var current_passive_buttons: Array = []
 
 func _ready() -> void:
+	mouse_filter = Control.MOUSE_FILTER_STOP
 	highlight_material = ShaderMaterial.new()
 	highlight_material.shader = OUTLINE_SHADER
 	highlight_material.set_shader_parameter("width", 3.0)
