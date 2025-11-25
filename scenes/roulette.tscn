@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://bv3r20c0gu33v"]
+[gd_scene load_steps=17 format=3 uid="uid://bv3r20c0gu33v"]
 
 [ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_jyskt"]
 [ext_resource type="Texture2D" uid="uid://dpcgv05fqqjag" path="res://assets/Manivela (1) (1).png" id="2_gils2"]
@@ -21,8 +21,18 @@ size = Vector2(544.9423, 240.75171)
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_t1x4v"]
 height = 92.0
 
-[node name="Roulette" type="Node2D"]
+[sub_resource type="Curve" id="Curve_shxjy"]
+_data = [Vector2(0.2611465, 1), 0.0, 0.0, 0, 0]
+point_count = 1
+
+[sub_resource type="Gradient" id="Gradient_egcvt"]
+offsets = PackedFloat32Array(0, 0, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0.99215686, 0.47058824, 0, 1, 1, 0, 0, 1)
+
+[node name="Roulette" type="Node2D" node_paths=PackedStringArray("spin_dust_particles", "needle_sparks_particles")]
 script = ExtResource("1_jyskt")
+spin_dust_particles = NodePath("")
+needle_sparks_particles = NodePath("Manecilla/NeedleSparks")
 
 [node name="Lever" type="Sprite2D" parent="."]
 position = Vector2(878.9862, 259.94424)
@@ -47,7 +57,6 @@ scale = Vector2(0.13809647, 0.13680618)
 texture = ExtResource("2_jyskt")
 
 [node name="Particles" type="CPUParticles2D" parent="SpriteRuleta"]
-visible = false
 position = Vector2(-5705.256, -3402.7043)
 scale = Vector2(11.164885, 11.083728)
 
@@ -273,6 +282,24 @@ position = Vector2(-0.8123779, 2.4012146)
 shape = SubResource("CapsuleShape2D_t1x4v")
 
 [node name="Timer" type="Timer" parent="Manecilla"]
+
+[node name="NeedleSparks" type="CPUParticles2D" parent="Manecilla"]
+z_index = 7
+position = Vector2(192, 113)
+emitting = false
+amount = 10
+lifetime = 0.6
+explosiveness = 1.0
+direction = Vector2(0, -1)
+spread = 60.0
+gravity = Vector2(0, 800)
+initial_velocity_min = 150.0
+initial_velocity_max = 250.0
+scale_amount_min = 3.0
+scale_amount_max = 4.0
+scale_amount_curve = SubResource("Curve_shxjy")
+color = Color(0.6879542, 0.68795425, 0, 1)
+color_ramp = SubResource("Gradient_egcvt")
 
 [node name="Europea" type="Control" parent="."]
 layout_mode = 3

@@ -34,6 +34,11 @@ signal roulette_spin_started
 @export var lever_release_particles: GPUParticles2D
 @export var win_particles: GPUParticles2D
 
+# --- NUEVO: REFERENCIAS VISUALES ROMANAS ---
+@export_group("Roman FX")
+@export var spin_dust_particles: CPUParticles2D # Asigna tu nodo de polvo aquí
+@export var needle_sparks_particles: CPUParticles2D # Asigna tu nodo de chispas aquí
+
 @export_subgroup("Audio & Camera")
 @export var game_camera: Camera2D
 @export var lever_ratchet_audio: AudioStreamPlayer 
@@ -47,7 +52,6 @@ signal roulette_spin_started
 @onready var ticker_audio: AudioStreamPlayer = $Manecilla/AudioStreamPlayer
 
 # REFERENCIAS A LOS ICONOS DE SINERGIA
-# Asegúrate de que los nodos se llamen así en tu escena
 @onready var icon_japonesa = $Japonesa
 @onready var icon_nordica = $Nordica
 @onready var icon_europea = $Europea
@@ -236,13 +240,28 @@ func _process(delta: float) -> void:
 func _spin(_delta: float):
 	$SpriteRuleta.rotation_degrees += inertia
 	
-	var glow_amount = remap(clamp(inertia, 0, 50), 0, 50, 0.0, 1.0)
-	$SpriteRuleta.modulate = Color.WHITE.lerp(speed_glow_color, glow_amount)
-	
+	# --- NUEVO: Lógica de Polvo en lugar de Brillo ---
+	if spin_dust_particles:
+		# Solo emitimos polvo si gira medianamente rápido
+		if inertia > 2.0:
+			spin_dust_particles.emitting = true
+			# Cuanto más rápido, más partículas y más velocidad
+			var dust_intensity = remap(clamp(inertia, 0, 50), 0, 50, 0.2, 1.0)
+			
+			# Ajustamos la cantidad visualmente (intenta usar amount_ratio si está disponible)
+			if "amount_ratio" in spin_dust_particles:
+				spin_dust_particles.amount_ratio = dust_intensity
+			
+			spin_dust_particles.speed_scale = 1.0 + dust_intensity
+		else:
+			spin_dust_particles.emitting = false
+	# --------------------------------------------------
+
 	inertia *= friction
 
 	if abs(inertia) < 0.05:
 		inertia = 0
+		if spin_dust_particles: spin_dust_particles.emitting = false
 		$SpriteRuleta.modulate = Color.WHITE 
 		_reward()
 		_reset()
@@ -277,7 +296,12 @@ func _bounce():
 	
 	spr.rotation_degrees = -bounce_angle
 	spr.position.y -= 4
-	spr.modulate = Color(1.5, 1.5, 1.5)
+	
+	# --- NUEVO: Chispas en lugar de Modulate ---
+	if needle_sparks_particles:
+		needle_sparks_particles.restart()
+		needle_sparks_particles.emitting = true
+	# --------------------------------------------
 	
 	if ticker_audio:
 		var pitch = remap(clamp(inertia, 0, 50), 0, 50, 0.7, 1.3)
@@ -286,9 +310,9 @@ func _bounce():
 	
 	var t = create_tween()
 	t.set_parallel(true)
-	t.tween_property(spr, "rotation_degrees", orig_rot, bounce_time)
+	# Usamos TRANS_ELASTIC para simular el rebote metálico
+	t.tween_property(spr, "rotation_degrees", orig_rot, bounce_time).set_trans(Tween.TRANS_ELASTIC)
 	t.tween_property(spr, "position", orig_pos, bounce_time)
-	t.tween_property(spr, "modulate", Color.WHITE, 0.1)
 	t.chain().tween_callback(func(): bouncing = false)
 
 # --- RECOMPENSAS ---
@@ -415,7 +439,8 @@ func _calculate_counts() -> Dictionary:
 	var unique_ids_nor = {}
 	var unique_ids_eur = {}
 	
-	if not slots_container: return {"jap_count":0, "nor_count":0, "eur_count":0}
+	if not slots_container: 
+		return {"jap_count":0, "nor_count":0, "eur_count":0}
 
 	for slot_root in slots_container.get_children():
 		if not slot_root.has_node("slot"): continue

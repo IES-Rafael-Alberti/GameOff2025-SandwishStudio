@@ -544,63 +544,126 @@ func _get_empty_roulette_slots() -> int:
 	
 # --- EFECTOS VISUALES (ESTILO ROMA/ARENA) ---
 
+# En GameOff2025-SandwishStudio/scripts/inventory.gd
+
 func _play_arena_return_effect(item_data: Resource, start_pos: Vector2, target_slot: Node):
 	if not item_data or not "icon" in item_data: return
 	
-	# 1. Crear un nodo temporal para el efecto
+	# --- CORRECCIÓN DE PUNTERÍA ---
+	var target_pos = Vector2.ZERO
+	
+	# 1. Intentamos buscar el icono específico dentro del slot para ser precisos
+	if "item_icon" in target_slot and target_slot.item_icon and target_slot.item_icon.visible:
+		# Obtenemos el centro EXACTO de la imagen en pantalla
+		target_pos = target_slot.item_icon.get_global_rect().get_center()
+	else:
+		# Fallback: Si no encontramos el icono, vamos al centro del slot
+		target_pos = target_slot.get_global_rect().get_center()
+	# -----------------------------
+
 	var effect_root = Node2D.new()
-	effect_root.global_position = start_pos
-	effect_root.z_index = 4096 # ¡Por encima de todo!
+	effect_root.z_index = 4096 
 	get_tree().root.add_child(effect_root)
 	
-	# 2. Crear el Sprite (la imagen de la pieza que vuela)
+	# 2. Sprite de la pieza
 	var sprite = Sprite2D.new()
 	sprite.texture = item_data.icon
-	sprite.scale = Vector2(0.6, 0.6) # Un poco más pequeña mientras viaja
+	# Ajustamos la escala inicial para que coincida con el tamaño del icono en el inventario
+	# (Un poco más grande al principio para que se note)
+	sprite.scale = Vector2(0.9, 0.9) 
+	sprite.position = Vector2.ZERO 
 	effect_root.add_child(sprite)
 	
-	# 3. Crear Sistema de Partículas (El polvo del Coliseo)
+	# 3. Partículas (Igual que antes)
 	var particles = CPUParticles2D.new()
-	particles.amount = 20
-	particles.lifetime = 0.6
-	particles.texture = null # Usaremos cuadrados simples por código si no hay textura
-	# Si tienes una textura de "grano de arena" o "humo", asígnala aquí:
-	# particles.texture = preload("res://ruta/a/tu/particula.png")
-	
+	particles.amount = 25
+	particles.lifetime = 0.5
+	particles.local_coords = false 
 	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
 	particles.emission_sphere_radius = 15.0
-	particles.gravity = Vector2(0, 100) # La arena cae un poco
-	particles.scale_amount_min = 4.0
+	particles.direction = Vector2(-1, 0)
+	particles.spread = 180.0
+	particles.gravity = Vector2(0, 50)
+	particles.scale_amount_min = 3.0
 	particles.scale_amount_max = 6.0
-	particles.color = Color(0.9, 0.8, 0.5) # Color Arena Dorada
-	particles.local_coords = false # Para que dejen estela en el mundo
+	particles.color = Color(0.95, 0.8, 0.3) 
+	var gradient = Gradient.new()
+	gradient.set_color(0, Color(0.95, 0.8, 0.3, 1.0))
+	gradient.set_color(1, Color(0.95, 0.8, 0.3, 0.0))
+	particles.color_ramp = gradient
 	effect_root.add_child(particles)
 	particles.emitting = true
+
+	# 4. Cálculo de la Curva (Trayectoria)
+	var p0 = start_pos
+	var p2 = target_pos
 	
-	# 4. Calcular el movimiento (Arco Parabólico)
-	var target_pos = target_slot.global_position + (target_slot.size / 2.0)
+	# Calculamos la altura del arco basándonos en la distancia
+	var distance = p0.distance_to(p2)
+	var arc_height = min(distance * 0.5, 300.0) * -1.0 # Negativo es hacia arriba
+	
+	# Punto de control P1
+	var center_x = (p0.x + p2.x) / 2.0
+	# Usamos el punto más alto entre los dos y sumamos la altura del arco
+	var base_y = min(p0.y, p2.y) 
+	var p1 = Vector2(center_x, base_y + arc_height)
+	
+	# 5. Animación
+	var t = create_tween()
+	t.set_parallel(true)
+	
+	# Movimiento curvo
+	t.tween_method(func(val): 
+		effect_root.global_position = _bezier_quadratic(p0, p1, p2, val), 
+		0.0, 1.0, 0.55).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_SINE)
+	
+	# Rotación
+	t.tween_property(sprite, "rotation", deg_to_rad(360), 0.55).set_ease(Tween.EASE_OUT)
+	
+	# Escala: Hace un "zoom" hacia la cámara y luego se ajusta al tamaño final
+	var t_scale = create_tween()
+	t_scale.tween_property(sprite, "scale", Vector2(1.3, 1.3), 0.25).set_ease(Tween.EASE_OUT)
+	# Al final se encoge para "entrar" en el slot (un poco más pequeño que 1.0 para que no tape el borde)
+	t_scale.chain().tween_property(sprite, "scale", Vector2(0.8, 0.8), 0.3).set_ease(Tween.EASE_IN)
+
+	# 6. Finalización
+	t.chain().tween_callback(func():
+		particles.emitting = false
+		sprite.visible = false # Ocultamos el sprite inmediatamente al llegar
+		
+		# Limpieza diferida para dejar terminar las partículas
+		var cleanup = create_tween()
+		cleanup.tween_interval(0.6)
+		cleanup.tween_callback(effect_root.queue_free)
+		
+		_play_slot_impact(target_slot)
+	)
+	
+# --- FUNCIONES AUXILIARES (Añadir al final de inventory.gd) ---
+
+# Función matemática para calcular la curva suave
+func _bezier_quadratic(p0: Vector2, p1: Vector2, p2: Vector2, t: float) -> Vector2:
+	var q0 = p0.lerp(p1, t)
+	var q1 = p1.lerp(p2, t)
+	return q0.lerp(q1, t)
+
+# Efecto de golpe visual en el slot cuando recibe la pieza
+func _play_slot_impact(slot_node: Node):
+	if not slot_node: return
+	
+	# 1. Flash blanco
+	var original_modulate = slot_node.modulate
+	slot_node.modulate = Color(2.0, 2.0, 1.5) # Brillo intenso
 	
 	var t = create_tween()
 	t.set_parallel(true)
-	t.set_ease(Tween.EASE_IN_OUT)
-	t.set_trans(Tween.TRANS_CUBIC)
+	t.set_trans(Tween.TRANS_ELASTIC)
+	t.set_ease(Tween.EASE_OUT)
 	
-	# Movimiento en X e Y
-	t.tween_property(effect_root, "global_position", target_pos, 0.5)
+	# 2. Temblor / Aplastamiento
+	# Usamos scale para que no rompa el layout del grid
+	slot_node.scale = Vector2(1.3, 0.7) 
+	t.tween_property(slot_node, "scale", Vector2.ONE, 0.4)
 	
-	# Efecto de escala: Se hace pequeña al entrar en la "bolsa"
-	t.tween_property(sprite, "scale", Vector2(0.1, 0.1), 0.5).set_ease(Tween.EASE_IN)
-	t.tween_property(sprite, "modulate:a", 0.0, 0.5).set_ease(Tween.EASE_IN) # Desvanecer
-	
-	# Rotación épica (como lanzada por los aires)
-	t.tween_property(sprite, "rotation", deg_to_rad(360 * 2), 0.5)
-	
-	# 5. Limpieza al terminar
-	t.chain().tween_callback(effect_root.queue_free)
-	
-	# Efecto extra: "Golpe" visual en el slot de destino al llegar
-	t.chain().tween_callback(func():
-		var slot_tween = create_tween()
-		slot_tween.tween_property(target_slot, "scale", Vector2(1.2, 1.2), 0.1).set_trans(Tween.TRANS_BOUNCE)
-		slot_tween.chain().tween_property(target_slot, "scale", Vector2.ONE, 0.2)
-	)
+	# Recuperar color normal
+	t.tween_property(slot_node, "modulate", original_modulate, 0.3)
