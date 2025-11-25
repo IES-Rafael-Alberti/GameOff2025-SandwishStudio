@@ -150,21 +150,23 @@ func can_add_item(data: Resource) -> bool:
 func get_item_count(target_res: Resource) -> int:
 	if not target_res: return 0
 	
-	var search_res = target_res
-	
-	# Caso Pieza
-	if target_res is PieceData:
-		search_res = target_res.piece_origin if target_res.piece_origin else target_res
-		if search_res is PieceRes:
-			for id in piece_counts:
-				var entry = piece_counts[id]
-				var data = entry["data"]
-				if data is PieceData and data.piece_origin == search_res:
-					return entry["count"]
-	
-	# Caso Pasiva (Miramos PlayerData)
-	elif target_res is PassiveData:
+	# 1. Comprobación de PASIVAS
+	if target_res is PassiveData:
 		return PlayerData.get_passive_count_global(target_res)
+	
+	# 2. Comprobación de PIEZAS
+	# Recuperamos la lógica original que permite buscar tanto por PieceData como por PieceRes
+	var search_res = target_res
+	if target_res is PieceData:
+		search_res = target_res.piece_origin
+	
+	if search_res is PieceRes:
+		for id in piece_counts:
+			var entry = piece_counts[id]
+			var data = entry["data"]
+			# Comparamos el origen (definition) para encontrar coincidencias
+			if data is PieceData and data.piece_origin == search_res:
+				return entry["count"]
 	
 	return 0
 
