@@ -27,10 +27,15 @@ subpixel_positioning=4
 keep_rounding_remainders=true
 oversampling=0.0
 Fallbacks=null
-fallbacks=[]
+fallbacks=[Resource("uid://bpkgnbq4vyoh3", "res://assets/fonts/DejaVuSans.ttf"), Resource("uid://cc3ny1pk6ycix", "res://assets/fonts/NotoColorEmoji-Regular.ttf"), Resource("uid://bwp8uein6qf72", "res://assets/fonts/NotoSansSymbols2-Regular.ttf"), Resource("uid://c5phmnirfjseh", "res://assets/fonts/Symbola.ttf")]
 Compress=null
 compress=true
-preload=[]
+preload=[{
+"chars": [],
+"glyphs": [],
+"name": "Nueva Configuración",
+"size": Vector2i(16, 0)
+}]
 language_support={}
 script_support={}
 opentype_features={}
