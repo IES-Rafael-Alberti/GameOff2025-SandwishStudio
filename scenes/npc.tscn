@@ -292,3 +292,5 @@ animation = &"idle"
 visible = false
 sprite_frames = ExtResource("18_n0klm")
 animation = &"idle"
+
+[node name="AudioPlayer" type="AudioStreamPlayer2D" parent="."]

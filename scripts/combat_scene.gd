@@ -610,6 +610,9 @@ func _do_attack(attacker: npc, defender: npc) -> void:
 	# Mostrar animacion
 	_play_attack_anim(attacker)
 	
+	if attacker.npc_res.sfx_attack:
+		attacker.play_sfx(attacker.npc_res.sfx_attack)
+
 	attacker.notify_before_attack(defender)
 	var base := attacker.get_damage(defender)
 	var dmg := base
@@ -621,7 +624,6 @@ func _do_attack(attacker: npc, defender: npc) -> void:
 	var target_max_hp := defender.max_health
 	var target_name := _who(defender)
 	
-	# SOLO UNA LLAMADA A TAKE_DAMAGE (Aquí estaba el bug que lo llamaba dos veces)
 	defender.take_damage(dmg, attacker, crit)
 
 	var after_hp := 0.0
