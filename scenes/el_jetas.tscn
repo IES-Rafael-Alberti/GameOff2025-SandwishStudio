@@ -4,13 +4,14 @@
 [ext_resource type="PackedScene" uid="uid://bevacqmdtykqr" path="res://scenes/button_shop.tscn" id="2_qgppr"]
 
 [node name="elJetas" type="Sprite2D"]
-position = Vector2(926.00006, 656.00006)
+position = Vector2(595, 443)
 scale = Vector2(0.30778688, 0.30778688)
 texture = ExtResource("1_5ctqt")
 
 [node name="ButtonShop" parent="." instance=ExtResource("2_qgppr")]
-offset_left = -152.70326
+modulate = Color(0.60933036, 0.60933006, 0.60932994, 1)
+offset_left = -139.70726
 offset_top = -289.1613
-offset_right = 32.489853
+offset_right = 45.485855
 offset_bottom = -149.45425
 disabled = false

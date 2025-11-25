@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://0dvayl6271no"]
+[gd_scene load_steps=11 format=3 uid="uid://0dvayl6271no"]
 
 [ext_resource type="Script" uid="uid://bw0d7s71m5dov" path="res://scripts/combat_scene.gd" id="1_ivkwx"]
 [ext_resource type="Script" uid="uid://bd1qpluesymyw" path="res://scripts/npc_res.gd" id="2_0vylu"]
@@ -8,7 +8,8 @@
 [ext_resource type="Resource" uid="uid://bsecr6d6j63jr" path="res://resources/warrior/armor_gladiator.tres" id="6_6sw3s"]
 [ext_resource type="Texture2D" uid="uid://cutrq81untdgo" path="res://assets/Combat_scene/Fondos/unnamed.png" id="7_ivkwx"]
 [ext_resource type="Texture2D" uid="uid://cm1hl2evn33uh" path="res://assets/Combat_scene/Fondos/OL (2).png" id="8_6sw3s"]
-[ext_resource type="Texture2D" uid="uid://bqswvveb5bl3y" path="res://assets/Combat_scene/Fondos/EPeleaDef (1).png" id="9_g0m11"]
+[ext_resource type="Texture2D" uid="uid://cat4mb3idsr2g" path="res://assets/EPeleaDefCol.png" id="9_ivkwx"]
+[ext_resource type="Texture2D" uid="uid://c5hdbehge8pqb" path="res://assets/PeleaDefCen.png" id="10_6sw3s"]
 
 [node name="combat_scene" type="Node2D"]
 position = Vector2(-24.999998, 4)
@@ -39,15 +40,27 @@ scale = Vector2(1.373091, 2.1140316)
 texture = ExtResource("8_6sw3s")
 metadata/_edit_use_anchors_ = true
 
-[node name="pillars" type="TextureRect" parent="."]
+[node name="PillarIzq" type="TextureRect" parent="."]
 z_index = 2
-offset_left = -1141.2458
-offset_top = -966.8625
-offset_right = 3123.7542
-offset_bottom = 569.1375
-scale = Vector2(1.4378277, 2.2151363)
-texture = ExtResource("9_g0m11")
-metadata/_edit_use_anchors_ = true
+offset_left = -530.5358
+offset_top = -348.3836
+offset_right = -230.53583
+offset_bottom = 551.0501
+scale = Vector2(1.7744678, 1.9284203)
+texture = ExtResource("9_ivkwx")
+flip_h = true
+
+[node name="PillarDer" type="TextureRect" parent="."]
+z_index = 2
+offset_left = 4738.2
+offset_top = 1407.2351
+offset_right = 5038.2
+offset_bottom = 2323.5273
+rotation = 3.1385164
+scale = Vector2(1.7744678, 1.9284203)
+texture = ExtResource("9_ivkwx")
+flip_h = true
+flip_v = true
 
 [node name="GladiatorSpawn" type="Marker2D" parent="."]
 position = Vector2(-483.02518, 747.6548)
@@ -111,3 +124,11 @@ position = Vector2(594.8733, 872.9164)
 
 [node name="EnemyBattleSlot" type="Marker2D" parent="EnemySlots"]
 position = Vector2(1473.8208, 872.9164)
+
+[node name="PeleaCen" type="TextureRect" parent="."]
+offset_left = 334.55432
+offset_top = -180.06345
+offset_right = 1934.5543
+offset_bottom = 19.936554
+scale = Vector2(2.1549644, 2.1549644)
+texture = ExtResource("10_6sw3s")

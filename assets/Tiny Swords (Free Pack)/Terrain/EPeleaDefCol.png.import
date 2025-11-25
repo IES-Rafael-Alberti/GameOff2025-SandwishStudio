@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c2fa30p75xeed"
-path="res://.godot/imported/Pupil.png-dd7a3155e958a0359546bfc00b2449bf.ctex"
+uid="uid://bjeufnaaydo60"
+path="res://.godot/imported/EPeleaDefCol.png-a6b3b0d7edef3b223343e572ee38aae4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Pupil.png"
-dest_files=["res://.godot/imported/Pupil.png-dd7a3155e958a0359546bfc00b2449bf.ctex"]
+source_file="res://assets/Tiny Swords (Free Pack)/Terrain/EPeleaDefCol.png"
+dest_files=["res://.godot/imported/EPeleaDefCol.png-a6b3b0d7edef3b223343e572ee38aae4.ctex"]
 
 [params]
 

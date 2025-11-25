@@ -62,36 +62,37 @@ theme_override_font_sizes/font_size = 28
 
 [node name="RoundLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 338.0
-offset_top = 334.0
-offset_right = 882.0
-offset_bottom = 373.0
+offset_left = 837.0
+offset_top = 44.0
+offset_right = 954.0
+offset_bottom = 83.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 
 [node name="TextureRect" type="TextureRect" parent="RoundLabel"]
 layout_mode = 0
-offset_left = -57.999992
-offset_top = -6.0
-offset_right = 1717.0
-offset_bottom = 1621.0
-scale = Vector2(0.030910943, 0.029605173)
+offset_left = -48.0
+offset_top = 5.999999
+offset_right = 1727.0
+offset_bottom = 1633.0
+scale = Vector2(0.021465681, 0.020558907)
 texture = ExtResource("12_trtic")
 
 [node name="DayLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 925.0
-offset_top = 39.0
-offset_right = 1073.0
-offset_bottom = 78.0
+offset_left = 1019.0
+offset_top = 45.0
+offset_right = 1167.0
+offset_bottom = 84.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 
 [node name="GladiatorLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 824.0
-offset_top = 40.0
-offset_right = 944.0
-offset_bottom = 79.0
+offset_left = 700.0
+offset_top = 45.0
+offset_right = 759.0
+offset_bottom = 84.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 

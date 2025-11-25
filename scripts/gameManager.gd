@@ -77,7 +77,7 @@ func _ready():
 	daily_gold_salary = 0
 	daily_gold_loot = 0
 	pupil_offset = pupil.position
-	eye_closed_texture = preload("res://assets/Oculta.png")
+	eye_closed_texture = preload("res://assets/Oculta_retocada.png")
 	original_eye_texture = sprite_show.texture
 
 	for child in store.get_children():
@@ -143,14 +143,8 @@ func _update_ui_labels() -> void:
 		gladiator_label.text = "%d/%d" % [gladiators_defeated, gladiators_per_day]
 	
 	if is_instance_valid(round_label):
-		var state_text = ""
-		match current_state:
-			GameState.SHOP: state_text = " - Tienda"
-			GameState.ROULETTE: state_text = " - ¡Gira la ruleta!"
-			GameState.SPINNING: state_text = " - ¡Girando!"
-			GameState.COMBAT: state_text = " - ¡Combate!"
 		
-		round_label.text = "Waves %d/%d%s" % [current_round, rounds_per_day, state_text]
+		round_label.text = "Waves %d/%d" % [current_round, rounds_per_day]
 
 
 ## ------------------------------------------------------------------
