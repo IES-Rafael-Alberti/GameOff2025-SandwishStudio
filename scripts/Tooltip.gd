@@ -296,13 +296,19 @@ func _get_passive_stats_string(data: PassiveData) -> String:
 # --- SUMMARY TOOLTIP WITH ICONS ---
 func show_passive_summary(passive_counts: Dictionary, multiplier: float) -> void:
 	if passive_counts.is_empty(): return 
+	name_label.text = "Fruit Medley"
 
-	name_label.text = "UPGRADES SUMMARY"
-	name_label.label_settings = LabelSettings.new()
-	name_label.label_settings.font_color = Color("#FFD700") 
-	name_label.label_settings.font_size = 22
-	name_label.label_settings.outline_size = 6
-	name_label.label_settings.outline_color = Color(0, 0, 0, 1)
+	var ls := LabelSettings.new()
+
+	# MUY IMPORTANTE: darle una fuente válida.
+	ls.font = get_theme_default_font()
+
+	ls.font_color = Color("#FFD700")
+	ls.font_size = 22
+	ls.outline_size = 6
+	ls.outline_color = Color(0, 0, 0, 1)
+
+	name_label.label_settings = ls
 	
 	if card_style:
 		card_style.border_color = Color("#FFD700")
