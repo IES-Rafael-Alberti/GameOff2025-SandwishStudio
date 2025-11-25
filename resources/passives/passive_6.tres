@@ -7,7 +7,7 @@
 script = ExtResource("1_b7j6f")
 type = 2
 value = 3.0
-name_passive = "Increased critical damage"
+name_passive = "Fig of the luck"
 icon = ExtResource("1_pukcq")
 price = 5
 metadata/_custom_type_script = "uid://berngf3tq220v"

@@ -7,6 +7,6 @@
 script = ExtResource("1_onj8q")
 type = 1
 value = 2.0
-name_passive = "Increased Critical Chance"
+name_passive = "Apple of critical damage"
 icon = ExtResource("1_bigkk")
 price = 5

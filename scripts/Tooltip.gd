@@ -214,6 +214,7 @@ func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int 
 		sell_price_label.show()
 	else:
 		sell_price_label.hide()
+	size = Vector2.ZERO
 	show()
 
 # --- HELPER: Generates [img] tag ---
