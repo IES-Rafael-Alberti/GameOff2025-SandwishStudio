@@ -113,12 +113,15 @@ passive_origins = Array[ExtResource("9_n3io3")]([ExtResource("10_abbvk"), ExtRes
 texture_unlocked = ExtResource("21_y1dpo")
 texture_locked = ExtResource("22_rky2c")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="TextureRect" parent="."]
 material = SubResource("ShaderMaterial_3ro5p")
-position = Vector2(822.581, 429.71207)
+layout_mode = 0
+offset_left = -28.7062
+offset_top = 57.559586
+offset_right = 971.2938
+offset_bottom = 657.5596
 scale = Vector2(1.7, 1.342)
 texture = ExtResource("16_abbvk")
-offset = Vector2(1, 1)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
