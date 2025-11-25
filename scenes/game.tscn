@@ -130,19 +130,34 @@ visible = false
 z_index = 4
 offset_left = -4.0
 offset_top = -2.0
-offset_right = 1681.0
-offset_bottom = 1093.0
+offset_right = 1165.0
+offset_bottom = 766.0
 mouse_filter = 0
 texture = ExtResource("12_dinhu")
 
-[node name="Label" type="Label" parent="DayFinished"]
+[node name="NextDayLabel" type="Label" parent="DayFinished"]
 z_index = 4
-offset_left = 333.0
-offset_top = 287.0
-offset_right = 841.0
-offset_bottom = 386.0
+offset_left = 367.0
+offset_top = 142.0
+offset_right = 875.0
+offset_bottom = 241.0
 theme_override_font_sizes/font_size = 72
-text = "SIGUIENTE DIA"
+
+[node name="HSlider" type="HSlider" parent="DayFinished"]
+z_index = 4
+offset_left = 358.0
+offset_top = 334.0
+offset_right = 857.0
+offset_bottom = 350.0
+
+[node name="InfoLabel" type="Label" parent="DayFinished"]
+z_index = 4
+anchors_preset = -1
+anchor_bottom = 0.015000001
+offset_left = 469.0
+offset_top = 369.0
+offset_right = 743.0
+offset_bottom = 683.6
 
 [node name="Win" type="CanvasLayer" parent="."]
 visible = false

@@ -11,6 +11,8 @@ const PieceAdapter := preload("res://scripts/piece_adapter.gd")
 const ALLY_LIMIT := 14
 const ENEMY_LIMIT := 1
 
+var round_gold_loot: int = 0
+# --- NUEVO: Variables de Escalado Diario (Scaling) ---
 @export_group("Escalado de Dificultad (Por Día)")
 @export_subgroup("Crecimiento Exponencial")
 @export var scaling_hp_mult: float = 1.4     
@@ -107,7 +109,7 @@ func on_roulette_combat_requested(piece_resource: Resource) -> void:
 	_start_pre_battle_sequence()
 
 func _stop_combat() -> void:
-	# Recompensa parcial si SOLO queda el enemigo vivo
+
 	if enemy_npcs.size() > 0 and ally_npcs.is_empty():
 		var w: npc = enemy_npcs[0]
 		if is_instance_valid(w) and w.health > 0.0:
@@ -120,9 +122,10 @@ func _stop_combat() -> void:
 			if payout > 0:
 				PlayerData.add_currency(payout)
 				w.gold_pool = int(w.gold_pool) - payout
-				print("Round reward: +", payout)
 
-	# Parar y borrar timers
+				round_gold_loot += payout # NUEVO: Registramos el pago parcial
+				print("Round reward (partial): +", payout)
+	
 	for t in ally_timers:
 		if is_instance_valid(t):
 			t.stop()
@@ -150,6 +153,14 @@ func _stop_combat() -> void:
 
 	combat_running = false
 
+	var msg_timer: Timer = null
+	
+	var player_won_round = not enemy_alive
+	
+	if player_won_round and allies_alive:
+		msg_timer = _show_round_message("Ronda terminada: ¡Victoria!")
+		msg_timer.timeout.connect(_cleanup_allies_and_reset)
+
 	# Resultado de la ronda
 	var player_won_round := not enemy_alive
 
@@ -158,11 +169,22 @@ func _stop_combat() -> void:
 		if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 			_move_with_tween(enemy_npcs[0], enemy_wait_slot.position, 0.5)
 
-	# Limpiar aliados y avisar al GameManager
-	_cleanup_allies_and_reset()
-	combat_finished.emit(player_won_round)
 
-	print("Battle stopped. Player won: ", player_won_round)
+	elif player_won_round and (not allies_alive):
+		msg_timer = _show_round_message("Ronda terminada: doble KO.")
+		msg_timer.timeout.connect(_cleanup_allies_and_reset)
+	else:
+		msg_timer = _show_round_message("Ronda terminada.")
+		msg_timer.timeout.connect(_cleanup_allies_and_reset)
+	
+	# MODIFICADO: Enviamos el oro recolectado (round_gold_loot) en la señal
+	if msg_timer:
+		msg_timer.timeout.connect(func(): combat_finished.emit(player_won_round, round_gold_loot))
+	else:
+		_cleanup_allies_and_reset()
+		combat_finished.emit(player_won_round, round_gold_loot)
+		
+	print("Battle stopped. Player won: ", player_won_round, " Loot: ", round_gold_loot)
 
 func spawn_enemy_one() -> void:
 	if enemy_npcs.size() >= ENEMY_LIMIT:
@@ -384,10 +406,10 @@ func _on_npc_died(n: npc) -> void:
 		var amount: int = int(max(0, n.gold_pool))
 		if amount > 0:
 			PlayerData.add_currency(amount)
+			round_gold_loot += amount # NUEVO: Sumamos al acumulador local
 			print("Reward (death): +", amount, " gold.")
 		n.gold_pool = 0
-
-		print("¡Gladiador murió!") # Eliminamos "Reemplazando..."
+		print("¡Gladiador murió!")
 
 func _on_npc_exited(n: npc) -> void:
 	if n.team == npc.Team.ALLY:
@@ -406,6 +428,7 @@ func _on_start_pressed() -> void:
 
 func _begin_combat() -> void:
 	print("Battle begins")
+	round_gold_loot = 0 # NUEVO: Reiniciamos el loot al comenzar ronda
 	if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 		var w: npc = enemy_npcs[0]
 		enemy_hp_round_start = w.health
