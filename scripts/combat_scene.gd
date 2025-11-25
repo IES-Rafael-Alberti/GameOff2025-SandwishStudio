@@ -6,6 +6,7 @@ signal combat_finished(player_won: bool, gold_looted: int)
 
 const NPC_SCENE := preload("res://scenes/npc.tscn")
 const PieceAdapter := preload("res://scripts/piece_adapter.gd")
+const NPC_DEATH_PARTICLES := preload("res://scenes/npc_death_particles.tscn")
 
 @export_group("Configuración de Enemigos")
 @export var enemy_res: Array[npcRes] = []
@@ -13,7 +14,8 @@ const ALLY_LIMIT := 14
 const ENEMY_LIMIT := 1
 
 var round_gold_loot: int = 0
-# Animacion de golpear 
+
+# Animacion de golpear aliados y enemigos
 @export_group("Animación de Ataque")
 @export_subgroup("Aliados (PieceRes)")
 @export var ally_attack_offset: Vector2 = Vector2(-125, -35) # Movimiento izquierda + salto
@@ -400,7 +402,54 @@ func _place_ally_in_slot_with_tween(n: npc, final_pos: Vector2, order_index: int
 	tween.tween_property(n, "position", mid_pos, 0.5)
 	tween.tween_property(n, "position", final_pos, 0.5)
 
+func _spawn_death_particles(n: npc) -> void:
+	if not is_instance_valid(n):
+		return
+
+	var particles : GPUParticles2D = NPC_DEATH_PARTICLES.instantiate()
+	
+	# Colocamos las partículas en el mismo sitio que el NPC
+	particles.position = n.position
+	
+	# Las añadimos al mismo padre que el NPC (la misma capa)
+	var parent := n.get_parent()
+	if parent:
+		parent.add_child(particles)
+	else:
+		add_child(particles) # fallback
+
+	# Intentar copiar la textura del sprite del NPC al shader
+	var tex: Texture2D = null
+
+	if n.has_node("AnimatedSprite2D"):
+		var anim_sprite: AnimatedSprite2D = n.get_node("AnimatedSprite2D")
+		# Coger la textura del frame actual (simplificado: primer frame)
+		if anim_sprite.sprite_frames:
+			var frames := anim_sprite.sprite_frames
+			var anim := anim_sprite.animation
+			if frames.get_frame_count(anim) > 0:
+				tex = frames.get_frame_texture(anim, anim_sprite.frame)
+	elif n.has_node("Sprite2D"):
+		var sprite: Sprite2D = n.get_node("Sprite2D")
+		tex = sprite.texture
+
+	if tex:
+		var mat := particles.process_material
+		if mat is ShaderMaterial:
+			mat.set_shader_parameter("sprite", tex)
+
+	# Activar emisión
+	particles.emitting = true
+
+	# Opción: auto-destruir después de su lifetime
+	var life := particles.lifetime
+	get_tree().create_timer(life + 0.5).timeout.connect(func ():
+		if is_instance_valid(particles):
+			particles.queue_free()
+	)
+
 func _on_npc_died(n: npc) -> void:
+	_spawn_death_particles(n)
 	if n.team == npc.Team.ENEMY:
 		var amount: int = int(max(0, n.gold_pool))
 		if amount > 0:
@@ -427,28 +476,39 @@ func _on_start_pressed() -> void:
 
 func _begin_combat() -> void:
 	print("Battle begins")
-	round_gold_loot = 0 # NUEVO: Reiniciamos el loot al comenzar ronda
+	round_gold_loot = 0 # Reiniciar el loot al comenzar ronda
 	if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 		var w: npc = enemy_npcs[0]
 		enemy_hp_round_start = w.health
 		enemy_gold_round_start = int(w.gold_pool)
 
-	for a in ally_npcs:
+	for i in range(ally_npcs.size()):
+		var a: npc = ally_npcs[i]
 		if is_instance_valid(a):
-			var t := _make_attack_timer(a, enemy_npcs)
+			var initial_delay := randf_range(0.01, 0.25)
+			var t := _make_attack_timer(a, enemy_npcs, initial_delay)
 			ally_timers.append(t)
 	for e in enemy_npcs:
 		if is_instance_valid(e):
 			var t := _make_attack_timer(e, ally_npcs)
 			enemy_timers.append(t)
 
-func _make_attack_timer(attacker: npc, defender: Variant) -> Timer:
+func _make_attack_timer(attacker: npc, defender: Variant, initial_delay: float = -1.0) -> Timer:
 	var t := Timer.new()
 	t.one_shot = false
+
 	var aps := 1.0
 	if is_instance_valid(attacker):
 		aps = max(0.01, attacker.get_attack_speed())
-	t.wait_time = 1.0 / aps
+
+	var base_wait_time := 1.0 / aps
+	t.wait_time = base_wait_time
+
+	# Si nos pasan un delay inicial, lo usamos SOLO para el primer ataque
+	if initial_delay >= 0.0:
+		t.wait_time = initial_delay
+		t.set_meta("first_attack", true)
+
 	add_child(t)
 
 	t.timeout.connect(func () -> void:
@@ -456,6 +516,7 @@ func _make_attack_timer(attacker: npc, defender: Variant) -> Timer:
 			t.stop()
 			t.queue_free()
 			return
+
 		var target: Variant = defender
 		if target is Array:
 			var alive: Array = []
@@ -468,8 +529,15 @@ func _make_attack_timer(attacker: npc, defender: Variant) -> Timer:
 			target = alive[randi() % alive.size()]
 		if not is_instance_valid(target):
 			return
+
 		_do_attack(attacker, target)
+
+		# Después del PRIMER ataque de este timer, volvemos al wait_time normal
+		if t.has_meta("first_attack") and t.get_meta("first_attack") == true:
+			t.set_meta("first_attack", false)
+			t.wait_time = base_wait_time
 	)
+
 	t.start()
 	return t
 

@@ -1,0 +1,37 @@
+[gd_scene load_steps=3 format=3 uid="uid://cn1odn3fnmuca"]
+
+[ext_resource type="Shader" uid="uid://c322j16xietc7" path="res://shaders/die_animation.gdshader" id="1_cn1hj"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mxkfb"]
+shader = ExtResource("1_cn1hj")
+shader_parameter/tint_color_a = Vector4(1, 0.4, 0.3, 1)
+shader_parameter/tint_color_b = Vector4(1, 1, 0.3, 1)
+shader_parameter/spread = 360.0
+shader_parameter/inherit_emitter_velocity_ratio = 0.0
+shader_parameter/initial_linear_velocity_min = 260.0
+shader_parameter/initial_linear_velocity_max = 500.0
+shader_parameter/orbit_velocity_min = 0.0
+shader_parameter/orbit_velocity_max = 0.0
+shader_parameter/radial_velocity_min = 180.0
+shader_parameter/radial_velocity_max = 250.0
+shader_parameter/linear_accel_min = -80.0
+shader_parameter/linear_accel_max = -120.0
+shader_parameter/radial_accel_min = 0.0
+shader_parameter/radial_accel_max = 0.0
+shader_parameter/tangent_accel_min = 0.0
+shader_parameter/tangent_accel_max = 0.0
+shader_parameter/damping_min = 2.0
+shader_parameter/damping_max = 4.0
+shader_parameter/scale_min = 2.5
+shader_parameter/scale_max = 3.0
+shader_parameter/lifetime_randomness = 0.25
+shader_parameter/emission_shape_offset = Vector3(0, 0, 0)
+shader_parameter/emission_shape_scale = Vector3(1, 1, 1)
+shader_parameter/emission_box_extents = Vector3(100, 100, 0)
+
+[node name="npc_death_particles" type="GPUParticles2D"]
+emitting = false
+amount = 200
+lifetime = 0.5
+one_shot = true
+process_material = SubResource("ShaderMaterial_mxkfb")
