@@ -1,6 +1,11 @@
-[gd_scene load_steps=3 format=3 uid="uid://dblnjb14cqaif"]
+[gd_scene load_steps=8 format=3 uid="uid://dblnjb14cqaif"]
 
 [ext_resource type="Script" uid="uid://bnpguy7y2xdrf" path="res://scripts/Tooltip.gd" id="1_7dicn"]
+[ext_resource type="Texture2D" uid="uid://d32k775bkfw00" path="res://assets/inventario/VIDA.png" id="2_ywu5r"]
+[ext_resource type="Texture2D" uid="uid://xr5sxokqvql1" path="res://assets/inventario/ADMG.png" id="3_j2erg"]
+[ext_resource type="Texture2D" uid="uid://dgjstvaqfykdq" path="res://assets/inventario/ASPEED.png" id="4_bli6e"]
+[ext_resource type="Texture2D" uid="uid://b10j5vwr4mjk4" path="res://assets/inventario/Crit.png" id="5_bfmi0"]
+[ext_resource type="Texture2D" uid="uid://tl8h73xfj25t" path="res://assets/inventario/CritDMG.png" id="6_miqp6"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7dicn"]
 bg_color = Color(0.5411765, 0.3647059, 0.19215687, 0.31764707)
@@ -13,6 +18,11 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_7dicn")
 script = ExtResource("1_7dicn")
+icon_health = ExtResource("2_ywu5r")
+icon_damage = ExtResource("3_j2erg")
+icon_speed = ExtResource("4_bli6e")
+icon_crit_chance = ExtResource("5_bfmi0")
+icon_crit_damage = ExtResource("6_miqp6")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2

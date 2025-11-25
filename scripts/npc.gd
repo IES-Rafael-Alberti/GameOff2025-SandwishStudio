@@ -30,8 +30,6 @@ var max_health: float = 1.0
 var health: float = 1.0
 # Gold pool that unit can drop
 var gold_pool: int = 0
-var display_name: String = ""
-@onready var name_label: Label = $NameLabel
 @onready var health_bar: ProgressBar = $healthBar
 
 # Variables para almacenar las bonificaciones de GlobalStats
@@ -90,7 +88,11 @@ func _ready() -> void:
 	else:
 		push_warning("NPC sin frames en inspector")
 
-	# 2. GUARDAR ESTILO ORIGINAL (VERDE) Y APLICAR VISUALES
+	# Configuración visual de la barra (Posición y Z-Index de Rama A)
+	_setup_healthbar_z()
+	_apply_healthbar_offset_from_res()
+
+	# 2. GUARDAR ESTILO ORIGINAL (VERDE) Y APLICAR VISUALES (Rama B)
 	if is_instance_valid(health_bar):
 		# Guardamos el estilo verde de la escena antes de tocar nada
 		default_bar_style = health_bar.get_theme_stylebox("fill")
@@ -100,16 +102,6 @@ func _ready() -> void:
 
 	for ab in abilities:
 		if ab: ab.on_spwan(self)
-
-func set_display_name(text: String) -> void:
-	display_name = text
-	_update_name_label()
-
-func _update_name_label() -> void:
-	if not is_instance_valid(name_label):
-		return
-	name_label.text = display_name
-	name_label.visible = display_name != ""
 
 func _update_healthbar() -> void:
 	if not is_instance_valid(health_bar): return
@@ -133,7 +125,7 @@ func _apply_bar_visuals():
 		return
 
 	# CASO 2: CON SINERGIA -> AZUL O MORADO
-	print("[%s] Aplicando COLOR Europeo: Tier %d" % [name, synergy_eur_tier])
+	# print("[%s] Aplicando COLOR Europeo: Tier %d" % [name, synergy_eur_tier])
 
 	var sb = StyleBoxFlat.new()
 	sb.set_corner_radius_all(2) 
@@ -172,6 +164,7 @@ func _show_damage_text(amount: float, was_crit: bool = false, is_epic: bool = fa
 	else:
 		var min_color := Color(1.0, 0.0, 0.0, 1.0) 
 		var max_color := Color(0.276, 0.005, 0.396, 1.0)
+		# Daño a partir del cual se considera “máximo morado”
 		var color_damage_cap := 120.0
 		var t : float = clamp(float(dmg_int) / color_damage_cap, 0.0, 1.0)
 		final_color = min_color.lerp(max_color, t)
@@ -389,4 +382,20 @@ func _show_heal_text(amount: float) -> void:
 	if root == null: return
 	root.add_child(heal_label)
 	
+	# Reutilizamos la animación definida para el daño
 	_animate_label(heal_label)
+
+func _apply_healthbar_offset_from_res() -> void:
+	if not is_instance_valid(health_bar):
+		return
+	if npc_res == null:
+		return
+
+	health_bar.position = npc_res.health_bar_offset
+
+func _setup_healthbar_z() -> void:
+	if not is_instance_valid(health_bar):
+		return
+
+	health_bar.z_as_relative = false
+	health_bar.z_index = 100

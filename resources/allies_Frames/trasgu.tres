@@ -1,10 +1,10 @@
-[gd_resource type="SpriteFrames" load_steps=3 format=3 uid="uid://s5dqraogpmma"]
+[gd_resource type="SpriteFrames" load_steps=3 format=3 uid="uid://drxe6ftchok7c"]
 
-[ext_resource type="Texture2D" uid="uid://bdvqxioqbg7gc" path="res://assets/Combat_scene/allies_scaled/Trasgu.png" id="1_f8w6d"]
+[ext_resource type="Texture2D" uid="uid://d06goxihti3aw" path="res://assets/Combat_scene/allies_final/Trasgu.png" id="1_f8w6d"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_prk4j"]
 atlas = ExtResource("1_f8w6d")
-region = Rect2(0, 0, 407, 274)
+region = Rect2(0, 0, 204, 137)
 
 [resource]
 animations = [{

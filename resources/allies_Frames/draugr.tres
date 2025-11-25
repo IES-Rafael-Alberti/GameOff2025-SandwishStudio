@@ -1,16 +1,16 @@
 [gd_resource type="SpriteFrames" load_steps=3 format=3 uid="uid://cv78gw7w1hu8y"]
 
-[ext_resource type="Texture2D" uid="uid://bpvm2wcd1jg3r" path="res://assets/Combat_scene/allies_scaled/Draugr.png" id="1_ysf7o"]
+[ext_resource type="Texture2D" uid="uid://dvwgmmdg5h61o" path="res://assets/Combat_scene/allies_final/Draugr.png" id="1_ysf7o"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_7knng"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_ysf7o"]
 atlas = ExtResource("1_ysf7o")
-region = Rect2(0, 0, 198, 206)
+region = Rect2(0, 0, 149, 155)
 
 [resource]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_7knng")
+"texture": SubResource("AtlasTexture_ysf7o")
 }],
 "loop": true,
 "name": &"idle",

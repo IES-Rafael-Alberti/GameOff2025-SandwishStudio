@@ -1,19 +1,19 @@
-[gd_scene load_steps=22 format=3 uid="uid://bekys0sh7i1sf"]
+[gd_scene load_steps=40 format=3 uid="uid://bekys0sh7i1sf"]
 
 [ext_resource type="Shader" uid="uid://kl5qcx1hsdjw" path="res://assets/shaders/shock_damage.gdshader" id="1_rv78h"]
 [ext_resource type="Script" uid="uid://dkh16s35ytd1p" path="res://scripts/npc.gd" id="2_rv78h"]
-[ext_resource type="SpriteFrames" uid="uid://gvweoobpn1ha" path="res://resources/allies_Frames/banshiee.tres" id="3_rv78h"]
-[ext_resource type="SpriteFrames" uid="uid://cfn77wm5oqo8k" path="res://resources/allies_Frames/dragon.tres" id="4_nyaq3"]
-[ext_resource type="SpriteFrames" uid="uid://cv78gw7w1hu8y" path="res://resources/allies_Frames/draugr.tres" id="5_4wlns"]
-[ext_resource type="SpriteFrames" uid="uid://i1ppr1u5ps14" path="res://resources/allies_Frames/jotuun.tres" id="6_tl2vt"]
-[ext_resource type="SpriteFrames" uid="uid://osibphf1sb75" path="res://resources/allies_Frames/kappa.tres" id="7_gl1un"]
-[ext_resource type="SpriteFrames" uid="uid://cq1jiipx7vdys" path="res://resources/allies_Frames/kozo.tres" id="8_wuru7"]
-[ext_resource type="SpriteFrames" uid="uid://8sg5xcm4pv0q" path="res://resources/allies_Frames/norna.tres" id="9_nyaq3"]
-[ext_resource type="SpriteFrames" uid="uid://liwdmac0s7io" path="res://resources/allies_Frames/oni.tres" id="10_yf2ql"]
-[ext_resource type="SpriteFrames" uid="uid://cnh48p4hva1em" path="res://resources/allies_Frames/satiro.tres" id="11_8gbmn"]
-[ext_resource type="SpriteFrames" uid="uid://ci0tv38g8v7at" path="res://resources/allies_Frames/tengu.tres" id="12_pvipr"]
-[ext_resource type="SpriteFrames" uid="uid://s5dqraogpmma" path="res://resources/allies_Frames/trasgu.tres" id="13_wuru7"]
-[ext_resource type="SpriteFrames" uid="uid://mp6dpbb2ijl8" path="res://resources/allies_Frames/valk.tres" id="14_nyaq3"]
+[ext_resource type="Texture2D" uid="uid://bjeo7ufgwd3m8" path="res://assets/Combat_scene/allies_final/Banshee.png" id="3_n0klm"]
+[ext_resource type="SpriteFrames" uid="uid://cfn77wm5oqo8k" path="res://resources/allies_Frames/dragon.tres" id="4_n0klm"]
+[ext_resource type="Texture2D" uid="uid://dvwgmmdg5h61o" path="res://assets/Combat_scene/allies_final/Draugr.png" id="5_ca6vw"]
+[ext_resource type="Texture2D" uid="uid://cuwm3qv7oa501" path="res://assets/Combat_scene/allies_final/Jotunn.png" id="6_t8u8m"]
+[ext_resource type="SpriteFrames" uid="uid://osibphf1sb75" path="res://resources/allies_Frames/kappa.tres" id="7_n0klm"]
+[ext_resource type="Texture2D" uid="uid://t7qcd3si4vrn" path="res://assets/Combat_scene/allies_final/Kozo.png" id="8_ewlk4"]
+[ext_resource type="Texture2D" uid="uid://dit6xt6dt02md" path="res://assets/Combat_scene/allies_final/Norna.png" id="9_bw2c7"]
+[ext_resource type="Texture2D" uid="uid://cxhtyg5j77yqb" path="res://assets/Combat_scene/allies_final/Oni.png" id="10_gc4mq"]
+[ext_resource type="Texture2D" uid="uid://ckd5yp5d85800" path="res://assets/Combat_scene/allies_final/Satiro.png" id="11_2gr28"]
+[ext_resource type="Texture2D" uid="uid://5hd1trsnn0no" path="res://assets/Combat_scene/allies_final/Tengu.png" id="12_tkdcp"]
+[ext_resource type="SpriteFrames" uid="uid://drxe6ftchok7c" path="res://resources/allies_Frames/trasgu.tres" id="13_wuru7"]
+[ext_resource type="Texture2D" uid="uid://cbtylxcnsv7kh" path="res://assets/Combat_scene/allies_final/Valk.png" id="14_bll4x"]
 [ext_resource type="SpriteFrames" uid="uid://rjwlxoj38qir" path="res://resources/warrior/red_gladiator_animation.tres" id="15_yf2ql"]
 [ext_resource type="SpriteFrames" uid="uid://binkgvqygxeqd" path="res://resources/warrior/purple_gladiator_animation.tres" id="16_pvipr"]
 [ext_resource type="SpriteFrames" uid="uid://dxylk5lisg7lo" path="res://resources/warrior/armor_gladiator_animation.tres" id="17_n0klm"]
@@ -36,6 +36,141 @@ animations = [{
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_abqhh"]
 bg_color = Color(0.39513198, 0.8288472, 0.40690893, 1)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_asmvl"]
+atlas = ExtResource("3_n0klm")
+region = Rect2(0, 0, 236, 251)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_46t2e"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_asmvl")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ysf7o"]
+atlas = ExtResource("5_ca6vw")
+region = Rect2(0, 0, 149, 155)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_jwdfw"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ysf7o")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_va3n3"]
+atlas = ExtResource("6_t8u8m")
+region = Rect2(0, 0, 278, 276)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_y1ua7"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_va3n3")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wvjp8"]
+atlas = ExtResource("8_ewlk4")
+region = Rect2(0, 0, 200, 231)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ub7sa"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wvjp8")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jm2s3"]
+atlas = ExtResource("9_bw2c7")
+region = Rect2(0, 0, 203, 204)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_fdkk8"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jm2s3")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dd4jn"]
+atlas = ExtResource("10_gc4mq")
+region = Rect2(0, 0, 209, 263)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_iwn7c"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dd4jn")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x48ul"]
+atlas = ExtResource("11_2gr28")
+region = Rect2(0, 0, 161, 261)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_8x8lr"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x48ul")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r35s1"]
+atlas = ExtResource("12_tkdcp")
+region = Rect2(0, 0, 250, 270)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_2miyh"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r35s1")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_31vhs"]
+atlas = ExtResource("14_bll4x")
+region = Rect2(0, 0, 188, 202)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_4401o"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_31vhs")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
 
 [node name="npc" type="AnimatedSprite2D"]
 material = SubResource("ShaderMaterial_7n8xq")
@@ -68,61 +203,61 @@ theme_override_font_sizes/font_size = 21
 [node name="banshiee" type="AnimatedSprite2D" parent="."]
 visible = false
 scale = Vector2(0.001, 0.001)
-sprite_frames = ExtResource("3_rv78h")
+sprite_frames = SubResource("SpriteFrames_46t2e")
 animation = &"idle"
 flip_h = true
 
 [node name="dragon" type="AnimatedSprite2D" parent="."]
 visible = false
 scale = Vector2(0.001, 0.001)
-sprite_frames = ExtResource("4_nyaq3")
+sprite_frames = ExtResource("4_n0klm")
 animation = &"idle"
 flip_h = true
 
 [node name="draugr" type="AnimatedSprite2D" parent="."]
 visible = false
-sprite_frames = ExtResource("5_4wlns")
+sprite_frames = SubResource("SpriteFrames_jwdfw")
 animation = &"idle"
 flip_h = true
 
 [node name="jotuun" type="AnimatedSprite2D" parent="."]
 visible = false
-sprite_frames = ExtResource("6_tl2vt")
+sprite_frames = SubResource("SpriteFrames_y1ua7")
 animation = &"idle"
 flip_h = true
 
 [node name="kappa" type="AnimatedSprite2D" parent="."]
 visible = false
-sprite_frames = ExtResource("7_gl1un")
+sprite_frames = ExtResource("7_n0klm")
 animation = &"idle"
 flip_h = true
 
 [node name="kozo" type="AnimatedSprite2D" parent="."]
 visible = false
-sprite_frames = ExtResource("8_wuru7")
+sprite_frames = SubResource("SpriteFrames_ub7sa")
 animation = &"idle"
 flip_h = true
 
 [node name="norna" type="AnimatedSprite2D" parent="."]
 visible = false
-sprite_frames = ExtResource("9_nyaq3")
+sprite_frames = SubResource("SpriteFrames_fdkk8")
 animation = &"idle"
 flip_h = true
 
 [node name="oni" type="AnimatedSprite2D" parent="."]
 visible = false
-sprite_frames = ExtResource("10_yf2ql")
+sprite_frames = SubResource("SpriteFrames_iwn7c")
 animation = &"idle"
 
 [node name="satiro" type="AnimatedSprite2D" parent="."]
 visible = false
-sprite_frames = ExtResource("11_8gbmn")
+sprite_frames = SubResource("SpriteFrames_8x8lr")
 animation = &"idle"
 flip_h = true
 
 [node name="tengu" type="AnimatedSprite2D" parent="."]
 visible = false
-sprite_frames = ExtResource("12_pvipr")
+sprite_frames = SubResource("SpriteFrames_2miyh")
 animation = &"idle"
 flip_h = true
 
@@ -134,7 +269,7 @@ flip_h = true
 
 [node name="valk" type="AnimatedSprite2D" parent="."]
 visible = false
-sprite_frames = ExtResource("14_nyaq3")
+sprite_frames = SubResource("SpriteFrames_4401o")
 animation = &"idle"
 flip_h = true
 

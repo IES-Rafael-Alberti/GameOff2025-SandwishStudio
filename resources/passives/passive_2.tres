@@ -1,12 +1,12 @@
 [gd_resource type="Resource" script_class="PassiveData" load_steps=3 format=3 uid="uid://bqmnhrov7qvu7"]
 
 [ext_resource type="Script" uid="uid://berngf3tq220v" path="res://scripts/passive_data.gd" id="1_ea058"]
-[ext_resource type="Texture2D" uid="uid://ndf8hba61ykk" path="res://assets/passive_3.jpg" id="1_jokap"]
+[ext_resource type="Texture2D" uid="uid://cqc4rwgluigvv" path="res://assets/Uvas.png" id="1_jokap"]
 
 [resource]
 script = ExtResource("1_ea058")
 type = 3
 value = 1.2
-name_passive = "Increased Attack Speed"
+name_passive = "Grapes of speed"
 icon = ExtResource("1_jokap")
 price = 5

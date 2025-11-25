@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://dd8wqmfs2cj1j"]
+[gd_scene load_steps=15 format=3 uid="uid://dd8wqmfs2cj1j"]
 
 [ext_resource type="Script" uid="uid://bpnxk43sopml" path="res://scripts/gameManager.gd" id="1_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://hbcgudcjh0wn" path="res://scenes/inventory.tscn" id="2_lbhrr"]
@@ -8,11 +8,12 @@
 [ext_resource type="Resource" uid="uid://57d6mtngeb8t" path="res://resources/pieces/draugr.tres" id="4_dinhu"]
 [ext_resource type="PackedScene" uid="uid://bv3r20c0gu33v" path="res://scenes/roulette.tscn" id="5_iywne"]
 [ext_resource type="Resource" uid="uid://b065ie430glv1" path="res://resources/pieces/banshie.tres" id="5_kvuet"]
-[ext_resource type="PackedScene" uid="uid://bevacqmdtykqr" path="res://scenes/button_shop.tscn" id="6_p57ef"]
 [ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/jotun.tres" id="6_trtic"]
 [ext_resource type="Resource" uid="uid://cxbloivuqkrwe" path="res://resources/pieces/valkirias.tres" id="7_ir15t"]
 [ext_resource type="Texture2D" uid="uid://dycbttp2vpnv1" path="res://assets/Tiny Swords (Free Pack)/Terrain/Water Background color.png" id="12_dinhu"]
+[ext_resource type="Texture2D" uid="uid://bse428jrn0sbc" path="res://assets/Waves.png" id="12_trtic"]
 [ext_resource type="PackedScene" uid="uid://cj8n2p21wqyqt" path="res://scenes/help_over_lay.tscn" id="13_kvuet"]
+[ext_resource type="PackedScene" uid="uid://bbfqm8pblt056" path="res://scenes/el_jetas.tscn" id="13_trtic"]
 
 [node name="game" type="Node2D"]
 script = ExtResource("1_lbhrr")
@@ -40,6 +41,18 @@ offset_top = 394.0
 offset_right = 416.0
 offset_bottom = 394.0
 scale = Vector2(0.8860778, 0.88381195)
+max_copies = null
+duplicate_piece_mult = null
+duplicate_passive_mult = null
+COLOR_NORMAL_BG = null
+COLOR_UNAFFORD_BG = null
+reroll_base_cost = null
+reroll_cost_multiplier = null
+prob_comun = null
+prob_raro = null
+prob_epico = null
+prob_legendario = null
+keep_lock_on_new_day = null
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
 z_index = 4
@@ -59,13 +72,6 @@ offset_bottom = 427.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 
-[node name="ButtonShop" parent="." instance=ExtResource("6_p57ef")]
-z_index = 4
-offset_left = 1629.0
-offset_top = 448.0
-offset_right = 1733.0
-offset_bottom = 831.0
-
 [node name="RoundLabel" type="Label" parent="."]
 z_index = 4
 offset_left = 338.0
@@ -74,21 +80,30 @@ offset_right = 882.0
 offset_bottom = 373.0
 theme_override_font_sizes/font_size = 28
 
+[node name="TextureRect" type="TextureRect" parent="RoundLabel"]
+layout_mode = 0
+offset_left = -57.999992
+offset_top = -6.0
+offset_right = 1717.0
+offset_bottom = 1621.0
+scale = Vector2(0.030910943, 0.029605173)
+texture = ExtResource("12_trtic")
+
 [node name="DayLabel" type="Label" parent="."]
 z_index = 4
 offset_left = 925.0
-offset_top = 49.0
+offset_top = 39.0
 offset_right = 1073.0
-offset_bottom = 88.0
+offset_bottom = 78.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 
 [node name="GladiatorLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 820.0
-offset_top = 53.0
-offset_right = 940.0
-offset_bottom = 92.0
+offset_left = 824.0
+offset_top = 40.0
+offset_right = 944.0
+offset_bottom = 79.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 
@@ -171,3 +186,8 @@ theme_override_font_sizes/font_size = 72
 text = "Has ganado crack :)"
 
 [node name="HelpOverLay" parent="." instance=ExtResource("13_kvuet")]
+
+[node name="elJetas" parent="." instance=ExtResource("13_trtic")]
+z_index = 5
+position = Vector2(1682.9999, 540.00006)
+rotation = -0.7558317
