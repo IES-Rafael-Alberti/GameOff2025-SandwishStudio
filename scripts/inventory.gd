@@ -436,6 +436,16 @@ func _on_piece_returned(piece_data: PieceData):
 
 	_update_slot_visuals_for_piece(piece_data)
 	
+	var id = _get_item_id(piece_data)
+	if piece_counts.has(id):
+		var entry = piece_counts[id]
+		var target_slot_node = entry["slot_node"]
+		
+		if target_slot_node:
+			var start_pos = get_global_mouse_position()
+			_play_arena_return_effect(piece_data, start_pos, target_slot_node)
+	# -----------------------------------------
+	
 	call_deferred("_update_passive_stats_display")
 
 
@@ -531,3 +541,66 @@ func _get_empty_roulette_slots() -> int:
 				empty_count += 1
 				
 	return empty_count
+	
+# --- EFECTOS VISUALES (ESTILO ROMA/ARENA) ---
+
+func _play_arena_return_effect(item_data: Resource, start_pos: Vector2, target_slot: Node):
+	if not item_data or not "icon" in item_data: return
+	
+	# 1. Crear un nodo temporal para el efecto
+	var effect_root = Node2D.new()
+	effect_root.global_position = start_pos
+	effect_root.z_index = 4096 # ¡Por encima de todo!
+	get_tree().root.add_child(effect_root)
+	
+	# 2. Crear el Sprite (la imagen de la pieza que vuela)
+	var sprite = Sprite2D.new()
+	sprite.texture = item_data.icon
+	sprite.scale = Vector2(0.6, 0.6) # Un poco más pequeña mientras viaja
+	effect_root.add_child(sprite)
+	
+	# 3. Crear Sistema de Partículas (El polvo del Coliseo)
+	var particles = CPUParticles2D.new()
+	particles.amount = 20
+	particles.lifetime = 0.6
+	particles.texture = null # Usaremos cuadrados simples por código si no hay textura
+	# Si tienes una textura de "grano de arena" o "humo", asígnala aquí:
+	# particles.texture = preload("res://ruta/a/tu/particula.png")
+	
+	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
+	particles.emission_sphere_radius = 15.0
+	particles.gravity = Vector2(0, 100) # La arena cae un poco
+	particles.scale_amount_min = 4.0
+	particles.scale_amount_max = 6.0
+	particles.color = Color(0.9, 0.8, 0.5) # Color Arena Dorada
+	particles.local_coords = false # Para que dejen estela en el mundo
+	effect_root.add_child(particles)
+	particles.emitting = true
+	
+	# 4. Calcular el movimiento (Arco Parabólico)
+	var target_pos = target_slot.global_position + (target_slot.size / 2.0)
+	
+	var t = create_tween()
+	t.set_parallel(true)
+	t.set_ease(Tween.EASE_IN_OUT)
+	t.set_trans(Tween.TRANS_CUBIC)
+	
+	# Movimiento en X e Y
+	t.tween_property(effect_root, "global_position", target_pos, 0.5)
+	
+	# Efecto de escala: Se hace pequeña al entrar en la "bolsa"
+	t.tween_property(sprite, "scale", Vector2(0.1, 0.1), 0.5).set_ease(Tween.EASE_IN)
+	t.tween_property(sprite, "modulate:a", 0.0, 0.5).set_ease(Tween.EASE_IN) # Desvanecer
+	
+	# Rotación épica (como lanzada por los aires)
+	t.tween_property(sprite, "rotation", deg_to_rad(360 * 2), 0.5)
+	
+	# 5. Limpieza al terminar
+	t.chain().tween_callback(effect_root.queue_free)
+	
+	# Efecto extra: "Golpe" visual en el slot de destino al llegar
+	t.chain().tween_callback(func():
+		var slot_tween = create_tween()
+		slot_tween.tween_property(target_slot, "scale", Vector2(1.2, 1.2), 0.1).set_trans(Tween.TRANS_BOUNCE)
+		slot_tween.chain().tween_property(target_slot, "scale", Vector2.ONE, 0.2)
+	)

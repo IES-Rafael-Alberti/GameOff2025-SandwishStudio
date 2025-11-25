@@ -60,10 +60,17 @@ func _on_mouse_entered():
 			var race_enum = game_manager.get_race_enum_from_name(race_name)
 			active_ids = game_manager.get_active_unit_ids_for_race(race_enum)
 	
-	# 4. Mostramos el Tooltip con los 7 argumentos
+	# --- CORRECCIÓN ---
+	# Calculamos la cantidad real basada en los IDs activos que acabamos de buscar.
+	# Si active_ids tiene datos, usamos su tamaño. Si no (quizás no encontró el GM), usamos el guardado.
+	var real_count_for_tooltip = current_count
+	if game_manager: # Si tenemos game_manager, la lista active_ids es la "verdad absoluta"
+		real_count_for_tooltip = active_ids.size()
+	
+	# 4. Mostramos el Tooltip usando real_count_for_tooltip en lugar de current_count
 	if tooltip_ref and tooltip_ref.has_method("show_synergy_tooltip"):
 		var defs = synergy_definitions.get(race_name, [])
-		tooltip_ref.show_synergy_tooltip(race_name, current_count, 4, defs, theme_color, all_pieces, active_ids)
+		tooltip_ref.show_synergy_tooltip(race_name, real_count_for_tooltip, 4, defs, theme_color, all_pieces, active_ids)
 
 func _on_mouse_exited():
 	if tooltip_ref and tooltip_ref.has_method("hide_tooltip"):

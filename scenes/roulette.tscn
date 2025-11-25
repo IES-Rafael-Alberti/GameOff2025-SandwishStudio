@@ -305,6 +305,7 @@ offset_top = 366.0
 offset_right = 1158.0
 offset_bottom = 406.0
 script = ExtResource("7_ekxsn")
+race_name = "Japonesa"
 
 [node name="TextureRect" type="TextureRect" parent="Japonesa"]
 layout_mode = 1
@@ -327,6 +328,7 @@ offset_top = 498.0
 offset_right = 1152.0
 offset_bottom = 538.0
 script = ExtResource("7_ekxsn")
+race_name = "Nordica"
 
 [node name="TextureRect" type="TextureRect" parent="Nordica"]
 layout_mode = 1

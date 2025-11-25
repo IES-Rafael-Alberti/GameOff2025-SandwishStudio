@@ -20,6 +20,9 @@ var gladiators_defeated: int = 0
 @onready var buttonShop: Button = $elJetas/ButtonShop
 @onready var sprite_show: Sprite2D = $elJetas/ButtonShop/EyeSprite
 @onready var pupil: Sprite2D = $elJetas/ButtonShop/EyeSprite/Pupil
+# Referencia al AnimationPlayer de elJetas
+@onready var el_jetas_anim: AnimationPlayer = $elJetas/AnimationPlayer
+
 @onready var mat = $Store/Sprite2D.material
 @onready var anim = $Store/AnimationPlayer
 @onready var gold_label: Label = $gold_label
@@ -125,15 +128,21 @@ func _ready():
 
 
 func _process(delta: float) -> void:
-	if not is_tended:
-		pupil.visible = false
-	else:
+	# Gestionamos el temporizador del parpadeo
+	blink_timer -= delta
+	
+	# Solo mostramos/movemos la pupila si el ojo está ABIERTO (textura original)
+	if sprite_show.texture == original_eye_texture:
 		pupil.visible = true
-		blink_timer -= delta
 		_update_pupil_position()
-		if blink_timer <= 0.0 and sprite_show.visible:
-			await _toggle_eye_parpadeo()
-			blink_timer = randf_range(blink_interval_min, blink_interval_max)
+	else:
+		# Si está parpadeando (textura cerrada), ocultamos la pupila
+		pupil.visible = false
+
+	# Ejecutar parpadeo aleatorio cuando toca
+	if blink_timer <= 0.0 and sprite_show.visible:
+		await _toggle_eye_parpadeo()
+		blink_timer = randf_range(blink_interval_min, blink_interval_max)
 
 	if Input.is_action_just_pressed("pause"):
 		pausar()
@@ -331,6 +340,13 @@ func _toggle_store(close_store: bool):
 	if anim.is_playing(): return
 	is_tended = close_store
 	_update_eye_state()
+	
+	# Control de animación de entrada/salida de El Jetas
+	if is_tended:
+		if el_jetas_anim: el_jetas_anim.play("show")
+	else:
+		if el_jetas_anim: el_jetas_anim.play("hide")
+
 	if not is_tended: roulette.visible = false
 	if is_tended:
 		anim.play("roll")
@@ -351,10 +367,16 @@ func _on_PlayerData_currency_changed(new_amount: int) -> void:
 	if gold_label: gold_label.text = str(new_amount) + "€"
 
 func _toggle_eye_parpadeo() -> void:
-	if not is_tended: return
+	# Parpadeo: Cambio textura a cerrada y oculto pupila temporalmente
+	# NOTA: Hemos quitado el chequeo "if not is_tended" para que parpadee siempre
 	sprite_show.texture = eye_closed_texture
+	pupil.visible = false
+	
 	await get_tree().create_timer(0.07).timeout
+	
+	# Restaurar ojo abierto y pupila
 	sprite_show.texture = original_eye_texture
+	pupil.visible = true
 
 func _update_pupil_position():
 	if not pupil.visible or not sprite_show.visible: return
@@ -364,6 +386,7 @@ func _update_pupil_position():
 	pupil.position = pupil_offset + dir
 
 func _on_shop_hover():
+	# Mantenemos este efecto visual de parpadeo (alpha) al pasar el ratón
 	if blink_tween and blink_tween.is_valid(): blink_tween.kill()
 	blink_tween = create_tween()
 	blink_tween.tween_property(sprite_show, "modulate:a", 0.5, 0.12)
@@ -374,12 +397,9 @@ func _on_shop_exit():
 	sprite_show.modulate.a = 1.0
 
 func _update_eye_state():
-	if is_tended:
-		sprite_show.texture = original_eye_texture
-		pupil.visible = true
-	else:
-		sprite_show.texture = eye_closed_texture
-		pupil.visible = false
+	# Estado base: Ojo abierto y pupila visible (para vigilar)
+	sprite_show.texture = original_eye_texture
+	pupil.visible = true
 
 func start_unroll():
 	anim.play("unroll")
@@ -455,7 +475,6 @@ func get_all_pieces_for_race(race_name: String) -> Array:
 	
 	var registry = registry_script.new()
 	var prefix = race_name.to_lower() + "."
-	
 	# Iteramos sobre las claves del mapa (ej: "europea.satiro")
 	for key in registry._map.keys():
 		if key.begins_with(prefix):
