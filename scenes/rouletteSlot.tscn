@@ -67,7 +67,7 @@ expand_mode = 1
 [node name="TierLabel" type="TextureRect" parent="slot/ItemIcon"]
 z_index = 5
 layout_mode = 0
-offset_left = 68.835724
+offset_left = 80.30836
 offset_top = 55.305634
 offset_right = 493.32272
 offset_bottom = 586.23975
