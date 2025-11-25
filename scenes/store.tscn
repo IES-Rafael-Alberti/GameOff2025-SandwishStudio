@@ -88,10 +88,18 @@ _data = {
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ttn3v"]
 bg_color = Color(0.3529412, 0.011764706, 0.0627451, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
 expand_margin_left = 10.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y1dpo"]
 bg_color = Color(0.35188454, 0.010673957, 0.06309028, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
 expand_margin_left = 10.0
 
 [node name="Store" type="Control"]
