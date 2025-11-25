@@ -23,7 +23,6 @@ var highlight_mat: ShaderMaterial
 # Variables de estado
 var is_purchased: bool = false 
 var is_maxed: bool = false
-# NUEVO: Variable para recordar si tenemos dinero suficiente
 var can_afford_status: bool = true 
 
 # --- COLORES ---
@@ -38,7 +37,6 @@ func _ready() -> void:
 	
 	_setup_texture_rect(item_icon)
 	_setup_texture_rect(count_label)
-	
 	_setup_label(too_expensive_label)
 	_setup_label(out_of_stock_label)
 	_setup_label(maxed_label)
@@ -82,8 +80,6 @@ func set_item(data: Resource, price: int, shader: ShaderMaterial, can_afford: bo
 	if item_icon: item_icon.texture = icon_texture
 	
 	update_count_visuals(data, count)
-	
-	# Actualizar asequibilidad (esto también guarda la variable can_afford_status)
 	update_affordability(can_afford)
 
 func update_count_visuals(data: Resource, count: int) -> void:
@@ -110,11 +106,8 @@ func update_count_visuals(data: Resource, count: int) -> void:
 	else:
 		count_label.visible = false
 
-# --- LÓGICA DE PRECIO ---
 func update_affordability(can_afford: bool) -> void:
-	# 1. Guardamos el estado para usarlo en _on_mouse_entered
 	can_afford_status = can_afford
-	
 	if not texture_button or is_purchased or is_maxed: return
 	
 	if can_afford:
@@ -124,17 +117,14 @@ func update_affordability(can_afford: bool) -> void:
 		texture_button.modulate = color_dark
 		if too_expensive_label: too_expensive_label.visible = true
 
-# --- LÓGICA DE MAXED ---
 func set_maxed_state(state: bool) -> void:
 	if is_purchased: return
-	
 	is_maxed = state
 	
 	if is_maxed:
 		if texture_button:
 			texture_button.disabled = false
 			texture_button.modulate = color_dark
-		
 		if maxed_label: maxed_label.visible = true
 		if too_expensive_label: too_expensive_label.visible = false
 		if out_of_stock_label: out_of_stock_label.visible = false
@@ -142,36 +132,23 @@ func set_maxed_state(state: bool) -> void:
 		if texture_button:
 			texture_button.disabled = false
 			texture_button.modulate = color_normal
-			
 		if maxed_label: maxed_label.visible = false
 
-# --- LÓGICA DE STOCK ---
 func disable_interaction() -> void:
 	if texture_button:
 		is_purchased = true
-		
 		texture_button.modulate = color_dark
 		texture_button.material = null 
 		texture_button.disabled = false
-		
 		if out_of_stock_label: out_of_stock_label.visible = true
 		if too_expensive_label: too_expensive_label.visible = false
 		if maxed_label: maxed_label.visible = false
 
-# --- CAMBIO CLAVE: TOOLTIP SÍ, SHADER NO ---
 func _on_mouse_entered() -> void:
-	# 1. TOOLTIP: Siempre lo mostramos (emitimos señal)
 	slot_hovered.emit(item_data)
-
-	# 2. SHADER: Solo si se puede comprar
-	# Si está comprado, maxeado O no hay dinero -> NO ponemos el shader
-	if is_purchased or is_maxed or not can_afford_status: 
-		return
-
-	if texture_button:
-		texture_button.material = highlight_mat
+	if is_purchased or is_maxed or not can_afford_status: return
+	if texture_button: texture_button.material = highlight_mat
 
 func _on_mouse_exited() -> void:
-	if texture_button:
-		texture_button.material = null
+	if texture_button: texture_button.material = null
 	slot_exited.emit()
