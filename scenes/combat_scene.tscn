@@ -103,15 +103,6 @@ position = Vector2(4073.0508, 818.11444)
 [node name="AllyFinalSlot14" type="Marker2D" parent="AllyFinalSlots"]
 position = Vector2(4144.317, 1045.151)
 
-[node name="RoundMessage" type="Label" parent="."]
-z_index = 4
-offset_left = 756.99994
-offset_top = 601.99994
-offset_right = 1032.0
-offset_bottom = 723.99994
-theme_override_font_sizes/font_size = 46
-metadata/_edit_use_anchors_ = true
-
 [node name="EnemySlots" type="Node2D" parent="."]
 scale = Vector2(0.99999994, 0.99999994)
 
