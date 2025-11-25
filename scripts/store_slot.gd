@@ -9,7 +9,10 @@ signal slot_exited()
 @onready var texture_button: TextureButton = $TextureButton
 @onready var item_icon: TextureRect = $TextureButton/ItemIcon 
 @onready var count_label: TextureRect = $TextureButton/CountLabel
-@onready var price_label: Label = $TextureButton/PriceLabel
+@onready var price_label: RichTextLabel = $TextureButton/PriceLabel 
+
+# --- NUEVO: Icono de moneda para inyectar en el texto ---
+@export var coin_icon: Texture2D 
 
 # --- ETIQUETAS DE ESTADO ---
 @onready var too_expensive_label: Control = $TooExpensiveLabel
@@ -37,9 +40,16 @@ func _ready() -> void:
 	
 	_setup_texture_rect(item_icon)
 	_setup_texture_rect(count_label)
+	
 	_setup_label(too_expensive_label)
 	_setup_label(out_of_stock_label)
 	_setup_label(maxed_label)
+	
+	if price_label:
+		price_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		price_label.bbcode_enabled = true
+		price_label.fit_content = true
+		price_label.scroll_active = false
 
 func _setup_texture_rect(node: TextureRect):
 	if node:
@@ -70,7 +80,16 @@ func set_item(data: Resource, price: int, shader: ShaderMaterial, can_afford: bo
 	current_price = price
 	highlight_mat = shader
 	
-	if price_label: price_label.text = str(current_price)
+	# --- CAMBIO: Precio + Imagen ondulando juntos ---
+	if price_label:
+		var icon_bbcode = ""
+		if coin_icon:
+			# Inyectamos la imagen con un tamaño fijo (ej. 20x20)
+			icon_bbcode = "[img=20x20]%s[/img]" % coin_icon.resource_path
+		
+		# Formato: [OLA] PRECIO  IMAGEN [/OLA]
+		# Al estar todo dentro de [wave], se mueven sincronizados
+		price_label.text = "[center][wave amp=25 freq=5]%d %s[/wave][/center]" % [current_price, icon_bbcode]
 	
 	var icon_texture: Texture2D = null
 	if "icon" in data and data.icon:
@@ -108,6 +127,7 @@ func update_count_visuals(data: Resource, count: int) -> void:
 
 func update_affordability(can_afford: bool) -> void:
 	can_afford_status = can_afford
+	
 	if not texture_button or is_purchased or is_maxed: return
 	
 	if can_afford:
@@ -119,12 +139,14 @@ func update_affordability(can_afford: bool) -> void:
 
 func set_maxed_state(state: bool) -> void:
 	if is_purchased: return
+	
 	is_maxed = state
 	
 	if is_maxed:
 		if texture_button:
 			texture_button.disabled = false
 			texture_button.modulate = color_dark
+		
 		if maxed_label: maxed_label.visible = true
 		if too_expensive_label: too_expensive_label.visible = false
 		if out_of_stock_label: out_of_stock_label.visible = false
@@ -132,23 +154,31 @@ func set_maxed_state(state: bool) -> void:
 		if texture_button:
 			texture_button.disabled = false
 			texture_button.modulate = color_normal
+			
 		if maxed_label: maxed_label.visible = false
 
 func disable_interaction() -> void:
 	if texture_button:
 		is_purchased = true
+		
 		texture_button.modulate = color_dark
 		texture_button.material = null 
 		texture_button.disabled = false
+		
 		if out_of_stock_label: out_of_stock_label.visible = true
 		if too_expensive_label: too_expensive_label.visible = false
 		if maxed_label: maxed_label.visible = false
 
 func _on_mouse_entered() -> void:
 	slot_hovered.emit(item_data)
-	if is_purchased or is_maxed or not can_afford_status: return
-	if texture_button: texture_button.material = highlight_mat
+
+	if is_purchased or is_maxed or not can_afford_status: 
+		return
+
+	if texture_button:
+		texture_button.material = highlight_mat
 
 func _on_mouse_exited() -> void:
-	if texture_button: texture_button.material = null
+	if texture_button:
+		texture_button.material = null
 	slot_exited.emit()
