@@ -17,3 +17,4 @@ enum UnitType { GLADIATOR, PIECE }
 @export var gold: int
 
 @export var Unit_type: UnitType = UnitType.PIECE
+@export var health_bar_offset: Vector2 = Vector2(0, -40)

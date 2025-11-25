@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://dd8wqmfs2cj1j"]
+[gd_scene load_steps=15 format=3 uid="uid://dd8wqmfs2cj1j"]
 
 [ext_resource type="Script" uid="uid://bpnxk43sopml" path="res://scripts/gameManager.gd" id="1_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://hbcgudcjh0wn" path="res://scenes/inventory.tscn" id="2_lbhrr"]
@@ -11,6 +11,7 @@
 [ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/jotun.tres" id="6_trtic"]
 [ext_resource type="Resource" uid="uid://cxbloivuqkrwe" path="res://resources/pieces/valkirias.tres" id="7_ir15t"]
 [ext_resource type="Texture2D" uid="uid://dycbttp2vpnv1" path="res://assets/Tiny Swords (Free Pack)/Terrain/Water Background color.png" id="12_dinhu"]
+[ext_resource type="Texture2D" uid="uid://bse428jrn0sbc" path="res://assets/Waves.png" id="12_trtic"]
 [ext_resource type="PackedScene" uid="uid://cj8n2p21wqyqt" path="res://scenes/help_over_lay.tscn" id="13_kvuet"]
 [ext_resource type="PackedScene" uid="uid://bbfqm8pblt056" path="res://scenes/el_jetas.tscn" id="13_trtic"]
 
@@ -67,22 +68,30 @@ offset_right = 882.0
 offset_bottom = 373.0
 theme_override_font_sizes/font_size = 28
 
+[node name="TextureRect" type="TextureRect" parent="RoundLabel"]
+layout_mode = 0
+offset_left = -57.999992
+offset_top = -6.0
+offset_right = 1717.0
+offset_bottom = 1621.0
+scale = Vector2(0.030910943, 0.029605173)
+texture = ExtResource("12_trtic")
+
 [node name="DayLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 909.0
-offset_top = 35.0
-offset_right = 1057.0
-offset_bottom = 74.0
+offset_left = 925.0
+offset_top = 39.0
+offset_right = 1073.0
+offset_bottom = 78.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 
 [node name="GladiatorLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 776.0
-offset_top = 41.0
-offset_right = 896.0
-offset_bottom = 80.0
-scale = Vector2(1.0014056, 0.963751)
+offset_left = 824.0
+offset_top = 40.0
+offset_right = 944.0
+offset_bottom = 79.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 
@@ -114,19 +123,34 @@ visible = false
 z_index = 4
 offset_left = -4.0
 offset_top = -2.0
-offset_right = 1681.0
-offset_bottom = 1093.0
+offset_right = 1165.0
+offset_bottom = 766.0
 mouse_filter = 0
 texture = ExtResource("12_dinhu")
 
-[node name="Label" type="Label" parent="DayFinished"]
+[node name="NextDayLabel" type="Label" parent="DayFinished"]
 z_index = 4
-offset_left = 333.0
-offset_top = 287.0
-offset_right = 841.0
-offset_bottom = 386.0
+offset_left = 367.0
+offset_top = 142.0
+offset_right = 875.0
+offset_bottom = 241.0
 theme_override_font_sizes/font_size = 72
-text = "SIGUIENTE DIA"
+
+[node name="HSlider" type="HSlider" parent="DayFinished"]
+z_index = 4
+offset_left = 358.0
+offset_top = 334.0
+offset_right = 857.0
+offset_bottom = 350.0
+
+[node name="InfoLabel" type="Label" parent="DayFinished"]
+z_index = 4
+anchors_preset = -1
+anchor_bottom = 0.015000001
+offset_left = 469.0
+offset_top = 369.0
+offset_right = 743.0
+offset_bottom = 683.6
 
 [node name="Win" type="CanvasLayer" parent="."]
 visible = false

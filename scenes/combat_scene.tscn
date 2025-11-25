@@ -62,61 +62,52 @@ position = Vector2(-738.395, 0)
 scale = Vector2(0.99999994, 0.99999994)
 
 [node name="AllyFinalSlot1" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3170.348, 685.02405)
+position = Vector2(2972.3867, 669.36633)
 
 [node name="AllyFinalSlot2" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3170.348, 935.5472)
+position = Vector2(2924.876, 1115.6106)
 
 [node name="AllyFinalSlot3" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3297.043, 810.28564)
+position = Vector2(3019.8975, 786.7991)
 
 [node name="AllyFinalSlot4" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3297.0432, 1060.8087)
+position = Vector2(3146.5925, 998.178)
 
 [node name="AllyFinalSlot5" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3423.738, 685.02405)
+position = Vector2(3289.1248, 692.8529)
 
 [node name="AllyFinalSlot6" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3423.738, 935.5472)
+position = Vector2(3304.9617, 919.88947)
 
 [node name="AllyFinalSlot7" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3550.4333, 810.2856)
+position = Vector2(3487.0857, 810.2856)
 
 [node name="AllyFinalSlot8" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3550.4333, 1060.8087)
+position = Vector2(3447.4937, 1068.6376)
 
 [node name="AllyFinalSlot9" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3677.1287, 685.02405)
+position = Vector2(3669.21, 731.99713)
 
 [node name="AllyFinalSlot10" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3677.1287, 935.5472)
+position = Vector2(3669.21, 974.6914)
 
 [node name="AllyFinalSlot11" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3803.8235, 810.2856)
+position = Vector2(3890.9268, 912.06055)
 
 [node name="AllyFinalSlot12" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3803.8235, 1060.8087)
+position = Vector2(3914.682, 1107.7817)
 
 [node name="AllyFinalSlot13" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3930.5188, 685.02405)
+position = Vector2(4073.0508, 818.11444)
 
 [node name="AllyFinalSlot14" type="Marker2D" parent="AllyFinalSlots"]
-position = Vector2(3930.5188, 935.5472)
-
-[node name="RoundMessage" type="Label" parent="."]
-z_index = 4
-offset_left = 756.99994
-offset_top = 601.99994
-offset_right = 1032.0
-offset_bottom = 723.99994
-theme_override_font_sizes/font_size = 46
-metadata/_edit_use_anchors_ = true
+position = Vector2(4144.317, 1045.151)
 
 [node name="EnemySlots" type="Node2D" parent="."]
 scale = Vector2(0.99999994, 0.99999994)
 
 [node name="EnemyWaitSlot" type="Marker2D" parent="EnemySlots"]
-position = Vector2(539.44415, 982.52026)
+position = Vector2(594.8733, 872.9164)
 
 [node name="EnemyBattleSlot" type="Marker2D" parent="EnemySlots"]
-position = Vector2(1798.477, 880.74524)
+position = Vector2(1473.8208, 872.9164)

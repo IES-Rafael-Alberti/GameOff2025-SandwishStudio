@@ -9,6 +9,7 @@ id = "nordica.valkirias"
 display_name = "valkirias"
 race = 0
 rarity = 1
+health_bar_offset = Vector2(-60, -140)
 frames = ExtResource("1_tf6qj")
 stats = {
 "BRONCE": {

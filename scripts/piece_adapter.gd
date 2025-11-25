@@ -50,6 +50,7 @@ static func to_npc_res(piece: PieceRes, num_copies: int, gold_per_enemy: int) ->
 	r.critical_damage = float(eff["crit_mult"])
 	r.description = piece.display_name
 	r.raza = ["Nórdica","Japonesa","Europea"][piece.race]
+	r.health_bar_offset = piece.health_bar_offset
 	
 	# Usar el tier calculado
 	var tier: int = int(eff["_piece_tier"])

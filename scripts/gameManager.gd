@@ -48,6 +48,11 @@ var gladiators_defeated: int = 0
 @onready var game_over_view: CanvasLayer = $GameOver
 @onready var win_view: CanvasLayer = $Win
 
+# --- Referencias NUEVAS para DayFinished ---
+@onready var next_day_label: Label = $DayFinished/NextDayLabel
+@onready var day_slider: HSlider = $DayFinished/HSlider
+@onready var info_label: Label = $DayFinished/InfoLabel
+
 var pupil_offset: Vector2
 var original_eye_texture: Texture2D
 var eye_closed_texture: Texture2D
@@ -61,12 +66,16 @@ var original_positions = {}
 var blink_tween: Tween = null
 var max_distance: float = 100
 
+# Variable acumuladora para el oro ganado EXCLUSIVAMENTE en el día
+var daily_gold_salary: int = 0
+var daily_gold_loot: int = 0
 ## ------------------------------------------------------------------
 ## Funciones de Godot
 ## ------------------------------------------------------------------
 
 func _ready():
-	
+	daily_gold_salary = 0
+	daily_gold_loot = 0
 	pupil_offset = pupil.position
 	eye_closed_texture = preload("res://assets/Oculta.png")
 	original_eye_texture = sprite_show.texture
@@ -100,6 +109,8 @@ func _ready():
 
 	blink_timer = randf_range(blink_interval_min, blink_interval_max)
 	_on_PlayerData_currency_changed(PlayerData.get_current_currency())
+	
+	
 	store.start_new_round()
 	_update_ui_labels()
 
@@ -139,7 +150,8 @@ func _update_ui_labels() -> void:
 			GameState.SPINNING: state_text = " - ¡Girando!"
 			GameState.COMBAT: state_text = " - ¡Combate!"
 		
-		round_label.text = "Ronda %d/%d%s" % [current_round, rounds_per_day, state_text]
+		round_label.text = "Waves %d/%d%s" % [current_round, rounds_per_day, state_text]
+
 
 ## ------------------------------------------------------------------
 ## Máquina de Estados
@@ -173,7 +185,7 @@ func set_state(new_state: GameState):
 			roulette.set_interactive(false)
 
 ## ------------------------------------------------------------------
-## Lógica Principal (MODIFICADA)
+## Lógica Principal
 ## ------------------------------------------------------------------
 
 func _on_shop_button_pressed():
@@ -196,10 +208,18 @@ func _on_combat_requested(piece_resource: Resource):
 		print("Giro en vacío. Pasando a siguiente ronda.")
 		_on_combat_finished(false)
 
-func _on_combat_finished(player_won: bool = false):
+func _on_combat_finished(player_won: bool = false, loot_from_combat: int = 0):
+	# 1. Ingreso Base (Salario por ronda)
 	var round_income = int(gold_round_base * gold_day_mult)
+	
+	# 2. Sumamos al jugador el salario (el loot ya se lo dio combat_scene)
 	PlayerData.add_currency(round_income)
 	
+	# 3. Acumulamos por separado para el desglose
+	daily_gold_salary += round_income
+	daily_gold_loot += loot_from_combat
+	
+	print("Fin ronda. Base: %d, Loot: %d" % [round_income, loot_from_combat])
 
 	if player_won:
 		gladiators_defeated += 1
@@ -209,7 +229,6 @@ func _on_combat_finished(player_won: bool = false):
 		print("¡Fin del Día %d! Verificando cuota..." % current_day)
 		
 		if gladiators_defeated >= gladiators_per_day:
-			# 3. NUEVO: Comprobar si es el último día para GANAR
 			if current_day >= max_days:
 				print("¡Juego Completado! Victoria.")
 				_show_win_view()
@@ -228,15 +247,55 @@ func _on_combat_finished(player_won: bool = false):
 		store.start_new_round()
 		if combat_scene:
 			combat_scene.spawn_enemy_one()
-# --- Funciones de Vistas (DayFinished, GameOver & Win) ---
-
 func _show_day_finished_view() -> void:
 	if day_finished_view:
+		# 1. Configurar Label del Título
+		if next_day_label:
+			next_day_label.text = "Día %d Finalizado" % current_day
+		
+		# 2. Configurar el Slider de progreso
+		if day_slider:
+			day_slider.min_value = 0
+			day_slider.max_value = max_days
+			day_slider.value = current_day
+			day_slider.editable = false 
+		
+		# 3. Configurar el resumen con formato (Precio Unitario) xCantidad: Total
+		if info_label:
+			# --- CÁLCULOS ---
+			# Rondas: Asumimos que se han jugado todas las rondas del día para llegar aquí
+			var rounds_count = rounds_per_day 
+			var round_unit_price = 0
+			if rounds_count > 0:
+				round_unit_price = daily_gold_salary / rounds_count
+			
+			# Gladiadores: Usamos el contador de derrotados
+			var glad_count = gladiators_defeated
+			var glad_unit_price = 0
+			if glad_count > 0:
+				glad_unit_price = daily_gold_loot / glad_count
+			
+			var total_day = daily_gold_salary + daily_gold_loot
+			
+			# --- TEXTO ---
+			var info_text = "RESUMEN DEL DÍA:\n\n"
+			
+			# Formato: Rondas (X oro) xY: Z oro
+			info_text += "Rondas (%d oro) x%d: %d oro\n" % [round_unit_price, rounds_count, daily_gold_salary]
+			
+			# Formato: Gladiadores (X oro) xY: Z oro
+			info_text += "Gladiadores (%d oro) x%d: %d oro\n" % [glad_unit_price, glad_count, daily_gold_loot]
+			
+			info_text += "\n--------------------------\n"
+			info_text += "TOTAL: %d oro" % total_day
+			
+			info_label.text = info_text
+
 		day_finished_view.visible = true
 		buttonShop.disabled = true
 	else:
 		_advance_to_next_day()
-
+		
 func _show_game_over_view() -> void:
 	if game_over_view:
 		game_over_view.visible = true
@@ -244,12 +303,10 @@ func _show_game_over_view() -> void:
 	else:
 		push_error("GameManager: No se encontró el nodo 'GameOver'.")
 
-# 4. NUEVO: Función para mostrar Victoria
 func _show_win_view() -> void:
 	if win_view:
 		win_view.visible = true
 		buttonShop.disabled = true
-		# Aquí podrías detener timers o poner música de victoria
 	else:
 		push_error("GameManager: No se encontró el nodo 'Win'.")
 
@@ -264,6 +321,10 @@ func _advance_to_next_day() -> void:
 	current_round = 1
 	gladiators_defeated = 0 
 	
+	# Reiniciamos los contadores para el nuevo día
+	daily_gold_salary = 0
+	daily_gold_loot = 0
+	
 	if day_finished_view:
 		day_finished_view.visible = false
 	
@@ -275,7 +336,6 @@ func _advance_to_next_day() -> void:
 	store.start_new_round()
 	if combat_scene:
 		combat_scene.spawn_enemy_one()
-
 func _give_initial_piece():
 	if not inventory.has_method("get_random_initial_piece"): return
 	var initial_piece: Resource = inventory.get_random_initial_piece()
@@ -373,11 +433,9 @@ func get_inventory_piece_count(resource_to_check: Resource) -> int:
 	return 0
 
 ## ------------------------------------------------------------------
-## SISTEMA DE SINERGIAS (NUEVO)
+## SISTEMA DE SINERGIAS
 ## ------------------------------------------------------------------
 
-# Esta función recorre la ruleta, cuenta las piezas únicas y devuelve los niveles de bonus.
-# Se llama desde combat_scene.gd antes de spawnear a los aliados.
 func get_active_synergies() -> Dictionary:
 	var result = {
 		"jap": 0, # Tier Japonés

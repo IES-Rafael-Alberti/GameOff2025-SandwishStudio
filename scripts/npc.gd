@@ -30,8 +30,6 @@ var max_health: float = 1.0
 var health: float = 1.0
 # Gold pool that unit can drop
 var gold_pool: int = 0
-var display_name: String = ""
-@onready var name_label: Label = $NameLabel
 @onready var health_bar: ProgressBar = $healthBar
 
 # Variables para almacenar las bonificaciones de GlobalStats
@@ -41,20 +39,32 @@ var bonus_speed: float = 0.0
 var bonus_crit_chance: float = 0.0
 var bonus_crit_damage: float = 0.0
 
-# --- VARIABLES DE SINERGIA (NUEVO) ---
+# --- VARIABLES DE SINERGIA ---
 var synergy_jap_tier: int = 0
 var synergy_nor_tier: int = 0
 var synergy_eur_tier: int = 0
 
 # Flags de estado
-var has_attacked: bool = false # Para Japonés
-var nordica_heal_used: bool = false # Para Nórdico
+var attack_count: int = 0        # Contador de ataques
+var is_last_attack_special: bool = false # Para efectos visuales
+var nordica_heal_used: bool = false
+
+# MULTIPLICADOR ALMACENADO (Solo HP)
+var synergy_hp_mult: float = 1.0
+
+# ESTILO ORIGINAL (Para restaurar el verde)
+var default_bar_style: StyleBox = null
 
 func _ready() -> void:
-	# Carge stats form the resource
+	# 1. CARGAR STATS BASE
 	if npc_res:
-		max_health = max(1.0, npc_res.max_health)
+		var base_hp = max(1.0, npc_res.max_health)
+		max_health = (base_hp + bonus_health) * synergy_hp_mult
+		
 		health = clamp(npc_res.health, 0.0, max_health)
+		if abs(npc_res.health - npc_res.max_health) < 0.1: 
+			health = max_health
+			
 		gold_pool = int(npc_res.gold)
 	else:
 		max_health = 1.0
@@ -78,20 +88,20 @@ func _ready() -> void:
 	else:
 		push_warning("NPC sin frames en inspector")
 
+	# Configuración visual de la barra (Posición y Z-Index de Rama A)
+	_setup_healthbar_z()
+	_apply_healthbar_offset_from_res()
+
+	# 2. GUARDAR ESTILO ORIGINAL (VERDE) Y APLICAR VISUALES (Rama B)
+	if is_instance_valid(health_bar):
+		# Guardamos el estilo verde de la escena antes de tocar nada
+		default_bar_style = health_bar.get_theme_stylebox("fill")
+		
 	_update_healthbar()
+	_apply_bar_visuals() 
 
 	for ab in abilities:
 		if ab: ab.on_spwan(self)
-
-func set_display_name(text: String) -> void:
-	display_name = text
-	_update_name_label()
-
-func _update_name_label() -> void:
-	if not is_instance_valid(name_label):
-		return
-	name_label.text = display_name
-	name_label.visible = display_name != ""
 
 func _update_healthbar() -> void:
 	if not is_instance_valid(health_bar): return
@@ -99,91 +109,112 @@ func _update_healthbar() -> void:
 	health_bar.value = health
 	health_bar.visible = show_healthbar and (not hide_when_full or health < max_health)
 
-func _show_damage_text(amount: float, was_crit: bool = false) -> void:
-	# Instanciamos el Label
+# --- LÓGICA VISUAL DE BARRA (Corrección Color) ---
+func _apply_bar_visuals():
+	if not is_instance_valid(health_bar): return
+	
+	# Reseteamos tintes
+	health_bar.modulate = Color.WHITE
+	health_bar.self_modulate = Color.WHITE
+	
+	# CASO 1: SIN SINERGIA (GLADIADORES O ALIADOS SIN BONUS) -> VERDE
+	if synergy_eur_tier == 0:
+		# Si tenemos guardado el estilo original (verde), lo restauramos
+		if default_bar_style:
+			health_bar.add_theme_stylebox_override("fill", default_bar_style)
+		return
+
+	# CASO 2: CON SINERGIA -> AZUL O MORADO
+	# print("[%s] Aplicando COLOR Europeo: Tier %d" % [name, synergy_eur_tier])
+
+	var sb = StyleBoxFlat.new()
+	sb.set_corner_radius_all(2) 
+
+	if synergy_eur_tier == 1:
+		sb.bg_color = Color(0.0, 0.8, 1.0) # Azul Cian
+	elif synergy_eur_tier == 2:
+		sb.bg_color = Color(0.6, 0.2, 1.0) # Morado
+	
+	health_bar.add_theme_stylebox_override("fill", sb)
+
+# VISUAL: Textos de daño
+func _show_damage_text(amount: float, was_crit: bool = false, is_epic: bool = false) -> void:
 	var dmg_label: Label = DAMAGE_TEXT_SCENE.instantiate()
 	var dmg_int := int(round(amount))
 	dmg_label.text = str(dmg_int)
 
 	var base_font_size := 34.0
 	var size_factor: float = clamp(0.7 + float(dmg_int) / 60.0, 0.7, 2.5)
+	
+	if is_epic:
+		size_factor *= 1.5 
+		dmg_label.text += "!" 
+	
 	var size := int(base_font_size * size_factor)
-
-	# Si es crítico, un pelín más grande (efecto “negrita” ligero)
 	if was_crit:
 		size = int(size * 1.1)
 
 	dmg_label.add_theme_font_size_override("font_size", size)
 
-	# --- Color según el daño (de rojo a morado intenso) ---
-	var min_color := Color(1.0, 0.0, 0.0, 1.0)   # rojo para poco daño
-	var max_color := Color(0.276, 0.005, 0.396, 1.0)   # morado intenso para mucho daño
-
-	# Daño a partir del cual se considera “máximo morado” (ajusta a tu gusto)
-	var color_damage_cap := 120.0
-	var t : float = clamp(float(dmg_int) / color_damage_cap, 0.0, 1.0)
-
-	var final_color := min_color.lerp(max_color, t)
-
-	# Si es crítico, lo aclaramos un poco para que destaque, pero
-	# el tono base sigue viniendo del daño (no del crítico en sí).
-	if was_crit:
-		final_color = final_color.lightened(0.15)
-
-	dmg_label.modulate = final_color
-
-	# Si quieres remarcar aún más el crítico (“negrita” visual):
-	if was_crit:
-		dmg_label.add_theme_constant_override("outline_size", 2)
+	var final_color: Color
+	if is_epic:
+		final_color = Color(1.0, 0.84, 0.0, 1.0) # Dorado
+		dmg_label.add_theme_constant_override("outline_size", 4)
 		dmg_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+	else:
+		var min_color := Color(1.0, 0.0, 0.0, 1.0) 
+		var max_color := Color(0.276, 0.005, 0.396, 1.0)
+		# Daño a partir del cual se considera “máximo morado”
+		var color_damage_cap := 120.0
+		var t : float = clamp(float(dmg_int) / color_damage_cap, 0.0, 1.0)
+		final_color = min_color.lerp(max_color, t)
+
+		if was_crit:
+			final_color = final_color.lightened(0.15)
+			dmg_label.add_theme_constant_override("outline_size", 2)
+			dmg_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+
+	dmg_label.add_theme_color_override("font_color", final_color)
+	dmg_label.modulate = Color.WHITE
 
 	var root := get_tree().current_scene
 	if root == null: return
 	root.add_child(dmg_label)
+	
+	_animate_label(dmg_label)
 
-	# --------------------
-	#  POSICIÓN DENTRO DE UN "CONO"
-	# --------------------
-	var max_height := 140.0   # cuanto más grande, más alto pueden aparecer
+func _animate_label(lbl: Label) -> void:
+	var max_height := 140.0
 	var min_height := 50.0
-
 	var h := randf_range(min_height, max_height)
-
 	var max_width_at_top := 160.0
 	var half_width := (h / max_height) * (max_width_at_top * 0.5)
-
 	var offset_x := randf_range(-half_width, half_width)
 	var offset_y := -h
-
 	var start_pos := global_position + Vector2(offset_x, offset_y)
-	dmg_label.global_position = start_pos
+	lbl.global_position = start_pos
 
-	# --------------------
-	#  ANIMACIÓN SERPENTEANTE
-	# --------------------
 	var total_travel := randf_range(40.0, 90.0)
 	var amplitude := randf_range(10.0, 15.0)
 	var waves := randf_range(1.5, 3.0)
 	var move_time := 0.7
 	var fade_time := 0.3
 
-	var tween := root.create_tween()
-
+	var tween := lbl.create_tween()
 	tween.tween_method(
 		func(t: float) -> void:
-			if not is_instance_valid(dmg_label):
-				return
+			if not is_instance_valid(lbl): return
 			var y := -t * total_travel
 			var x := sin(t * TAU * waves) * amplitude
-			dmg_label.global_position = start_pos + Vector2(x, y)
+			lbl.global_position = start_pos + Vector2(x, y)
 	, 0.0, 1.0, move_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 	tween.parallel().tween_property(
-		dmg_label, "modulate:a", 0.0, fade_time
+		lbl, "modulate:a", 0.0, fade_time
 	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN).set_delay(move_time - fade_time)
 
 	tween.finished.connect(func() -> void:
-		if is_instance_valid(dmg_label): dmg_label.queue_free()
+		if is_instance_valid(lbl): lbl.queue_free()
 	)
 
 func can_damage(other: npc) -> bool:
@@ -200,20 +231,23 @@ func apply_synergies(data: Dictionary):
 	synergy_nor_tier = data.get("nor", 0)
 	synergy_eur_tier = data.get("eur", 0)
 	
-	_apply_european_buff()
+	synergy_hp_mult = 1.0
+	if synergy_eur_tier == 1: 
+		synergy_hp_mult = 1.25
+	elif synergy_eur_tier == 2: 
+		synergy_hp_mult = 1.50
+	
+	if is_node_ready():
+		_recalculate_stats_live()
 
-# LÓGICA EUROPEA: Aumenta Vida Máxima
-func _apply_european_buff():
-	if synergy_eur_tier == 0: return
-	
-	var mult = 1.0
-	if synergy_eur_tier == 1: mult = 1.25 # +25%
-	elif synergy_eur_tier == 2: mult = 1.50 # +50%
-	
-	max_health = max_health * mult
-	health = max_health # Rellena la vida con el nuevo máximo
+func _recalculate_stats_live():
+	if not npc_res: return
+	var base_hp = max(1.0, npc_res.max_health)
+	max_health = (base_hp + bonus_health) * synergy_hp_mult
+	health = max_health
 	_update_healthbar()
-	
+	_apply_bar_visuals()
+
 # --- APLICAR GLOBAL STATS ---
 func apply_passive_bonuses(p_health: float, p_damage: float, p_speed: float, p_crit_c: float, p_crit_d: float):
 	bonus_health = p_health
@@ -222,21 +256,21 @@ func apply_passive_bonuses(p_health: float, p_damage: float, p_speed: float, p_c
 	bonus_crit_chance = p_crit_c
 	bonus_crit_damage = p_crit_d
 	
-	max_health += bonus_health
-	health = max_health 
-	_update_healthbar()
+	if is_node_ready():
+		_recalculate_stats_live()
 
 # CONTROLER BATTLE
 func get_damage(target: npc) -> float:
 	var val := npc_res.damage + bonus_damage
 	
-	# LÓGICA JAPONESA: Bonus primer ataque
-	if synergy_jap_tier > 0 and not has_attacked:
+	# LÓGICA JAPONESA
+	is_last_attack_special = false
+	if synergy_jap_tier > 0 and (attack_count + 1) % 3 == 0:
 		var mult = 1.0
-		if synergy_jap_tier == 1: mult = 1.5 # +50%
-		elif synergy_jap_tier == 2: mult = 2.0 # +100%
+		if synergy_jap_tier == 1: mult = 1.5
+		elif synergy_jap_tier == 2: mult = 2.0
 		val *= mult
-		# Nota: has_attacked se pone true en 'notify_after_attack'
+		is_last_attack_special = true
 	
 	for ab in abilities:
 		if ab: val = ab.modify_damage(val, self, target)
@@ -276,21 +310,24 @@ func take_damage(amount: float, from: npc = null, was_crit: bool = false) -> voi
 			shock_timer = 0.0
 			is_shocked = true
 			shock_material.set_shader_parameter("shock_time", shock_timer)
-	_show_damage_text(amount, was_crit)
+	
+	var is_epic_hit = false
+	if from and "is_last_attack_special" in from and from.is_last_attack_special:
+		is_epic_hit = true
+	
+	_show_damage_text(amount, was_crit, is_epic_hit)
 
-	# LÓGICA NÓRDICA: Curación al 25% HP
+	# LÓGICA NÓRDICA
 	if synergy_nor_tier > 0 and not nordica_heal_used:
 		if health > 0 and (health / max_health) <= 0.25:
 			nordica_heal_used = true
-			var target_pct = 0.50 # Tier 1: 50%
-			if synergy_nor_tier == 2: target_pct = 0.75 # Tier 2: 75%
+			var target_pct = 0.50 
+			if synergy_nor_tier == 2: target_pct = 0.75 
 			
 			var heal_amt = (max_health * target_pct) - health
 			if heal_amt > 0:
 				health += heal_amt
 				_show_heal_text(heal_amt)
-				# Opcional: Mostrar texto de cura
-				print("%s se curó por sinergia Nórdica" % name)
 	
 	for ab in abilities:
 		if ab: ab.on_take_damage(self, amount, from)
@@ -304,16 +341,12 @@ func _die(killer: npc = null) -> void:
 	emit_signal("died", self)
 	queue_free()
 
-# Notificadores 
 func notify_before_attack(target: npc) -> void:
 	for ab in abilities:
 		if ab: ab.on_before_attack(self, target)
 
 func notify_after_attack(target: npc, dealt_damage: float, was_crit: bool) -> void:
-	# Sinergia Japonesa: Marcar que ya atacó
-	if not has_attacked:
-		has_attacked = true
-		
+	attack_count += 1
 	for ab in abilities:
 		if ab: ab.on_after_attack(self, target, dealt_damage, was_crit)
 
@@ -323,69 +356,46 @@ func notify_kill(victim: npc) -> void:
 
 func _process(delta: float) -> void:
 	if is_shocked and shock_material:
-		# Avanzamos el tiempo del efecto
-		shock_timer += delta * 8.0  # sube/baja este 8.0 para cambiar velocidad
+		shock_timer += delta * 8.0 
 		shock_material.set_shader_parameter("shock_time", shock_timer)
-
-		# Cuando pasa un rato, damos por terminado el efecto
 		if shock_timer > 0.3:
 			is_shocked = false
 			shock_material.set_shader_parameter("shock_time", 999.0)
+
+# VISUAL: Texto Curación Nórdica (Verde Puro)
 func _show_heal_text(amount: float) -> void:
-	# Instanciamos la misma escena que el daño
 	var heal_label: Label = DAMAGE_TEXT_SCENE.instantiate()
 	var heal_int := int(round(amount))
 	
-	# Ponemos un "+" para indicar que es positivo
 	heal_label.text = "+" + str(heal_int)
 
-	# Configuración de tamaño (similar al daño)
 	var base_font_size := 34.0
 	var size_factor: float = clamp(0.7 + float(heal_int) / 60.0, 0.7, 2.5)
 	var size := int(base_font_size * size_factor)
 
 	heal_label.add_theme_font_size_override("font_size", size)
 
-	# --- COLOR VERDE BRILLANTE ---
-	heal_label.modulate = Color(0.396, 1.0, 0.376, 1.0) 
+	heal_label.add_theme_color_override("font_color", Color(0.396, 1.0, 0.376, 1.0))
+	heal_label.modulate = Color.WHITE
 
 	var root := get_tree().current_scene
 	if root == null: return
 	root.add_child(heal_label)
-
-	# --- POSICIONAMIENTO Y ANIMACIÓN (Idéntico al daño) ---
-	var max_height := 140.0
-	var min_height := 50.0
-	var h := randf_range(min_height, max_height)
-	var max_width_at_top := 160.0
-	var half_width := (h / max_height) * (max_width_at_top * 0.5)
-
-	var offset_x := randf_range(-half_width, half_width)
-	var offset_y := -h
-	var start_pos := global_position + Vector2(offset_x, offset_y)
 	
-	heal_label.global_position = start_pos
+	# Reutilizamos la animación definida para el daño
+	_animate_label(heal_label)
 
-	var total_travel := randf_range(40.0, 90.0)
-	var amplitude := randf_range(10.0, 15.0)
-	var waves := randf_range(1.5, 3.0)
-	var move_time := 0.7
-	var fade_time := 0.3
+func _apply_healthbar_offset_from_res() -> void:
+	if not is_instance_valid(health_bar):
+		return
+	if npc_res == null:
+		return
 
-	var tween := root.create_tween()
+	health_bar.position = npc_res.health_bar_offset
 
-	tween.tween_method(
-		func(t: float) -> void:
-			if not is_instance_valid(heal_label): return
-			var y := -t * total_travel
-			var x := sin(t * TAU * waves) * amplitude
-			heal_label.global_position = start_pos + Vector2(x, y)
-	, 0.0, 1.0, move_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+func _setup_healthbar_z() -> void:
+	if not is_instance_valid(health_bar):
+		return
 
-	tween.parallel().tween_property(
-		heal_label, "modulate:a", 0.0, fade_time
-	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN).set_delay(move_time - fade_time)
-
-	tween.finished.connect(func() -> void:
-		if is_instance_valid(heal_label): heal_label.queue_free()
-	)
+	health_bar.z_as_relative = false
+	health_bar.z_index = 100

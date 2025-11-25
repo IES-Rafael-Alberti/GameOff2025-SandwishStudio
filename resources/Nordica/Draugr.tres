@@ -6,6 +6,7 @@
 [resource]
 script = ExtResource("1_tha16")
 race = 0
+health_bar_offset = Vector2(-30, -100)
 frames = ExtResource("1_hd8bf")
 stats = {
 "BRONCE": {
