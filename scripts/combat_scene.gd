@@ -13,7 +13,8 @@ const ALLY_LIMIT := 14
 const ENEMY_LIMIT := 1
 
 var round_gold_loot: int = 0
-# --- NUEVO: Variables de Escalado Diario (Scaling) ---
+
+# --- ESCALADO DE DIFICULTAD (POR DÍA) ---
 @export_group("Escalado de Dificultad (Por Día)")
 @export_subgroup("Crecimiento Exponencial")
 @export var scaling_hp_mult: float = 1.4      
@@ -23,6 +24,21 @@ var round_gold_loot: int = 0
 @export var scaling_speed_flat: float = 0.1   
 @export var scaling_crit_chance_flat: float = 5.0
 @export var scaling_crit_dmg_flat: float = 0.05   
+
+# --- NUEVO: ESCALADO POR DERROTAS (INTRA-DÍA) ---
+@export_group("Escalado por Derrotas (Intra-Día)")
+@export_subgroup("Multiplicador por Derrota")
+@export var defeat_hp_mult: float = 1.1       # +10% HP (acumulativo) por cada derrota hoy
+@export var defeat_damage_mult: float = 1.05  # +5% Daño (acumulativo) por cada derrota hoy
+
+@export_subgroup("Suma Plana por Derrota")
+@export var defeat_speed_flat: float = 0.05
+@export var defeat_crit_chance_flat: float = 1.0
+@export var defeat_crit_dmg_flat: float = 0.02
+
+# Variables internas para rastreo
+var daily_defeat_count: int = 0
+var last_recorded_day: int = 1
 
 @onready var enemy_spawn: Marker2D = $GladiatorSpawn
 @onready var ally_entry_spawn: Marker2D = $AlliesSpawn
@@ -125,7 +141,7 @@ func _stop_combat() -> void:
 				PlayerData.add_currency(payout)
 				w.gold_pool = int(w.gold_pool) - payout
 
-				round_gold_loot += payout # NUEVO: Registramos el pago parcial
+				round_gold_loot += payout
 				print("Round reward (partial): +", payout)
 	
 	for t in ally_timers:
@@ -157,13 +173,19 @@ func _stop_combat() -> void:
 
 	var player_won_round = not enemy_alive
 	
+	# --- MODIFICADO: Contar victoria si ganamos ---
+	if player_won_round:
+		daily_defeat_count += 1
+		print("Victoria de ronda. Derrotas acumuladas hoy: ", daily_defeat_count)
+	# ----------------------------------------------
+	
 	# Resultado de la ronda
 	# Si el gladiador sobrevive, lo mandamos al slot de espera
 	if not player_won_round:
 		if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 			_move_with_tween(enemy_npcs[0], enemy_wait_slot.position, 0.5)
 
-	# MODIFICADO: Esperamos un poco y enviamos la señal directamente sin _show_round_message
+	# Esperamos un poco y enviamos la señal directamente
 	await get_tree().create_timer(1.0).timeout
 	
 	_cleanup_allies_and_reset()
@@ -216,7 +238,6 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 			
 	# APLICAR SINERGIAS DE RULETA 
 	if team == npc.Team.ALLY:
-		# Buscamos al GameManager para pedir las sinergias
 		var game_manager = get_parent() # Asumiendo que CombatScene es hijo de Game
 		if game_manager and game_manager.has_method("get_active_synergies"):
 			var active_synergies = game_manager.get_active_synergies()
@@ -229,7 +250,7 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 	get_node("npcs").add_child(n)
 
 
-	# APLICAR BONUS A ENEMIGOS (Scaling Diario)
+	# APLICAR BONUS A ENEMIGOS (Scaling Diario + Derrotas)
 	if team == npc.Team.ENEMY:
 		n.gold_pool = int(n.npc_res.gold)
 		_apply_enemy_daily_scaling(n)
@@ -238,28 +259,43 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 	n.tree_exited.connect(_on_npc_exited.bind(n))
 	return n
 
-# Cálculos de Escalado
+# --- MODIFICADO: Cálculos de Escalado Combinado ---
 func _apply_enemy_daily_scaling(n: npc) -> void:
 	# Intentamos obtener el día actual del GameManager (Padre)
 	var gm = get_parent()
 	if not gm or not "current_day" in gm:
 		return
 	
-	# El día 1 es índice 0 (sin bonus). Día 2 es índice 1, etc.
+	# Detectar cambio de día para resetear contador de derrotas
+	if gm.current_day != last_recorded_day:
+		daily_defeat_count = 0
+		last_recorded_day = gm.current_day
+		print("Nuevo día detectado (", gm.current_day, "). Reseteando contador de derrotas.")
+	
+	# Indices para el cálculo
 	var day_index = max(0, gm.current_day - 1)
+	var kills_index = daily_defeat_count 
 	
-	if day_index == 0:
-		return # No hay escalado en el día 1
+	if day_index == 0 and kills_index == 0:
+		return # Día 1, primera pelea: valores base
 		
-	# CÁLCULO DE MULTIPLICADORES Y SUMAS
-	# Exponencial: Base * (Multiplicador ^ Dias)
-	var total_hp_mult = pow(scaling_hp_mult, day_index)
-	var total_dmg_mult = pow(scaling_damage_mult, day_index)
+	# --- 1. CÁLCULO EXPONENCIAL (HP y DAÑO) ---
+	# Fórmula: Base * (BuffDia ^ Dias) * (BuffDerrota ^ Derrotas)
 	
-	# Lineal: Base + (Incremento * Dias)
-	var added_speed = scaling_speed_flat * day_index
-	var added_crit_chance = scaling_crit_chance_flat * day_index
-	var added_crit_dmg = scaling_crit_dmg_flat * day_index
+	var day_factor_hp = pow(scaling_hp_mult, day_index)
+	var day_factor_dmg = pow(scaling_damage_mult, day_index)
+	
+	var kill_factor_hp = pow(defeat_hp_mult, kills_index)
+	var kill_factor_dmg = pow(defeat_damage_mult, kills_index)
+	
+	var total_hp_mult = day_factor_hp * kill_factor_hp
+	var total_dmg_mult = day_factor_dmg * kill_factor_dmg
+	
+	# --- 2. CÁLCULO LINEAL (Velocidad y Críticos) ---
+	# Sumamos: (BaseDia * Dias) + (BaseDerrota * Derrotas)
+	var added_speed = (scaling_speed_flat * day_index) + (defeat_speed_flat * kills_index)
+	var added_crit_chance = (scaling_crit_chance_flat * day_index) + (defeat_crit_chance_flat * kills_index)
+	var added_crit_dmg = (scaling_crit_dmg_flat * day_index) + (defeat_crit_dmg_flat * kills_index)
 	
 	# Convertimos el multiplicador a porcentaje de bonus (ej. 1.4 -> +40%)
 	var bonus_hp_percent = (total_hp_mult - 1.0) * 100.0
@@ -276,11 +312,13 @@ func _apply_enemy_daily_scaling(n: npc) -> void:
 		# Actualizamos la vida actual al nuevo máximo
 		n.health = n.max_health
 		
-		print("Enemy Scaled (Day %d): HP +%d%%, DMG +%d%%, SPD +%.2f" % [gm.current_day, int(bonus_hp_percent), int(bonus_dmg_percent), added_speed])
+		print("Enemy Scaled (Day %d, Kills %d): HP +%d%%, DMG +%d%%, SPD +%.2f" % 
+			[gm.current_day, kills_index, int(bonus_hp_percent), int(bonus_dmg_percent), added_speed])
 	else:
-		# Fallback por si no tiene el método (modificamos HP manualmente al menos)
+		# Fallback por si no tiene el método
 		n.max_health *= total_hp_mult
 		n.health = n.max_health
+# ----------------------------------------------------
 
 func _move_with_tween(n: npc, target_pos: Vector2, duration: float = 1.8) -> void:
 	if not is_instance_valid(n):
@@ -391,7 +429,7 @@ func _on_npc_died(n: npc) -> void:
 		var amount: int = int(max(0, n.gold_pool))
 		if amount > 0:
 			PlayerData.add_currency(amount)
-			round_gold_loot += amount # NUEVO: Sumamos al acumulador local
+			round_gold_loot += amount
 			print("Reward (death): +", amount, " gold.")
 		n.gold_pool = 0
 		print("¡Gladiador murió!")
@@ -413,7 +451,7 @@ func _on_start_pressed() -> void:
 
 func _begin_combat() -> void:
 	print("Battle begins")
-	round_gold_loot = 0 # NUEVO: Reiniciamos el loot al comenzar ronda
+	round_gold_loot = 0 
 	if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 		var w: npc = enemy_npcs[0]
 		enemy_hp_round_start = w.health
@@ -486,7 +524,6 @@ func _do_attack(attacker: npc, defender: npc) -> void:
 	var target_max_hp := defender.max_health
 	var target_name := _who(defender)
 	
-	# SOLO UNA LLAMADA A TAKE_DAMAGE (Aquí estaba el bug que lo llamaba dos veces)
 	defender.take_damage(dmg, attacker, crit)
 
 	var after_hp := 0.0
