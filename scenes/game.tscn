@@ -35,7 +35,7 @@ initial_pieces = Array[ExtResource("3_kvpfn")]([ExtResource("4_dinhu"), ExtResou
 
 [node name="Store" parent="." instance=ExtResource("3_iywne")]
 visible = false
-z_index = 4
+z_index = 5
 offset_left = 416.0
 offset_top = 394.0
 offset_right = 416.0
