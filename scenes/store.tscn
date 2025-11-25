@@ -133,7 +133,7 @@ offset_right = 1213.5792
 offset_bottom = 186.10399
 theme_override_font_sizes/font_size = 40
 theme_override_styles/normal = SubResource("StyleBoxFlat_ttn3v")
-text = "Piezas"
+text = "Roulette Pieces"
 
 [node name="piece_zone" type="HBoxContainer" parent="."]
 layout_mode = 0
@@ -152,7 +152,7 @@ offset_right = 795.8545
 offset_bottom = 526.4995
 theme_override_font_sizes/font_size = 40
 theme_override_styles/normal = SubResource("StyleBoxFlat_y1dpo")
-text = "Pasivas"
+text = "Fruits of Power"
 
 [node name="passive_zone" type="HBoxContainer" parent="."]
 layout_mode = 0
