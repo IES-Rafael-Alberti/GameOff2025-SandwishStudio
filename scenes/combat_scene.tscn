@@ -52,9 +52,9 @@ flip_h = true
 
 [node name="PillarDer" type="TextureRect" parent="."]
 z_index = 2
-offset_left = 4738.2
+offset_left = 4704.5464
 offset_top = 1407.2351
-offset_right = 5038.2
+offset_right = 5004.5464
 offset_bottom = 2323.5273
 rotation = 3.1385164
 scale = Vector2(1.7744678, 1.9284203)

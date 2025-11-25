@@ -68,53 +68,49 @@ func _ready() -> void:
 		lock_button.pressed.connect(_on_lock_pressed)
 	
 	_setup_reroll_label()
+	
+	# Al iniciar, determinamos si restaurar o generar
 	start_new_round()
 
 # --- LÓGICA DEL CANDADO ---
 func _update_lock_visuals() -> void:
 	if not lock_button: return
 	
-	# Leemos directamente de PlayerData (la "caja fuerte")
 	if PlayerData.is_shop_locked:
 		if texture_locked: lock_button.texture_normal = texture_locked
 	else:
 		if texture_unlocked: lock_button.texture_normal = texture_unlocked
 
 func _on_lock_pressed() -> void:
-	# Actualizamos la variable global
 	PlayerData.is_shop_locked = not PlayerData.is_shop_locked
 	_update_lock_visuals()
+	_update_reroll_button_visuals()
+	
+	# Si acabamos de bloquear, asegurémonos de guardar el estado actual EXACTO
+	if PlayerData.is_shop_locked:
+		_save_current_shop_state()
 
 # --- CAMBIO DE RONDA (Lógica Principal) ---
 func start_new_round() -> void:
 	_rerolls_this_round = 0
 	_update_reroll_button_visuals()
 
-	# 1. Verificamos si la tienda se quedó bloqueada en la ronda anterior
+	# 1. Si está bloqueado, RESTAURAMOS y SALIMOS (Return)
 	if PlayerData.is_shop_locked:
-		print("Tienda Bloqueada: Restaurando items guardados...")
-		
-		# A. Restauramos los items exactos que teníamos
+		print("Tienda Bloqueada: Restaurando items...")
 		_restore_shop_from_save()
-		
-		# B. Gestionamos si el candado se abre o se queda cerrado
-		if not keep_lock_on_new_day:
-			PlayerData.is_shop_locked = false
-			_update_lock_visuals()
-		
-		# C. Actualizamos colores (dinero/maxed) pero NO generamos nada nuevo
 		_update_shop_visuals()
 		return 
 
-	# 2. Si no había candado, generamos tienda nueva normalmente
+	# 2. Si NO está bloqueado, GENERAMOS NUEVOS
 	_refresh_shop_content() 
 
-# --- GUARDAR Y RESTAURAR ---
+# --- GUARDAR Y RESTAURAR (CORREGIDO PARA PASIVAS) ---
 
-# Esta función guarda lo que hay en pantalla dentro de PlayerData
 func _save_current_shop_state() -> void:
 	PlayerData.shop_items_saved.clear()
 	
+	# 1. GUARDAR PIEZAS
 	for slot in piece_zone.get_children():
 		if slot is StoreSlot:
 			var data_packet = {
@@ -122,48 +118,133 @@ func _save_current_shop_state() -> void:
 				"data": slot.item_data,
 				"price": slot.current_price,
 				"purchased": slot.is_purchased
-				# No hace falta guardar 'is_maxed' o 'can_afford', eso se recalcula
 			}
 			PlayerData.shop_items_saved.append(data_packet)
-			
-	# Nota: Si también quieres guardar las pasivas, habría que añadir lógica similar aquí.
-
-# Esta función reconstruye la tienda desde PlayerData
-func _restore_shop_from_save() -> void:
-	# Limpiar zona
-	for child in piece_zone.get_children(): child.queue_free()
 	
-	# Recrear slots
+	# 2. GUARDAR PASIVAS (¡NUEVO!)
+	# Iteramos sobre los contenedores VBoxContainer en passive_zone
+	for wrapper in passive_zone.get_children():
+		# Buscamos el botón dentro del contenedor
+		var button = null
+		for child in wrapper.get_children():
+			if child is TextureButton:
+				button = child
+				break
+		
+		if button:
+			var data_packet = {
+				"type": "passive",
+				"data": button.get_meta("data"),
+				"price": button.get_meta("price"),
+				"purchased": button.disabled # Usamos 'disabled' para saber si se compró
+			}
+			PlayerData.shop_items_saved.append(data_packet)
+
+func _restore_shop_from_save() -> void:
+	# 1. LIMPIEZA TOTAL
+	for child in piece_zone.get_children(): child.queue_free()
+	for child in passive_zone.get_children(): child.queue_free()
+	current_passive_buttons.clear()
+	
+	# 2. RECONSTRUCCIÓN
 	for packet in PlayerData.shop_items_saved:
-		if packet.type == "piece":
-			var data = packet.data
-			var price = packet.price
-			var purchased = packet.purchased
-			
+		var type = packet.type
+		var data = packet.data
+		var price = packet.price
+		var purchased = packet.purchased
+		
+		if type == "piece":
 			var slot = store_slot_scene.instantiate() as StoreSlot
 			piece_zone.add_child(slot)
 			
-			# Calculamos estado actual (dinero y copias)
 			var can_afford = PlayerData.has_enough_currency(price)
 			var current_count = _get_item_count_safe(data)
 			
 			slot.set_item(data, price, highlight_material, can_afford, current_count)
 			
-			# Si estaba comprado, lo marcamos como Agotado inmediatamente
 			if purchased:
 				slot.disable_interaction()
-			
-			# Si ya tienes el máximo, lo marcamos como Maxed
 			elif current_count >= max_copies:
 				slot.set_maxed_state(true)
 				
 			slot.slot_pressed.connect(_on_piece_slot_pressed)
 			slot.slot_hovered.connect(_on_hover_item)
 			slot.slot_exited.connect(_on_exit_item)
+			
+		elif type == "passive":
+			# Reconstruimos la pasiva manualmente para respetar el precio/estado guardado
+			_create_single_passive_button(data, price, purchased)
 
-# --- GENERACIÓN (Modificada para guardar al final) ---
+# Función auxiliar para crear UN botón de pasiva (usada al restaurar)
+func _create_single_passive_button(data, price: int, is_purchased: bool) -> void:
+	var item_container = VBoxContainer.new()
+	item_container.alignment = VBoxContainer.ALIGNMENT_CENTER
+	
+	var price_label = Label.new()
+	price_label.text = str(price) + "€"
+	price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	
+	var style_box = StyleBoxFlat.new()
+	style_box.content_margin_left = 6
+	style_box.content_margin_right = 6
+	style_box.corner_radius_top_left = 4
+	style_box.corner_radius_top_right = 4
+	style_box.corner_radius_bottom_left = 4
+	style_box.corner_radius_bottom_right = 4
+	
+	if PlayerData.has_enough_currency(price):
+		style_box.bg_color = COLOR_NORMAL_BG
+	else:
+		style_box.bg_color = COLOR_UNAFFORD_BG
+		
+	price_label.add_theme_stylebox_override("normal", style_box)
+	item_container.add_child(price_label)
+
+	var button = TextureButton.new()
+	var tex = data.icon
+	if tex == null:
+		# Fallback si no tiene icono (instanciar escena temp)
+		var instance = passive_scene.instantiate()
+		var sprite = instance.find_child("Sprite2D", true, false)
+		if sprite: tex = sprite.texture
+		instance.queue_free()
+		
+	button.texture_normal = tex
+	button.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
+	
+	# Metadatos críticos
+	button.set_meta("data", data)
+	button.set_meta("price", price)
+	
+	# Conexiones
+	button.pressed.connect(_on_passive_button_pressed.bind(button))
+	button.mouse_entered.connect(_on_hover_item.bind(data))
+	button.mouse_entered.connect(func(): if not button.disabled: button.material = highlight_material)
+	button.mouse_exited.connect(_on_exit_item)
+	button.mouse_exited.connect(func(): button.material = null)
+	
+	# Estado comprado
+	if is_purchased:
+		button.disabled = true
+		button.modulate = Color(0.25, 0.25, 0.25, 1.0)
+	
+	item_container.add_child(button)
+	passive_zone.add_child(item_container)
+	
+	current_passive_buttons.append({
+		"button": button,
+		"label": price_label,
+		"style": style_box,
+		"price": price
+	})
+
+# --- GENERACIÓN / REROLL ---
 
 func generate():
+	if PlayerData.is_shop_locked:
+		_animate_error_shake(reroll_button)
+		return
+
 	var current_cost = _calculate_reroll_cost()
 	if current_cost > 0:
 		if not PlayerData.has_enough_currency(current_cost):
@@ -200,7 +281,7 @@ func _refresh_shop_content():
 		var selected = shuffled.slice(0, min(2, shuffled.size()))
 		_generate_passive_buttons(selected)
 	
-	# ¡IMPORTANTE! Guardamos el estado recién generado
+	# GUARDAR: Guardamos inmediatamente lo que acabamos de generar
 	_save_current_shop_state()
 
 func _generate_piece_slots(items: Array) -> void:
@@ -245,15 +326,15 @@ func _on_piece_slot_pressed(slot: StoreSlot) -> void:
 
 	if PlayerData.spend_currency(price):
 		inventory.add_item(data)
-		slot.disable_interaction() # Marca visualmente como Agotado
+		slot.disable_interaction()
 		_update_shop_visuals()
 		
-		# ¡IMPORTANTE! Actualizamos el guardado porque ahora este item está comprado
+		# Actualizamos el guardado al comprar
 		_save_current_shop_state()
 	else:
 		_animate_error_shake(slot.texture_button)
 
-# --- RESTO DE FUNCIONES AUXILIARES (Sin cambios importantes) ---
+# --- RESTO DE FUNCIONES AUXILIARES ---
 
 func _setup_reroll_label():
 	reroll_label = Label.new()
@@ -276,6 +357,13 @@ func _calculate_reroll_cost() -> int:
 
 func _update_reroll_button_visuals():
 	if not reroll_label: return
+	
+	if PlayerData.is_shop_locked:
+		reroll_label.text = "BLOQ."
+		reroll_label.modulate = Color(0.5, 0.5, 0.5)
+		reroll_button.modulate = Color(0.7, 0.7, 0.7)
+		return
+
 	var cost = _calculate_reroll_cost()
 	if cost == 0:
 		reroll_label.text = "GRATIS"
@@ -297,61 +385,12 @@ func _animate_error_shake(node: Control):
 	tween.tween_property(node, "position:x", original_pos - 10, 0.05)
 	tween.tween_property(node, "position:x", original_pos, 0.05)
 
+# Generación normal de pasivas (usada al hacer reroll/generar)
 func _generate_passive_buttons(items: Array) -> void:
 	for data in items:
-		var item_container = VBoxContainer.new()
-		item_container.alignment = VBoxContainer.ALIGNMENT_CENTER
-		
 		var final_price = _calculate_price(data)
-		var price_label = Label.new()
-		price_label.text = str(final_price) + "€"
-		price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		
-		var style_box = StyleBoxFlat.new()
-		style_box.content_margin_left = 6
-		style_box.content_margin_right = 6
-		style_box.corner_radius_top_left = 4
-		style_box.corner_radius_top_right = 4
-		style_box.corner_radius_bottom_left = 4
-		style_box.corner_radius_bottom_right = 4
-		
-		if PlayerData.has_enough_currency(final_price):
-			style_box.bg_color = COLOR_NORMAL_BG
-		else:
-			style_box.bg_color = COLOR_UNAFFORD_BG
-			
-		price_label.add_theme_stylebox_override("normal", style_box)
-		item_container.add_child(price_label)
-
-		var button = TextureButton.new()
-		var tex = data.icon
-		if tex == null:
-			var instance = passive_scene.instantiate()
-			var sprite = instance.find_child("Sprite2D", true, false)
-			if sprite: tex = sprite.texture
-			instance.queue_free()
-			
-		button.texture_normal = tex
-		button.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
-		
-		button.set_meta("data", data)
-		button.set_meta("price", final_price)
-		
-		button.pressed.connect(_on_passive_button_pressed.bind(button))
-		button.mouse_entered.connect(_on_hover_item.bind(data))
-		button.mouse_entered.connect(func(): if not button.disabled: button.material = highlight_material)
-		button.mouse_exited.connect(_on_exit_item)
-		button.mouse_exited.connect(func(): button.material = null)
-		
-		item_container.add_child(button)
-		passive_zone.add_child(item_container)
-		
-		current_passive_buttons.append({
-			"button": button,
-			"label": price_label,
-			"style": style_box,
-			"price": final_price
-		})
+		# Creamos el botón "limpio"
+		_create_single_passive_button(data, final_price, false)
 
 func _on_passive_button_pressed(button: TextureButton) -> void:
 	var data = button.get_meta("data")
@@ -367,6 +406,9 @@ func _on_passive_button_pressed(button: TextureButton) -> void:
 		button.modulate = Color(0.25, 0.25, 0.25, 1.0)
 		button.material = null
 		_update_shop_visuals()
+		
+		# Actualizamos guardado
+		_save_current_shop_state()
 
 func _update_shop_visuals(_new_amount: int = 0) -> void:
 	_update_reroll_button_visuals()
