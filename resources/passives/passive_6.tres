@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="PassiveData" load_steps=3 format=3 uid="uid://nytgdhu2kh46"]
 
 [ext_resource type="Script" uid="uid://berngf3tq220v" path="res://scripts/passive_data.gd" id="1_b7j6f"]
-[ext_resource type="Texture2D" uid="uid://ykld66tx2edm" path="res://assets/passive_6.jpg" id="1_pukcq"]
+[ext_resource type="Texture2D" uid="uid://cqc4rwgluigvv" path="res://assets/Uvas.png" id="1_pukcq"]
 
 [resource]
 script = ExtResource("1_b7j6f")

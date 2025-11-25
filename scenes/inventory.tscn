@@ -17,7 +17,7 @@
 [ext_resource type="Texture2D" uid="uid://dgjstvaqfykdq" path="res://assets/inventario/ASPEED.png" id="11_fiysm"]
 [ext_resource type="Texture2D" uid="uid://b10j5vwr4mjk4" path="res://assets/inventario/Crit.png" id="12_0df5h"]
 [ext_resource type="Texture2D" uid="uid://tl8h73xfj25t" path="res://assets/inventario/CritDMG.png" id="12_brsb2"]
-[ext_resource type="Texture2D" uid="uid://b7nsdsys80ot7" path="res://assets/inventario/Stats.png" id="13_40feg"]
+[ext_resource type="Texture2D" uid="uid://b7nsdsys80ot7" path="res://assets/Stats.png" id="13_40feg"]
 
 [node name="inventory" type="Control"]
 layout_mode = 3

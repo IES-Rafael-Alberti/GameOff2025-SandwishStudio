@@ -76,19 +76,20 @@ theme_override_font_sizes/font_size = 28
 
 [node name="DayLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 925.0
-offset_top = 49.0
-offset_right = 1073.0
-offset_bottom = 88.0
+offset_left = 909.0
+offset_top = 35.0
+offset_right = 1057.0
+offset_bottom = 74.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 
 [node name="GladiatorLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 820.0
-offset_top = 53.0
-offset_right = 940.0
-offset_bottom = 92.0
+offset_left = 776.0
+offset_top = 41.0
+offset_right = 896.0
+offset_bottom = 80.0
+scale = Vector2(1.0014056, 0.963751)
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 

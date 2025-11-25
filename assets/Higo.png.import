@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ykld66tx2edm"
-path="res://.godot/imported/passive_6.jpg-f112aba677e6b89c12ff3b2d7115cc79.ctex"
+uid="uid://cql2kfp3rbsgn"
+path="res://.godot/imported/Higo.png-70416d5afd74cb1a5588a79fd2e24671.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/passive_6.jpg"
-dest_files=["res://.godot/imported/passive_6.jpg-f112aba677e6b89c12ff3b2d7115cc79.ctex"]
+source_file="res://assets/Higo.png"
+dest_files=["res://.godot/imported/Higo.png-70416d5afd74cb1a5588a79fd2e24671.ctex"]
 
 [params]
 

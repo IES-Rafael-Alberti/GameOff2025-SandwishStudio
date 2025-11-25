@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ndf8hba61ykk"
-path="res://.godot/imported/passive_3.jpg-25974d91c17800916b2a64b81efeabe3.ctex"
+uid="uid://cqc4rwgluigvv"
+path="res://.godot/imported/Uvas.png-e382a4ae4cab932a0f2e1155054b40a7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/passive_3.jpg"
-dest_files=["res://.godot/imported/passive_3.jpg-25974d91c17800916b2a64b81efeabe3.ctex"]
+source_file="res://assets/Uvas.png"
+dest_files=["res://.godot/imported/Uvas.png-e382a4ae4cab932a0f2e1155054b40a7.ctex"]
 
 [params]
 

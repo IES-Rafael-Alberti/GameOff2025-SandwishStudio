@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cvueb5noma4sp"
-path="res://.godot/imported/passive_2.jpg-a6d4d0724a46642edfd1d8590d14a9e2.ctex"
+uid="uid://d1vgubqe84mhy"
+path="res://.godot/imported/Granada.png-f7580aeee9423f00bfd5261e07720fb6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/passive_2.jpg"
-dest_files=["res://.godot/imported/passive_2.jpg-a6d4d0724a46642edfd1d8590d14a9e2.ctex"]
+source_file="res://assets/Granada.png"
+dest_files=["res://.godot/imported/Granada.png-f7580aeee9423f00bfd5261e07720fb6.ctex"]
 
 [params]
 
