@@ -27,6 +27,10 @@ window/size/viewport_width=1162
 window/size/viewport_height=760
 window/stretch/mode="canvas_items"
 
+[gui]
+
+theme/custom_font="uid://btm23orarrgif"
+
 [input]
 
 pause={

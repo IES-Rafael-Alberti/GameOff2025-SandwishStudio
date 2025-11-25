@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://dblnjb14cqaif"]
+[gd_scene load_steps=9 format=3 uid="uid://dblnjb14cqaif"]
 
 [ext_resource type="Script" uid="uid://bnpguy7y2xdrf" path="res://scripts/Tooltip.gd" id="1_7dicn"]
 [ext_resource type="Texture2D" uid="uid://d32k775bkfw00" path="res://assets/inventario/VIDA.png" id="2_ywu5r"]
@@ -9,6 +9,16 @@
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7dicn"]
 bg_color = Color(0.5411765, 0.3647059, 0.19215687, 0.31764707)
+
+[sub_resource type="FontFile" id="FontFile_ywu5r"]
+subpixel_positioning = 0
+msdf_pixel_range = 14
+msdf_size = 128
+cache/0/16/0/ascent = 0.0
+cache/0/16/0/descent = 0.0
+cache/0/16/0/underline_position = 0.0
+cache/0/16/0/underline_thickness = 0.0
+cache/0/16/0/scale = 1.0
 
 [node name="Tooltip" type="PanelContainer"]
 anchors_preset = 15
@@ -29,6 +39,7 @@ layout_mode = 2
 
 [node name="NameLabel" type="Label" parent="VBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = SubResource("FontFile_ywu5r")
 
 [node name="DescriptionLabel" type="RichTextLabel" parent="VBoxContainer"]
 layout_mode = 2
