@@ -214,8 +214,10 @@ func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int 
 		sell_price_label.show()
 	else:
 		sell_price_label.hide()
-	size = Vector2.ZERO
+	
 	show()
+	await get_tree().process_frame
+	size = Vector2.ZERO
 
 # --- HELPER: Generates [img] tag ---
 func _get_icon_tag(texture: Texture2D) -> String:
