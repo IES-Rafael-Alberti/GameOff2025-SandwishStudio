@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://bbfqm8pblt056"]
+
+[ext_resource type="Texture2D" uid="uid://c0bn00jg5b5cb" path="res://assets/ELJETAS (1).png" id="1_5ctqt"]
+[ext_resource type="PackedScene" uid="uid://bevacqmdtykqr" path="res://scenes/button_shop.tscn" id="2_qgppr"]
+
+[node name="elJetas" type="Sprite2D"]
+position = Vector2(926.00006, 656.00006)
+scale = Vector2(0.30778688, 0.30778688)
+texture = ExtResource("1_5ctqt")
+
+[node name="ButtonShop" parent="." instance=ExtResource("2_qgppr")]
+offset_left = -107.21725
+offset_top = -246.92427
+offset_right = 77.97587
+offset_bottom = -107.21724
+disabled = false
