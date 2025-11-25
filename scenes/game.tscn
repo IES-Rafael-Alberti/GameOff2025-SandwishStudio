@@ -22,7 +22,7 @@ gold_round_base = 2
 gladiators_per_day = 4
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
-position = Vector2(182.00002, 88.99997)
+position = Vector2(176.00003, 88.99997)
 scale = Vector2(0.35115045, 0.22791663)
 
 [node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
