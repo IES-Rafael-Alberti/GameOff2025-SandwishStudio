@@ -11,6 +11,9 @@ enum PieceRarity { COMUN, RARO, EPICO, LEGENDARIO }
 @export var race: PieceRace = PieceRace.EUROPEA
 @export var rarity: PieceRarity = PieceRarity.COMUN
 
+# Barra de vida adaptable
+@export var health_bar_offset: Vector2 = Vector2(0, -40)
+
 # --- VISUALES Y ECONOMÍA ---
 @export var frames: SpriteFrames
 

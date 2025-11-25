@@ -10,6 +10,7 @@ const PieceAdapter := preload("res://scripts/piece_adapter.gd")
 @export var enemy_res: Array[npcRes] = []
 const ALLY_LIMIT := 14
 const ENEMY_LIMIT := 1
+
 var round_gold_loot: int = 0
 # --- NUEVO: Variables de Escalado Diario (Scaling) ---
 @export_group("Escalado de Dificultad (Por Día)")
@@ -21,10 +22,8 @@ var round_gold_loot: int = 0
 @export var scaling_speed_flat: float = 0.1  
 @export var scaling_crit_chance_flat: float = 5.0
 @export var scaling_crit_dmg_flat: float = 0.05  
-# -----------------------------------------------------
 
 @onready var enemy_spawn: Marker2D = $GladiatorSpawn
-@onready var round_message: Label = $RoundMessage
 @onready var ally_entry_spawn: Marker2D = $AlliesSpawn
 @onready var enemy_wait_slot: Marker2D = $EnemySlots/EnemyWaitSlot
 @onready var enemy_battle_slot: Marker2D = $EnemySlots/EnemyBattleSlot
@@ -83,7 +82,7 @@ func on_roulette_combat_requested(piece_resource: Resource) -> void:
 		
 	print("Señal de combate global recibida. Aliado: ", piece_resource.display_name)
 	
-	# --- CASO 2: Combate Normal ---
+	# Combate Normal
 	_cleanup_allies_and_reset()
 	spawn_piece(npc.Team.ALLY, piece_resource)
 	
@@ -110,7 +109,7 @@ func on_roulette_combat_requested(piece_resource: Resource) -> void:
 	_start_pre_battle_sequence()
 
 func _stop_combat() -> void:
-	# Lógica de pago parcial
+
 	if enemy_npcs.size() > 0 and ally_npcs.is_empty():
 		var w: npc = enemy_npcs[0]
 		if is_instance_valid(w) and w.health > 0.0:
@@ -123,6 +122,7 @@ func _stop_combat() -> void:
 			if payout > 0:
 				PlayerData.add_currency(payout)
 				w.gold_pool = int(w.gold_pool) - payout
+
 				round_gold_loot += payout # NUEVO: Registramos el pago parcial
 				print("Round reward (partial): +", payout)
 	
@@ -137,19 +137,22 @@ func _stop_combat() -> void:
 			t.stop()
 			t.queue_free()
 	enemy_timers.clear()
-	
+
+	# Comprobar quién sigue vivo
 	var enemy_alive := false
 	for e in enemy_npcs:
 		if is_instance_valid(e) and e.health > 0.0:
 			enemy_alive = true
 			break
+
 	var allies_alive := false
 	for a in ally_npcs:
 		if is_instance_valid(a) and a.health > 0.0:
 			allies_alive = true
 			break
-	
+
 	combat_running = false
+
 	var msg_timer: Timer = null
 	
 	var player_won_round = not enemy_alive
@@ -158,11 +161,14 @@ func _stop_combat() -> void:
 		msg_timer = _show_round_message("Ronda terminada: ¡Victoria!")
 		msg_timer.timeout.connect(_cleanup_allies_and_reset)
 
-	elif not player_won_round:
-		msg_timer = _show_round_message("Ronda terminada: El gladiador sobrevivió.")
+	# Resultado de la ronda
+	var player_won_round := not enemy_alive
+
+	# Si el gladiador sobrevive, lo mandamos al slot de espera
+	if not player_won_round:
 		if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 			_move_with_tween(enemy_npcs[0], enemy_wait_slot.position, 0.5)
-		msg_timer.timeout.connect(_cleanup_allies_and_reset)
+
 
 	elif player_won_round and (not allies_alive):
 		msg_timer = _show_round_message("Ronda terminada: doble KO.")
@@ -223,7 +229,7 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 				crit_damage_bonus
 			)
 			
-	# --- APLICAR SINERGIAS DE RULETA (¡NUEVO!) ---
+	# APLICAR SINERGIAS DE RULETA 
 	if team == npc.Team.ALLY:
 		# Buscamos al GameManager para pedir las sinergias
 		var game_manager = get_parent() # Asumiendo que CombatScene es hijo de Game
@@ -234,22 +240,20 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 				n.apply_synergies(active_synergies)
 			else:
 				push_warning("NPC no tiene metodo apply_synergies")
-	# ---------------------------------------------
 	
 	get_node("npcs").add_child(n)
 
 
-	# --- APLICAR BONUS A ENEMIGOS (Scaling Diario) ---
+	# APLICAR BONUS A ENEMIGOS (Scaling Diario)
 	if team == npc.Team.ENEMY:
 		n.gold_pool = int(n.npc_res.gold)
-		# ¡Aquí aplicamos el crecimiento!
 		_apply_enemy_daily_scaling(n)
 	
 	n.died.connect(_on_npc_died)
 	n.tree_exited.connect(_on_npc_exited.bind(n))
 	return n
 
-# --- NUEVA FUNCIÓN: Cálculos de Escalado ---
+# Cálculos de Escalado
 func _apply_enemy_daily_scaling(n: npc) -> void:
 	# Intentamos obtener el día actual del GameManager (Padre)
 	var gm = get_parent()
@@ -262,7 +266,7 @@ func _apply_enemy_daily_scaling(n: npc) -> void:
 	if day_index == 0:
 		return # No hay escalado en el día 1
 		
-	# 1. CÁLCULO DE MULTIPLICADORES Y SUMAS
+	# CÁLCULO DE MULTIPLICADORES Y SUMAS
 	# Exponencial: Base * (Multiplicador ^ Dias)
 	var total_hp_mult = pow(scaling_hp_mult, day_index)
 	var total_dmg_mult = pow(scaling_damage_mult, day_index)
@@ -271,10 +275,6 @@ func _apply_enemy_daily_scaling(n: npc) -> void:
 	var added_speed = scaling_speed_flat * day_index
 	var added_crit_chance = scaling_crit_chance_flat * day_index
 	var added_crit_dmg = scaling_crit_dmg_flat * day_index
-	
-	# 2. APLICACIÓN AL NPC
-	# Usamos 'apply_passive_bonuses' asumiendo que acepta:
-	# (hp_percent, damage_percent, speed_flat, crit_chance_flat, crit_damage_flat)
 	
 	# Convertimos el multiplicador a porcentaje de bonus (ej. 1.4 -> +40%)
 	var bonus_hp_percent = (total_hp_mult - 1.0) * 100.0
@@ -288,7 +288,7 @@ func _apply_enemy_daily_scaling(n: npc) -> void:
 			added_crit_chance,
 			added_crit_dmg
 		)
-		# Importante: Actualizamos la vida actual al nuevo máximo
+		# Actualizamos la vida actual al nuevo máximo
 		n.health = n.max_health
 		
 		print("Enemy Scaled (Day %d): HP +%d%%, DMG +%d%%, SPD +%.2f" % [gm.current_day, int(bonus_hp_percent), int(bonus_dmg_percent), added_speed])
@@ -296,8 +296,6 @@ func _apply_enemy_daily_scaling(n: npc) -> void:
 		# Fallback por si no tiene el método (modificamos HP manualmente al menos)
 		n.max_health *= total_hp_mult
 		n.health = n.max_health
-
-# ---------------------------------------------
 
 func _move_with_tween(n: npc, target_pos: Vector2, duration: float = 1.8) -> void:
 	if not is_instance_valid(n):
@@ -355,8 +353,8 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 			return
 
 		var to_spawn: int = min(members, free_slots_limit, free_markers.size())
-		var delay_per_ally := 0.25
-		var move_segment_time := 0.5
+		var delay_per_ally := 0.10
+		var move_segment_time := 0.4
 		var total_move_time := move_segment_time * 2.0
 
 		for i in range(to_spawn):
@@ -366,11 +364,9 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 
 			var n: npc = _spawn_npc(team, ally_entry_spawn.position, npc_template)
 			if n:
-				if piece.display_name != "":
-					n.set_display_name(piece.display_name)
 				ally_npcs.append(n)
 
-				# USAMOS EL CONTADOR GLOBAL, NO 'i'
+				# USAMOS EL CONTADOR GLOBAL
 				var order_index := ally_spawn_order_counter
 				ally_spawn_order_counter += 1
 
@@ -393,7 +389,7 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 func _place_ally_in_slot_with_tween(n: npc, final_pos: Vector2, order_index: int) -> void:
 	n.position = ally_entry_spawn.position
 
-	var delay_per_ally := 0.25
+	var delay_per_ally := 0.10
 
 	var mid_pos := Vector2(final_pos.x, ally_entry_spawn.position.y)
 
@@ -477,23 +473,6 @@ func _make_attack_timer(attacker: npc, defender: Variant) -> Timer:
 	)
 	t.start()
 	return t
-
-func _show_round_message(msg: String, duration := 2.5) -> Timer:
-	if not round_message:
-		return null
-	round_message.text = msg
-	round_message.visible = true
-	var msg_timer := Timer.new()
-	msg_timer.one_shot = true
-	msg_timer.wait_time = duration
-	add_child(msg_timer)
-	msg_timer.timeout.connect(func ():
-		if is_instance_valid(round_message):
-			round_message.visible = false
-		msg_timer.queue_free()
-	)
-	msg_timer.start()
-	return msg_timer
 
 func _num(x: float, d: int = 2) -> String:
 	return String.num(x, d)

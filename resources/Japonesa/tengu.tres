@@ -9,6 +9,7 @@ id = "japonesa.tengu"
 display_name = "tengu"
 race = 1
 rarity = 2
+health_bar_offset = Vector2(0, -130)
 frames = ExtResource("1_pgrif")
 stats = {
 "BRONCE": {

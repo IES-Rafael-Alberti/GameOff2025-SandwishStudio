@@ -149,7 +149,9 @@ func _update_ui_labels() -> void:
 			GameState.ROULETTE: state_text = " - ¡Gira la ruleta!"
 			GameState.SPINNING: state_text = " - ¡Girando!"
 			GameState.COMBAT: state_text = " - ¡Combate!"
-		round_label.text = "Ronda %d/%d%s" % [current_round, rounds_per_day, state_text]
+		
+		round_label.text = "Waves %d/%d%s" % [current_round, rounds_per_day, state_text]
+
 
 ## ------------------------------------------------------------------
 ## Máquina de Estados

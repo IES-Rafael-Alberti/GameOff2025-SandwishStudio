@@ -9,6 +9,7 @@ id = "japonesa.Hitotsume_kozo"
 display_name = "Hitotsume_kozo"
 race = 1
 rarity = 1
+health_bar_offset = Vector2(0, -160)
 frames = ExtResource("1_1ohcj")
 stats = {
 "BRONCE": {

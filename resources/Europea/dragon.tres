@@ -8,6 +8,7 @@ script = ExtResource("1_x2ot1")
 id = "europea.dragon"
 display_name = "dragon"
 rarity = 3
+health_bar_offset = Vector2(0, -100)
 frames = ExtResource("1_g02va")
 stats = {
 "BRONCE": {
@@ -24,7 +25,7 @@ stats = {
 "crit_mult": 2.0,
 "dmg": 25.0,
 "hp": 250.0,
-"members": 10
+"members": 3
 },
 "PLATA": {
 "aps": 1.1,
@@ -32,7 +33,7 @@ stats = {
 "crit_mult": 1.6,
 "dmg": 15.0,
 "hp": 150.0,
-"members": 8
+"members": 2
 }
 }
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"

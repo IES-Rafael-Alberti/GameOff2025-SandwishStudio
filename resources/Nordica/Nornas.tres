@@ -9,6 +9,7 @@ id = "nordica.Nornas"
 display_name = "Nornas"
 race = 0
 rarity = 2
+health_bar_offset = Vector2(-60, -100)
 frames = ExtResource("1_lo3au")
 stats = {
 "BRONCE": {
