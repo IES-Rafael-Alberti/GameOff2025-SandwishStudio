@@ -136,6 +136,10 @@ stretch_mode = 4
 [node name="Tooltip" parent="passive_inventory" instance=ExtResource("16_jc13p")]
 layout_mode = 0
 anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+grow_horizontal = 1
+grow_vertical = 1
 
 [node name="delete" type="Panel" parent="."]
 custom_minimum_size = Vector2(100, 100)
@@ -152,10 +156,10 @@ texture = ExtResource("4_53g1v")
 
 [node name="TextureRect3" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 1430.0
-offset_top = 657.00006
-offset_right = 4509.0
-offset_bottom = 2478.0
+offset_left = 1493.0
+offset_top = 652.00006
+offset_right = 4257.8794
+offset_bottom = 2799.2053
 scale = Vector2(0.25786263, 0.17371413)
 texture = ExtResource("13_40feg")
 
@@ -246,7 +250,7 @@ size_flags_horizontal = 3
 [node name="TextureRect" type="TextureRect" parent="TextureRect3/CChance_container"]
 layout_mode = 2
 texture = ExtResource("12_0df5h")
-stretch_mode = 2
+stretch_mode = 4
 
 [node name="Label" type="Label" parent="TextureRect3/CChance_container"]
 layout_mode = 2
@@ -265,7 +269,7 @@ size_flags_horizontal = 3
 [node name="TextureRect" type="TextureRect" parent="TextureRect3/CDamage_chance"]
 layout_mode = 2
 texture = ExtResource("12_brsb2")
-stretch_mode = 2
+stretch_mode = 3
 
 [node name="Label" type="Label" parent="TextureRect3/CDamage_chance"]
 layout_mode = 2
