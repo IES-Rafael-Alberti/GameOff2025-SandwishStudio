@@ -92,7 +92,9 @@ func hide_tooltip() -> void:
 # ==============================================================================
 func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int = 0) -> void:
 	if not item_data: return
-
+	if units_grid:
+			for child in units_grid.get_children():
+				child.queue_free()
 	# --- A. BASIC DATA ---
 	var title_text = "Item"
 	if item_data.resource_name: title_text = item_data.resource_name

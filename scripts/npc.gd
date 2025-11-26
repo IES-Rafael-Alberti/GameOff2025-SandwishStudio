@@ -22,6 +22,7 @@ const DAMAGE_TEXT_SCENE := preload("res://scenes/damage_text.tscn")
 @onready var shock_material: ShaderMaterial = material
 var shock_timer: float = 0.0
 var is_shocked: bool = false
+var attack_notified: bool = false
 
 @export var npc_res: npcRes
 @export var show_healthbar: bool = true
@@ -51,7 +52,7 @@ var synergy_eur_tier: int = 0
 var attack_count: int = 0        # Contador de ataques
 var is_last_attack_special: bool = false # Para efectos visuales
 var nordica_heal_used: bool = false
-
+var jap_special_ready: bool = false
 # MULTIPLICADOR ALMACENADO (Solo HP)
 var synergy_hp_mult: float = 1.0
 
@@ -268,19 +269,22 @@ func apply_passive_bonuses(p_health: float, p_damage: float, p_speed: float, p_c
 func get_damage(target: npc) -> float:
 	var val := npc_res.damage + bonus_damage
 	
-	# LÓGICA JAPONESA
+	# LÓGICA JAPONESA 
 	is_last_attack_special = false
-	if synergy_jap_tier > 0 and (attack_count + 1) % 3 == 0:
+	
+	if synergy_jap_tier > 0 and jap_special_ready:
 		var mult = 1.0
 		if synergy_jap_tier == 1: mult = 1.5
 		elif synergy_jap_tier == 2: mult = 2.0
 		val *= mult
+		
 		is_last_attack_special = true
+		jap_special_ready = false 
 	
 	for ab in abilities:
 		if ab: val = ab.modify_damage(val, self, target)
 	return max(0.0, val)
-
+	
 func get_attack_speed() -> float:
 	var val := npc_res.atack_speed + bonus_speed
 	for ab in abilities:
@@ -349,9 +353,9 @@ func _die(killer: npc = null) -> void:
 	queue_free()
 
 func notify_before_attack(target: npc) -> void:
+	attack_notified = false
 	for ab in abilities:
 		if ab: ab.on_before_attack(self, target)
-
 func notify_after_attack(target: npc, dealt_damage: float, was_crit: bool) -> void:
 	attack_count += 1
 	for ab in abilities:
@@ -415,3 +419,7 @@ func play_sfx(stream: AudioStream) -> void:
 
 	audio_player.stream = stream
 	audio_player.play()
+func charge_jap_synergy() -> void:
+	if synergy_jap_tier > 0:
+		jap_special_ready = true
+		# Opcional: Aquí podrías añadir un efecto visual (brillo) para indicar que está cargado

@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://bv3r20c0gu33v"]
+[gd_scene load_steps=23 format=3 uid="uid://bv3r20c0gu33v"]
 
 [ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_jyskt"]
 [ext_resource type="Texture2D" uid="uid://dpcgv05fqqjag" path="res://assets/Manivela (1) (1).png" id="2_gils2"]
@@ -7,10 +7,16 @@
 [ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="4_k6evh"]
 [ext_resource type="Texture2D" uid="uid://qmthj5xqadhq" path="res://assets/Manilla (1).png" id="5_jyskt"]
 [ext_resource type="Script" uid="uid://bdsnaco1ib6yi" path="res://scripts/SynergyIcon.gd" id="7_ekxsn"]
-[ext_resource type="Texture2D" uid="uid://xr5sxokqvql1" path="res://assets/inventario/ADMG.png" id="7_gils2"]
-[ext_resource type="Texture2D" uid="uid://b10j5vwr4mjk4" path="res://assets/inventario/Crit.png" id="8_8jefs"]
-[ext_resource type="Texture2D" uid="uid://d32k775bkfw00" path="res://assets/inventario/VIDA.png" id="9_ekxsn"]
+[ext_resource type="Texture2D" uid="uid://brk5bpdrbjn2g" path="res://assets/sinergias/Europa0.png" id="8_6wnlc"]
+[ext_resource type="Texture2D" uid="uid://ba3u3ku76qdbh" path="res://assets/sinergias/Europa1.png" id="9_lp4gq"]
 [ext_resource type="PackedScene" uid="uid://dblnjb14cqaif" path="res://scenes/tooltip.tscn" id="10_8jefs"]
+[ext_resource type="Texture2D" uid="uid://dvu0470xcjjdj" path="res://assets/sinergias/Europa2.png" id="10_waas3"]
+[ext_resource type="Texture2D" uid="uid://nr8v1mn475wb" path="res://assets/sinergias/Japon0.png" id="12_bjn61"]
+[ext_resource type="Texture2D" uid="uid://q62dl2kq354h" path="res://assets/sinergias/Japon1.png" id="13_co0ci"]
+[ext_resource type="Texture2D" uid="uid://brnv8ou77xejp" path="res://assets/sinergias/Japon2.png" id="14_8wylf"]
+[ext_resource type="Texture2D" uid="uid://yqtalunulmvv" path="res://assets/sinergias/Vikingo0.png" id="16_8he63"]
+[ext_resource type="Texture2D" uid="uid://7bmaftnfs6vd" path="res://assets/sinergias/Vikingo1.png" id="17_yrbwv"]
+[ext_resource type="Texture2D" uid="uid://blygcmpq3amf5" path="res://assets/sinergias/Vikingo2.png" id="18_fyshn"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jyskt"]
 size = Vector2(8624.092, 436.06683)
@@ -29,9 +35,8 @@ point_count = 1
 offsets = PackedFloat32Array(0, 0, 1)
 colors = PackedColorArray(1, 1, 1, 1, 0.99215686, 0.47058824, 0, 1, 1, 0, 0, 1)
 
-[node name="Roulette" type="Node2D" node_paths=PackedStringArray("spin_dust_particles", "needle_sparks_particles")]
+[node name="Roulette" type="Node2D" node_paths=PackedStringArray("needle_sparks_particles")]
 script = ExtResource("1_jyskt")
-spin_dust_particles = NodePath("")
 needle_sparks_particles = NodePath("Manecilla/NeedleSparks")
 
 [node name="Lever" type="Sprite2D" parent="."]
@@ -301,14 +306,18 @@ scale_amount_curve = SubResource("Curve_shxjy")
 color = Color(0.6879542, 0.68795425, 0, 1)
 color_ramp = SubResource("Gradient_egcvt")
 
-[node name="Europea" type="Control" parent="."]
+[node name="Europea" type="Control" parent="." node_paths=PackedStringArray("icon_display")]
 layout_mode = 3
 anchors_preset = 0
-offset_left = 1206.0
-offset_top = 257.0
-offset_right = 1246.0
-offset_bottom = 297.0
+offset_left = 1090.0
+offset_top = 159.0
+offset_right = 1130.0
+offset_bottom = 199.0
 script = ExtResource("7_ekxsn")
+icon_display = NodePath("TextureRect")
+sinergia0 = ExtResource("8_6wnlc")
+sinergia1 = ExtResource("9_lp4gq")
+sinergia2 = ExtResource("10_waas3")
 
 [node name="TextureRect" type="TextureRect" parent="Europea"]
 z_index = 5
@@ -322,17 +331,20 @@ offset_left = -20.0
 offset_top = -20.760002
 offset_right = 20.0
 offset_bottom = 32.0
-texture = ExtResource("7_gils2")
 
-[node name="Japonesa" type="Control" parent="."]
+[node name="Japonesa" type="Control" parent="." node_paths=PackedStringArray("icon_display")]
 layout_mode = 3
 anchors_preset = 0
-offset_left = 1118.0
-offset_top = 366.0
-offset_right = 1158.0
-offset_bottom = 406.0
+offset_left = 1085.0
+offset_top = 344.0
+offset_right = 1125.0
+offset_bottom = 384.0
 script = ExtResource("7_ekxsn")
+icon_display = NodePath("TextureRect")
 race_name = "Japonesa"
+sinergia0 = ExtResource("12_bjn61")
+sinergia1 = ExtResource("13_co0ci")
+sinergia2 = ExtResource("14_8wylf")
 
 [node name="TextureRect" type="TextureRect" parent="Japonesa"]
 layout_mode = 1
@@ -341,21 +353,24 @@ anchor_left = 2.65
 anchor_top = 0.5
 anchor_right = 2.65
 anchor_bottom = 0.5
-offset_left = -32.0
-offset_top = -29.0
-offset_right = 32.0
-offset_bottom = 35.0
-texture = ExtResource("8_8jefs")
+offset_left = -102.0
+offset_top = -28.0
+offset_right = -38.0
+offset_bottom = 36.0
 
-[node name="Nordica" type="Control" parent="."]
+[node name="Nordica" type="Control" parent="." node_paths=PackedStringArray("icon_display")]
 layout_mode = 3
 anchors_preset = 0
-offset_left = 1112.0
-offset_top = 498.0
-offset_right = 1152.0
-offset_bottom = 538.0
+offset_left = 1101.0
+offset_top = 527.0
+offset_right = 1141.0
+offset_bottom = 567.0
 script = ExtResource("7_ekxsn")
+icon_display = NodePath("TextureRect")
 race_name = "Nordica"
+sinergia0 = ExtResource("16_8he63")
+sinergia1 = ExtResource("17_yrbwv")
+sinergia2 = ExtResource("18_fyshn")
 
 [node name="TextureRect" type="TextureRect" parent="Nordica"]
 layout_mode = 1
@@ -363,11 +378,10 @@ anchors_preset = -1
 anchor_left = 2.7
 anchor_right = 2.7
 anchor_bottom = 0.1
-offset_left = -32.0
-offset_top = -27.0
-offset_right = 32.0
-offset_bottom = 31.0
-texture = ExtResource("9_ekxsn")
+offset_left = -117.0
+offset_top = -15.0
+offset_right = -53.0
+offset_bottom = 43.0
 
 [node name="Tooltip" parent="." instance=ExtResource("10_8jefs")]
 
