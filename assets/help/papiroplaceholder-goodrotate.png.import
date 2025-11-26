@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bqnc8y7rld06u"
-path="res://.godot/imported/papiroplaceholder.png-3a96c6593244d7eb19a155205b6191f7.ctex"
+uid="uid://u680lxpfqu1"
+path="res://.godot/imported/papiroplaceholder-goodrotate.png-4941ac30964a0e92fd06c1eb275fc8b5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/help/papiroplaceholder.png"
-dest_files=["res://.godot/imported/papiroplaceholder.png-3a96c6593244d7eb19a155205b6191f7.ctex"]
+source_file="res://assets/help/papiroplaceholder-goodrotate.png"
+dest_files=["res://.godot/imported/papiroplaceholder-goodrotate.png-4941ac30964a0e92fd06c1eb275fc8b5.ctex"]
 
 [params]
 

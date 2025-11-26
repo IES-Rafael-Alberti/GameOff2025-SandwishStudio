@@ -172,11 +172,6 @@ text = "Has ganado crack :)"
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="HelpOverLay" parent="CanvasLayer" instance=ExtResource("13_kvuet")]
-z_index = 9
-offset_left = 1032.0
-offset_top = -8.0
-offset_right = 1032.0
-offset_bottom = -8.0
 
 [node name="elJetas" parent="." instance=ExtResource("13_trtic")]
 z_index = 4
