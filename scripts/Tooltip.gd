@@ -3,7 +3,7 @@ extends PanelContainer
 # References to nodes
 @onready var name_label: Label = $VBoxContainer/NameLabel
 @onready var description_label: RichTextLabel = $VBoxContainer/DescriptionLabel
-@onready var sell_price_label: Label = $VBoxContainer/SellPriceLabel
+@onready var sell_price_label: RichTextLabel = $VBoxContainer/SellPriceLabel
 
 @export_group("Stat Icons")
 @export var icon_health: Texture2D
@@ -21,6 +21,9 @@ var card_style: StyleBoxFlat
 var units_grid: HBoxContainer = null
 
 func _ready() -> void:
+	if sell_price_label:
+		sell_price_label.fit_content = true  # <--- Vital para que no tenga altura 0
+		sell_price_label.bbcode_enabled = true # <--- Necesario para las negritas [b] y la imagen [img]
 	add_to_group("tooltip")
 	hide()
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -176,15 +179,17 @@ func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int 
 		var members = current_stats.get("members", 1)
 		var next_members = next_stats.get("members", members)
 
-		text += "[cell][color=#aaaaaa] 👥 Units[/color][/cell]"
+		text += "[cell][color=#aaaaaa] 👥 [b]Units[/b][/color][/cell]"
 		if is_upgrade and members != next_members: text += "[cell][color=#ffffff]%d[/color] [color=#00ff00]➞ %d[/color][/cell]" % [members, next_members]
 		else: text += "[cell][b]%d[/b][/cell]" % members
 			
 		var u_color = "#ffffff"
-		if cur_uses <= 1: u_color = "#ff5555" 
-		text += "[cell][color=#aaaaaa] 🔋 Uses[/color][/cell]"
-		text += "[cell][color=%s]%d[/color] / %d[/cell]" % [u_color, cur_uses, max_uses]
-		text += "[cell] [/cell][cell] [/cell]" 
+		if cur_uses <= 1:
+			u_color = "#ff5555"
+
+		text += "[cell][color=#aaaaaa][b]🔋 Uses[/b][/color][/cell]"
+		text += "[cell][color=%s][b]%d[/b] / [b]%d[/b][/color][/cell]" % [u_color, cur_uses, max_uses]
+		text += "[cell] [/cell][cell] [/cell]"
 
 		# --- UPDATED: FULL STAT NAMES WITH ICONS ---
 		text += _row_table("%s Damage" % _get_icon_tag(icon_damage), current_stats["dmg"], next_stats["dmg"], is_upgrade, "#ff7675")
@@ -208,42 +213,41 @@ func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int 
 
 	description_label.text = text
 
-	# --- E. PRICE ---
+# --- E. PRICE ---
 	if "price" in item_data and item_data.price > 0:
 		var final_price = item_data.price
 		var price_txt = ""
-		var price_color = Color("#ffcc00") 
+		# Definimos un color por defecto para asegurar que siempre tenga uno
 		
 		if sell_percentage > 0:
+			# --- LÓGICA DE VENTA ---
 			final_price = int(item_data.price * (sell_percentage / 100.0))
-			price_txt = "SELL: %d€" % final_price
-			price_color = Color("#55efc4")
+			price_txt = "[b]SELL[/b]: %d " % final_price
+			price_txt += "[img=16x16]res://assets/Coin (1).png[/img]"
 		else:
+			# --- LÓGICA DE COMPRA ---
 			var cost = final_price
 			if item_data is PassiveData:
 				if current_count > 0:
 					cost = _calculate_price_logic(item_data, current_count)
-					price_txt = "OWNED: %d  |  COST: %d€" % [current_count, cost]
-					sell_price_label.modulate = Color.CYAN
+					price_txt = "[b]OWNED[/b]: %d  |  [b]COST[/b]: %d " % [current_count, cost]
+					price_txt += "[img=16x16]res://assets/Coin (1).png[/img]"
 				else:
-					price_txt = "COST: %d€" % cost
-					sell_price_label.modulate = Color("#ffcc00")
+					price_txt = "[b]COST[/b]: %d " % cost
+					price_txt += "[img=16x16]res://assets/Coin (1).png[/img]"
 			else: 
 				if current_count >= 3:
 					price_txt = "MAXED OUT!"
-					price_color = Color("#ff5555")
 				elif current_count > 0:
 					cost = _calculate_price_logic(item_data, current_count)
-					price_txt = "OWNED: %d/3  |  COST: %d€" % [current_count, cost]
-					sell_price_label.modulate = Color.CYAN
+					price_txt = "[b]OWNED[/b]: %d/3  |  [b]COST[/b]: %d " % [current_count, cost]
+					price_txt += "[img=16x16]res://assets/Coin (1).png[/img]"
 				else:
-					price_txt = "COST: %d€" % cost
-					sell_price_label.modulate = Color("#ffcc00")
+					price_txt = "[b]COST[/b]: %d " % cost
+					price_txt += "[img=16x16]res://assets/Coin (1).png[/img]"
 		
+		# --- APLICACIÓN FINAL UNIFICADA ---
 		sell_price_label.text = price_txt
-		if sell_percentage == 0:
-			if not (item_data is PieceData and current_count >= 3): pass 
-			else: sell_price_label.modulate = price_color
 		sell_price_label.show()
 	else:
 		sell_price_label.hide()
@@ -258,7 +262,12 @@ func show_synergy_tooltip(race_name: String, current_count: int, max_count: int,
 	_ensure_units_grid_exists()
 	
 	name_label.text = race_name.to_upper()
-	name_label.label_settings = LabelSettings.new()
+	var theme_font := get_theme_default_font() # Godot 4
+	var ls := LabelSettings.new()
+	ls.font = theme_font
+	ls.font_size = 22
+	ls.outline_size = 4
+	name_label.label_settings = ls
 	name_label.label_settings.font_color = color_theme
 	name_label.label_settings.font_size = 24
 	name_label.label_settings.outline_size = 6
@@ -332,26 +341,27 @@ func show_synergy_tooltip(race_name: String, current_count: int, max_count: int,
 			icon_rect.custom_minimum_size = Vector2(40, 40)
 			
 			var final_texture = null
-			if "icon" in piece_res and piece_res.icon: final_texture = piece_res.icon
-			elif "frames" in piece_res and piece_res.frames:
-				var frames = piece_res.frames
-				var anims = frames.get_animation_names()
-				var best_anim = ""
-				if "idle" in anims: best_anim = "idle"
-				elif "default" in anims: best_anim = "default"
-				elif anims.size() > 0: best_anim = anims[0]
-				if best_anim != "" and frames.get_frame_count(best_anim) > 0:
-					final_texture = frames.get_frame_texture(best_anim, 0)
+			
+			# 1. Obtenemos el nombre de la pieza
+			var p_name = piece_res.get("display_name")
+			if p_name == null: p_name = piece_res.get("piece_name")
+			
+			# 2. Lógica FORZADA: Buscar solo en la carpeta "blanco"
+			if p_name:
+				# Construimos la ruta específica ignorando cualquier icono que tenga el recurso
+				var path_attempt = "res://assets/piezas/blanco/" + p_name + ".png"
+				
+				if ResourceLoader.exists(path_attempt):
+					final_texture = load(path_attempt)
+				else:
+					# (Opcional) Imprimir error si no existe la imagen en esa carpeta
+					print("Tooltip: No se encontró imagen 'blanco' para: ", p_name)
 
-			if final_texture == null:
-				var p_name = piece_res.get("display_name")
-				if p_name == null: p_name = piece_res.get("piece_name")
-				if p_name:
-					var path_attempt = "res://assets/piezas/" + p_name + ".png"
-					if ResourceLoader.exists(path_attempt): final_texture = load(path_attempt)
-
-			if final_texture: icon_rect.texture = final_texture
+			# 3. Asignar la textura
+			if final_texture: 
+				icon_rect.texture = final_texture
 			else:
+				# Fallback: Cuadrado rojo semitransparente si no se encontró la imagen
 				var placeholder = PlaceholderTexture2D.new()
 				placeholder.size = Vector2(40,40)
 				icon_rect.texture = placeholder
@@ -376,7 +386,12 @@ func show_passive_list_tooltip(active_passives: Dictionary) -> void:
 	
 	# --- ESTILO DEL PANEL ---
 	name_label.text = "ESTADÍSTICAS"
-	name_label.label_settings = LabelSettings.new()
+	var theme_font := get_theme_default_font() # Godot 4
+	var ls := LabelSettings.new()
+	ls.font = theme_font
+	ls.font_size = 22
+	ls.outline_size = 4
+	name_label.label_settings = ls
 	name_label.label_settings.font_color = Color("#FFD700") # Dorado
 	name_label.label_settings.font_size = 24
 	name_label.label_settings.outline_size = 6
@@ -515,7 +530,12 @@ func show_passive_summary(passive_counts: Dictionary, multiplier: float) -> void
 	if passive_counts.is_empty(): return 
 
 	name_label.text = "UPGRADES SUMMARY"
-	name_label.label_settings = LabelSettings.new()
+	var theme_font := get_theme_default_font() # Godot 4
+	var ls := LabelSettings.new()
+	ls.font = theme_font
+	ls.font_size = 22
+	ls.outline_size = 4
+	name_label.label_settings = ls
 	name_label.label_settings.font_color = Color("#FFD700") 
 	name_label.label_settings.font_size = 22
 	name_label.label_settings.outline_size = 6

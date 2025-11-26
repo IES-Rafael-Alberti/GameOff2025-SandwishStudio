@@ -6,6 +6,7 @@
 [resource]
 script = ExtResource("1_1f5fn")
 id = "europea.Duende"
+display_name = "duende"
 health_bar_offset = Vector2(-80, -100)
 frames = ExtResource("1_c8iob")
 stats = {

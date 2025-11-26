@@ -366,7 +366,7 @@ func _on_animation_finished(anim_name: String):
 	if anim_name == "roll": store.visible = false
 
 func _on_PlayerData_currency_changed(new_amount: int) -> void:
-	if gold_label: gold_label.text = str(new_amount) + "€"
+	if gold_label: gold_label.text = str(new_amount)
 
 func _toggle_eye_parpadeo() -> void:
 	# Parpadeo: Cambio textura a cerrada y oculto pupila temporalmente

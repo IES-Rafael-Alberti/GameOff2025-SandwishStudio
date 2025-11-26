@@ -44,5 +44,5 @@ theme_override_fonts/font = SubResource("FontFile_ywu5r")
 [node name="DescriptionLabel" type="RichTextLabel" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="SellPriceLabel" type="Label" parent="VBoxContainer"]
+[node name="SellPriceLabel" type="RichTextLabel" parent="VBoxContainer"]
 layout_mode = 2
