@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://hbcgudcjh0wn"]
+[gd_scene load_steps=25 format=3 uid="uid://hbcgudcjh0wn"]
 
 [ext_resource type="Script" uid="uid://cmqqk0nk7sejg" path="res://scripts/inventory.gd" id="1_hj2ta"]
 [ext_resource type="PackedScene" uid="uid://n7qqfs70w4b" path="res://scenes/inventory_slot.tscn" id="2_ty45s"]
@@ -14,10 +14,16 @@
 [ext_resource type="Texture2D" uid="uid://bnarhlk7ktg1q" path="res://assets/inventario/Mesa (1).png" id="8_40feg"]
 [ext_resource type="Texture2D" uid="uid://d32k775bkfw00" path="res://assets/inventario/VIDA.png" id="9_ylenm"]
 [ext_resource type="Texture2D" uid="uid://xr5sxokqvql1" path="res://assets/inventario/ADMG.png" id="10_0df5h"]
+[ext_resource type="Texture2D" uid="uid://cql2kfp3rbsgn" path="res://assets/Higo.png" id="11_5mlvw"]
 [ext_resource type="Texture2D" uid="uid://dgjstvaqfykdq" path="res://assets/inventario/ASPEED.png" id="11_fiysm"]
 [ext_resource type="Texture2D" uid="uid://b10j5vwr4mjk4" path="res://assets/inventario/Crit.png" id="12_0df5h"]
 [ext_resource type="Texture2D" uid="uid://tl8h73xfj25t" path="res://assets/inventario/CritDMG.png" id="12_brsb2"]
+[ext_resource type="Texture2D" uid="uid://8i8g3joejru0" path="res://assets/Pera.png" id="12_jc13p"]
 [ext_resource type="Texture2D" uid="uid://b7nsdsys80ot7" path="res://assets/Stats.png" id="13_40feg"]
+[ext_resource type="Texture2D" uid="uid://cqc4rwgluigvv" path="res://assets/Uvas.png" id="13_iqxo6"]
+[ext_resource type="Texture2D" uid="uid://d1vgubqe84mhy" path="res://assets/Granada.png" id="14_y2qpb"]
+[ext_resource type="Texture2D" uid="uid://v7nekwjyhuij" path="res://assets/Manzana.png" id="15_5kq8a"]
+[ext_resource type="PackedScene" uid="uid://dblnjb14cqaif" path="res://scenes/tooltip.tscn" id="16_jc13p"]
 
 [node name="inventory" type="Control"]
 layout_mode = 3
@@ -73,17 +79,63 @@ theme_override_constants/h_separation = 80
 theme_override_constants/v_separation = 115
 columns = 2
 
-[node name="passive_inventory" type="GridContainer" parent="."]
-layout_mode = 0
-offset_left = 1705.0001
-offset_top = 211.99997
-offset_right = 2104.0698
-offset_bottom = 710.3278
+[node name="passive_inventory" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 1636.1174
+offset_top = 61.215668
+offset_right = 2308.8203
+offset_bottom = 1204.1674
 rotation = -0.0030516738
 scale = Vector2(0.5, 0.5)
-theme_override_constants/h_separation = 28
-theme_override_constants/v_separation = 25
-columns = 3
+
+[node name="cchance" type="TextureRect" parent="passive_inventory"]
+layout_mode = 0
+offset_left = 293.09378
+offset_top = 220.46413
+offset_right = 597.0117
+offset_bottom = 478.451
+texture = ExtResource("11_5mlvw")
+stretch_mode = 4
+
+[node name="health" type="TextureRect" parent="passive_inventory"]
+layout_mode = 0
+offset_left = 42.203724
+offset_top = 511.69983
+offset_right = 364.81433
+offset_bottom = 866.65533
+texture = ExtResource("12_jc13p")
+stretch_mode = 4
+
+[node name="aspeed" type="TextureRect" parent="passive_inventory"]
+layout_mode = 0
+offset_left = 136.4292
+offset_top = 437.98703
+offset_right = 612.4758
+offset_bottom = 780.23
+texture = ExtResource("13_iqxo6")
+stretch_mode = 4
+
+[node name="damage" type="TextureRect" parent="passive_inventory"]
+layout_mode = 0
+offset_left = 263.61676
+offset_top = 704.37646
+offset_right = 573.41223
+offset_bottom = 1029.6055
+texture = ExtResource("14_y2qpb")
+stretch_mode = 4
+
+[node name="cdamage" type="TextureRect" parent="passive_inventory"]
+layout_mode = 0
+offset_left = 71.23516
+offset_top = 173.78687
+offset_right = 350.3377
+offset_bottom = 475.49274
+texture = ExtResource("15_5kq8a")
+stretch_mode = 4
+
+[node name="Tooltip" parent="passive_inventory" instance=ExtResource("16_jc13p")]
+layout_mode = 0
+anchors_preset = 0
 
 [node name="delete" type="Panel" parent="."]
 custom_minimum_size = Vector2(100, 100)
@@ -219,3 +271,6 @@ stretch_mode = 2
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 text = "+0"
+
+[connection signal="mouse_entered" from="passive_inventory" to="." method="_on_passive_inventory_mouse_entered"]
+[connection signal="mouse_exited" from="passive_inventory" to="." method="_on_passive_inventory_mouse_exited"]

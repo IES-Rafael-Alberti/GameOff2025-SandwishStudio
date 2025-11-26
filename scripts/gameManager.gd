@@ -30,7 +30,7 @@ var gladiators_defeated: int = 0
 @onready var inventory: Control = $inventory
 @onready var roulette: Node2D = $Roulette
 @onready var combat_scene: Node2D = $combat_scene
-
+@onready var announcement_label: Label = $AnnouncementLabel
 # --- CONFIGURACIÓN ---
 @export var gold_round_base: int = 100
 @export var gold_day_mult: float = 1
@@ -149,13 +149,15 @@ func _process(delta: float) -> void:
 
 func _update_ui_labels() -> void:
 	if is_instance_valid(day_label):
-		day_label.text = "Día " + str(current_day) + " / " + str(max_days)
+		day_label.text = "Day " + str(current_day) + " / " + str(max_days)
 	
 	if is_instance_valid(gladiator_label):
 		gladiator_label.text = "%d/%d" % [gladiators_defeated, gladiators_per_day]
 	
 	if is_instance_valid(round_label):
-		round_label.text = "Waves %d/%d" % [current_round, rounds_per_day]
+
+		var state_text = ""	
+		round_label.text = "Wave %d/%d" % [current_round, rounds_per_day]
 
 
 ## ------------------------------------------------------------------

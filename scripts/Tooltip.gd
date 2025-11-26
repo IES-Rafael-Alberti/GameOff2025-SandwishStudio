@@ -1,6 +1,6 @@
 extends PanelContainer
 
-# Referencias a los nodos
+# References to nodes
 @onready var name_label: Label = $VBoxContainer/NameLabel
 @onready var description_label: RichTextLabel = $VBoxContainer/DescriptionLabel
 @onready var sell_price_label: Label = $VBoxContainer/SellPriceLabel
@@ -104,11 +104,18 @@ func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int 
 		bg_tint = rarity_color.darkened(0.85); bg_tint.a = 0.95
 	elif item_data is PassiveData:
 		rarity_color = Color("#FFD700") 
-		subtitle = "✦ Mejora Pasiva ✦"
+		subtitle = "✦ Passive Upgrade ✦"
 		bg_tint = Color(0.1, 0.1, 0.05, 0.95)
 
+	# --- C. STYLES ---
 	name_label.text = title_text.to_upper()
-	name_label.label_settings = LabelSettings.new()
+	var theme_font := get_theme_default_font() # Godot 4
+	var ls := LabelSettings.new()
+	ls.font = theme_font
+	ls.font_color = rarity_color
+	ls.font_size = 22
+	ls.outline_size = 4
+	name_label.label_settings = ls
 	name_label.label_settings.font_color = rarity_color
 	name_label.label_settings.font_size = 22
 	name_label.label_settings.outline_size = 4
@@ -139,9 +146,11 @@ func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int 
 		
 		text += "[font_size=16]"
 		if is_upgrade:
-			text += "[center][wave amp=25 freq=5][color=%s]★ MEJORA A %s ★[/color][/wave][/center]" % [tier_colors[next_tier_idx], tier_keys[next_tier_idx]]
+			var tier_display = tier_keys[next_tier_idx].replace("BRONCE", "BRONZE").replace("PLATA", "SILVER").replace("ORO", "GOLD")
+			text += "[center][wave amp=25 freq=5][color=%s]★ UPGRADE TO %s ★[/color][/wave][/center]" % [tier_colors[next_tier_idx], tier_display]
 		else:
-			text += "[center][color=%s]NIVEL: %s[/color][/center]" % [tier_colors[current_tier_idx], tier_keys[current_tier_idx]]
+			var tier_display = tier_keys[current_tier_idx].replace("BRONCE", "BRONZE").replace("PLATA", "SILVER").replace("ORO", "GOLD")
+			text += "[center][color=%s]LEVEL: %s[/color][/center]" % [tier_colors[current_tier_idx], tier_display]
 
 		var bar_visual = ""
 		for i in range(3):
@@ -326,6 +335,8 @@ func show_synergy_tooltip(race_name: String, current_count: int, max_count: int,
 
 	sell_price_label.hide()
 	show()
+	await get_tree().process_frame
+	size = Vector2.ZERO
 
 func show_passive_list_tooltip(active_passives: Dictionary) -> void:
 	_ensure_units_grid_exists()
@@ -425,8 +436,10 @@ func show_passive_list_tooltip(active_passives: Dictionary) -> void:
 func _row_table(label: String, val_old, val_new, show_upg: bool, color_hex: String) -> String:
 	var row = "[cell][color=%s] %s[/color][/cell]" % [color_hex, label]
 	if show_upg and str(val_old) != str(val_new):
-		row += "[cell][color=#cccccc]%s[/color] [color=#00ff00]➞ %s[/color][/cell]" % [str(val_old), str(val_new)]
+		# CORREGIDO: Añadidas etiquetas [b] para negrita en ambos valores
+		row += "[cell][color=#cccccc][b]%s[/b][/color] [color=#00ff00]➞ [b]%s[/b][/color][/cell]" % [str(val_old), str(val_new)]
 	else:
+		# Caso normal (ya tenía negrita)
 		row += "[cell][b]%s[/b][/cell]" % str(val_new)
 	return row
 
@@ -443,19 +456,20 @@ func _get_rarity_color(rarity_enum: int) -> Color:
 
 func _get_race_name(race_enum: int) -> String:
 	match race_enum:
-		0: return "Nórdica"
-		1: return "Japonesa"
-		2: return "Europea"
-		_: return "Clase"
+		0: return "Nordic"
+		1: return "Japanese"
+		2: return "European"
+		_: return "Class"
 		
 func _get_rarity_name(rarity_enum: int) -> String:
 	match rarity_enum:
-		0: return "Común"
-		1: return "Raro"
-		2: return "Épico"
-		3: return "Legendario"
+		0: return "Common"
+		1: return "Rare"
+		2: return "Epic"
+		3: return "Legendary"
 		_: return ""
 
+# --- PASSIVE STATS WITH ICONS ---
 func _get_passive_stats_string(data: PassiveData) -> String:
 	var val = data.value
 	match data.type:

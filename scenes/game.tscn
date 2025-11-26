@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://dd8wqmfs2cj1j"]
+[gd_scene load_steps=16 format=3 uid="uid://dd8wqmfs2cj1j"]
 
 [ext_resource type="Script" uid="uid://bpnxk43sopml" path="res://scripts/gameManager.gd" id="1_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://hbcgudcjh0wn" path="res://scenes/inventory.tscn" id="2_lbhrr"]
@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://bse428jrn0sbc" path="res://assets/Waves.png" id="12_trtic"]
 [ext_resource type="PackedScene" uid="uid://cj8n2p21wqyqt" path="res://scenes/help_over_lay.tscn" id="13_kvuet"]
 [ext_resource type="PackedScene" uid="uid://bbfqm8pblt056" path="res://scenes/el_jetas.tscn" id="13_trtic"]
+[ext_resource type="Texture2D" uid="uid://ca521tx5dgil" path="res://assets/GladsIcon (1).png" id="15_ir15t"]
 
 [node name="game" type="Node2D"]
 script = ExtResource("1_lbhrr")
@@ -21,7 +22,7 @@ gold_round_base = 2
 gladiators_per_day = 4
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
-position = Vector2(182.00002, 77.99997)
+position = Vector2(176.00003, 88.99997)
 scale = Vector2(0.35115045, 0.22791663)
 
 [node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
@@ -42,6 +43,18 @@ offset_top = 394.0
 offset_right = 416.0
 offset_bottom = 394.0
 scale = Vector2(0.8860778, 0.88381195)
+max_copies = null
+duplicate_piece_mult = null
+duplicate_passive_mult = null
+COLOR_NORMAL_BG = null
+COLOR_UNAFFORD_BG = null
+reroll_base_cost = null
+reroll_cost_multiplier = null
+prob_comun = null
+prob_raro = null
+prob_epico = null
+prob_legendario = null
+keep_lock_on_new_day = null
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
 z_index = 4
@@ -96,6 +109,18 @@ offset_right = 759.0
 offset_bottom = 84.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
+vertical_alignment = 1
+
+[node name="gladiatorLabel" type="TextureRect" parent="GladiatorLabel"]
+z_index = 4
+layout_mode = 0
+offset_left = -46.0
+offset_top = 4.0
+offset_right = -7.0
+offset_bottom = 49.0
+texture = ExtResource("15_ir15t")
+expand_mode = 1
+stretch_mode = 4
 
 [node name="GameOver" type="CanvasLayer" parent="."]
 visible = false

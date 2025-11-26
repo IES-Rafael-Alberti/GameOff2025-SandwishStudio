@@ -9,7 +9,6 @@ extends Control
 @onready var piece_zone: HBoxContainer = $piece_zone
 @onready var passive_zone: HBoxContainer = $passive_zone
 @onready var reroll_button: TextureButton = $Reroll
-
 @onready var lock_button: TextureButton = $Lock 
 
 # --- CONFIGURACIÓN ---
@@ -52,6 +51,7 @@ var current_passive_buttons: Array = []
 var is_rerolling: bool = false
 
 func _ready() -> void:
+	mouse_filter = Control.MOUSE_FILTER_STOP
 	highlight_material = ShaderMaterial.new()
 	highlight_material.shader = OUTLINE_SHADER
 	highlight_material.set_shader_parameter("width", 3.0)
@@ -78,6 +78,7 @@ func _ready() -> void:
 # --- LÓGICA DEL CANDADO ---
 func _update_lock_visuals() -> void:
 	if not lock_button: return
+	
 	if PlayerData.is_shop_locked:
 		if texture_locked: lock_button.texture_normal = texture_locked
 	else:
@@ -97,7 +98,14 @@ func start_new_round() -> void:
 	_update_reroll_button_visuals()
 
 	if PlayerData.is_shop_locked:
+		print("Tienda Bloqueada: Restaurando items guardados...")
 		_restore_shop_from_save()
+		
+		# Lógica de Development: Revisar si mantenemos el candado
+		if not keep_lock_on_new_day:
+			PlayerData.is_shop_locked = false
+			_update_lock_visuals()
+			
 		_update_shop_visuals()
 		return 
 
@@ -107,8 +115,13 @@ func start_new_round() -> void:
 # --- GUARDAR Y RESTAURAR ---
 func _save_current_shop_state() -> void:
 	PlayerData.shop_items_saved.clear()
+	
+	# Guardar Piezas
 	for slot in piece_zone.get_children():
-		if "item_data" in slot: 
+		if slot.is_queued_for_deletion(): continue
+		
+		# Combinación de chequeos de ambas ramas
+		if slot is StoreSlot or "item_data" in slot: 
 			var data_packet = {
 				"type": "piece",
 				"data": slot.item_data,
@@ -117,7 +130,9 @@ func _save_current_shop_state() -> void:
 			}
 			PlayerData.shop_items_saved.append(data_packet)
 	
+	# Guardar Pasivas (Lógica V2)
 	for wrapper in passive_zone.get_children():
+		if wrapper.is_queued_for_deletion(): continue
 		var button = _find_texture_button_recursive(wrapper)
 		if button:
 			var data_packet = {
@@ -149,6 +164,7 @@ func _restore_shop_from_save() -> void:
 		if type == "piece":
 			var slot = store_slot_scene.instantiate()
 			piece_zone.add_child(slot)
+			
 			var can_afford = PlayerData.has_enough_currency(price)
 			var current_count = _get_item_count_safe(data)
 			if slot.has_method("set_item"):
@@ -162,7 +178,7 @@ func _restore_shop_from_save() -> void:
 		elif type == "passive":
 			_create_single_passive_button(data, price, purchased)
 
-# --- CREACIÓN DE PASIVAS ---
+# --- CREACIÓN DE PASIVAS (V2) ---
 func _create_single_passive_button(data, price: int, is_purchased: bool) -> void:
 	var item_container = VBoxContainer.new()
 	item_container.alignment = VBoxContainer.ALIGNMENT_CENTER
@@ -412,8 +428,10 @@ func _refresh_shop_content():
 		if piece: selected_pieces.append(piece)
 	_generate_piece_slots(selected_pieces)
 	
-	# 2. PASIVAS
-	var available_passives = _filter_maxed_items(passive_origins) 
+	# 2. GENERAR PASIVAS
+	# Nota: Combinamos la lógica. En Development no se filtraba por maxed (son acumulables),
+	# pero mantenemos la generación de botones de v2.
+	var available_passives = passive_origins 
 	if not available_passives.is_empty():
 		var shuffled = available_passives.duplicate()
 		shuffled.shuffle()
@@ -465,11 +483,13 @@ func _on_piece_slot_pressed(slot) -> void:
 
 	if PlayerData.spend_currency(price):
 		inventory.add_item(data)
-		slot.disable_interaction()
+		slot.disable_interaction() 
 		_update_shop_visuals()
 		_save_current_shop_state()
 	else:
 		_animate_error_shake(slot.get_node("TextureButton"))
+
+# --- FUNCIONES AUXILIARES (UI y Lógica) ---
 
 func _setup_reroll_label():
 	reroll_label = Label.new()
@@ -531,6 +551,12 @@ func _on_passive_button_pressed(button: TextureButton) -> void:
 	if not PlayerData.has_enough_currency(price):
 		_animate_error_shake(button)
 		return
+		
+	# Verificación de hueco visual para pasivas (Development)
+	if not inventory.can_add_item(data):
+		_animate_error_shake(button)
+		return
+
 	if PlayerData.spend_currency(price):
 		inventory.add_item(data)
 		button.disabled = true
@@ -580,6 +606,11 @@ func _calculate_price(data) -> int:
 	return int(base * (1.0 + (mult * count)))
 
 func _get_item_count_safe(data) -> int:
+	# Si es Pasiva, preguntamos a PlayerData
+	if data is PassiveData:
+		return PlayerData.get_passive_count_global(data)
+		
+	# Si es Pieza, preguntamos al inventario de la escena
 	var gm = null
 	if owner and owner.has_method("get_inventory_piece_count"): gm = owner
 	elif get_tree().current_scene and get_tree().current_scene.has_method("get_inventory_piece_count"): gm = get_tree().current_scene
