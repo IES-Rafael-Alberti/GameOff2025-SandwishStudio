@@ -123,9 +123,10 @@ func _ready():
 	if current_round == 1:
 		_give_initial_piece()
 		set_state(GameState.ROULETTE)
+		# --- CAMBIO AQUI: Forzamos la animación de entrada al inicio ---
+		if el_jetas_anim: el_jetas_anim.play("intro")
 	else:
 		set_state(GameState.SHOP)
-
 
 func _process(delta: float) -> void:
 	# Gestionamos el temporizador del parpadeo
@@ -343,11 +344,14 @@ func _toggle_store(close_store: bool):
 	is_tended = close_store
 	_update_eye_state()
 	
-	# Control de animación de entrada/salida de El Jetas
+	# --- CAMBIO AQUI: Control de nuevas animaciones ---
 	if is_tended:
-		if el_jetas_anim: el_jetas_anim.play("show")
+		# La tienda se cierra, el Jetas vuelve a subir
+		if el_jetas_anim: el_jetas_anim.play("return_up")
 	else:
-		if el_jetas_anim: el_jetas_anim.play("hide")
+		# La tienda se abre, el Jetas se esconde por abajo
+		if el_jetas_anim: el_jetas_anim.play("hide_down")
+	# --------------------------------------------------
 
 	if not is_tended: roulette.visible = false
 	if is_tended:

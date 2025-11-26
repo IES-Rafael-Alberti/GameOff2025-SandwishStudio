@@ -1,6 +1,6 @@
 extends PanelContainer
 
-# References to nodes
+# --- REFERENCIAS A NODOS ---
 @onready var name_label: Label = $VBoxContainer/NameLabel
 @onready var description_label: RichTextLabel = $VBoxContainer/DescriptionLabel
 @onready var sell_price_label: Label = $VBoxContainer/SellPriceLabel
@@ -20,6 +20,9 @@ extends PanelContainer
 var card_style: StyleBoxFlat
 var units_grid: HBoxContainer = null
 
+# ==============================================================================
+# CICLO DE VIDA
+# ==============================================================================
 func _ready() -> void:
 	add_to_group("tooltip")
 	hide()
@@ -29,15 +32,15 @@ func _ready() -> void:
 	
 	# --- ESTILO VISUAL BASE ---
 	card_style = StyleBoxFlat.new()
-	card_style.bg_color = Color(0.08, 0.08, 0.1, 0.98)
-	card_style.border_width_left = 2
-	card_style.border_width_top = 2
-	card_style.border_width_right = 2
-	card_style.border_width_bottom = 2
-	card_style.corner_radius_top_left = 8
-	card_style.corner_radius_top_right = 8
-	card_style.corner_radius_bottom_right = 8
-	card_style.corner_radius_bottom_left = 8
+	card_style.bg_color = Color(0.05, 0.05, 0.07, 0.98) # Fondo oscuro moderno
+	card_style.border_width_left = 1
+	card_style.border_width_top = 1
+	card_style.border_width_right = 1
+	card_style.border_width_bottom = 1
+	card_style.corner_radius_top_left = 6
+	card_style.corner_radius_top_right = 6
+	card_style.corner_radius_bottom_right = 6
+	card_style.corner_radius_bottom_left = 6
 	card_style.shadow_color = Color(0, 0, 0, 0.5)
 	card_style.shadow_size = 10
 	card_style.shadow_offset = Vector2(4, 4)
@@ -88,171 +91,156 @@ func hide_tooltip() -> void:
 	hide()
 
 # ==============================================================================
-# 1. TOOLTIP ESTÁNDAR (Objeto individual)
+# 1. TOOLTIP ESTÁNDAR (Piezas y Pasivas) - DISEÑO MODERNO V3
 # ==============================================================================
 func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int = 0) -> void:
 	if not item_data: return
+	
+	# Limpieza de iconos anteriores
 	if units_grid:
-			for child in units_grid.get_children():
-				child.queue_free()
-	# --- A. BASIC DATA ---
+		for child in units_grid.get_children():
+			child.queue_free()
+
+	# --- A. PREPARACIÓN DE DATOS ---
 	var title_text = "Item"
 	if item_data.resource_name: title_text = item_data.resource_name
 	if "piece_name" in item_data and not item_data.piece_name.is_empty(): title_text = item_data.piece_name
 	elif "name_passive" in item_data and not item_data.name_passive.is_empty(): title_text = item_data.name_passive
 	
-	# --- B. COLORS ---
 	var rarity_color = Color.WHITE
-	var subtitle = ""
-	var bg_tint = Color(0.05, 0.05, 0.07, 0.95)
-	
+	# Fondo oscuro "plano" moderno
+	var bg_tint = Color(0.05, 0.05, 0.07, 0.98) 
+
 	if item_data is PieceData and item_data.piece_origin:
 		rarity_color = _get_rarity_color(item_data.piece_origin.rarity)
-		subtitle = "%s • %s" % [_get_race_name(item_data.piece_origin.race), _get_rarity_name(item_data.piece_origin.rarity)]
-		bg_tint = rarity_color.darkened(0.85); bg_tint.a = 0.95
 	elif item_data is PassiveData:
 		rarity_color = Color("#FFD700") 
-		subtitle = "✦ Passive Upgrade ✦"
-		bg_tint = Color(0.1, 0.1, 0.05, 0.95)
 
-	# --- C. STYLES ---
-	
-	name_label.text = title_text.to_upper()
-	var theme_font := get_theme_default_font() # Godot 4
-	var ls := LabelSettings.new()
-	ls.font = theme_font
-	ls.font_color = rarity_color
-	ls.font_size = 22
-	ls.outline_size = 4
-	name_label.label_settings = ls
-	name_label.label_settings.font_color = rarity_color
-	name_label.label_settings.font_size = 22
-	name_label.label_settings.outline_size = 6
-	name_label.label_settings.outline_color = Color(0, 0, 0, 1)
-	name_label.label_settings.shadow_size = 4
-	name_label.label_settings.shadow_color = Color(0, 0, 0, 0.5)
-	
+	# Estilo del Panel (Borde fino)
 	if card_style:
 		card_style.border_color = rarity_color
 		card_style.bg_color = bg_tint
 
-	# --- D. CONTENT ---
+	# --- B. CONSTRUCCIÓN DEL CONTENIDO ---
 	var text = ""
-	text += "[center][color=#cccccc][font_size=14]%s[/font_size][/color][/center]\n" % subtitle
-	text += "[center][color=#444444]━━━━━━━━━━━━━━━━━━[/color][/center]\n"
 
-	if item_data is PieceData and item_data.piece_origin:
-		var origin = item_data.piece_origin
-		var current_tier_idx = clampi(current_count, 1, 3) - 1 
-		if current_count == 0: current_tier_idx = 0 
-		var next_tier_idx = current_tier_idx
-		var is_upgrade = false
-		if sell_percentage == 0 and current_count > 0 and current_count < 3:
-			next_tier_idx = current_tier_idx + 1
-			is_upgrade = true
-		
+	# 1. CABECERA (EXTERNA)
+	var tier_suffix = ""
+	if item_data is PieceData:
 		var tier_keys = ["BRONCE", "PLATA", "ORO"]
-		var tier_colors = ["#cd7f32", "#c0c0c0", "#ffd700"]
-		var current_stats = origin.stats[tier_keys[current_tier_idx]]
-		var next_stats = origin.stats[tier_keys[next_tier_idx]]
-		
-		text += "[font_size=16]"
-		if is_upgrade:
-			var tier_display = tier_keys[next_tier_idx].replace("BRONCE", "BRONZE").replace("PLATA", "SILVER").replace("ORO", "GOLD")
-			text += "[center][wave amp=25 freq=5][color=%s]★ UPGRADE TO %s ★[/color][/wave][/center]" % [tier_colors[next_tier_idx], tier_display]
-		else:
-			var tier_display = tier_keys[current_tier_idx].replace("BRONCE", "BRONZE").replace("PLATA", "SILVER").replace("ORO", "GOLD")
-			text += "[center][color=%s]LEVEL: %s[/color][/center]" % [tier_colors[current_tier_idx], tier_display]
+		var idx = clampi(current_count, 1, 3) - 1
+		if current_count == 0: idx = 0
+		tier_suffix = tier_keys[idx]
+	
+	# Si es pasiva, no mostramos tier en el título
+	if item_data is PieceData:
+		name_label.text = "%s  |  %s" % [title_text.to_upper(), tier_suffix]
+	else:
+		name_label.text = title_text.to_upper()
+	
+	var ls = LabelSettings.new()
+	ls.font_size = 20
+	ls.font_color = rarity_color
+	ls.shadow_size = 0 # Diseño flat
+	name_label.label_settings = ls
 
-		var bar_visual = ""
-		for i in range(3):
-			if i < current_count: bar_visual += "[color=%s]◼[/color] " % tier_colors[current_tier_idx]
-			else: bar_visual += "[color=#333333]◻[/color] "
-		text += "[center][font_size=18]%s[/font_size][/center]\n" % bar_visual
-		
-		text += "[table=2]"
+	# 2. SUBTÍTULO + PRECIO (Tabla invisible alineada)
+	var sub_str = "Objeto"
+	if item_data is PieceData and item_data.piece_origin:
+		sub_str = "%s • %s" % [_get_race_name(item_data.piece_origin.race), _get_rarity_name(item_data.piece_origin.rarity)]
+	elif item_data is PassiveData:
+		sub_str = "Pasiva"
+
+	var price_bb = ""
+	if "price" in item_data and item_data.price > 0:
+		var cost = item_data.price
+		if sell_percentage > 0:
+			cost = int(item_data.price * (sell_percentage / 100.0))
+			price_bb = "[color=#55efc4]Vender: %d€[/color]" % cost
+		else:
+			if current_count >= 3 and item_data is PieceData:
+				price_bb = "[color=#ff5555]MAX[/color]"
+			else:
+				if current_count > 0: cost = _calculate_price_logic(item_data, current_count)
+				price_bb = "[color=#ffcc00]Costo: %d€[/color]" % cost
+
+	text += "[table=2]"
+	text += "[cell][color=#888888][i]%s[/i][/color][/cell]" % sub_str
+	text += "[cell][p align=right][b]%s[/b][/p][/cell]" % price_bb
+	text += "[/table]"
+	
+	# SEPARADOR MODERNO
+	text += _get_modern_separator()
+
+	# 3. INFO DE JUEGO (UNIDADES | USOS)
+	if item_data is PieceData:
 		var cur_uses = item_data.uses
 		var max_uses = item_data.get_meta("max_uses") if item_data.has_meta("max_uses") else cur_uses
-		var members = current_stats.get("members", 1)
-		var next_members = next_stats.get("members", members)
-
-		text += "[cell][color=#aaaaaa] 👥 Units[/color][/cell]"
-		if is_upgrade and members != next_members: text += "[cell][color=#ffffff]%d[/color] [color=#00ff00]➞ %d[/color][/cell]" % [members, next_members]
-		else: text += "[cell][b]%d[/b][/cell]" % members
-			
-		var u_color = "#ffffff"
-		if cur_uses <= 1: u_color = "#ff5555" 
-		text += "[cell][color=#aaaaaa] 🔋 Uses[/color][/cell]"
-		text += "[cell][color=%s]%d[/color] / %d[/cell]" % [u_color, cur_uses, max_uses]
-		text += "[cell] [/cell][cell] [/cell]" 
-
-		# --- UPDATED: FULL STAT NAMES WITH ICONS ---
-		text += _row_table("%s Damage" % _get_icon_tag(icon_damage), current_stats["dmg"], next_stats["dmg"], is_upgrade, "#ff7675")
-		text += _row_table("%s Health" % _get_icon_tag(icon_health), current_stats["hp"], next_stats["hp"], is_upgrade, "#55efc4")
-		text += _row_table("%s Attack Speed" % _get_icon_tag(icon_speed), current_stats["aps"], next_stats["aps"], is_upgrade, "#ffeaa7")
 		
-		if next_stats["crit_chance"] > 0:
-			text += _row_table("%s Crit Chance" % _get_icon_tag(icon_crit_chance), str(current_stats["crit_chance"]) + "%", str(next_stats["crit_chance"]) + "%", is_upgrade, "#ff9f43")
-		if next_stats["crit_mult"] > 1.0:
-			text += _row_table("%s Crit Damage" % _get_icon_tag(icon_crit_damage), "x" + str(current_stats["crit_mult"]), "x" + str(next_stats["crit_mult"]), is_upgrade, "#ff9f43")
+		# Datos Stats
+		var origin = item_data.piece_origin
+		var tier_keys = ["BRONCE", "PLATA", "ORO"]
+		var idx = clampi(current_count, 1, 3) - 1
+		if current_count == 0: idx = 0
+		
+		var next_idx = idx
+		var is_upg = (sell_percentage == 0 and current_count > 0 and current_count < 3)
+		if is_upg: next_idx = idx + 1
+		
+		var cur_stats = origin.stats[tier_keys[idx]]
+		var nxt_stats = origin.stats[tier_keys[next_idx]]
+		var members = cur_stats.get("members", 1)
+		var next_members = nxt_stats.get("members", members)
 
-		text += "[/table][/font_size]\n"
-	
+		text += "[table=2]"
+		
+		# Columna Izquierda: Unidades
+		var mem_str = str(members)
+		if is_upg and members != next_members:
+			mem_str = "%d [color=#00ff00]➞ %d[/color]" % [members, next_members]
+		text += "[cell][color=#bbbbbb]👥 Unidades:[/color] [b]%s[/b][/cell]" % mem_str
+		
+		# Columna Derecha: Usos
+		var u_col = "#ffffff"
+		if cur_uses <= 1: u_col = "#ff5555"
+		text += "[cell][p align=right][color=#bbbbbb]🔋 Usos:[/color] [color=%s][b]%d[/b][/color]/%d[/p][/cell]" % [u_col, cur_uses, max_uses]
+		text += "[/table]"
+		
+		text += "\n" # Espacio limpio
+
+		# 4. ESTADÍSTICAS (Tabla limpia)
+		text += "[table=2]"
+		text += _row_modern("Daño", icon_damage, cur_stats["dmg"], nxt_stats["dmg"], is_upg, "#ff7675")
+		text += _row_modern("Vida", icon_health, cur_stats["hp"], nxt_stats["hp"], is_upg, "#55efc4")
+		text += _row_modern("Velocidad", icon_speed, cur_stats["aps"], nxt_stats["aps"], is_upg, "#ffeaa7")
+		
+		if nxt_stats["crit_chance"] > 0:
+			var c1 = str(cur_stats["crit_chance"]) + "%"
+			var c2 = str(nxt_stats["crit_chance"]) + "%"
+			text += _row_modern("Crítico", icon_crit_chance, c1, c2, is_upg, "#ff9f43")
+			
+		if nxt_stats["crit_mult"] > 1.0:
+			var m1 = "x" + str(cur_stats["crit_mult"])
+			var m2 = "x" + str(nxt_stats["crit_mult"])
+			text += _row_modern("Daño Crit", icon_crit_damage, m1, m2, is_upg, "#fab1a0")
+		text += "[/table]"
+
 	elif item_data is PassiveData:
-		text += "[font_size=16]\n"
-		text += _get_passive_stats_string(item_data)
-		text += "[/font_size]\n\n"
+		text += "\n[font_size=16]" + _get_passive_stats_string(item_data) + "[/font_size]\n"
 
+	# Footer Descripción
 	if "description" in item_data and not item_data.description.is_empty():
-		text += "[color=#888888][i]%s[/i][/color]" % item_data.description
+		text += _get_modern_separator()
+		text += "[color=#666666][i]%s[/i][/color]" % item_data.description
 
 	description_label.text = text
-
-	# --- E. PRICE ---
-	if "price" in item_data and item_data.price > 0:
-		var final_price = item_data.price
-		var price_txt = ""
-		var price_color = Color("#ffcc00") 
-		
-		if sell_percentage > 0:
-			final_price = int(item_data.price * (sell_percentage / 100.0))
-			price_txt = "SELL: %d€" % final_price
-			price_color = Color("#55efc4")
-		else:
-			var cost = final_price
-			if item_data is PassiveData:
-				if current_count > 0:
-					cost = _calculate_price_logic(item_data, current_count)
-					price_txt = "OWNED: %d  |  COST: %d€" % [current_count, cost]
-					sell_price_label.modulate = Color.CYAN
-				else:
-					price_txt = "COST: %d€" % cost
-					sell_price_label.modulate = Color("#ffcc00")
-			else: 
-				if current_count >= 3:
-					price_txt = "MAXED OUT!"
-					price_color = Color("#ff5555")
-				elif current_count > 0:
-					cost = _calculate_price_logic(item_data, current_count)
-					price_txt = "OWNED: %d/3  |  COST: %d€" % [current_count, cost]
-					sell_price_label.modulate = Color.CYAN
-				else:
-					price_txt = "COST: %d€" % cost
-					sell_price_label.modulate = Color("#ffcc00")
-		
-		sell_price_label.text = price_txt
-		if sell_percentage == 0:
-			if not (item_data is PieceData and current_count >= 3): pass 
-			else: sell_price_label.modulate = price_color
-		sell_price_label.show()
-	else:
-		sell_price_label.hide()
-	
+	sell_price_label.hide() # Ocultamos el label antiguo
 	show()
 	await get_tree().process_frame
-	size = Vector2.ZERO
+	size = Vector2.ZERO 
+
 # ==============================================================================
-# 2. TOOLTIP DE SINERGIAS (CON FIX DE IMÁGENES)
+# 2. TOOLTIP DE SINERGIAS
 # ==============================================================================
 func show_synergy_tooltip(race_name: String, current_count: int, max_count: int, bonuses: Array, color_theme: Color, all_pieces: Array = [], active_ids: Array = []) -> void:
 	_ensure_units_grid_exists()
@@ -271,7 +259,7 @@ func show_synergy_tooltip(race_name: String, current_count: int, max_count: int,
 	var text = ""
 	var count_color = "#ffffff" if current_count > 0 else "#777777"
 	text += "[center][color=#aaaaaa]Sinergia Activa:[/color] [color=%s][b]%d / %d[/b] Unidades[/color][/center]\n" % [count_color, current_count, max_count]
-	text += "[center][color=#444444]━━━━━━━━━━━━━━━━━━[/color][/center]\n"
+	text += _get_modern_separator()
 	
 	text += "[table=1]"
 	for i in range(bonuses.size()):
@@ -287,6 +275,7 @@ func show_synergy_tooltip(race_name: String, current_count: int, max_count: int,
 	text += "\n[center][i][font_size=12][color=#666666]Colección:[/color][/font_size][/i][/center]"
 	description_label.text = text
 	
+	# Iconos de colección
 	for child in units_grid.get_children(): child.queue_free()
 	
 	if not all_pieces.is_empty():
@@ -308,7 +297,9 @@ func show_synergy_tooltip(race_name: String, current_count: int, max_count: int,
 			var is_active = false
 			if p_id != null:
 				for act_id in active_ids:
-					if str(act_id) == str(p_id): is_active = true; break
+					if str(act_id) == str(p_id): 
+						is_active = true
+						break
 			
 			var frame_style = StyleBoxFlat.new()
 			frame_style.bg_color = Color(0, 0, 0, 0.5)
@@ -370,21 +361,23 @@ func show_synergy_tooltip(race_name: String, current_count: int, max_count: int,
 	await get_tree().process_frame
 	size = Vector2.ZERO
 
+# ==============================================================================
+# 3. LISTA DE PASIVAS
+# ==============================================================================
 func show_passive_list_tooltip(active_passives: Dictionary) -> void:
 	_ensure_units_grid_exists()
 	for child in units_grid.get_children(): child.queue_free()
 	
-	# --- ESTILO DEL PANEL ---
 	name_label.text = "ESTADÍSTICAS"
 	name_label.label_settings = LabelSettings.new()
-	name_label.label_settings.font_color = Color("#FFD700") # Dorado
+	name_label.label_settings.font_color = Color("#FFD700") 
 	name_label.label_settings.font_size = 24
 	name_label.label_settings.outline_size = 6
 	name_label.label_settings.outline_color = Color(0, 0, 0, 1)
 	
 	if card_style:
 		card_style.border_color = Color("#FFD700")
-		card_style.bg_color = Color(0.08, 0.08, 0.1, 0.98) # Fondo oscuro sólido
+		card_style.bg_color = Color(0.08, 0.08, 0.1, 0.98) 
 
 	var text = ""
 	
@@ -392,9 +385,8 @@ func show_passive_list_tooltip(active_passives: Dictionary) -> void:
 		text += "\n[center][color=#666666][i]Inventario vacío[/i][/color][/center]\n"
 	else:
 		text += "[center][color=#aaaaaa]Bonificaciones actuales:[/color][/center]\n"
-		text += "[color=#444444]━━━━━━━━━━━━━━━━━━[/color]\n"
+		text += _get_modern_separator()
 		
-		# Tabla de 3 columnas: Icono+Nombre | Cantidad | Total
 		text += "[table=3]"
 		
 		var keys = active_passives.keys()
@@ -407,43 +399,35 @@ func show_passive_list_tooltip(active_passives: Dictionary) -> void:
 			
 			if not p_data: continue
 			
-			# 1. SELECCIÓN DE ICONO REAL Y COLOR
 			var icon_path = ""
 			var name_color = "#ffffff"
 			
 			match p_data.type:
 				PassiveData.PassiveType.HEALTH_INCREASE: 
 					icon_path = "res://assets/inventario/VIDA.png"
-					name_color = "#ff5555" # Rojo Vida
+					name_color = "#ff5555"
 				PassiveData.PassiveType.CRITICAL_DAMAGE_INCREASE: 
 					icon_path = "res://assets/inventario/CritDMG.png"
-					name_color = "#ff9f43" # Naranja
+					name_color = "#ff9f43"
 				PassiveData.PassiveType.CRITICAL_CHANCE_INCREASE: 
 					icon_path = "res://assets/inventario/Crit.png"
-					name_color = "#fab1a0" # Salmón
+					name_color = "#fab1a0"
 				PassiveData.PassiveType.ATTACK_SPEED_INCREASE: 
 					icon_path = "res://assets/inventario/ASPEED.png"
-					name_color = "#feca57" # Amarillo
+					name_color = "#feca57"
 				PassiveData.PassiveType.BASE_DAMAGE_INCREASE: 
 					icon_path = "res://assets/inventario/ADMG.png"
-					name_color = "#ee5253" # Rojo Daño
+					name_color = "#ee5253"
 			
-			# Creamos el tag de imagen bbcode. [img=ancho]ruta[/img]
 			var icon_bbcode = ""
 			if ResourceLoader.exists(icon_path):
-				# Ajusta el tamaño (24px) para que cuadre con el texto
 				icon_bbcode = "[img=24]%s[/img]" % icon_path 
 			else:
-				icon_bbcode = "🔸" # Fallback si falla la carga
+				icon_bbcode = "🔸"
 			
-			# 2. COLUMNA 1: Icono + Nombre
-			# Usamos [valign] si está disponible o simplemente el icono inline
 			text += "[cell][font_size=18][color=%s] %s %s  [/color][/font_size][/cell]" % [name_color, icon_bbcode, p_data.name_passive]
-			
-			# 3. COLUMNA 2: Cantidad (Estilo Badge/Etiqueta)
 			text += "[cell][center][color=#666666]x[/color][b][font_size=18][color=#ffffff]%d[/color][/font_size][/b][/center][/cell]" % count
 			
-			# 4. COLUMNA 3: Valor Total Calculado
 			var base_val = float(p_data.value)
 			var total_val = base_val * count
 			var val_str = ""
@@ -458,25 +442,82 @@ func show_passive_list_tooltip(active_passives: Dictionary) -> void:
 			text += "[cell][p align=right][b][font_size=18][color=#55efc4]%s[/color][/font_size][/b][/p][/cell]" % val_str
 			
 		text += "[/table]"
-		text += "\n[color=#444444]━━━━━━━━━━━━━━━━━━[/color]"
 
 	description_label.text = text
 	sell_price_label.hide()
 	show()
 
-# --- HELPERS ---
-func _row_table(label: String, val_old, val_new, show_upg: bool, color_hex: String) -> String:
-	var row = "[cell][color=%s] %s[/color][/cell]" % [color_hex, label]
-	if show_upg and str(val_old) != str(val_new):
-		# CORREGIDO: Añadidas etiquetas [b] para negrita en ambos valores
-		row += "[cell][color=#cccccc][b]%s[/b][/color] [color=#00ff00]➞ [b]%s[/b][/color][/cell]" % [str(val_old), str(val_new)]
+func show_passive_summary(passive_counts: Dictionary, multiplier: float) -> void:
+	if passive_counts.is_empty(): return 
+
+	name_label.text = "UPGRADES SUMMARY"
+	name_label.label_settings = LabelSettings.new()
+	name_label.label_settings.font_color = Color("#FFD700") 
+	name_label.label_settings.font_size = 22
+	name_label.label_settings.outline_size = 6
+	name_label.label_settings.outline_color = Color(0, 0, 0, 1)
+	
+	if card_style:
+		card_style.border_color = Color("#FFD700")
+		card_style.bg_color = Color(0.1, 0.1, 0.05, 0.98) 
+
+	var text = ""
+	var mult_color = "#ffffff"
+	if multiplier > 1.0: mult_color = "#00ff00"
+	
+	text += "[center][color=#aaaaaa]Empty Slot Multiplier:[/color] [b][color=%s]x%.2f[/color][/b][/center]\n" % [mult_color, multiplier]
+	text += _get_modern_separator()
+	text += "[font_size=16]"
+	
+	for id in passive_counts:
+		var entry = passive_counts[id]
+		var data: PassiveData = entry["data"]
+		var count: int = entry["count"]
+		if not data: continue
+		
+		var total_value = (data.value * count) * multiplier
+		var name_str = data.name_passive if not data.name_passive.is_empty() else "Passive"
+		var stat_str = _get_passive_stat_label(data.type, total_value)
+		
+		text += "• [color=#ffcc00]%s[/color] [color=#888888](x%d)[/color]\n" % [name_str, count]
+		text += "   └ %s\n" % stat_str
+		
+	text += "[/font_size]"
+	description_label.text = text
+	sell_price_label.hide()
+	show()
+
+# ==============================================================================
+# FUNCIONES AUXILIARES
+# ==============================================================================
+
+# Genera una línea sólida fina usando un truco de fondo de fuente
+func _get_modern_separator() -> String:
+	# Ajusta la cantidad de espacios si tu tooltip es muy ancho.
+	return "\n[font_size=2][bgcolor=#ffffff15]                                                                                                    [/bgcolor][/font_size]\n"
+
+# Fila limpia para estadísticas
+func _row_modern(label: String, icon: Texture2D, v1, v2, upg: bool, col: String) -> String:
+	var ic = ""
+	if icon: ic = "[img=18]%s[/img] " % icon.resource_path
+	
+	# Celda 1: Icono + Nombre (Gris suave)
+	var row = "[cell][color=#aaaaaa]%s%s[/color][/cell]" % [ic, label]
+	
+	# Celda 2: Valor (Color vibrante)
+	var val = ""
+	if upg and str(v1) != str(v2):
+		val = "[color=#888888]%s[/color] [color=#00ff00]➞ [b]%s[/b][/color]" % [str(v1), str(v2)]
 	else:
-		# Caso normal (ya tenía negrita)
-		row += "[cell][b]%s[/b][/cell]" % str(val_new)
+		val = "[color=%s][b]%s[/b][/color]" % [col, str(v2)]
+		
+	row += "[cell][p align=right]%s[/p][/cell]" % val
 	return row
 
 func _calculate_price_logic(data, count) -> int:
-	return int(data.price * (1.0 + (0.5 * count)))
+	if "price" in data:
+		return int(data.price * (1.0 + (0.5 * count)))
+	return 0
 
 func _get_rarity_color(rarity_enum: int) -> Color:
 	match rarity_enum:
@@ -501,7 +542,6 @@ func _get_rarity_name(rarity_enum: int) -> String:
 		3: return "Legendary"
 		_: return ""
 
-# --- PASSIVE STATS WITH ICONS ---
 func _get_passive_stats_string(data: PassiveData) -> String:
 	var val = data.value
 	match data.type:
@@ -511,45 +551,6 @@ func _get_passive_stats_string(data: PassiveData) -> String:
 		PassiveData.PassiveType.ATTACK_SPEED_INCREASE: return "[color=#ffe66d]⚡ Vel. Ataque:[/color] [b]+%s[/b]" % val
 		PassiveData.PassiveType.BASE_DAMAGE_INCREASE: return "[color=#ff6b6b]⚔️ Daño Base:[/color] [b]+%s[/b]" % val
 	return ""
-func show_passive_summary(passive_counts: Dictionary, multiplier: float) -> void:
-	if passive_counts.is_empty(): return 
-
-	name_label.text = "UPGRADES SUMMARY"
-	name_label.label_settings = LabelSettings.new()
-	name_label.label_settings.font_color = Color("#FFD700") 
-	name_label.label_settings.font_size = 22
-	name_label.label_settings.outline_size = 6
-	name_label.label_settings.outline_color = Color(0, 0, 0, 1)
-	
-	if card_style:
-		card_style.border_color = Color("#FFD700")
-		card_style.bg_color = Color(0.1, 0.1, 0.05, 0.98) 
-
-	var text = ""
-	var mult_color = "#ffffff"
-	if multiplier > 1.0: mult_color = "#00ff00"
-	
-	text += "[center][color=#aaaaaa]Empty Slot Multiplier:[/color] [b][color=%s]x%.2f[/color][/b][/center]\n" % [mult_color, multiplier]
-	text += "[center][color=#444444]━━━━━━━━━━━━━━━━━━[/color][/center]\n"
-	text += "[font_size=16]"
-	
-	for id in passive_counts:
-		var entry = passive_counts[id]
-		var data: PassiveData = entry["data"]
-		var count: int = entry["count"]
-		if not data: continue
-		
-		var total_value = (data.value * count) * multiplier
-		var name_str = data.name_passive if not data.name_passive.is_empty() else "Passive"
-		var stat_str = _get_passive_stat_label(data.type, total_value)
-		
-		text += "• [color=#ffcc00]%s[/color] [color=#888888](x%d)[/color]\n" % [name_str, count]
-		text += "   └ %s\n" % stat_str
-		
-	text += "[/font_size]"
-	description_label.text = text
-	sell_price_label.hide()
-	show()
 
 func _get_passive_stat_label(type: int, total_val: float) -> String:
 	var val_str = str(snapped(total_val, 0.1))
@@ -565,6 +566,7 @@ func _get_passive_stat_label(type: int, total_val: float) -> String:
 		PassiveData.PassiveType.BASE_DAMAGE_INCREASE:
 			return "[color=#ff6b6b]%s +%s Base Damage[/color]" % [_get_icon_tag(icon_damage), val_str]
 	return ""
+
 func _get_icon_tag(texture: Texture2D) -> String:
 	if texture:
 		return "[img=%dx%d]%s[/img]" % [icon_size, icon_size, texture.resource_path]
