@@ -60,6 +60,23 @@ keep_lock_on_new_day = null
 z_index = 4
 position = Vector2(132, 361.00003)
 scale = Vector2(0.8845031, 0.8845031)
+friction = null
+min_impulse_force = null
+min_impulse_random_range = null
+bounce_angle = null
+bounce_time = null
+lever_max_angle = null
+drag_sensitivity = null
+activation_threshold = null
+ratchet_step_angle = null
+tension_color = null
+speed_glow_color = null
+flash_color = null
+flash_time = null
+final_highlight_intensity = null
+shake_intensity_lever = null
+screen_shake_force = null
+zoom_strength = null
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(902, 590)

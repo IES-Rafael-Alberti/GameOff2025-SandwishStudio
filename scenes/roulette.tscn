@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_jyskt"]
 [ext_resource type="Texture2D" uid="uid://dpcgv05fqqjag" path="res://assets/Manivela (1) (1).png" id="2_gils2"]
 [ext_resource type="Texture2D" uid="uid://go30fno5akpc" path="res://assets/ruleta.png" id="2_jyskt"]
-[ext_resource type="Script" uid="uid://d1s3pk6cls46q" path="res://scripts/RouletteSlice.gd" id="4_jyskt"]
+[ext_resource type="Script" path="res://scripts/RouletteSlice.gd" id="4_jyskt"]
 [ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="4_k6evh"]
 [ext_resource type="Texture2D" uid="uid://qmthj5xqadhq" path="res://assets/Manilla (1).png" id="5_jyskt"]
 [ext_resource type="Script" uid="uid://bdsnaco1ib6yi" path="res://scripts/SynergyIcon.gd" id="7_ekxsn"]
@@ -29,9 +29,8 @@ point_count = 1
 offsets = PackedFloat32Array(0, 0, 1)
 colors = PackedColorArray(1, 1, 1, 1, 0.99215686, 0.47058824, 0, 1, 1, 0, 0, 1)
 
-[node name="Roulette" type="Node2D" node_paths=PackedStringArray("spin_dust_particles", "needle_sparks_particles")]
+[node name="Roulette" type="Node2D" node_paths=PackedStringArray("needle_sparks_particles")]
 script = ExtResource("1_jyskt")
-spin_dust_particles = NodePath("")
 needle_sparks_particles = NodePath("Manecilla/NeedleSparks")
 
 [node name="Lever" type="Sprite2D" parent="."]
@@ -268,6 +267,7 @@ shape = SubResource("RectangleShape2D_nqo7r")
 
 [node name="Manecilla" type="Area2D" parent="."]
 position = Vector2(722, 91)
+audio_bus_name = &"SFX"
 
 [node name="SpriteManecilla" type="Sprite2D" parent="Manecilla"]
 position = Vector2(0.18759918, 0.40119934)
