@@ -76,10 +76,10 @@ theme_override_font_sizes/font_size = 28
 
 [node name="RoundLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 837.0
+offset_left = 928.0
 offset_top = 44.0
-offset_right = 954.0
-offset_bottom = 83.0
+offset_right = 1045.0
+offset_bottom = 92.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 
@@ -92,21 +92,12 @@ offset_bottom = 1633.0
 scale = Vector2(0.021465681, 0.020558907)
 texture = ExtResource("12_trtic")
 
-[node name="DayLabel" type="Label" parent="."]
-z_index = 4
-offset_left = 1019.0
-offset_top = 45.0
-offset_right = 1167.0
-offset_bottom = 84.0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 28
-
 [node name="GladiatorLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 700.0
-offset_top = 45.0
-offset_right = 759.0
-offset_bottom = 84.0
+offset_left = 807.0
+offset_top = 42.0
+offset_right = 866.0
+offset_bottom = 90.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 vertical_alignment = 1
@@ -115,9 +106,9 @@ vertical_alignment = 1
 z_index = 4
 layout_mode = 0
 offset_left = -46.0
-offset_top = 4.0
+offset_top = 2.0
 offset_right = -7.0
-offset_bottom = 49.0
+offset_bottom = 47.0
 texture = ExtResource("15_ir15t")
 expand_mode = 1
 stretch_mode = 4
