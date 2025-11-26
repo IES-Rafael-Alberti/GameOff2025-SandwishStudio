@@ -31,6 +31,7 @@ offset_left = 56.0
 offset_top = 380.0
 offset_right = 56.0
 offset_bottom = 780.0
+rotation = -0.00020483583
 scale = Vector2(0.77105117, 0.77105117)
 initial_pieces = Array[ExtResource("3_kvpfn")]([ExtResource("4_dinhu"), ExtResource("5_kvuet"), ExtResource("6_trtic"), ExtResource("7_ir15t")])
 
@@ -75,29 +76,37 @@ theme_override_font_sizes/font_size = 28
 
 [node name="RoundLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 920.0
-offset_top = 40.0
-offset_right = 1041.0
-offset_bottom = 88.0
+offset_left = 837.0
+offset_top = 44.0
+offset_right = 954.0
+offset_bottom = 83.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 
 [node name="TextureRect" type="TextureRect" parent="RoundLabel"]
 layout_mode = 0
-offset_left = -53.0
-offset_top = 8.999999
-offset_right = 1305.7422
-offset_bottom = 1399.5548
-scale = Vector2(0.030910943, 0.029605173)
+offset_left = -48.0
+offset_top = 5.999999
+offset_right = 1727.0
+offset_bottom = 1633.0
+scale = Vector2(0.021465681, 0.020558907)
 texture = ExtResource("12_trtic")
-stretch_mode = 4
+
+[node name="DayLabel" type="Label" parent="."]
+z_index = 4
+offset_left = 1019.0
+offset_top = 45.0
+offset_right = 1167.0
+offset_bottom = 84.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 28
 
 [node name="GladiatorLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 807.0
-offset_top = 40.0
-offset_right = 869.0
-offset_bottom = 88.0
+offset_left = 700.0
+offset_top = 45.0
+offset_right = 759.0
+offset_bottom = 84.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 vertical_alignment = 1
@@ -194,6 +203,5 @@ text = "Has ganado crack :)"
 [node name="HelpOverLay" parent="." instance=ExtResource("13_kvuet")]
 
 [node name="elJetas" parent="." instance=ExtResource("13_trtic")]
-z_index = 5
-position = Vector2(1682.9999, 540.00006)
+z_index = 4
 rotation = -0.7558317

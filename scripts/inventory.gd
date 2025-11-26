@@ -425,6 +425,18 @@ func _on_piece_returned(piece_data: PieceData):
 	print("... Pieza devuelta. Usos restantes: %d" % piece_data.uses)
 
 	_update_slot_visuals_for_piece(piece_data)
+	
+	var id = _get_item_id(piece_data)
+	if piece_counts.has(id):
+		var entry = piece_counts[id]
+		var target_slot_node = entry["slot_node"]
+		
+		if target_slot_node:
+			var start_pos = get_global_mouse_position()
+			_play_arena_return_effect(piece_data, start_pos, target_slot_node)
+	# -----------------------------------------
+	
+
 	call_deferred("_update_passive_stats_display")
 
 
@@ -505,6 +517,132 @@ func _get_empty_roulette_slots() -> int:
 				empty_count += 1
 				
 	return empty_count
+	
+# --- EFECTOS VISUALES (ESTILO ROMA/ARENA) ---
+
+# En GameOff2025-SandwishStudio/scripts/inventory.gd
+
+func _play_arena_return_effect(item_data: Resource, start_pos: Vector2, target_slot: Node):
+	if not item_data or not "icon" in item_data: return
+	
+	# --- CORRECCIÓN DE PUNTERÍA ---
+	var target_pos = Vector2.ZERO
+	
+	# 1. Intentamos buscar el icono específico dentro del slot para ser precisos
+	if "item_icon" in target_slot and target_slot.item_icon and target_slot.item_icon.visible:
+		# Obtenemos el centro EXACTO de la imagen en pantalla
+		target_pos = target_slot.item_icon.get_global_rect().get_center()
+	else:
+		# Fallback: Si no encontramos el icono, vamos al centro del slot
+		target_pos = target_slot.get_global_rect().get_center()
+	# -----------------------------
+
+	var effect_root = Node2D.new()
+	effect_root.z_index = 4096 
+	get_tree().root.add_child(effect_root)
+	
+	# 2. Sprite de la pieza
+	var sprite = Sprite2D.new()
+	sprite.texture = item_data.icon
+	# Ajustamos la escala inicial para que coincida con el tamaño del icono en el inventario
+	# (Un poco más grande al principio para que se note)
+	sprite.scale = Vector2(0.9, 0.9) 
+	sprite.position = Vector2.ZERO 
+	effect_root.add_child(sprite)
+	
+	# 3. Partículas (Igual que antes)
+	var particles = CPUParticles2D.new()
+	particles.amount = 25
+	particles.lifetime = 0.5
+	particles.local_coords = false 
+	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
+	particles.emission_sphere_radius = 15.0
+	particles.direction = Vector2(-1, 0)
+	particles.spread = 180.0
+	particles.gravity = Vector2(0, 50)
+	particles.scale_amount_min = 3.0
+	particles.scale_amount_max = 6.0
+	particles.color = Color(0.95, 0.8, 0.3) 
+	var gradient = Gradient.new()
+	gradient.set_color(0, Color(0.95, 0.8, 0.3, 1.0))
+	gradient.set_color(1, Color(0.95, 0.8, 0.3, 0.0))
+	particles.color_ramp = gradient
+	effect_root.add_child(particles)
+	particles.emitting = true
+
+	# 4. Cálculo de la Curva (Trayectoria)
+	var p0 = start_pos
+	var p2 = target_pos
+	
+	# Calculamos la altura del arco basándonos en la distancia
+	var distance = p0.distance_to(p2)
+	var arc_height = min(distance * 0.5, 300.0) * -1.0 # Negativo es hacia arriba
+	
+	# Punto de control P1
+	var center_x = (p0.x + p2.x) / 2.0
+	# Usamos el punto más alto entre los dos y sumamos la altura del arco
+	var base_y = min(p0.y, p2.y) 
+	var p1 = Vector2(center_x, base_y + arc_height)
+	
+	# 5. Animación
+	var t = create_tween()
+	t.set_parallel(true)
+	
+	# Movimiento curvo
+	t.tween_method(func(val): 
+		effect_root.global_position = _bezier_quadratic(p0, p1, p2, val), 
+		0.0, 1.0, 0.55).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_SINE)
+	
+	# Rotación
+	t.tween_property(sprite, "rotation", deg_to_rad(360), 0.55).set_ease(Tween.EASE_OUT)
+	
+	# Escala: Hace un "zoom" hacia la cámara y luego se ajusta al tamaño final
+	var t_scale = create_tween()
+	t_scale.tween_property(sprite, "scale", Vector2(1.3, 1.3), 0.25).set_ease(Tween.EASE_OUT)
+	# Al final se encoge para "entrar" en el slot (un poco más pequeño que 1.0 para que no tape el borde)
+	t_scale.chain().tween_property(sprite, "scale", Vector2(0.8, 0.8), 0.3).set_ease(Tween.EASE_IN)
+
+	# 6. Finalización
+	t.chain().tween_callback(func():
+		particles.emitting = false
+		sprite.visible = false # Ocultamos el sprite inmediatamente al llegar
+		
+		# Limpieza diferida para dejar terminar las partículas
+		var cleanup = create_tween()
+		cleanup.tween_interval(0.6)
+		cleanup.tween_callback(effect_root.queue_free)
+		
+		_play_slot_impact(target_slot)
+	)
+	
+# --- FUNCIONES AUXILIARES (Añadir al final de inventory.gd) ---
+
+# Función matemática para calcular la curva suave
+func _bezier_quadratic(p0: Vector2, p1: Vector2, p2: Vector2, t: float) -> Vector2:
+	var q0 = p0.lerp(p1, t)
+	var q1 = p1.lerp(p2, t)
+	return q0.lerp(q1, t)
+
+# Efecto de golpe visual en el slot cuando recibe la pieza
+func _play_slot_impact(slot_node: Node):
+	if not slot_node: return
+	
+	# 1. Flash blanco
+	var original_modulate = slot_node.modulate
+	slot_node.modulate = Color(2.0, 2.0, 1.5) # Brillo intenso
+	
+	var t = create_tween()
+	t.set_parallel(true)
+	t.set_trans(Tween.TRANS_ELASTIC)
+	t.set_ease(Tween.EASE_OUT)
+	
+	# 2. Temblor / Aplastamiento
+	# Usamos scale para que no rompa el layout del grid
+	slot_node.scale = Vector2(1.3, 0.7) 
+	t.tween_property(slot_node, "scale", Vector2.ONE, 0.4)
+	
+	# Recuperar color normal
+	t.tween_property(slot_node, "modulate", original_modulate, 0.3)
 
 # --- HANDLERS DEL TOOLTIP (CONECTADOS EN _setup_passive_nodes) ---
 func _on_passive_inventory_mouse_entered() -> void:

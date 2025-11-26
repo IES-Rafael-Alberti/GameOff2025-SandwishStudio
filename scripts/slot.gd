@@ -101,44 +101,37 @@ func _on_mouse_exited() -> void:
 	if item_icon:
 		item_icon.material = null
 
-# --- DRAG & DROP ---
-
+# --- DRAG & DROP --
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+	# Verificaciones de estado de la ruleta (no cambiar)
 	if ruleta and ruleta.has_method("is_moving"):
 		if ruleta.is_moving() or not ruleta.is_interactive:
 			return false
-	
-	if occupied:
-		return false
-		
 	if data is Dictionary and "data" in data:
 		if data.data is PieceData:
 			return data.data.uses > 0
+			
 	return false
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
+	if occupied and current_piece_data:
+		GlobalSignals.piece_returned_from_roulette.emit(current_piece_data)
 	occupied = true
 	current_piece_data = data.data
 	
-	# --- CAMBIO: Extraer la cantidad del paquete de arrastre ---
 	if "count" in data:
 		current_piece_count = data.count
 	else:
-		current_piece_count = 1 # Fallback por seguridad
-	# -----------------------------------------------------------
+		current_piece_count = 1 
 	
 	if current_piece_data and "icon" in current_piece_data:
 		if current_piece_data.icon:
 			piece_texture_rect.texture = current_piece_data.icon
 			piece_texture_rect.visible = true 
-			
-			# Hacemos visible el contenedor principal
 			if item_icon:
 				item_icon.visible = true 
-	
 	GlobalSignals.piece_placed_on_roulette.emit(current_piece_data)
 	
-	# Actualizar visuales inmediatamente usando el count que acabamos de recibir
 	_refresh_visuals()
 
 # --- ACTUALIZACIÓN DE DATOS ---

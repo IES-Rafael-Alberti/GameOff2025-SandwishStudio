@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://2ggc15pgbjpi"
-path="res://.godot/imported/Oculta.png-7251164ad0930fe54005adeab1a7b198.ctex"
+uid="uid://c3egjovavg2yk"
+path="res://.godot/imported/Mostrada_retocada.png-fe6aaab6b9074424259cf9349925b0d2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Oculta.png"
-dest_files=["res://.godot/imported/Oculta.png-7251164ad0930fe54005adeab1a7b198.ctex"]
+source_file="res://assets/Mostrada_retocada.png"
+dest_files=["res://.godot/imported/Mostrada_retocada.png-fe6aaab6b9074424259cf9349925b0d2.ctex"]
 
 [params]
 
