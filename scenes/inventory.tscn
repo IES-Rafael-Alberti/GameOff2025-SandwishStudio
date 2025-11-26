@@ -60,11 +60,11 @@ texture = ExtResource("4_uae8j")
 
 [node name="Bandeja" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 1587.0
-offset_top = 41.0
-offset_right = 6154.0
-offset_bottom = 7041.0
-rotation = -0.006927715
+offset_left = 1982.968
+offset_top = 15.000028
+offset_right = 6549.968
+offset_bottom = 7015.0
+rotation = 1.5707964
 scale = Vector2(0.087852575, 0.087852575)
 texture = ExtResource("5_s887n")
 flip_v = true
@@ -81,55 +81,61 @@ columns = 2
 
 [node name="passive_inventory" type="Control" parent="."]
 anchors_preset = 0
-offset_left = 1636.1174
-offset_top = 61.215668
-offset_right = 2308.8203
-offset_bottom = 1204.1674
-rotation = -0.0030516738
+offset_left = 1943.968
+offset_top = 60.000027
+offset_right = 2616.671
+offset_bottom = 1202.9517
+rotation = 1.5707964
 scale = Vector2(0.5, 0.5)
 
 [node name="cchance" type="TextureRect" parent="passive_inventory"]
+z_index = 1
 layout_mode = 0
-offset_left = 293.09378
-offset_top = 220.46413
-offset_right = 597.0117
-offset_bottom = 478.451
+offset_left = 278.00003
+offset_top = 572.0
+offset_right = 581.91797
+offset_bottom = 829.9869
+rotation = 4.712389
 texture = ExtResource("11_5mlvw")
 stretch_mode = 4
 
 [node name="health" type="TextureRect" parent="passive_inventory"]
 layout_mode = 0
-offset_left = 42.203724
-offset_top = 511.69983
-offset_right = 364.81433
-offset_bottom = 866.65533
+offset_left = -95.999985
+offset_top = 676.0001
+offset_right = 226.61061
+offset_bottom = 1030.9556
+rotation = -1.5707964
 texture = ExtResource("12_jc13p")
 stretch_mode = 4
 
 [node name="aspeed" type="TextureRect" parent="passive_inventory"]
 layout_mode = 0
-offset_left = 136.4292
-offset_top = 437.98703
-offset_right = 612.4758
-offset_bottom = 780.23
+offset_left = -111.999985
+offset_top = 666.0
+offset_right = 364.04663
+offset_bottom = 1008.2429
+rotation = 6.2831855
 texture = ExtResource("13_iqxo6")
 stretch_mode = 4
 
 [node name="damage" type="TextureRect" parent="passive_inventory"]
 layout_mode = 0
-offset_left = 263.61676
-offset_top = 704.37646
-offset_right = 573.41223
-offset_bottom = 1029.6055
+offset_left = 262.00003
+offset_top = 860.0
+offset_right = 571.79553
+offset_bottom = 1185.229
+rotation = 4.712389
 texture = ExtResource("14_y2qpb")
 stretch_mode = 4
 
 [node name="cdamage" type="TextureRect" parent="passive_inventory"]
 layout_mode = 0
-offset_left = 71.23516
-offset_top = 173.78687
-offset_right = 350.3377
-offset_bottom = 475.49274
+offset_left = 4.0000153
+offset_top = 430.0
+offset_right = 283.10254
+offset_bottom = 731.7059
+rotation = -1.5707964
 texture = ExtResource("15_5kq8a")
 stretch_mode = 4
 
@@ -156,10 +162,10 @@ texture = ExtResource("4_53g1v")
 
 [node name="TextureRect3" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 1493.0
+offset_left = 1430.9999
 offset_top = 652.00006
-offset_right = 4257.8794
-offset_bottom = 2799.2053
+offset_right = 4436.318
+offset_bottom = 2402.0012
 scale = Vector2(0.25786263, 0.17371413)
 texture = ExtResource("13_40feg")
 
