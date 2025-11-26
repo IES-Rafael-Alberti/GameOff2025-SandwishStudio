@@ -92,7 +92,8 @@ func _on_gui_input(event: InputEvent) -> void:
 
 	GlobalSignals.piece_returned_from_roulette.emit(current_piece_data)
 	clear_slot()
-
+	GlobalSignals.synergy_update_requested.emit()
+	
 func _on_mouse_entered() -> void:
 	if occupied and item_icon:
 		item_icon.material = highlight_material
@@ -131,7 +132,7 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 			if item_icon:
 				item_icon.visible = true 
 	GlobalSignals.piece_placed_on_roulette.emit(current_piece_data)
-	
+	GlobalSignals.synergy_update_requested.emit()
 	_refresh_visuals()
 
 # --- ACTUALIZACIÓN DE DATOS ---
@@ -167,7 +168,6 @@ func _get_total_copies(data: Resource) -> int:
 
 func _update_tier_and_members(count: int) -> void:
 	if not current_piece_data: return
-	
 	# A. ACTUALIZAR TIER (Marco de rareza) - Lógica reforzada
 	if tier_label:
 		tier_label.visible = true
@@ -219,7 +219,7 @@ func clear_slot():
 		
 	if tier_label: tier_label.visible = false
 	if count_label: count_label.visible = false
-
+	
 func _process(delta):
 	if piece_over:
 		var dist = piece_over.global_position.distance_to(global_position)

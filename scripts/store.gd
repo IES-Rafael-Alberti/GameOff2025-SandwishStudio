@@ -572,6 +572,10 @@ func _update_shop_visuals(_new_amount: int = 0) -> void:
 			var current_count = _get_item_count_safe(slot.item_data)
 			slot.update_count_visuals(slot.item_data, current_count)
 			if slot.is_purchased: continue
+			var new_price = _calculate_price(slot.item_data)
+			
+			if slot.has_method("update_price"):
+				slot.update_price(new_price)
 			if slot.item_data is PieceData and current_count >= max_copies:
 				slot.set_maxed_state(true)
 			else:
