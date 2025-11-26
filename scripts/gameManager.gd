@@ -344,27 +344,73 @@ func _toggle_store(close_store: bool):
 	is_tended = close_store
 	_update_eye_state()
 	
-	# --- CAMBIO AQUI: Control de nuevas animaciones ---
+	# Animaciones del Jetas
 	if is_tended:
-		# La tienda se cierra, el Jetas vuelve a subir
 		if el_jetas_anim: el_jetas_anim.play("return_up")
 	else:
-		# La tienda se abre, el Jetas se esconde por abajo
 		if el_jetas_anim: el_jetas_anim.play("hide_down")
-	# --------------------------------------------------
 
 	if not is_tended: roulette.visible = false
+	
+	# CORRECCIÓN: 1.0s exacto para coincidir con la animación de la alfombra
+	var anim_duration = 1.0 
+	
 	if is_tended:
+		# --- CERRAR ---
+		# 1. Ocultar items inmediatamente (simple fade out rápido)
+		_simple_items_fade(0.0, 0.2)
+		
+		# 2. Esperar un instante para que no se vea feo
+		await get_tree().create_timer(0.2).timeout
+		
+		# 3. Enrollar alfombra
 		anim.play("roll")
-		animate_store(true, Callable(self, "_on_store_hidden"))
+		var tween = create_tween()
+		tween.tween_property(mat, "shader_parameter/roll_amount", 1.0, anim_duration)
+		
+		# 4. Ocultar la tienda SOLO al terminar la animación completa
+		tween.tween_callback(func(): store.visible = false)
+		
 	else:
+		# --- ABRIR ---
 		store.visible = true
+		# 1. Asegurar que los items sean invisibles antes de abrir
+		_reset_items_visibility()
+		
+		# 2. Desenrollar alfombra
 		anim.play("unroll")
-		animate_store(false)
-	var target = 1.0 if is_tended else 0.0
-	var tween = create_tween()
-	tween.tween_property(mat, "shader_parameter/roll_amount", target, 0.6)
+		var tween = create_tween()
+		tween.tween_property(mat, "shader_parameter/roll_amount", 0.0, anim_duration)
+		
+		# 3. Mostrar items suavemente cuando la alfombra casi termina (al 80% del camino)
+		tween.tween_callback(func(): _simple_items_fade(1.0, 0.3)).set_delay(anim_duration * 0.8)
+		
+func _reset_items_visibility():
+	# Pone todo transparente y resetea la escala por si acaso
+	for item in _get_animatable_store_items():
+		if is_instance_valid(item):
+			item.modulate.a = 0.0
+			item.scale = Vector2.ONE # Reseteamos escala por seguridad
+			# Restauramos posición original si existe
+			if original_positions.has(item):
+				item.position = original_positions[item]
 
+func _simple_items_fade(target_alpha: float, duration: float):
+	var tween = create_tween().set_parallel(true)
+	for item in _get_animatable_store_items():
+		if is_instance_valid(item):
+			tween.tween_property(item, "modulate:a", target_alpha, duration)
+
+func _get_animatable_store_items() -> Array:
+	var items = []
+	if store.has_node("piece_zone"):
+		for child in store.piece_zone.get_children(): items.append(child)
+	if store.has_node("passive_zone"):
+		for child in store.passive_zone.get_children(): items.append(child)
+	if store.has_node("Reroll"): items.append(store.get_node("Reroll"))
+	if store.has_node("Lock"): items.append(store.get_node("Lock"))
+	return items
+		
 func _on_animation_finished(anim_name: String):
 	roulette.visible = is_tended
 	if anim_name == "roll": store.visible = false

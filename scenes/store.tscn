@@ -142,10 +142,10 @@ text = "Roulette Pieces"
 
 [node name="piece_zone" type="HBoxContainer" parent="."]
 layout_mode = 0
-offset_left = 243.50774
-offset_top = 249.09407
-offset_right = 1109.643
-offset_bottom = 343.96698
+offset_left = 239.54826
+offset_top = 210.39021
+offset_right = 1105.6835
+offset_bottom = 305.26312
 size_flags_horizontal = 4
 theme_override_constants/separation = 200
 
