@@ -6,6 +6,7 @@
 [resource]
 script = ExtResource("1_xfa5c")
 id = "europea.Satiro"
+display_name = "satiro"
 health_bar_offset = Vector2(-10, -170)
 frames = ExtResource("1_7uwfu")
 stats = {

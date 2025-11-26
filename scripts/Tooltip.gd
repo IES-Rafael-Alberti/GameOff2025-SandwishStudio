@@ -258,7 +258,12 @@ func show_synergy_tooltip(race_name: String, current_count: int, max_count: int,
 	_ensure_units_grid_exists()
 	
 	name_label.text = race_name.to_upper()
-	name_label.label_settings = LabelSettings.new()
+	var theme_font := get_theme_default_font() # Godot 4
+	var ls := LabelSettings.new()
+	ls.font = theme_font
+	ls.font_size = 22
+	ls.outline_size = 4
+	name_label.label_settings = ls
 	name_label.label_settings.font_color = color_theme
 	name_label.label_settings.font_size = 24
 	name_label.label_settings.outline_size = 6
@@ -332,26 +337,27 @@ func show_synergy_tooltip(race_name: String, current_count: int, max_count: int,
 			icon_rect.custom_minimum_size = Vector2(40, 40)
 			
 			var final_texture = null
-			if "icon" in piece_res and piece_res.icon: final_texture = piece_res.icon
-			elif "frames" in piece_res and piece_res.frames:
-				var frames = piece_res.frames
-				var anims = frames.get_animation_names()
-				var best_anim = ""
-				if "idle" in anims: best_anim = "idle"
-				elif "default" in anims: best_anim = "default"
-				elif anims.size() > 0: best_anim = anims[0]
-				if best_anim != "" and frames.get_frame_count(best_anim) > 0:
-					final_texture = frames.get_frame_texture(best_anim, 0)
+			
+			# 1. Obtenemos el nombre de la pieza
+			var p_name = piece_res.get("display_name")
+			if p_name == null: p_name = piece_res.get("piece_name")
+			
+			# 2. Lógica FORZADA: Buscar solo en la carpeta "blanco"
+			if p_name:
+				# Construimos la ruta específica ignorando cualquier icono que tenga el recurso
+				var path_attempt = "res://assets/piezas/blanco/" + p_name + ".png"
+				
+				if ResourceLoader.exists(path_attempt):
+					final_texture = load(path_attempt)
+				else:
+					# (Opcional) Imprimir error si no existe la imagen en esa carpeta
+					print("Tooltip: No se encontró imagen 'blanco' para: ", p_name)
 
-			if final_texture == null:
-				var p_name = piece_res.get("display_name")
-				if p_name == null: p_name = piece_res.get("piece_name")
-				if p_name:
-					var path_attempt = "res://assets/piezas/" + p_name + ".png"
-					if ResourceLoader.exists(path_attempt): final_texture = load(path_attempt)
-
-			if final_texture: icon_rect.texture = final_texture
+			# 3. Asignar la textura
+			if final_texture: 
+				icon_rect.texture = final_texture
 			else:
+				# Fallback: Cuadrado rojo semitransparente si no se encontró la imagen
 				var placeholder = PlaceholderTexture2D.new()
 				placeholder.size = Vector2(40,40)
 				icon_rect.texture = placeholder
@@ -376,7 +382,12 @@ func show_passive_list_tooltip(active_passives: Dictionary) -> void:
 	
 	# --- ESTILO DEL PANEL ---
 	name_label.text = "ESTADÍSTICAS"
-	name_label.label_settings = LabelSettings.new()
+	var theme_font := get_theme_default_font() # Godot 4
+	var ls := LabelSettings.new()
+	ls.font = theme_font
+	ls.font_size = 22
+	ls.outline_size = 4
+	name_label.label_settings = ls
 	name_label.label_settings.font_color = Color("#FFD700") # Dorado
 	name_label.label_settings.font_size = 24
 	name_label.label_settings.outline_size = 6
@@ -515,7 +526,12 @@ func show_passive_summary(passive_counts: Dictionary, multiplier: float) -> void
 	if passive_counts.is_empty(): return 
 
 	name_label.text = "UPGRADES SUMMARY"
-	name_label.label_settings = LabelSettings.new()
+	var theme_font := get_theme_default_font() # Godot 4
+	var ls := LabelSettings.new()
+	ls.font = theme_font
+	ls.font_size = 22
+	ls.outline_size = 4
+	name_label.label_settings = ls
 	name_label.label_settings.font_color = Color("#FFD700") 
 	name_label.label_settings.font_size = 22
 	name_label.label_settings.outline_size = 6
