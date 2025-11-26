@@ -579,8 +579,8 @@ func _update_shop_visuals(_new_amount: int = 0) -> void:
 				var can = PlayerData.has_enough_currency(slot.current_price)
 				slot.update_affordability(can)
 	for item_info in current_passive_buttons:
-		var btn = item_info.button
-		if btn.disabled: continue
+		#var btn = item_info.button
+		#if btn.disabled: continue
 		var price = item_info.price
 		var style = item_info.style
 		if PlayerData.has_enough_currency(price):
