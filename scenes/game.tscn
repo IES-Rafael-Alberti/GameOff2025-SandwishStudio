@@ -36,7 +36,6 @@ scale = Vector2(0.77105117, 0.77105117)
 initial_pieces = Array[ExtResource("3_kvpfn")]([ExtResource("4_dinhu"), ExtResource("5_kvuet"), ExtResource("6_trtic"), ExtResource("7_ir15t")])
 
 [node name="Store" parent="." instance=ExtResource("3_iywne")]
-visible = false
 z_index = 4
 offset_left = 416.0
 offset_top = 394.0
@@ -113,27 +112,6 @@ texture = ExtResource("15_ir15t")
 expand_mode = 1
 stretch_mode = 4
 
-[node name="GameOver" type="CanvasLayer" parent="."]
-visible = false
-
-[node name="GameOverImage" type="TextureRect" parent="GameOver"]
-z_index = 4
-offset_left = -4.0
-offset_top = -2.0
-offset_right = 1681.0
-offset_bottom = 1093.0
-mouse_filter = 0
-texture = ExtResource("12_dinhu")
-
-[node name="Label" type="Label" parent="GameOver"]
-z_index = 4
-offset_left = 433.0
-offset_top = 294.0
-offset_right = 747.0
-offset_bottom = 393.0
-theme_override_font_sizes/font_size = 72
-text = "CAGASTE"
-
 [node name="DayFinished" type="CanvasLayer" parent="."]
 visible = false
 
@@ -191,7 +169,14 @@ offset_bottom = 386.0
 theme_override_font_sizes/font_size = 72
 text = "Has ganado crack :)"
 
-[node name="HelpOverLay" parent="." instance=ExtResource("13_kvuet")]
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="HelpOverLay" parent="CanvasLayer" instance=ExtResource("13_kvuet")]
+z_index = 9
+offset_left = 1032.0
+offset_top = -8.0
+offset_right = 1032.0
+offset_bottom = -8.0
 
 [node name="elJetas" parent="." instance=ExtResource("13_trtic")]
 z_index = 4
