@@ -1,13 +1,13 @@
 [gd_resource type="Resource" script_class="PassiveData" load_steps=3 format=3 uid="uid://nytgdhu2kh46"]
 
 [ext_resource type="Script" uid="uid://berngf3tq220v" path="res://scripts/passive_data.gd" id="1_b7j6f"]
-[ext_resource type="Texture2D" uid="uid://cqc4rwgluigvv" path="res://assets/Uvas.png" id="1_pukcq"]
+[ext_resource type="Texture2D" uid="uid://cql2kfp3rbsgn" path="res://assets/Higo.png" id="1_pukcq"]
 
 [resource]
 script = ExtResource("1_b7j6f")
-type = 1
+type = 2
 value = 3.0
-name_passive = "Increased critical damage"
+name_passive = "Fig of the luck"
 icon = ExtResource("1_pukcq")
 price = 5
 metadata/_custom_type_script = "uid://berngf3tq220v"

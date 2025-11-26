@@ -61,26 +61,30 @@ offset_right = 326.0
 offset_bottom = 436.0
 mouse_filter = 2
 
-[node name="PriceLabel" type="Label" parent="TextureButton"]
+[node name="PriceLabel" type="RichTextLabel" parent="TextureButton"]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 0.432
 anchor_bottom = 0.15400001
-offset_left = 240.0
-offset_top = 30.0
-offset_right = 89.0
-offset_bottom = 14.761993
-theme_override_font_sizes/font_size = 50
+offset_left = 192.5
+offset_top = -50.0
+offset_right = 76.5
+offset_bottom = -32.738014
+theme_override_font_sizes/normal_font_size = 72
+bbcode_enabled = true
+text = "23"
+fit_content = true
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="TextureRect" type="TextureRect" parent="TextureButton"]
 layout_mode = 0
-offset_left = 305.0
-offset_top = 37.5
-offset_right = 355.0
-offset_bottom = 87.5
+offset_left = 302.5
+offset_top = -37.5
+offset_right = 382.5
+offset_bottom = 47.5
 texture = ExtResource("3_1fq57")
+stretch_mode = 4
 
 [node name="Tooltip" parent="." instance=ExtResource("7_ikokg")]
 layout_mode = 0

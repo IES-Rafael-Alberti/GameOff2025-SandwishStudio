@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://dd8wqmfs2cj1j"]
+[gd_scene load_steps=16 format=3 uid="uid://dd8wqmfs2cj1j"]
 
 [ext_resource type="Script" uid="uid://bpnxk43sopml" path="res://scripts/gameManager.gd" id="1_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://hbcgudcjh0wn" path="res://scenes/inventory.tscn" id="2_lbhrr"]
@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://bse428jrn0sbc" path="res://assets/Waves.png" id="12_trtic"]
 [ext_resource type="PackedScene" uid="uid://cj8n2p21wqyqt" path="res://scenes/help_over_lay.tscn" id="13_kvuet"]
 [ext_resource type="PackedScene" uid="uid://bbfqm8pblt056" path="res://scenes/el_jetas.tscn" id="13_trtic"]
+[ext_resource type="Texture2D" uid="uid://ca521tx5dgil" path="res://assets/GladsIcon (1).png" id="15_ir15t"]
 
 [node name="game" type="Node2D"]
 script = ExtResource("1_lbhrr")
@@ -21,7 +22,7 @@ gold_round_base = 2
 gladiators_per_day = 4
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
-position = Vector2(182.00002, 77.99997)
+position = Vector2(176.00003, 88.99997)
 scale = Vector2(0.35115045, 0.22791663)
 
 [node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
@@ -30,6 +31,7 @@ offset_left = 56.0
 offset_top = 380.0
 offset_right = 56.0
 offset_bottom = 780.0
+rotation = -0.00020483583
 scale = Vector2(0.77105117, 0.77105117)
 initial_pieces = Array[ExtResource("3_kvpfn")]([ExtResource("4_dinhu"), ExtResource("5_kvuet"), ExtResource("6_trtic"), ExtResource("7_ir15t")])
 
@@ -41,6 +43,18 @@ offset_top = 394.0
 offset_right = 416.0
 offset_bottom = 394.0
 scale = Vector2(0.8860778, 0.88381195)
+max_copies = null
+duplicate_piece_mult = null
+duplicate_passive_mult = null
+COLOR_NORMAL_BG = null
+COLOR_UNAFFORD_BG = null
+reroll_base_cost = null
+reroll_cost_multiplier = null
+prob_comun = null
+prob_raro = null
+prob_epico = null
+prob_legendario = null
+keep_lock_on_new_day = null
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
 z_index = 4
@@ -62,38 +76,51 @@ theme_override_font_sizes/font_size = 28
 
 [node name="RoundLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 338.0
-offset_top = 334.0
-offset_right = 882.0
-offset_bottom = 373.0
+offset_left = 837.0
+offset_top = 44.0
+offset_right = 954.0
+offset_bottom = 83.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 
 [node name="TextureRect" type="TextureRect" parent="RoundLabel"]
 layout_mode = 0
-offset_left = -57.999992
-offset_top = -6.0
-offset_right = 1717.0
-offset_bottom = 1621.0
-scale = Vector2(0.030910943, 0.029605173)
+offset_left = -48.0
+offset_top = 5.999999
+offset_right = 1727.0
+offset_bottom = 1633.0
+scale = Vector2(0.021465681, 0.020558907)
 texture = ExtResource("12_trtic")
 
 [node name="DayLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 925.0
-offset_top = 39.0
-offset_right = 1073.0
-offset_bottom = 78.0
+offset_left = 1019.0
+offset_top = 45.0
+offset_right = 1167.0
+offset_bottom = 84.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 
 [node name="GladiatorLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 824.0
-offset_top = 40.0
-offset_right = 944.0
-offset_bottom = 79.0
+offset_left = 700.0
+offset_top = 45.0
+offset_right = 759.0
+offset_bottom = 84.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
+vertical_alignment = 1
+
+[node name="gladiatorLabel" type="TextureRect" parent="GladiatorLabel"]
+z_index = 4
+layout_mode = 0
+offset_left = -46.0
+offset_top = 4.0
+offset_right = -7.0
+offset_bottom = 49.0
+texture = ExtResource("15_ir15t")
+expand_mode = 1
+stretch_mode = 4
 
 [node name="GameOver" type="CanvasLayer" parent="."]
 visible = false
@@ -177,5 +204,4 @@ text = "Has ganado crack :)"
 
 [node name="elJetas" parent="." instance=ExtResource("13_trtic")]
 z_index = 4
-position = Vector2(1682.9999, 540.00006)
 rotation = -0.7558317

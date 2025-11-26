@@ -7,6 +7,6 @@
 script = ExtResource("1_ea058")
 type = 3
 value = 1.2
-name_passive = "Increased Attack Speed"
+name_passive = "Grapes of speed"
 icon = ExtResource("1_jokap")
 price = 5

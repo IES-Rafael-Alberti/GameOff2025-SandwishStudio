@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3 uid="uid://bwh1obe7043i"]
+[gd_scene load_steps=35 format=3 uid="uid://bwh1obe7043i"]
 
 [ext_resource type="Script" uid="uid://boom6onvffdah" path="res://scripts/store.gd" id="1_atuvt"]
 [ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="2_n3io3"]
@@ -86,6 +86,22 @@ _data = {
 &"unroll": SubResource("Animation_3ro5p")
 }
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ttn3v"]
+bg_color = Color(0.3529412, 0.011764706, 0.0627451, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+expand_margin_left = 10.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y1dpo"]
+bg_color = Color(0.35188454, 0.010673957, 0.06309028, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+expand_margin_left = 10.0
+
 [node name="Store" type="Control"]
 layout_mode = 3
 anchors_preset = 0
@@ -97,27 +113,32 @@ passive_origins = Array[ExtResource("9_n3io3")]([ExtResource("10_abbvk"), ExtRes
 texture_unlocked = ExtResource("21_y1dpo")
 texture_locked = ExtResource("22_rky2c")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="TextureRect" parent="."]
 material = SubResource("ShaderMaterial_3ro5p")
-position = Vector2(822.581, 429.71207)
+layout_mode = 0
+offset_left = 625.5971
+offset_top = 148.861
+offset_right = 1625.5972
+offset_bottom = 748.86096
 scale = Vector2(1.7, 1.342)
+pivot_offset = Vector2(930.4768, 266.21936)
 texture = ExtResource("16_abbvk")
-offset = Vector2(1, 1)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
 &"": SubResource("AnimationLibrary_h7duq")
 }
+speed_scale = 0.5
 
 [node name="piece_label" type="Label" parent="."]
 layout_mode = 0
-offset_left = 565.2151
-offset_top = 117.10403
-offset_right = 1015.2246
-offset_bottom = 172.10406
+offset_left = 199.9535
+offset_top = 117.10398
+offset_right = 1213.5792
+offset_bottom = 186.10399
 theme_override_font_sizes/font_size = 40
-text = "Piezas"
-horizontal_alignment = 1
+theme_override_styles/normal = SubResource("StyleBoxFlat_ttn3v")
+text = "Roulette Pieces"
 
 [node name="piece_zone" type="HBoxContainer" parent="."]
 layout_mode = 0
@@ -130,20 +151,20 @@ theme_override_constants/separation = 200
 
 [node name="passive_label" type="Label" parent="."]
 layout_mode = 0
-offset_left = 544.42786
-offset_top = 423.75766
-offset_right = 1040.9612
-offset_bottom = 478.75766
+offset_left = 202.92311
+offset_top = 457.4995
+offset_right = 795.8545
+offset_bottom = 526.4995
 theme_override_font_sizes/font_size = 40
-text = "Pasivas"
-horizontal_alignment = 1
+theme_override_styles/normal = SubResource("StyleBoxFlat_y1dpo")
+text = "Fruits of Power"
 
 [node name="passive_zone" type="HBoxContainer" parent="."]
 layout_mode = 0
 offset_left = 352.3933
-offset_top = 533.9148
-offset_right = 928.497
-offset_bottom = 625.2162
+offset_top = 567.6566
+offset_right = 928.4971
+offset_bottom = 658.958
 size_flags_horizontal = 4
 size_flags_stretch_ratio = 0.85
 theme_override_constants/separation = 200

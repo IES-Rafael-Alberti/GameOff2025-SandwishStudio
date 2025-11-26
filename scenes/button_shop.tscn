@@ -1,7 +1,7 @@
 [gd_scene load_steps=8 format=3 uid="uid://bevacqmdtykqr"]
 
-[ext_resource type="Texture2D" uid="uid://bq5j0k20aml4l" path="res://assets/Mostrada.png" id="1_wvo3v"]
-[ext_resource type="Texture2D" uid="uid://c2fa30p75xeed" path="res://assets/Pupil.png" id="2_nx6ja"]
+[ext_resource type="Texture2D" uid="uid://c3egjovavg2yk" path="res://assets/Mostrada_retocada.png" id="1_wvo3v"]
+[ext_resource type="Texture2D" uid="uid://bcei2xif8grad" path="res://assets/Pupil_retocada.png" id="2_nx6ja"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wvo3v"]
 
@@ -34,6 +34,6 @@ scale = Vector2(0.058143836, 0.056065775)
 texture = ExtResource("1_wvo3v")
 
 [node name="Pupil" type="Sprite2D" parent="EyeSprite"]
-position = Vector2(14.483276, 197.44653)
-scale = Vector2(4.4119368, 4.4119363)
+position = Vector2(-25.392578, -6.629364)
+scale = Vector2(0.9710709, 0.97107077)
 texture = ExtResource("2_nx6ja")

@@ -1,16 +1,78 @@
-[gd_scene load_steps=3 format=3 uid="uid://bbfqm8pblt056"]
+[gd_scene load_steps=7 format=3 uid="uid://bbfqm8pblt056"]
 
 [ext_resource type="Texture2D" uid="uid://c0bn00jg5b5cb" path="res://assets/ELJETAS (1).png" id="1_5ctqt"]
 [ext_resource type="PackedScene" uid="uid://bevacqmdtykqr" path="res://scenes/button_shop.tscn" id="2_qgppr"]
 
+[sub_resource type="Animation" id="Animation_qgppr"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1316, 369)]
+}
+
+[sub_resource type="Animation" id="Animation_44tkv"]
+resource_name = "hide"
+length = 5.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1.0310602, 2.0333333, 3.0345976),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(1890, 482.99985), Vector2(1980, 528.00006), Vector2(1890, 482.99985), Vector2(1776, 835.0001)]
+}
+
+[sub_resource type="Animation" id="Animation_5ctqt"]
+resource_name = "show"
+length = 3.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1, 2.015254, 3),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(1890, 482.99985), Vector2(1790, 528.0001), Vector2(1693, 538), Vector2(1693, 538)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_qgppr"]
+_data = {
+&"RESET": SubResource("Animation_qgppr"),
+&"hide": SubResource("Animation_44tkv"),
+&"show": SubResource("Animation_5ctqt")
+}
+
 [node name="elJetas" type="Sprite2D"]
-position = Vector2(926.00006, 656.00006)
+position = Vector2(1316, 369)
+rotation = -0.024761781
 scale = Vector2(0.30778688, 0.30778688)
 texture = ExtResource("1_5ctqt")
 
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_qgppr")
+}
+autoplay = "show"
+
 [node name="ButtonShop" parent="." instance=ExtResource("2_qgppr")]
-offset_left = -152.70326
+modulate = Color(0.60933036, 0.60933006, 0.60932994, 1)
+offset_left = -139.70726
 offset_top = -289.1613
-offset_right = 32.489853
+offset_right = 45.485855
 offset_bottom = -149.45425
 disabled = false
