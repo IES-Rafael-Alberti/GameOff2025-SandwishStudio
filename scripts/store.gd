@@ -2,7 +2,7 @@ extends Control
 
 # --- REFERENCIAS ---
 @onready var store_slot_scene: PackedScene = preload("res://scenes/store_slot.tscn")
-@onready var passive_scene: PackedScene = preload("res://scenes/passive.tscn")
+@onready var passive_slot_scene: PackedScene = preload("res://scenes/passive_store_slot.tscn")
 
 @onready var tooltip: Control = $Tooltip 
 @onready var inventory: Control = $"../inventory"
@@ -46,7 +46,6 @@ var highlight_material: ShaderMaterial
 var _pieces_by_rarity: Dictionary = {}
 var _rerolls_this_round: int = 0
 var reroll_label: Label
-var current_passive_buttons: Array = []
 
 var is_rerolling: bool = false
 
@@ -73,6 +72,11 @@ func _ready() -> void:
 		lock_button.pressed.connect(_on_lock_pressed)
 	
 	_setup_reroll_label()
+	
+	# Verificar si la lista de piezas está vacía por error
+	if piece_origins.is_empty():
+		print("ALERTA: piece_origins está vacío en Store. Revisa el Inspector.")
+		
 	start_new_round()
 
 # --- LÓGICA DEL CANDADO ---
@@ -101,7 +105,6 @@ func start_new_round() -> void:
 		print("Tienda Bloqueada: Restaurando items guardados...")
 		_restore_shop_from_save()
 		
-		# Lógica de Development: Revisar si mantenemos el candado
 		if not keep_lock_on_new_day:
 			PlayerData.is_shop_locked = false
 			_update_lock_visuals()
@@ -119,9 +122,7 @@ func _save_current_shop_state() -> void:
 	# Guardar Piezas
 	for slot in piece_zone.get_children():
 		if slot.is_queued_for_deletion(): continue
-		
-		# Combinación de chequeos de ambas ramas
-		if slot is StoreSlot or "item_data" in slot: 
+		if "item_data" in slot and slot.item_data != null: 
 			var data_packet = {
 				"type": "piece",
 				"data": slot.item_data,
@@ -130,30 +131,21 @@ func _save_current_shop_state() -> void:
 			}
 			PlayerData.shop_items_saved.append(data_packet)
 	
-	# Guardar Pasivas (Lógica V2)
-	for wrapper in passive_zone.get_children():
-		if wrapper.is_queued_for_deletion(): continue
-		var button = _find_texture_button_recursive(wrapper)
-		if button:
+	# Guardar Pasivas
+	for slot in passive_zone.get_children():
+		if slot.is_queued_for_deletion(): continue
+		if slot.get("current_passive") != null:
 			var data_packet = {
 				"type": "passive",
-				"data": button.get_meta("data"),
-				"price": button.get_meta("price"),
-				"purchased": button.disabled
+				"data": slot.current_passive,
+				"price": slot.current_price,
+				"purchased": slot.is_purchased
 			}
 			PlayerData.shop_items_saved.append(data_packet)
-
-func _find_texture_button_recursive(node: Node) -> TextureButton:
-	if node is TextureButton: return node
-	for child in node.get_children():
-		var res = _find_texture_button_recursive(child)
-		if res: return res
-	return null
 
 func _restore_shop_from_save() -> void:
 	for child in piece_zone.get_children(): child.queue_free()
 	for child in passive_zone.get_children(): child.queue_free()
-	current_passive_buttons.clear()
 	
 	for packet in PlayerData.shop_items_saved:
 		var type = packet.type
@@ -176,249 +168,13 @@ func _restore_shop_from_save() -> void:
 				slot.slot_exited.connect(_on_exit_item)
 			
 		elif type == "passive":
-			_create_single_passive_button(data, price, purchased)
+			_create_single_passive_slot(data, price, purchased)
 
-# --- CREACIÓN DE PASIVAS (V2) ---
-func _create_single_passive_button(data, price: int, is_purchased: bool) -> void:
-	var item_container = VBoxContainer.new()
-	item_container.alignment = VBoxContainer.ALIGNMENT_CENTER
-	item_container.add_theme_constant_override("separation", 5) 
-	
-	var price_label = Label.new()
-	price_label.text = str(price) + "€"
-	price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	
-	var style_box = StyleBoxFlat.new()
-	style_box.content_margin_left = 6
-	style_box.content_margin_right = 6
-	style_box.corner_radius_top_left = 4
-	style_box.corner_radius_top_right = 4
-	style_box.corner_radius_bottom_left = 4
-	style_box.corner_radius_bottom_right = 4
-	
-	if PlayerData.has_enough_currency(price):
-		style_box.bg_color = COLOR_NORMAL_BG
-	else:
-		style_box.bg_color = COLOR_UNAFFORD_BG
-		
-	price_label.add_theme_stylebox_override("normal", style_box)
-	item_container.add_child(price_label)
-
-	var tex = data.icon
-	if tex == null:
-		var instance = passive_scene.instantiate()
-		var sprite = instance.find_child("Sprite2D", true, false)
-		if sprite: tex = sprite.texture
-		instance.queue_free()
-	
-	var holder = Control.new()
-	holder.mouse_filter = Control.MOUSE_FILTER_PASS
-	if tex:
-		holder.custom_minimum_size = tex.get_size()
-	else:
-		holder.custom_minimum_size = Vector2(64, 64)
-	
-	var button = TextureButton.new()
-	button.texture_normal = tex
-	button.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
-	button.set_anchors_preset(Control.PRESET_FULL_RECT) 
-	button.set_meta("data", data)
-	button.set_meta("price", price)
-	button.pressed.connect(_on_passive_button_pressed.bind(button))
-	button.mouse_entered.connect(_on_hover_item.bind(data))
-	button.mouse_entered.connect(func(): if not button.disabled: button.material = highlight_material)
-	button.mouse_exited.connect(_on_exit_item)
-	button.mouse_exited.connect(func(): button.material = null)
-	
-	if is_purchased:
-		button.disabled = true
-		button.modulate = Color(0.25, 0.25, 0.25, 1.0)
-	
-	holder.add_child(button)
-	item_container.add_child(holder)
-	passive_zone.add_child(item_container)
-	
-	if is_rerolling:
-		item_container.modulate.a = 0.0
-	
-	current_passive_buttons.append({
-		"button": button, "holder": holder, "container": item_container,
-		"label": price_label, "style": style_box, "price": price
-	})
-
-# ========================================================
-# --- SISTEMA DE ANIMACIÓN AVANZADO (GHOST SYSTEM) ---
-# ========================================================
-
-func generate():
-	if is_rerolling or PlayerData.is_shop_locked:
-		_animate_error_shake(reroll_button)
-		return
-
-	var current_cost = _calculate_reroll_cost()
-	if current_cost > 0:
-		if not PlayerData.has_enough_currency(current_cost):
-			_animate_error_shake(reroll_button)
-			return
-	
-	is_rerolling = true
-	reroll_button.disabled = true 
-	
-	# ---------------------------------------------------------
-	# FASE 1: SALIDA (ANIMAR ITEMS EXISTENTES CAYENDO)
-	# ---------------------------------------------------------
-	var exit_tween = create_tween().set_parallel(true)
-	var items_exiting = false
-	
-	# PASO CLAVE: Capturar posiciones y nodos ANTES de reparentar
-	var exit_snapshots = []
-	
-	# Capturar Piezas
-	for child in piece_zone.get_children():
-		if is_instance_valid(child) and child is Control:
-			exit_snapshots.append({"node": child, "pos": child.global_position, "size": child.size})
-			
-	# Capturar Pasivas
-	for child in passive_zone.get_children():
-		if is_instance_valid(child) and child is Control:
-			exit_snapshots.append({"node": child, "pos": child.global_position, "size": child.size})
-	
-	# Ejecutar animación de salida usando las posiciones capturadas
-	for snap in exit_snapshots:
-		items_exiting = true
-		_detach_and_animate_drop_safe(snap.node, snap.pos, snap.size, exit_tween)
-	
-	if items_exiting:
-		await exit_tween.finished
-		await get_tree().create_timer(0.1).timeout 
-	
-	# ---------------------------------------------------------
-	# FASE 2: REFRESCO LÓGICO (CREAR NUEVOS ITEMS INVISIBLES)
-	# ---------------------------------------------------------
-	if current_cost > 0: PlayerData.spend_currency(current_cost)
-	_rerolls_this_round += 1
-	_update_reroll_button_visuals()
-	
-	_refresh_shop_content() # Crea items con modulate.a = 0
-	
-	# Esperar 2 frames para que el HBoxContainer calcule posiciones
-	await get_tree().process_frame
-	await get_tree().process_frame 
-	
-	# ---------------------------------------------------------
-	# FASE 3: ENTRADA (FANTASMAS CAEN EN HUECOS RESERVADOS)
-	# ---------------------------------------------------------
-	var entry_tween = create_tween().set_parallel(true)
-	var delay = 0.0
-	var drop_height = 150.0 # Más arriba para que se vea bien la caída
-	
-	# --- PIEZAS ---
-	for slot in piece_zone.get_children():
-		if not "item_data" in slot: continue
-		
-		slot.modulate.a = 0.0 
-		
-		# 1. Crear Fantasma y añadirlo a la raíz (self)
-		var ghost = store_slot_scene.instantiate()
-		add_child(ghost)
-		
-		# 2. CRÍTICO: Desactivar Layout/Anclajes para permitir control por posición
-		ghost.set_anchors_preset(Control.PRESET_TOP_LEFT) 
-		
-		# 3. Configurar
-		var d = slot.item_data
-		ghost.set_item(d, slot.current_price, highlight_material, slot.can_afford_status, _get_item_count_safe(d))
-		if slot.is_maxed: ghost.set_maxed_state(true)
-		
-		# 4. Posicionamiento inicial y final
-		var target_pos = slot.global_position
-		var start_pos = target_pos - Vector2(0, drop_height)
-		
-		ghost.global_position = start_pos
-		ghost.scale = Vector2(0.8, 0.8)
-		ghost.z_index = 10 
-		
-		# 5. Tween
-		entry_tween.tween_property(ghost, "global_position", target_pos, 0.5)\
-			.set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT).set_delay(delay)
-		entry_tween.tween_property(ghost, "scale", Vector2.ONE, 0.4).set_delay(delay)
-		
-		# 6. Al terminar: Mostrar Real y Borrar Fantasma
-		entry_tween.parallel().tween_callback(func():
-			if is_instance_valid(slot): slot.modulate.a = 1.0
-			if is_instance_valid(ghost): ghost.queue_free()
-		).set_delay(delay + 0.45)
-		
-		delay += 0.1
-		
-	# --- PASIVAS ---
-	for container in passive_zone.get_children():
-		if not is_instance_valid(container): continue
-		container.modulate.a = 0.0
-		
-		# Clonar para el fantasma
-		var ghost = container.duplicate(0)
-		add_child(ghost)
-		
-		# CRÍTICO: Desactivar Layout/Anclajes en el fantasma
-		ghost.set_anchors_preset(Control.PRESET_TOP_LEFT)
-		
-		var target_pos = container.global_position
-		var start_pos = target_pos - Vector2(0, drop_height)
-		
-		ghost.global_position = start_pos
-		ghost.scale = Vector2(0.8, 0.8)
-		ghost.z_index = 10
-		
-		entry_tween.tween_property(ghost, "global_position", target_pos, 0.5)\
-			.set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT).set_delay(delay)
-		entry_tween.tween_property(ghost, "scale", Vector2.ONE, 0.4).set_delay(delay)
-		
-		entry_tween.parallel().tween_callback(func():
-			if is_instance_valid(container): container.modulate.a = 1.0
-			if is_instance_valid(ghost): ghost.queue_free()
-		).set_delay(delay + 0.45)
-		
-		delay += 0.1
-
-	await entry_tween.finished
-	is_rerolling = false
-	reroll_button.disabled = false
-	_save_current_shop_state()
-
-# Helper para "robar" un nodo de su HBox y animarlo cayendo
-func _detach_and_animate_drop_safe(node: Control, old_global_pos: Vector2, old_size: Vector2, tween: Tween):
-	# 1. Reparentar al root para sacarlo del HBox
-	node.reparent(self)
-	
-	# 2. CRÍTICO: Desactivar el layout para permitir la animación libre
-	node.set_anchors_preset(Control.PRESET_TOP_LEFT) 
-	
-	# 3. Restaurar la posición global y tamaño guardados
-	node.size = old_size
-	node.global_position = old_global_pos
-	node.z_index = 5 
-	
-	# 4. Animar caída: Corregido el easing para que se vea como una caída acelerada.
-	var drop_duration = 0.4
-	var drop_distance = 250.0 
-	
-	tween.tween_property(node, "position:y", drop_distance, drop_duration).as_relative()\
-		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN) # Transición más adecuada para una caída
-	
-	# Desvanecer al mismo tiempo
-	tween.tween_property(node, "modulate:a", 0.0, 0.2).set_delay(0.1) 
-	
-	# 5. Borrar al terminar
-	tween.tween_callback(node.queue_free).set_delay(drop_duration)
-
-# ========================================================
-
+# --- GENERACIÓN DE CONTENIDO ---
 func _refresh_shop_content():
 	for child in piece_zone.get_children(): child.queue_free()
 	for child in passive_zone.get_children(): child.queue_free()
-	current_passive_buttons.clear()
-
+	
 	# 1. PIEZAS
 	var available_pieces = _filter_maxed_items(piece_origins)
 	_organize_pieces_by_rarity(available_pieces)
@@ -428,9 +184,7 @@ func _refresh_shop_content():
 		if piece: selected_pieces.append(piece)
 	_generate_piece_slots(selected_pieces)
 	
-	# 2. GENERAR PASIVAS
-	# Nota: Combinamos la lógica. En Development no se filtraba por maxed (son acumulables),
-	# pero mantenemos la generación de botones de v2.
+	# 2. PASIVAS
 	var available_passives = passive_origins 
 	if not available_passives.is_empty():
 		var shuffled = available_passives.duplicate()
@@ -460,8 +214,156 @@ func _generate_piece_slots(items: Array) -> void:
 		if is_rerolling:
 			slot.modulate.a = 0.0
 
-# --- INTERACCIÓN ---
+func _generate_passive_buttons(items: Array) -> void:
+	for data in items:
+		var final_price = _calculate_price(data)
+		_create_single_passive_slot(data, final_price, false)
 
+# --- CREACIÓN DE PASIVA INDIVIDUAL ---
+func _create_single_passive_slot(data: PassiveData, price: int, is_purchased: bool) -> void:
+	var slot = passive_slot_scene.instantiate()
+	passive_zone.add_child(slot)
+	
+	var can_afford = PlayerData.has_enough_currency(price)
+	
+	if slot.has_method("set_passive"):
+		slot.set_passive(data, price, highlight_material, can_afford)
+		
+		if is_purchased:
+			slot.disable_interaction()
+	
+	# Conectamos la nueva señal UNIFICADA 'slot_pressed'
+	if not slot.slot_pressed.is_connected(_on_passive_slot_pressed):
+		slot.slot_pressed.connect(_on_passive_slot_pressed)
+	
+	if not slot.slot_hovered.is_connected(_on_hover_item):
+		slot.slot_hovered.connect(_on_hover_item)
+	if not slot.slot_exited.is_connected(_on_exit_item):
+		slot.slot_exited.connect(_on_exit_item)
+
+	if is_rerolling:
+		slot.modulate.a = 0.0
+
+# ========================================================
+# --- SISTEMA DE ANIMACIÓN AVANZADO (GHOST SYSTEM) ---
+# ========================================================
+
+func generate():
+	if is_rerolling or PlayerData.is_shop_locked:
+		_animate_error_shake(reroll_button)
+		return
+
+	var current_cost = _calculate_reroll_cost()
+	if current_cost > 0:
+		if not PlayerData.has_enough_currency(current_cost):
+			_animate_error_shake(reroll_button)
+			return
+	
+	is_rerolling = true
+	reroll_button.disabled = true 
+	
+	# FASE 1: SALIDA
+	var exit_tween = create_tween().set_parallel(true)
+	var items_exiting = false
+	var exit_snapshots = []
+	
+	for child in piece_zone.get_children():
+		if is_instance_valid(child) and child is Control:
+			exit_snapshots.append({"node": child, "pos": child.global_position, "size": child.size})
+	for child in passive_zone.get_children():
+		if is_instance_valid(child) and child is Control:
+			exit_snapshots.append({"node": child, "pos": child.global_position, "size": child.size})
+	
+	for snap in exit_snapshots:
+		items_exiting = true
+		_detach_and_animate_drop_safe(snap.node, snap.pos, snap.size, exit_tween)
+	
+	if items_exiting:
+		await exit_tween.finished
+		await get_tree().create_timer(0.1).timeout 
+
+	# FASE 2: REFRESCO
+	if current_cost > 0: PlayerData.spend_currency(current_cost)
+	_rerolls_this_round += 1
+	_update_reroll_button_visuals()
+	
+	_refresh_shop_content() 
+	
+	await get_tree().process_frame
+	await get_tree().process_frame 
+	
+	# FASE 3: ENTRADA
+	var entry_tween = create_tween().set_parallel(true)
+	var delay = 0.0
+	var drop_height = 150.0 
+	
+	# --- PIEZAS ---
+	for slot in piece_zone.get_children():
+		if not "item_data" in slot: continue
+		slot.modulate.a = 0.0 
+		var ghost = store_slot_scene.instantiate()
+		add_child(ghost)
+		ghost.set_anchors_preset(Control.PRESET_TOP_LEFT) 
+		var d = slot.item_data
+		ghost.set_item(d, slot.current_price, highlight_material, slot.can_afford_status, _get_item_count_safe(d))
+		if slot.is_maxed: ghost.set_maxed_state(true)
+		var target_pos = slot.global_position
+		var start_pos = target_pos - Vector2(0, drop_height)
+		ghost.global_position = start_pos
+		ghost.scale = Vector2(0.8, 0.8)
+		ghost.z_index = 10 
+		entry_tween.tween_property(ghost, "global_position", target_pos, 0.5)\
+			.set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT).set_delay(delay)
+		entry_tween.tween_property(ghost, "scale", Vector2.ONE, 0.4).set_delay(delay)
+		entry_tween.parallel().tween_callback(func():
+			if is_instance_valid(slot): slot.modulate.a = 1.0
+			if is_instance_valid(ghost): ghost.queue_free()
+		).set_delay(delay + 0.45)
+		delay += 0.1
+		
+	# --- PASIVAS ---
+	for container in passive_zone.get_children():
+		if not is_instance_valid(container): continue
+		container.modulate.a = 0.0
+		var ghost = container.duplicate(0)
+		add_child(ghost)
+		ghost.set_anchors_preset(Control.PRESET_TOP_LEFT)
+		var target_pos = container.global_position
+		var start_pos = target_pos - Vector2(0, drop_height)
+		ghost.global_position = start_pos
+		ghost.scale = Vector2(0.8, 0.8)
+		ghost.z_index = 10
+		entry_tween.tween_property(ghost, "global_position", target_pos, 0.5)\
+			.set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT).set_delay(delay)
+		entry_tween.tween_property(ghost, "scale", Vector2.ONE, 0.4).set_delay(delay)
+		entry_tween.parallel().tween_callback(func():
+			if is_instance_valid(container): container.modulate.a = 1.0
+			if is_instance_valid(ghost): ghost.queue_free()
+		).set_delay(delay + 0.45)
+		delay += 0.1
+
+	await entry_tween.finished
+	is_rerolling = false
+	reroll_button.disabled = false
+	_save_current_shop_state()
+
+func _detach_and_animate_drop_safe(node: Control, old_global_pos: Vector2, old_size: Vector2, tween: Tween):
+	node.reparent(self)
+	node.set_anchors_preset(Control.PRESET_TOP_LEFT) 
+	node.size = old_size
+	node.global_position = old_global_pos
+	node.z_index = 5 
+	
+	var drop_duration = 0.4
+	var drop_distance = 250.0 
+	
+	tween.tween_property(node, "position:y", drop_distance, drop_duration).as_relative()\
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	
+	tween.tween_property(node, "modulate:a", 0.0, 0.2).set_delay(0.1) 
+	tween.tween_callback(node.queue_free).set_delay(drop_duration)
+
+# --- INTERACCIÓN PIEZAS ---
 func _on_piece_slot_pressed(slot) -> void:
 	if is_rerolling: return 
 	var data = slot.item_data
@@ -489,7 +391,77 @@ func _on_piece_slot_pressed(slot) -> void:
 	else:
 		_animate_error_shake(slot.get_node("TextureButton"))
 
-# --- FUNCIONES AUXILIARES (UI y Lógica) ---
+# --- INTERACCIÓN PASIVAS (LÓGICA ACTUALIZADA) ---
+func _on_passive_slot_pressed(slot_ref) -> void:
+	if is_rerolling: return
+	
+	var data = slot_ref.current_passive
+	var price = slot_ref.current_price
+	
+	# Obtenemos referencia al botón visual para el efecto de shake
+	var btn_visual = slot_ref.texture_button
+	
+	# 1. Comprobamos si ya se compró -> Shake de error
+	if slot_ref.is_purchased:
+		_animate_error_shake(btn_visual)
+		return
+	
+	# 2. Comprobamos Dinero -> Shake de error
+	if not PlayerData.has_enough_currency(price):
+		_animate_error_shake(btn_visual)
+		return
+		
+	# 3. Comprobamos Espacio (si aplica) -> Shake de error
+	if not inventory.can_add_item(data):
+		_animate_error_shake(btn_visual)
+		return
+
+	# 4. Si todo ok -> Compramos
+	if PlayerData.spend_currency(price):
+		print("Tienda: Pasiva adquirida: ", data.name_passive if "name_passive" in data else "Pasiva")
+		inventory.add_item(data)
+		slot_ref.disable_interaction()
+		_update_shop_visuals()
+		_save_current_shop_state()
+	else:
+		_animate_error_shake(btn_visual)
+
+# --- ACTUALIZACIÓN VISUAL ---
+func _update_shop_visuals(_new_amount: int = 0) -> void:
+	_update_reroll_button_visuals()
+	
+	# Actualizar Piezas
+	for slot in piece_zone.get_children():
+		if slot.has_method("update_count_visuals"):
+			var current_count = _get_item_count_safe(slot.item_data)
+			slot.update_count_visuals(slot.item_data, current_count)
+			if slot.is_purchased: continue
+			
+			var new_price = _calculate_price(slot.item_data)
+			if slot.has_method("update_price"):
+				slot.update_price(new_price)
+			
+			if slot.item_data is PieceData and current_count >= max_copies:
+				slot.set_maxed_state(true)
+			else:
+				slot.set_maxed_state(false)
+				var can = PlayerData.has_enough_currency(slot.current_price)
+				slot.update_affordability(can)
+	
+	# Actualizar Pasivas
+	for slot in passive_zone.get_children():
+		if slot.has_method("update_affordability") and not slot.is_purchased:
+			var can = PlayerData.has_enough_currency(slot.current_price)
+			slot.update_affordability(can)
+
+# --- TOOLTIPS Y UTILS ---
+func _on_hover_item(data: Resource) -> void:
+	if tooltip and data:
+		var count = _get_item_count_safe(data)
+		tooltip.show_tooltip(data, 0, count)
+
+func _on_exit_item() -> void:
+	if tooltip: tooltip.hide_tooltip()
 
 func _setup_reroll_label():
 	reroll_label = Label.new()
@@ -539,67 +511,6 @@ func _animate_error_shake(node: Control):
 	tween.tween_property(node, "rotation_degrees", -5, 0.05)
 	tween.tween_property(node, "rotation_degrees", 0, 0.05)
 
-func _generate_passive_buttons(items: Array) -> void:
-	for data in items:
-		var final_price = _calculate_price(data)
-		_create_single_passive_button(data, final_price, false)
-
-func _on_passive_button_pressed(button: TextureButton) -> void:
-	if is_rerolling: return
-	var data = button.get_meta("data")
-	var price = button.get_meta("price")
-	if not PlayerData.has_enough_currency(price):
-		_animate_error_shake(button)
-		return
-		
-	# Verificación de hueco visual para pasivas (Development)
-	if not inventory.can_add_item(data):
-		_animate_error_shake(button)
-		return
-
-	if PlayerData.spend_currency(price):
-		inventory.add_item(data)
-		button.disabled = true
-		button.modulate = Color(0.25, 0.25, 0.25, 1.0)
-		button.material = null
-		_update_shop_visuals()
-		_save_current_shop_state()
-
-func _update_shop_visuals(_new_amount: int = 0) -> void:
-	_update_reroll_button_visuals()
-	for slot in piece_zone.get_children():
-		if slot.has_method("update_count_visuals"):
-			var current_count = _get_item_count_safe(slot.item_data)
-			slot.update_count_visuals(slot.item_data, current_count)
-			if slot.is_purchased: continue
-			var new_price = _calculate_price(slot.item_data)
-			
-			if slot.has_method("update_price"):
-				slot.update_price(new_price)
-			if slot.item_data is PieceData and current_count >= max_copies:
-				slot.set_maxed_state(true)
-			else:
-				slot.set_maxed_state(false)
-				var can = PlayerData.has_enough_currency(slot.current_price)
-				slot.update_affordability(can)
-	for item_info in current_passive_buttons:
-		#var btn = item_info.button
-		#if btn.disabled: continue
-		var price = item_info.price
-		var style = item_info.style
-		if PlayerData.has_enough_currency(price):
-			style.bg_color = COLOR_NORMAL_BG
-		else:
-			style.bg_color = COLOR_UNAFFORD_BG
-
-func _on_hover_item(data: Resource) -> void:
-	if tooltip and data:
-		var count = _get_item_count_safe(data)
-		tooltip.show_tooltip(data, 0, count)
-
-func _on_exit_item() -> void:
-	if tooltip: tooltip.hide_tooltip()
-
 func _calculate_price(data) -> int:
 	if not "price" in data: return 0
 	var base = data.price
@@ -610,11 +521,8 @@ func _calculate_price(data) -> int:
 	return int(base * (1.0 + (mult * count)))
 
 func _get_item_count_safe(data) -> int:
-	# Si es Pasiva, preguntamos a PlayerData
 	if data is PassiveData:
 		return PlayerData.get_passive_count_global(data)
-		
-	# Si es Pieza, preguntamos al inventario de la escena
 	var gm = null
 	if owner and owner.has_method("get_inventory_piece_count"): gm = owner
 	elif get_tree().current_scene and get_tree().current_scene.has_method("get_inventory_piece_count"): gm = get_tree().current_scene
