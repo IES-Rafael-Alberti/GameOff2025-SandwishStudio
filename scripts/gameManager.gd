@@ -25,7 +25,7 @@ var gladiators_defeated: int = 0
 
 @onready var mat = $Store/Sprite2D.material
 @onready var anim = $Store/AnimationPlayer
-@onready var gold_label: Label = $gold_label
+@onready var gold_label: Label = $Store/gold_label
 @onready var store: Control = $Store
 @onready var inventory: Control = $inventory
 @onready var roulette: Node2D = $Roulette
