@@ -21,20 +21,20 @@ stats = {
 "members": 1
 },
 "ORO": {
-"aps": 1.2,
-"crit_chance": 15,
-"crit_mult": 2.0,
-"dmg": 25.0,
-"hp": 250.0,
-"members": 3
+"aps": 0.9,
+"crit_chance": 7,
+"crit_mult": 1.7,
+"dmg": 38.0,
+"hp": 900.0,
+"members": 1
 },
 "PLATA": {
-"aps": 1.1,
-"crit_chance": 10,
+"aps": 0.8,
+"crit_chance": 6,
 "crit_mult": 1.6,
-"dmg": 15.0,
-"hp": 150.0,
-"members": 2
+"dmg": 28.0,
+"hp": 640.0,
+"members": 1
 }
 }
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"
