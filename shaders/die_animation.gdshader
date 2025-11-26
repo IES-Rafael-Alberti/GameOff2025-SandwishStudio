@@ -1,4 +1,4 @@
-// Sprite Particle Explosion Shader made in Godot 4.2.1  
+// Sprite Particle Explosion Shader made in Godot 4.2.1
 // port of PlayWithFurcifers shader https://www.youtube.com/watch?v=D7XSL0zBOwI
 // Ported by Mopifish
 shader_type particles;
@@ -6,7 +6,7 @@ render_mode disable_velocity;
 
 // Tinte aleatorio entre estos dos colores
 uniform vec4 tint_color_a = vec4(1.0, 0.4, 0.3, 1.0); // rojizo
-uniform vec4 tint_color_b = vec4(1.0, 1.0, 0.3, 1.0); // amarillento
+uniform vec4 tint_color_b = vec4(1.0, 0.4, 0.7, 1.0); // rosado
 
 uniform float spread = 180.0;
 uniform float inherit_emitter_velocity_ratio = 0.0;
