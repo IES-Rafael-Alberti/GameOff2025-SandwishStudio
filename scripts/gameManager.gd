@@ -20,6 +20,9 @@ var gladiators_defeated: int = 0
 @onready var buttonShop: Button = $elJetas/ButtonShop
 @onready var sprite_show: Sprite2D = $elJetas/ButtonShop/EyeSprite
 @onready var pupil: Sprite2D = $elJetas/ButtonShop/EyeSprite/Pupil
+# Referencia al AnimationPlayer de elJetas
+@onready var el_jetas_anim: AnimationPlayer = $elJetas/AnimationPlayer
+
 @onready var mat = $Store/Sprite2D.material
 @onready var anim = $Store/AnimationPlayer
 @onready var gold_label: Label = $gold_label
@@ -69,15 +72,19 @@ var max_distance: float = 100
 # Variable acumuladora para el oro ganado EXCLUSIVAMENTE en el día
 var daily_gold_salary: int = 0
 var daily_gold_loot: int = 0
+
 ## ------------------------------------------------------------------
 ## Funciones de Godot
 ## ------------------------------------------------------------------
 
 func _ready():
+	# IMPORTANTE: Añadir al grupo para que SynergyIcon pueda encontrarnos
+	add_to_group("game_manager")
+	
 	daily_gold_salary = 0
 	daily_gold_loot = 0
 	pupil_offset = pupil.position
-	eye_closed_texture = preload("res://assets/Oculta.png")
+	eye_closed_texture = preload("res://assets/Oculta_retocada.png")
 	original_eye_texture = sprite_show.texture
 
 	for child in store.get_children():
@@ -110,7 +117,6 @@ func _ready():
 	blink_timer = randf_range(blink_interval_min, blink_interval_max)
 	_on_PlayerData_currency_changed(PlayerData.get_current_currency())
 	
-	
 	store.start_new_round()
 	_update_ui_labels()
 
@@ -122,15 +128,21 @@ func _ready():
 
 
 func _process(delta: float) -> void:
-	if not is_tended:
-		pupil.visible = false
-	else:
+	# Gestionamos el temporizador del parpadeo
+	blink_timer -= delta
+	
+	# Solo mostramos/movemos la pupila si el ojo está ABIERTO (textura original)
+	if sprite_show.texture == original_eye_texture:
 		pupil.visible = true
-		blink_timer -= delta
 		_update_pupil_position()
-		if blink_timer <= 0.0 and sprite_show.visible:
-			await _toggle_eye_parpadeo()
-			blink_timer = randf_range(blink_interval_min, blink_interval_max)
+	else:
+		# Si está parpadeando (textura cerrada), ocultamos la pupila
+		pupil.visible = false
+
+	# Ejecutar parpadeo aleatorio cuando toca
+	if blink_timer <= 0.0 and sprite_show.visible:
+		await _toggle_eye_parpadeo()
+		blink_timer = randf_range(blink_interval_min, blink_interval_max)
 
 	if Input.is_action_just_pressed("pause"):
 		pausar()
@@ -143,6 +155,7 @@ func _update_ui_labels() -> void:
 		gladiator_label.text = "%d/%d" % [gladiators_defeated, gladiators_per_day]
 	
 	if is_instance_valid(round_label):
+
 		var state_text = ""	
 		round_label.text = "Wave %d/%d" % [current_round, rounds_per_day]
 
@@ -241,29 +254,24 @@ func _on_combat_finished(player_won: bool = false, loot_from_combat: int = 0):
 		store.start_new_round()
 		if combat_scene:
 			combat_scene.spawn_enemy_one()
+
 func _show_day_finished_view() -> void:
 	if day_finished_view:
-		# 1. Configurar Label del Título
 		if next_day_label:
 			next_day_label.text = "Día %d Finalizado" % current_day
 		
-		# 2. Configurar el Slider de progreso
 		if day_slider:
 			day_slider.min_value = 0
 			day_slider.max_value = max_days
 			day_slider.value = current_day
 			day_slider.editable = false 
 		
-		# 3. Configurar el resumen con formato (Precio Unitario) xCantidad: Total
 		if info_label:
-			# --- CÁLCULOS ---
-			# Rondas: Asumimos que se han jugado todas las rondas del día para llegar aquí
 			var rounds_count = rounds_per_day 
 			var round_unit_price = 0
 			if rounds_count > 0:
 				round_unit_price = daily_gold_salary / rounds_count
 			
-			# Gladiadores: Usamos el contador de derrotados
 			var glad_count = gladiators_defeated
 			var glad_unit_price = 0
 			if glad_count > 0:
@@ -271,15 +279,9 @@ func _show_day_finished_view() -> void:
 			
 			var total_day = daily_gold_salary + daily_gold_loot
 			
-			# --- TEXTO ---
 			var info_text = "RESUMEN DEL DÍA:\n\n"
-			
-			# Formato: Rondas (X oro) xY: Z oro
 			info_text += "Rondas (%d oro) x%d: %d oro\n" % [round_unit_price, rounds_count, daily_gold_salary]
-			
-			# Formato: Gladiadores (X oro) xY: Z oro
 			info_text += "Gladiadores (%d oro) x%d: %d oro\n" % [glad_unit_price, glad_count, daily_gold_loot]
-			
 			info_text += "\n--------------------------\n"
 			info_text += "TOTAL: %d oro" % total_day
 			
@@ -315,7 +317,6 @@ func _advance_to_next_day() -> void:
 	current_round = 1
 	gladiators_defeated = 0 
 	
-	# Reiniciamos los contadores para el nuevo día
 	daily_gold_salary = 0
 	daily_gold_loot = 0
 	
@@ -330,6 +331,7 @@ func _advance_to_next_day() -> void:
 	store.start_new_round()
 	if combat_scene:
 		combat_scene.spawn_enemy_one()
+
 func _give_initial_piece():
 	if not inventory.has_method("get_random_initial_piece"): return
 	var initial_piece: Resource = inventory.get_random_initial_piece()
@@ -340,6 +342,13 @@ func _toggle_store(close_store: bool):
 	if anim.is_playing(): return
 	is_tended = close_store
 	_update_eye_state()
+	
+	# Control de animación de entrada/salida de El Jetas
+	if is_tended:
+		if el_jetas_anim: el_jetas_anim.play("show")
+	else:
+		if el_jetas_anim: el_jetas_anim.play("hide")
+
 	if not is_tended: roulette.visible = false
 	if is_tended:
 		anim.play("roll")
@@ -360,10 +369,16 @@ func _on_PlayerData_currency_changed(new_amount: int) -> void:
 	if gold_label: gold_label.text = str(new_amount) + "€"
 
 func _toggle_eye_parpadeo() -> void:
-	if not is_tended: return
+	# Parpadeo: Cambio textura a cerrada y oculto pupila temporalmente
+	# NOTA: Hemos quitado el chequeo "if not is_tended" para que parpadee siempre
 	sprite_show.texture = eye_closed_texture
+	pupil.visible = false
+	
 	await get_tree().create_timer(0.07).timeout
+	
+	# Restaurar ojo abierto y pupila
 	sprite_show.texture = original_eye_texture
+	pupil.visible = true
 
 func _update_pupil_position():
 	if not pupil.visible or not sprite_show.visible: return
@@ -373,6 +388,7 @@ func _update_pupil_position():
 	pupil.position = pupil_offset + dir
 
 func _on_shop_hover():
+	# Mantenemos este efecto visual de parpadeo (alpha) al pasar el ratón
 	if blink_tween and blink_tween.is_valid(): blink_tween.kill()
 	blink_tween = create_tween()
 	blink_tween.tween_property(sprite_show, "modulate:a", 0.5, 0.12)
@@ -383,12 +399,9 @@ func _on_shop_exit():
 	sprite_show.modulate.a = 1.0
 
 func _update_eye_state():
-	if is_tended:
-		sprite_show.texture = original_eye_texture
-		pupil.visible = true
-	else:
-		sprite_show.texture = eye_closed_texture
-		pupil.visible = false
+	# Estado base: Ojo abierto y pupila visible (para vigilar)
+	sprite_show.texture = original_eye_texture
+	pupil.visible = true
 
 func start_unroll():
 	anim.play("unroll")
@@ -429,7 +442,59 @@ func get_inventory_piece_count(resource_to_check: Resource) -> int:
 ## ------------------------------------------------------------------
 ## SISTEMA DE SINERGIAS
 ## ------------------------------------------------------------------
+func get_active_unit_ids_for_race(target_race_enum: int) -> Array:
+	var active_ids = []
+	
+	if not roulette or not roulette.has_node("SpriteRuleta/SlotsContainer"):
+		return []
 
+	var slots_container = roulette.get_node("SpriteRuleta/SlotsContainer")
+	
+	for slot_root in slots_container.get_children():
+		if not slot_root.has_node("slot"): continue
+		var actual_slot = slot_root.get_node("slot")
+		
+		if "current_piece_data" in actual_slot and actual_slot.current_piece_data:
+			var piece = actual_slot.current_piece_data
+			if "piece_origin" in piece and piece.piece_origin:
+				var origin = piece.piece_origin
+				# Comprobamos si es la raza que buscamos
+				if origin.race == target_race_enum:
+					# Evitamos duplicados (si tienes 2 sátiros, solo cuenta 1 para la lista visual)
+					if not active_ids.has(origin.id):
+						active_ids.append(origin.id)
+	
+	return active_ids
+
+# --- NUEVA FUNCIÓN: Obtener todas las piezas de una raza (para el tooltip) ---
+func get_all_pieces_for_race(race_name: String) -> Array:
+	var list = []
+	# Instanciamos el registro para consultar el mapa
+	# Asumimos que PieceRegistry es un script accesible.
+	var registry_script = load("res://scripts/piece_Registry.gd")
+	if not registry_script:
+		return []
+	
+	var registry = registry_script.new()
+	var prefix = race_name.to_lower() + "."
+	# Iteramos sobre las claves del mapa (ej: "europea.satiro")
+	for key in registry._map.keys():
+		if key.begins_with(prefix):
+			var path = registry._map[key]
+			var res = load(path)
+			if res:
+				list.append(res)
+	
+	registry.free()
+	return list
+
+func get_race_enum_from_name(race_name: String) -> int:
+	match race_name:
+		"Europea": return 2 # PieceRes.PieceRace.EUROPEA
+		"Japonesa": return 1 # PieceRes.PieceRace.JAPONESA
+		"Nordica": return 0 # PieceRes.PieceRace.NORDICA
+	return -1
+	
 func get_active_synergies() -> Dictionary:
 	var result = {
 		"jap": 0, # Tier Japonés
@@ -437,14 +502,12 @@ func get_active_synergies() -> Dictionary:
 		"eur": 0  # Tier Europeo
 	}
 	
-	# Validaciones de seguridad
 	if not roulette or not roulette.has_node("SpriteRuleta/SlotsContainer"):
 		push_warning("GameManager: No se encontró el contenedor de slots en la ruleta.")
 		return result
 
 	var slots_container = roulette.get_node("SpriteRuleta/SlotsContainer")
 	
-	# Usamos Diccionarios para contar IDs únicos (Set)
 	var unique_ids_jap = {}
 	var unique_ids_nor = {}
 	var unique_ids_eur = {}
@@ -455,11 +518,9 @@ func get_active_synergies() -> Dictionary:
 			
 		var actual_slot = slot_root.get_node("slot")
 		
-		# Verificamos si hay una pieza válida en el slot
 		if "current_piece_data" in actual_slot and actual_slot.current_piece_data:
 			var piece_data = actual_slot.current_piece_data
 			
-			# Accedemos al PieceRes (donde está la raza y el ID)
 			if "piece_origin" in piece_data and piece_data.piece_origin is PieceRes:
 				var res = piece_data.piece_origin
 				var id = res.id
@@ -471,34 +532,26 @@ func get_active_synergies() -> Dictionary:
 						unique_ids_nor[id] = true
 					PieceRes.PieceRace.EUROPEA:
 						unique_ids_eur[id] = true
+					
+					
 
 	# --- CÁLCULO DE TIERS ---
-	
-	# Japonesas (2 -> +50% Dmg, 4 -> +100% Dmg Primer golpe)
 	var count_jap = unique_ids_jap.size()
 	if count_jap >= 4:
 		result["jap"] = 2
 	elif count_jap >= 2:
 		result["jap"] = 1
 		
-	# Nórdicas (2 -> Cura 50%, 4 -> Cura 75% al bajar de 25% HP)
 	var count_nor = unique_ids_nor.size()
 	if count_nor >= 4:
 		result["nor"] = 2
 	elif count_nor >= 2:
 		result["nor"] = 1
 		
-	# Europeas (2 -> +25% HP, 4 -> +50% HP)
 	var count_eur = unique_ids_eur.size()
 	if count_eur >= 4:
 		result["eur"] = 2
 	elif count_eur >= 2:
 		result["eur"] = 1
-		
-	if count_jap > 0 or count_nor > 0 or count_eur > 0:
-		print("--- Sinergias Activas (Banca) ---")
-		print("Japonesas (Unicas: %d) -> Tier %d" % [count_jap, result["jap"]])
-		print("Nórdicas (Unicas: %d) -> Tier %d" % [count_nor, result["nor"]])
-		print("Europeas (Unicas: %d) -> Tier %d" % [count_eur, result["eur"]])
 	
 	return result

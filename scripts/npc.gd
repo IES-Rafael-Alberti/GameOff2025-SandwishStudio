@@ -15,6 +15,9 @@ const ATTACK_SPEED_OVER_FACTOR := 0.3
 # Log
 const DAMAGE_TEXT_SCENE := preload("res://scenes/damage_text.tscn")
 
+# Sounds
+@onready var audio_player: AudioStreamPlayer2D = $AudioPlayer
+
 # Shader de daño (shock)
 @onready var shock_material: ShaderMaterial = material
 var shock_timer: float = 0.0
@@ -56,7 +59,9 @@ var synergy_hp_mult: float = 1.0
 var default_bar_style: StyleBox = null
 
 func _ready() -> void:
-	# 1. CARGAR STATS BASE
+	if npc_res and npc_res.sfx_spawn:
+		play_sfx(npc_res.sfx_spawn)
+	# CARGAR STATS BASE
 	if npc_res:
 		var base_hp = max(1.0, npc_res.max_health)
 		max_health = (base_hp + bonus_health) * synergy_hp_mult
@@ -336,6 +341,8 @@ func take_damage(amount: float, from: npc = null, was_crit: bool = false) -> voi
 		_die(from)
 
 func _die(killer: npc = null) -> void:
+	if npc_res and npc_res.sfx_death:
+		play_sfx(npc_res.sfx_death)
 	for ab in abilities:
 		if ab: ab.on_die(self, killer)
 	emit_signal("died", self)
@@ -399,3 +406,12 @@ func _setup_healthbar_z() -> void:
 
 	health_bar.z_as_relative = false
 	health_bar.z_index = 100
+
+func play_sfx(stream: AudioStream) -> void:
+	if stream == null:
+		return
+	if audio_player == null:
+		return
+
+	audio_player.stream = stream
+	audio_player.play()

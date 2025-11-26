@@ -6,6 +6,7 @@ signal combat_finished(player_won: bool, gold_looted: int)
 
 const NPC_SCENE := preload("res://scenes/npc.tscn")
 const PieceAdapter := preload("res://scripts/piece_adapter.gd")
+const NPC_DEATH_PARTICLES := preload("res://scenes/npc_death_particles.tscn")
 
 @export_group("Configuración de Enemigos")
 @export var enemy_res: Array[npcRes] = []
@@ -14,7 +15,22 @@ const ENEMY_LIMIT := 1
 
 var round_gold_loot: int = 0
 
-# --- ESCALADO DE DIFICULTAD (POR DÍA) ---
+# Animacion de golpear aliados y enemigos
+@export_group("Animación de Ataque")
+@export_subgroup("Aliados (PieceRes)")
+@export var ally_attack_offset: Vector2 = Vector2(-125, -35) # Movimiento izquierda + salto
+@export var ally_attack_rotation_deg: float = -8.0          # Gira hacia la izquierda/abajo
+
+@export_subgroup("Gladiador (npcRes)")
+@export var enemy_attack_offset: Vector2 = Vector2(25, 10)  # Derecha + un pelín hacia abajo
+@export var enemy_attack_rotation_deg: float = 8.0          # Gira hacia la derecha/abajo
+
+@export_subgroup("Tiempos")
+@export var attack_lunge_duration: float = 0.08             # Ida
+@export var attack_return_duration: float = 0.12            # Vuelta
+
+# Variables de Escalado Diario (Scaling)
+
 @export_group("Escalado de Dificultad (Por Día)")
 @export_subgroup("Crecimiento Exponencial")
 @export var scaling_hp_mult: float = 1.4      
@@ -424,7 +440,54 @@ func _place_ally_in_slot_with_tween(n: npc, final_pos: Vector2, order_index: int
 	tween.tween_property(n, "position", mid_pos, 0.5)
 	tween.tween_property(n, "position", final_pos, 0.5)
 
+func _spawn_death_particles(n: npc) -> void:
+	if not is_instance_valid(n):
+		return
+
+	var particles : GPUParticles2D = NPC_DEATH_PARTICLES.instantiate()
+	
+	# Colocamos las partículas en el mismo sitio que el NPC
+	particles.position = n.position
+	
+	# Las añadimos al mismo padre que el NPC (la misma capa)
+	var parent := n.get_parent()
+	if parent:
+		parent.add_child(particles)
+	else:
+		add_child(particles) # fallback
+
+	# Intentar copiar la textura del sprite del NPC al shader
+	var tex: Texture2D = null
+
+	if n.has_node("AnimatedSprite2D"):
+		var anim_sprite: AnimatedSprite2D = n.get_node("AnimatedSprite2D")
+		# Coger la textura del frame actual (simplificado: primer frame)
+		if anim_sprite.sprite_frames:
+			var frames := anim_sprite.sprite_frames
+			var anim := anim_sprite.animation
+			if frames.get_frame_count(anim) > 0:
+				tex = frames.get_frame_texture(anim, anim_sprite.frame)
+	elif n.has_node("Sprite2D"):
+		var sprite: Sprite2D = n.get_node("Sprite2D")
+		tex = sprite.texture
+
+	if tex:
+		var mat := particles.process_material
+		if mat is ShaderMaterial:
+			mat.set_shader_parameter("sprite", tex)
+
+	# Activar emisión
+	particles.emitting = true
+
+	# Opción: auto-destruir después de su lifetime
+	var life := particles.lifetime
+	get_tree().create_timer(life + 0.5).timeout.connect(func ():
+		if is_instance_valid(particles):
+			particles.queue_free()
+	)
+
 func _on_npc_died(n: npc) -> void:
+	_spawn_death_particles(n)
 	if n.team == npc.Team.ENEMY:
 		var amount: int = int(max(0, n.gold_pool))
 		if amount > 0:
@@ -451,28 +514,40 @@ func _on_start_pressed() -> void:
 
 func _begin_combat() -> void:
 	print("Battle begins")
+
 	round_gold_loot = 0 
 	if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 		var w: npc = enemy_npcs[0]
 		enemy_hp_round_start = w.health
 		enemy_gold_round_start = int(w.gold_pool)
 
-	for a in ally_npcs:
+	for i in range(ally_npcs.size()):
+		var a: npc = ally_npcs[i]
 		if is_instance_valid(a):
-			var t := _make_attack_timer(a, enemy_npcs)
+			var initial_delay := randf_range(0.01, 0.25)
+			var t := _make_attack_timer(a, enemy_npcs, initial_delay)
 			ally_timers.append(t)
 	for e in enemy_npcs:
 		if is_instance_valid(e):
 			var t := _make_attack_timer(e, ally_npcs)
 			enemy_timers.append(t)
 
-func _make_attack_timer(attacker: npc, defender: Variant) -> Timer:
+func _make_attack_timer(attacker: npc, defender: Variant, initial_delay: float = -1.0) -> Timer:
 	var t := Timer.new()
 	t.one_shot = false
+
 	var aps := 1.0
 	if is_instance_valid(attacker):
 		aps = max(0.01, attacker.get_attack_speed())
-	t.wait_time = 1.0 / aps
+
+	var base_wait_time := 1.0 / aps
+	t.wait_time = base_wait_time
+
+	# Si nos pasan un delay inicial, lo usamos SOLO para el primer ataque
+	if initial_delay >= 0.0:
+		t.wait_time = initial_delay
+		t.set_meta("first_attack", true)
+
 	add_child(t)
 
 	t.timeout.connect(func () -> void:
@@ -480,6 +555,7 @@ func _make_attack_timer(attacker: npc, defender: Variant) -> Timer:
 			t.stop()
 			t.queue_free()
 			return
+
 		var target: Variant = defender
 		if target is Array:
 			var alive: Array = []
@@ -492,8 +568,15 @@ func _make_attack_timer(attacker: npc, defender: Variant) -> Timer:
 			target = alive[randi() % alive.size()]
 		if not is_instance_valid(target):
 			return
+
 		_do_attack(attacker, target)
+
+		# Después del PRIMER ataque de este timer, volvemos al wait_time normal
+		if t.has_meta("first_attack") and t.get_meta("first_attack") == true:
+			t.set_meta("first_attack", false)
+			t.wait_time = base_wait_time
 	)
+
 	t.start()
 	return t
 
@@ -510,9 +593,65 @@ func _cleanup_allies_and_reset() -> void:
 	ally_npcs.clear()
 	ally_spawn_order_counter = 0
 
+func _play_attack_anim(attacker: npc) -> void:
+	if not is_instance_valid(attacker):
+		return
+
+	var original_pos: Vector2 = attacker.position
+	var original_rot_deg: float = attacker.rotation_degrees
+
+	# Limpiar tween anterior si existe
+	if attacker.has_meta("attack_tween"):
+		var old_tween: Tween = attacker.get_meta("attack_tween")
+		if is_instance_valid(old_tween):
+			old_tween.kill()
+
+	var tween := create_tween()
+	attacker.set_meta("attack_tween", tween)
+	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+	#   ANIMACIÓN ALIADOS
+	if attacker.team == npc.Team.ALLY:
+		# POSICIÓN EN EL "AIRE"
+		var jump_pos := original_pos + ally_attack_offset
+		var target_rot_deg := original_rot_deg + ally_attack_rotation_deg
+
+		# Salto hacia la izquierda
+		tween.tween_property(attacker, "position", jump_pos, attack_lunge_duration)
+
+		# En el aire, girar hasta la rotación de golpe
+		tween.chain().tween_property(attacker, "rotation_degrees", target_rot_deg, attack_lunge_duration)
+
+		# Siguen en el aire, volver a la rotación normal
+		tween.chain().tween_property(attacker, "rotation_degrees", original_rot_deg, attack_lunge_duration)
+
+		# Caer de vuelta a su posición original
+		tween.chain().tween_property(attacker, "position", original_pos, attack_return_duration)
+
+		return
+	#ANIMACIÓN GLADIADORES
+	var offset := enemy_attack_offset
+	var target_rot_deg := original_rot_deg + enemy_attack_rotation_deg
+	var forward_pos := original_pos + offset
+
+	# 1) Empuje hacia delante + giro
+	tween.tween_property(attacker, "position", forward_pos, attack_lunge_duration)
+	tween.parallel().tween_property(attacker, "rotation_degrees", target_rot_deg, attack_lunge_duration)
+
+	# 2) Volver a sitio y rotación original
+	tween.chain().tween_property(attacker, "position", original_pos, attack_return_duration)
+	tween.parallel().tween_property(attacker, "rotation_degrees", original_rot_deg, attack_return_duration)
+
 func _do_attack(attacker: npc, defender: npc) -> void:
 	if not attacker.can_damage(defender): return
 	if attacker.npc_res == null: return
+	
+	# Mostrar animacion
+	_play_attack_anim(attacker)
+	
+	if attacker.npc_res.sfx_attack:
+		attacker.play_sfx(attacker.npc_res.sfx_attack)
+
 	attacker.notify_before_attack(defender)
 	var base := attacker.get_damage(defender)
 	var dmg := base

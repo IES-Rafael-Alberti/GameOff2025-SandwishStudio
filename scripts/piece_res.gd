@@ -5,7 +5,7 @@ enum PieceRace { NORDICA, JAPONESA, EUROPEA }
 enum PiecePowerTier { BRONCE, PLATA, ORO }
 enum PieceRarity { COMUN, RARO, EPICO, LEGENDARIO }
 
-# --- IDENTIDAD ---
+# IDENTIDAD 
 @export var id: String = ""
 @export var display_name: String = ""
 @export var race: PieceRace = PieceRace.EUROPEA
@@ -14,7 +14,13 @@ enum PieceRarity { COMUN, RARO, EPICO, LEGENDARIO }
 # Barra de vida adaptable
 @export var health_bar_offset: Vector2 = Vector2(0, -40)
 
-# --- VISUALES Y ECONOMÍA ---
+#Sonido
+@export_group("Sonidos")
+@export var sfx_spawn: AudioStream
+@export var sfx_attack: AudioStream
+@export var sfx_death: AudioStream
+
+# VISUALES Y ECONOMÍA
 @export var frames: SpriteFrames
 
 # --- ESTADÍSTICAS POR TIER ---

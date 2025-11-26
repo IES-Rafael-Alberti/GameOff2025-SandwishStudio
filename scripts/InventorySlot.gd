@@ -214,12 +214,26 @@ func _on_button_pressed() -> void:
 
 func _on_button_mouse_entered() -> void:
 	if not button.disabled:
-		# --- CLAVE 2: Solo cambiamos el material del PADRE ---
-		# El padre se pone Outline.
-		# El hijo (item_icon) MANTIENE el fill_material porque use_parent_material = false
+		# Cambiamos solo el material del padre para el efecto visual (Outline)
 		button.material = highlight_material
+	
 	if item_data:
-		tooltip.show_tooltip(item_data, sell_percentage, current_count)
+		# --- MODIFICACIÓN: LÓGICA DIFERENCIADA PARA PASIVAS ---
+		
+		if item_data is PassiveData:
+			# Si es una pasiva, queremos ver el RESUMEN GLOBAL, no solo este item.
+			# Buscamos el GameManager para acceder a los datos del inventario.
+			var gm = get_tree().get_first_node_in_group("game_manager")
+			if gm and gm.inventory:
+				# Le pasamos el diccionario 'passive_counts' que tiene TODAS las pasivas acumuladas
+				tooltip.show_passive_list_tooltip(gm.inventory.passive_counts)
+			else:
+				# Si algo falla, mostramos el individual como respaldo
+				tooltip.show_tooltip(item_data, sell_percentage, current_count)
+				
+		else:
+			# Si es una PIEZA normal (tropa), mostramos su tooltip individual estándar
+			tooltip.show_tooltip(item_data, sell_percentage, current_count)
 
 func _on_button_mouse_exited() -> void:
 	# --- CLAVE 3: Restaurar el material del PADRE ---

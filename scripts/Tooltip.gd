@@ -5,7 +5,6 @@ extends PanelContainer
 @onready var description_label: RichTextLabel = $VBoxContainer/DescriptionLabel
 @onready var sell_price_label: Label = $VBoxContainer/SellPriceLabel
 
-# --- EXPORTED ICONS ---
 @export_group("Stat Icons")
 @export var icon_health: Texture2D
 @export var icon_damage: Texture2D
@@ -14,35 +13,38 @@ extends PanelContainer
 @export var icon_crit_damage: Texture2D
 @export var icon_size: int = 20 
 
-# Dynamic style for the card
+# Referencia al propio panel
+@onready var tooltip: PanelContainer = self 
+
+# Estilo dinámico
 var card_style: StyleBoxFlat
+var units_grid: HBoxContainer = null
 
 func _ready() -> void:
+	add_to_group("tooltip")
 	hide()
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	
-	# --- 1. LAYER CONFIGURATION ---
 	top_level = true
 	z_index = 4096
 	
-	# --- 2. "PREMIUM" VISUAL STYLE ---
+	# --- ESTILO VISUAL BASE ---
 	card_style = StyleBoxFlat.new()
-	card_style.bg_color = Color(0.05, 0.05, 0.07, 0.95) 
-	
-	# Borders and Corners
-	card_style.border_width_left = 2; card_style.border_width_top = 2
-	card_style.border_width_right = 2; card_style.border_width_bottom = 2
-	card_style.corner_radius_top_left = 12; card_style.corner_radius_top_right = 12
-	card_style.corner_radius_bottom_right = 12; card_style.corner_radius_bottom_left = 12
-	
-	# Shadow
-	card_style.shadow_color = Color(0, 0, 0, 0.6)
-	card_style.shadow_size = 8
+	card_style.bg_color = Color(0.08, 0.08, 0.1, 0.98)
+	card_style.border_width_left = 2
+	card_style.border_width_top = 2
+	card_style.border_width_right = 2
+	card_style.border_width_bottom = 2
+	card_style.corner_radius_top_left = 8
+	card_style.corner_radius_top_right = 8
+	card_style.corner_radius_bottom_right = 8
+	card_style.corner_radius_bottom_left = 8
+	card_style.shadow_color = Color(0, 0, 0, 0.5)
+	card_style.shadow_size = 10
 	card_style.shadow_offset = Vector2(4, 4)
-	
-	# Margins
-	card_style.content_margin_left = 20; card_style.content_margin_right = 20
-	card_style.content_margin_top = 16; card_style.content_margin_bottom = 16
+	card_style.content_margin_left = 16
+	card_style.content_margin_right = 16
+	card_style.content_margin_top = 12
+	card_style.content_margin_bottom = 12
 	
 	add_theme_stylebox_override("panel", card_style)
 	custom_minimum_size.x = 340 
@@ -52,6 +54,22 @@ func _ready() -> void:
 	
 	if has_node("VBoxContainer/ItemIcon"):
 		get_node("VBoxContainer/ItemIcon").hide()
+
+	_ensure_units_grid_exists()
+
+func _ensure_units_grid_exists():
+	if units_grid and is_instance_valid(units_grid): return
+	if has_node("VBoxContainer/UnitsGrid"):
+		units_grid = $VBoxContainer/UnitsGrid
+	else:
+		units_grid = HBoxContainer.new()
+		units_grid.name = "UnitsGrid"
+		units_grid.alignment = BoxContainer.ALIGNMENT_CENTER
+		units_grid.add_theme_constant_override("separation", 6)
+		var margin = MarginContainer.new()
+		margin.add_theme_constant_override("margin_top", 15)
+		margin.add_child(units_grid)
+		$VBoxContainer.add_child(margin)
 
 func _process(_delta: float) -> void:
 	if visible:
@@ -66,6 +84,12 @@ func _process(_delta: float) -> void:
 			tooltip_pos.y = mouse_pos.y - tooltip_size.y - 24
 		global_position = tooltip_pos
 
+func hide_tooltip() -> void:
+	hide()
+
+# ==============================================================================
+# 1. TOOLTIP ESTÁNDAR (Objeto individual)
+# ==============================================================================
 func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int = 0) -> void:
 	if not item_data: return
 
@@ -225,19 +249,222 @@ func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int 
 	show()
 	await get_tree().process_frame
 	size = Vector2.ZERO
-
-# --- HELPER: Generates [img] tag ---
-func _get_icon_tag(texture: Texture2D) -> String:
-	if texture:
-		return "[img=%dx%d]%s[/img]" % [icon_size, icon_size, texture.resource_path]
-	return ""
-
-func _row_table(label: String, val_old, val_new, show_upg: bool, color_hex: String) -> String:
-	var row = ""
-	# Columna 1: Etiqueta con color
-	row += "[cell][color=%s] %s[/color][/cell]" % [color_hex, label]
+# ==============================================================================
+# 2. TOOLTIP DE SINERGIAS (CON FIX DE IMÁGENES)
+# ==============================================================================
+func show_synergy_tooltip(race_name: String, current_count: int, max_count: int, bonuses: Array, color_theme: Color, all_pieces: Array = [], active_ids: Array = []) -> void:
+	_ensure_units_grid_exists()
 	
-	# Columna 2: Valor
+	name_label.text = race_name.to_upper()
+	name_label.label_settings = LabelSettings.new()
+	name_label.label_settings.font_color = color_theme
+	name_label.label_settings.font_size = 24
+	name_label.label_settings.outline_size = 6
+	name_label.label_settings.outline_color = Color(0, 0, 0, 1)
+	
+	if card_style:
+		card_style.border_color = color_theme
+		card_style.bg_color = Color(0.08, 0.08, 0.1, 0.98) 
+
+	var text = ""
+	var count_color = "#ffffff" if current_count > 0 else "#777777"
+	text += "[center][color=#aaaaaa]Sinergia Activa:[/color] [color=%s][b]%d / %d[/b] Unidades[/color][/center]\n" % [count_color, current_count, max_count]
+	text += "[center][color=#444444]━━━━━━━━━━━━━━━━━━[/color][/center]\n"
+	
+	text += "[table=1]"
+	for i in range(bonuses.size()):
+		var bonus_data = bonuses[i] 
+		var req = bonus_data["required"]
+		var desc = bonus_data["desc"]
+		if current_count >= req:
+			text += "[cell][color=%s]✔ [b](%d) %s[/b][/color][/cell]" % [color_theme.to_html(), req, desc]
+		else:
+			text += "[cell][color=#555555]🔒 (%d) %s[/color][/cell]" % [req, desc]
+	text += "[/table]"
+	
+	text += "\n[center][i][font_size=12][color=#666666]Colección:[/color][/font_size][/i][/center]"
+	description_label.text = text
+	
+	for child in units_grid.get_children(): child.queue_free()
+	
+	if not all_pieces.is_empty():
+		var processed_ids = {}
+		for piece_res in all_pieces:
+			if not piece_res: continue
+			var p_id = piece_res.get("id")
+			if p_id != null:
+				if p_id in processed_ids: continue
+				processed_ids[p_id] = true
+			
+			var card_frame = PanelContainer.new()
+			card_frame.custom_minimum_size = Vector2(48, 48)
+			
+			var rarity = 0
+			if "rarity" in piece_res: rarity = piece_res.rarity
+			var rarity_col = _get_rarity_color(rarity)
+			
+			var is_active = false
+			if p_id != null:
+				for act_id in active_ids:
+					if str(act_id) == str(p_id): is_active = true; break
+			
+			var frame_style = StyleBoxFlat.new()
+			frame_style.bg_color = Color(0, 0, 0, 0.5)
+			frame_style.border_width_left = 2; frame_style.border_width_top = 2
+			frame_style.border_width_right = 2; frame_style.border_width_bottom = 2
+			frame_style.corner_radius_top_left = 4; frame_style.corner_radius_top_right = 4
+			frame_style.corner_radius_bottom_right = 4; frame_style.corner_radius_bottom_left = 4
+			
+			if is_active:
+				frame_style.border_color = rarity_col
+				card_frame.modulate = Color(1, 1, 1, 1)
+			else:
+				frame_style.border_color = Color(0.3, 0.3, 0.3, 1)
+				card_frame.modulate = Color(0.4, 0.4, 0.4, 0.8)
+
+			card_frame.add_theme_stylebox_override("panel", frame_style)
+			
+			var icon_rect = TextureRect.new()
+			icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			icon_rect.custom_minimum_size = Vector2(40, 40)
+			
+			var final_texture = null
+			if "icon" in piece_res and piece_res.icon: final_texture = piece_res.icon
+			elif "frames" in piece_res and piece_res.frames:
+				var frames = piece_res.frames
+				var anims = frames.get_animation_names()
+				var best_anim = ""
+				if "idle" in anims: best_anim = "idle"
+				elif "default" in anims: best_anim = "default"
+				elif anims.size() > 0: best_anim = anims[0]
+				if best_anim != "" and frames.get_frame_count(best_anim) > 0:
+					final_texture = frames.get_frame_texture(best_anim, 0)
+
+			if final_texture == null:
+				var p_name = piece_res.get("display_name")
+				if p_name == null: p_name = piece_res.get("piece_name")
+				if p_name:
+					var path_attempt = "res://assets/piezas/" + p_name + ".png"
+					if ResourceLoader.exists(path_attempt): final_texture = load(path_attempt)
+
+			if final_texture: icon_rect.texture = final_texture
+			else:
+				var placeholder = PlaceholderTexture2D.new()
+				placeholder.size = Vector2(40,40)
+				icon_rect.texture = placeholder
+				icon_rect.modulate = Color(1, 0, 0, 0.2)
+
+			var margin = MarginContainer.new()
+			margin.add_theme_constant_override("margin_top", 4); margin.add_theme_constant_override("margin_bottom", 4)
+			margin.add_theme_constant_override("margin_left", 4); margin.add_theme_constant_override("margin_right", 4)
+			
+			margin.add_child(icon_rect)
+			card_frame.add_child(margin)
+			units_grid.add_child(card_frame)
+
+	sell_price_label.hide()
+	show()
+	await get_tree().process_frame
+	size = Vector2.ZERO
+
+func show_passive_list_tooltip(active_passives: Dictionary) -> void:
+	_ensure_units_grid_exists()
+	for child in units_grid.get_children(): child.queue_free()
+	
+	# --- ESTILO DEL PANEL ---
+	name_label.text = "ESTADÍSTICAS"
+	name_label.label_settings = LabelSettings.new()
+	name_label.label_settings.font_color = Color("#FFD700") # Dorado
+	name_label.label_settings.font_size = 24
+	name_label.label_settings.outline_size = 6
+	name_label.label_settings.outline_color = Color(0, 0, 0, 1)
+	
+	if card_style:
+		card_style.border_color = Color("#FFD700")
+		card_style.bg_color = Color(0.08, 0.08, 0.1, 0.98) # Fondo oscuro sólido
+
+	var text = ""
+	
+	if active_passives.is_empty():
+		text += "\n[center][color=#666666][i]Inventario vacío[/i][/color][/center]\n"
+	else:
+		text += "[center][color=#aaaaaa]Bonificaciones actuales:[/color][/center]\n"
+		text += "[color=#444444]━━━━━━━━━━━━━━━━━━[/color]\n"
+		
+		# Tabla de 3 columnas: Icono+Nombre | Cantidad | Total
+		text += "[table=3]"
+		
+		var keys = active_passives.keys()
+		keys.sort()
+		
+		for key in keys:
+			var entry = active_passives[key]
+			var p_data = entry["data"]
+			var count = entry["count"]
+			
+			if not p_data: continue
+			
+			# 1. SELECCIÓN DE ICONO REAL Y COLOR
+			var icon_path = ""
+			var name_color = "#ffffff"
+			
+			match p_data.type:
+				PassiveData.PassiveType.HEALTH_INCREASE: 
+					icon_path = "res://assets/inventario/VIDA.png"
+					name_color = "#ff5555" # Rojo Vida
+				PassiveData.PassiveType.CRITICAL_DAMAGE_INCREASE: 
+					icon_path = "res://assets/inventario/CritDMG.png"
+					name_color = "#ff9f43" # Naranja
+				PassiveData.PassiveType.CRITICAL_CHANCE_INCREASE: 
+					icon_path = "res://assets/inventario/Crit.png"
+					name_color = "#fab1a0" # Salmón
+				PassiveData.PassiveType.ATTACK_SPEED_INCREASE: 
+					icon_path = "res://assets/inventario/ASPEED.png"
+					name_color = "#feca57" # Amarillo
+				PassiveData.PassiveType.BASE_DAMAGE_INCREASE: 
+					icon_path = "res://assets/inventario/ADMG.png"
+					name_color = "#ee5253" # Rojo Daño
+			
+			# Creamos el tag de imagen bbcode. [img=ancho]ruta[/img]
+			var icon_bbcode = ""
+			if ResourceLoader.exists(icon_path):
+				# Ajusta el tamaño (24px) para que cuadre con el texto
+				icon_bbcode = "[img=24]%s[/img]" % icon_path 
+			else:
+				icon_bbcode = "🔸" # Fallback si falla la carga
+			
+			# 2. COLUMNA 1: Icono + Nombre
+			# Usamos [valign] si está disponible o simplemente el icono inline
+			text += "[cell][font_size=18][color=%s] %s %s  [/color][/font_size][/cell]" % [name_color, icon_bbcode, p_data.name_passive]
+			
+			# 3. COLUMNA 2: Cantidad (Estilo Badge/Etiqueta)
+			text += "[cell][center][color=#666666]x[/color][b][font_size=18][color=#ffffff]%d[/color][/font_size][/b][/center][/cell]" % count
+			
+			# 4. COLUMNA 3: Valor Total Calculado
+			var base_val = float(p_data.value)
+			var total_val = base_val * count
+			var val_str = ""
+			
+			if p_data.type == PassiveData.PassiveType.CRITICAL_CHANCE_INCREASE:
+				val_str = "+%d%%" % int(total_val)
+			elif floor(total_val) == total_val:
+				val_str = "+%d" % int(total_val)
+			else:
+				val_str = "+%.1f" % total_val
+				
+			text += "[cell][p align=right][b][font_size=18][color=#55efc4]%s[/color][/font_size][/b][/p][/cell]" % val_str
+			
+		text += "[/table]"
+		text += "\n[color=#444444]━━━━━━━━━━━━━━━━━━[/color]"
+
+	description_label.text = text
+	sell_price_label.hide()
+	show()
+
+# --- HELPERS ---
+func _row_table(label: String, val_old, val_new, show_upg: bool, color_hex: String) -> String:
+	var row = "[cell][color=%s] %s[/color][/cell]" % [color_hex, label]
 	if show_upg and str(val_old) != str(val_new):
 		# CORREGIDO: Añadidas etiquetas [b] para negrita en ambos valores
 		row += "[cell][color=#cccccc][b]%s[/b][/color] [color=#00ff00]➞ [b]%s[/b][/color][/cell]" % [str(val_old), str(val_new)]
@@ -247,19 +474,14 @@ func _row_table(label: String, val_old, val_new, show_upg: bool, color_hex: Stri
 	return row
 
 func _calculate_price_logic(data, count) -> int:
-	var base = data.price
-	var mult = 1.0 + (0.5 * count)
-	return int(base * mult)
-
-func hide_tooltip() -> void:
-	hide()
+	return int(data.price * (1.0 + (0.5 * count)))
 
 func _get_rarity_color(rarity_enum: int) -> Color:
 	match rarity_enum:
-		0: return Color("#b2bec3") 
-		1: return Color("#0984e3") 
-		2: return Color("#a55eea") 
-		3: return Color("#f1c40f") 
+		0: return Color("#b2bec3")
+		1: return Color("#0984e3")
+		2: return Color("#a55eea")
+		3: return Color("#f1c40f")
 		_: return Color.WHITE
 
 func _get_race_name(race_enum: int) -> String:
@@ -281,34 +503,21 @@ func _get_rarity_name(rarity_enum: int) -> String:
 func _get_passive_stats_string(data: PassiveData) -> String:
 	var val = data.value
 	match data.type:
-		PassiveData.PassiveType.HEALTH_INCREASE:
-			return "[color=#4ecdc4]%s Max Health:[/color] [b]+%s[/b]" % [_get_icon_tag(icon_health), val]
-		PassiveData.PassiveType.CRITICAL_DAMAGE_INCREASE:
-			return "[color=#ff9f43]%s Crit Damage:[/color] [b]+%s[/b]" % [_get_icon_tag(icon_crit_damage), val]
-		PassiveData.PassiveType.CRITICAL_CHANCE_INCREASE:
-			return "[color=#ff9f43]%s Crit Chance:[/color] [b]+%s%%[/b]" % [_get_icon_tag(icon_crit_chance), val]
-		PassiveData.PassiveType.ATTACK_SPEED_INCREASE:
-			return "[color=#ffe66d]%s Attack Speed:[/color] [b]+%s[/b]" % [_get_icon_tag(icon_speed), val]
-		PassiveData.PassiveType.BASE_DAMAGE_INCREASE:
-			return "[color=#ff6b6b]%s Base Damage:[/color] [b]+%s[/b]" % [_get_icon_tag(icon_damage), val]
+		PassiveData.PassiveType.HEALTH_INCREASE: return "[color=#4ecdc4]✚ Vida Max:[/color] [b]+%s[/b]" % val
+		PassiveData.PassiveType.CRITICAL_DAMAGE_INCREASE: return "[color=#ff9f43]💥 Daño Crítico:[/color] [b]+%s[/b]" % val
+		PassiveData.PassiveType.CRITICAL_CHANCE_INCREASE: return "[color=#ff9f43]🎯 Prob. Crítico:[/color] [b]+%s%%[/b]" % val
+		PassiveData.PassiveType.ATTACK_SPEED_INCREASE: return "[color=#ffe66d]⚡ Vel. Ataque:[/color] [b]+%s[/b]" % val
+		PassiveData.PassiveType.BASE_DAMAGE_INCREASE: return "[color=#ff6b6b]⚔️ Daño Base:[/color] [b]+%s[/b]" % val
 	return ""
-
-# --- SUMMARY TOOLTIP WITH ICONS ---
 func show_passive_summary(passive_counts: Dictionary, multiplier: float) -> void:
 	if passive_counts.is_empty(): return 
-	name_label.text = "Fruit Medley"
 
-	var ls := LabelSettings.new()
-
-	# MUY IMPORTANTE: darle una fuente válida.
-	ls.font = get_theme_default_font()
-
-	ls.font_color = Color("#FFD700")
-	ls.font_size = 22
-	ls.outline_size = 6
-	ls.outline_color = Color(0, 0, 0, 1)
-
-	name_label.label_settings = ls
+	name_label.text = "UPGRADES SUMMARY"
+	name_label.label_settings = LabelSettings.new()
+	name_label.label_settings.font_color = Color("#FFD700") 
+	name_label.label_settings.font_size = 22
+	name_label.label_settings.outline_size = 6
+	name_label.label_settings.outline_color = Color(0, 0, 0, 1)
 	
 	if card_style:
 		card_style.border_color = Color("#FFD700")
@@ -353,4 +562,8 @@ func _get_passive_stat_label(type: int, total_val: float) -> String:
 			return "[color=#ffe66d]%s +%s Attack Speed[/color]" % [_get_icon_tag(icon_speed), val_str]
 		PassiveData.PassiveType.BASE_DAMAGE_INCREASE:
 			return "[color=#ff6b6b]%s +%s Base Damage[/color]" % [_get_icon_tag(icon_damage), val_str]
+	return ""
+func _get_icon_tag(texture: Texture2D) -> String:
+	if texture:
+		return "[img=%dx%d]%s[/img]" % [icon_size, icon_size, texture.resource_path]
 	return ""

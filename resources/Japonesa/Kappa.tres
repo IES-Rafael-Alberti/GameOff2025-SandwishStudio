@@ -17,7 +17,7 @@ stats = {
 "crit_mult": 1.5,
 "dmg": 5.0,
 "hp": 60.0,
-"members": 6
+"members": 4
 },
 "ORO": {
 "aps": 1.2,
