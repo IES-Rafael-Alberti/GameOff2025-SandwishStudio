@@ -18,3 +18,9 @@ enum UnitType { GLADIATOR, PIECE }
 
 @export var Unit_type: UnitType = UnitType.PIECE
 @export var health_bar_offset: Vector2 = Vector2(0, -40)
+
+#Sound
+@export_group("Sonidos")
+@export var sfx_spawn: AudioStream
+@export var sfx_attack: AudioStream
+@export var sfx_death: AudioStream
