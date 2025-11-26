@@ -182,3 +182,13 @@ func _on_mouse_exited() -> void:
 	if texture_button:
 		texture_button.material = null
 	slot_exited.emit()
+func update_price(new_price: int) -> void:
+	current_price = new_price
+	
+	if price_label:
+		var icon_bbcode = ""
+		if coin_icon:
+			icon_bbcode = "[img=20x20]%s[/img]" % coin_icon.resource_path
+		
+		# Actualizamos el texto manteniendo el efecto wave
+		price_label.text = "[center][wave amp=25 freq=5]%d %s[/wave][/center]" % [current_price, icon_bbcode]

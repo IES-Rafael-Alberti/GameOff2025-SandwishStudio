@@ -12,7 +12,8 @@ const NPC_DEATH_PARTICLES := preload("res://scenes/npc_death_particles.tscn")
 @export var enemy_res: Array[npcRes] = []
 const ALLY_LIMIT := 14
 const ENEMY_LIMIT := 1
-
+var current_wave_attacks: int = 0 # Cuantos ataques llevamos en esta oleada
+var jap_wave_counter: int = 0     # Cuantas oleadas han pasado (1, 2, 3 -> ACTIVAR)
 var round_gold_loot: int = 0
 
 # Animacion de golpear aliados y enemigos
@@ -514,7 +515,8 @@ func _on_start_pressed() -> void:
 
 func _begin_combat() -> void:
 	print("Battle begins")
-
+	current_wave_attacks = 0
+	jap_wave_counter = 0
 	round_gold_loot = 0 
 	if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 		var w: npc = enemy_npcs[0]
@@ -673,7 +675,8 @@ func _do_attack(attacker: npc, defender: npc) -> void:
 	
 	if (not is_instance_valid(defender)) or after_hp <= 0.0:
 		attacker.notify_kill(defender)
-	
+	if attacker.team == npc.Team.ALLY:
+		_process_ally_wave_logic()
 	var crit_text := " (no crit)"
 	if crit: crit_text = " CRIT x" + _num(mult)
 	print("[HIT] ", _team_to_str(attacker.team), " -> ", _team_to_str(defender.team), " | final=", _num(dmg), crit_text)
@@ -720,3 +723,30 @@ func _advance_to_battle_and_start() -> void:
 	if not combat_running:
 		combat_running = true
 		start_timer.start(0.8)
+func _process_ally_wave_logic() -> void:
+	# 1. Contamos el ataque actual
+	current_wave_attacks += 1
+	
+	# 2. Calculamos cuántos aliados están vivos actualmente
+	var living_allies_count: int = 0
+	for a in ally_npcs:
+		if is_instance_valid(a) and a.health > 0:
+			living_allies_count += 1
+	
+	if living_allies_count == 0: return
+
+	# 3. Comprobamos si se ha completado una oleada (ataques >= num aliados vivos)
+	if current_wave_attacks >= living_allies_count:
+		current_wave_attacks = 0 # Reseteamos contador de ataques para la siguiente oleada
+		jap_wave_counter += 1    # Incrementamos el contador de "turnos/oleadas"
+		
+		# print("Oleada Aliada Completada. Contador Jap: ", jap_wave_counter)
+		
+		# 4. Cada 3 oleadas, activamos la carga especial
+		if jap_wave_counter % 3 == 0:
+			# print("¡Sinergia Japonesa Activada Globalmente!")
+			for a in ally_npcs:
+				if is_instance_valid(a) and a.health > 0:
+					# Llamamos a la nueva función que creamos en npc.gd
+					if a.has_method("charge_jap_synergy"):
+						a.charge_jap_synergy()

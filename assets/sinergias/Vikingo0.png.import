@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b6hogl04y4oll"
-path="res://.godot/imported/coin 2_0.png-048937331fc0b5603d5e8ef591318213.ctex"
+uid="uid://yqtalunulmvv"
+path="res://.godot/imported/Vikingo0.png-4f17b07660e26340919f05bf95d2c10c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/coin 2_0.png"
-dest_files=["res://.godot/imported/coin 2_0.png-048937331fc0b5603d5e8ef591318213.ctex"]
+source_file="res://assets/sinergias/Vikingo0.png"
+dest_files=["res://.godot/imported/Vikingo0.png-4f17b07660e26340919f05bf95d2c10c.ctex"]
 
 [params]
 
