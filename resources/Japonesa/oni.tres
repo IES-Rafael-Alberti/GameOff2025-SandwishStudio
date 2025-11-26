@@ -30,10 +30,10 @@ stats = {
 },
 "PLATA": {
 "aps": 1.1,
-"crit_chance": 10,
+"crit_chance": 12,
 "crit_mult": 1.6,
-"dmg": 15.0,
-"hp": 150.0,
+"dmg": 24.0,
+"hp": 390.0,
 "members": 2
 }
 }

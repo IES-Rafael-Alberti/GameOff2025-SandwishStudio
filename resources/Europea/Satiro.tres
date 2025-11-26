@@ -26,11 +26,11 @@ stats = {
 "members": 10
 },
 "PLATA": {
-"aps": 1.1,
-"crit_chance": 10,
+"aps": 1.5,
+"crit_chance": 9,
 "crit_mult": 1.6,
-"dmg": 15.0,
-"hp": 150.0,
+"dmg": 6.0,
+"hp": 65.0,
 "members": 8
 }
 }

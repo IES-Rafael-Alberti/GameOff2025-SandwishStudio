@@ -29,11 +29,11 @@ stats = {
 },
 "PLATA": {
 "aps": 1.1,
-"crit_chance": 10,
+"crit_chance": 6,
 "crit_mult": 1.6,
-"dmg": 15.0,
-"hp": 150.0,
-"members": 8
+"dmg": 7.0,
+"hp": 85.0,
+"members": 4
 }
 }
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"

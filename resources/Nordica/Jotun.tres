@@ -29,12 +29,12 @@ stats = {
 "members": 3
 },
 "PLATA": {
-"aps": 1.1,
-"crit_chance": 10,
+"aps": 0.8,
+"crit_chance": 6,
 "crit_mult": 1.6,
-"dmg": 15.0,
-"hp": 150.0,
-"members": 2
+"dmg": 28.0,
+"hp": 640.0,
+"members": 1
 }
 }
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"

@@ -30,11 +30,11 @@ stats = {
 },
 "PLATA": {
 "aps": 1.1,
-"crit_chance": 10,
+"crit_chance": 9,
 "crit_mult": 1.6,
-"dmg": 15.0,
+"dmg": 9.0,
 "hp": 150.0,
-"members": 8
+"members": 5
 }
 }
 metadata/_custom_type_script = "uid://cxyfaki7gjiby"
