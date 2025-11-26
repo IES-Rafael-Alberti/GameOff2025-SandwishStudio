@@ -18,12 +18,12 @@ stats = {
 "members": 3
 },
 "ORO": {
-"aps": 1.2,
-"crit_chance": 15,
-"crit_mult": 2.0,
-"dmg": 25.0,
-"hp": 250.0,
-"members": 10
+"aps": 1.4,
+"crit_chance": 21,
+"crit_mult": 2.2,
+"dmg": 16.0,
+"hp": 120.0,
+"members": 3
 },
 "PLATA": {
 "aps": 1.3,
