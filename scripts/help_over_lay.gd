@@ -17,8 +17,10 @@ var is_animating: bool = false
 @onready var progress_label: Label = $PanelBg/progress_label
 
 func _ready() -> void:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	print("HelpOverlay READY")
 
+	panel_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	# Que el papiro no robe el ratón si pasa por encima del botón
 	panel_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -65,6 +67,8 @@ func toggle_overlay() -> void:
 
 func _open_overlay() -> void:
 	print("HelpOverlay: _open_overlay")
+	mouse_filter = Control.MOUSE_FILTER_STOP
+
 	panel_bg.visible = true
 	panel_bg.modulate.a = 0.0
 	panel_bg.position = Vector2(0, 0)
@@ -84,6 +88,7 @@ func _close_overlay() -> void:
 		panel_bg.visible = false
 		panel_bg.position = Vector2.ZERO
 		panel_bg.modulate.a = 1.0
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
 	)
 
 # Dots, botones
