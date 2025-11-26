@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("1_b7j6f")
 type = 2
-value = 3.0
+value = 0.4
 name_passive = "Fig of the luck"
 icon = ExtResource("1_pukcq")
 price = 5
