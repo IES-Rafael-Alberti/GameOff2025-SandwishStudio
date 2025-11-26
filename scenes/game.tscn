@@ -6,10 +6,10 @@
 [ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="3_kvpfn"]
 [ext_resource type="PackedScene" uid="uid://0dvayl6271no" path="res://scenes/combat_scene.tscn" id="3_lnu2h"]
 [ext_resource type="Resource" uid="uid://57d6mtngeb8t" path="res://resources/pieces/draugr.tres" id="4_dinhu"]
+[ext_resource type="Resource" uid="uid://bjcjwt742by0m" path="res://resources/pieces/kappa.tres" id="5_ir15t"]
 [ext_resource type="PackedScene" uid="uid://bv3r20c0gu33v" path="res://scenes/roulette.tscn" id="5_iywne"]
-[ext_resource type="Resource" uid="uid://b065ie430glv1" path="res://resources/pieces/banshie.tres" id="5_kvuet"]
-[ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/jotun.tres" id="6_trtic"]
-[ext_resource type="Resource" uid="uid://cxbloivuqkrwe" path="res://resources/pieces/valkirias.tres" id="7_ir15t"]
+[ext_resource type="Resource" uid="uid://btl7owx64bo4s" path="res://resources/pieces/satiro.tres" id="6_ca42v"]
+[ext_resource type="Resource" uid="uid://6rli8qlo7wmd" path="res://resources/pieces/duende.tres" id="7_rysoc"]
 [ext_resource type="Texture2D" uid="uid://dycbttp2vpnv1" path="res://assets/Tiny Swords (Free Pack)/Terrain/Water Background color.png" id="12_dinhu"]
 [ext_resource type="Texture2D" uid="uid://bse428jrn0sbc" path="res://assets/Waves.png" id="12_trtic"]
 [ext_resource type="PackedScene" uid="uid://cj8n2p21wqyqt" path="res://scenes/help_over_lay.tscn" id="13_kvuet"]
@@ -24,6 +24,10 @@ gladiators_per_day = 4
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
 position = Vector2(176.00003, 88.99997)
 scale = Vector2(0.35115045, 0.22791663)
+defeat_hp_mult = 1.2
+defeat_damage_mult = 1.3
+defeat_speed_flat = 0.1
+defeat_crit_dmg_flat = 0.04
 
 [node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
 z_index = 4
@@ -33,7 +37,7 @@ offset_right = 56.0
 offset_bottom = 780.0
 rotation = -0.00020483583
 scale = Vector2(0.77105117, 0.77105117)
-initial_pieces = Array[ExtResource("3_kvpfn")]([ExtResource("4_dinhu"), ExtResource("5_kvuet"), ExtResource("6_trtic"), ExtResource("7_ir15t")])
+initial_pieces = Array[ExtResource("3_kvpfn")]([ExtResource("5_ir15t"), ExtResource("6_ca42v"), ExtResource("7_rysoc"), ExtResource("4_dinhu")])
 
 [node name="Store" parent="." instance=ExtResource("3_iywne")]
 visible = false
