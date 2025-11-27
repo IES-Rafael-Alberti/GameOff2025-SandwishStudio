@@ -49,6 +49,7 @@ offset_top = -966.8624
 offset_right = 3123.7542
 offset_bottom = 569.1376
 scale = Vector2(1.4, 1.4)
+mouse_filter = 2
 texture = ExtResource("9_g0m11")
 metadata/_edit_use_anchors_ = true
 
