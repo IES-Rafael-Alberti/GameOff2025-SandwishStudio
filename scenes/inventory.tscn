@@ -1,19 +1,18 @@
-[gd_scene load_steps=25 format=3 uid="uid://hbcgudcjh0wn"]
+[gd_scene load_steps=26 format=3 uid="uid://hbcgudcjh0wn"]
 
 [ext_resource type="Script" uid="uid://cmqqk0nk7sejg" path="res://scripts/inventory.gd" id="1_hj2ta"]
 [ext_resource type="PackedScene" uid="uid://n7qqfs70w4b" path="res://scenes/inventory_slot.tscn" id="2_ty45s"]
 [ext_resource type="PackedScene" uid="uid://7erbtxd030w2" path="res://scenes/piece.tscn" id="3_uae8j"]
 [ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="4_40feg"]
-[ext_resource type="Texture2D" uid="uid://boul6livclehs" path="res://assets/unnamed (1).jpg" id="4_53g1v"]
 [ext_resource type="Texture2D" uid="uid://b4bl7jr41p7bk" path="res://assets/inventario/Inventario.png" id="4_uae8j"]
 [ext_resource type="Script" uid="uid://cm67y0q4u1ot5" path="res://scripts/DeleteArea.gd" id="4_yyk2a"]
-[ext_resource type="Texture2D" uid="uid://b3gvhhihiil78" path="res://assets/inventario/Bandeja.png" id="5_s887n"]
 [ext_resource type="Resource" uid="uid://57d6mtngeb8t" path="res://resources/pieces/draugr.tres" id="5_tla8l"]
 [ext_resource type="Resource" uid="uid://b065ie430glv1" path="res://resources/pieces/banshie.tres" id="6_w24ly"]
 [ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/jotun.tres" id="7_ohgsq"]
 [ext_resource type="Texture2D" uid="uid://bnarhlk7ktg1q" path="res://assets/inventario/Mesa (1).png" id="8_40feg"]
 [ext_resource type="Texture2D" uid="uid://d32k775bkfw00" path="res://assets/inventario/VIDA.png" id="9_ylenm"]
 [ext_resource type="Texture2D" uid="uid://xr5sxokqvql1" path="res://assets/inventario/ADMG.png" id="10_0df5h"]
+[ext_resource type="Texture2D" uid="uid://bk87hyxheiaoc" path="res://assets/Bandeja.png" id="10_jc13p"]
 [ext_resource type="Texture2D" uid="uid://cql2kfp3rbsgn" path="res://assets/Higo.png" id="11_5mlvw"]
 [ext_resource type="Texture2D" uid="uid://dgjstvaqfykdq" path="res://assets/inventario/ASPEED.png" id="11_fiysm"]
 [ext_resource type="Texture2D" uid="uid://b10j5vwr4mjk4" path="res://assets/inventario/Crit.png" id="12_0df5h"]
@@ -24,6 +23,10 @@
 [ext_resource type="Texture2D" uid="uid://d1vgubqe84mhy" path="res://assets/Granada.png" id="14_y2qpb"]
 [ext_resource type="Texture2D" uid="uid://v7nekwjyhuij" path="res://assets/Manzana.png" id="15_5kq8a"]
 [ext_resource type="PackedScene" uid="uid://dblnjb14cqaif" path="res://scenes/tooltip.tscn" id="16_jc13p"]
+[ext_resource type="Texture2D" uid="uid://qkb8tvmapwdv" path="res://assets/Bujero.png" id="18_jc13p"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jc13p"]
+bg_color = Color(0.004019165, 0.004019165, 0.004019165, 0)
 
 [node name="inventory" type="Control"]
 layout_mode = 3
@@ -64,9 +67,9 @@ offset_left = 1358.0109
 offset_top = 466.3503
 offset_right = 5925.0107
 offset_bottom = 7466.35
-rotation = 4.702392
+rotation = 4.712389
 scale = Vector2(0.087852575, 0.087852575)
-texture = ExtResource("5_s887n")
+texture = ExtResource("10_jc13p")
 flip_v = true
 
 [node name="piece_inventory" type="GridContainer" parent="."]
@@ -100,10 +103,10 @@ stretch_mode = 4
 
 [node name="health" type="TextureRect" parent="passive_inventory"]
 layout_mode = 0
-offset_left = -95.999985
-offset_top = 676.0001
-offset_right = 226.61061
-offset_bottom = 1030.9556
+offset_left = -44.700653
+offset_top = 679.95764
+offset_right = 277.90994
+offset_bottom = 1034.9131
 rotation = -1.5707964
 texture = ExtResource("12_jc13p")
 stretch_mode = 4
@@ -149,15 +152,23 @@ grow_vertical = 1
 [node name="delete" type="Panel" parent="."]
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 0
-offset_left = 205.0
-offset_top = 741.0
-offset_right = 305.0
-offset_bottom = 841.0
+offset_left = 129.0
+offset_top = 725.0
+offset_right = 374.0
+offset_bottom = 852.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_jc13p")
 script = ExtResource("4_yyk2a")
 
-[node name="Sprite2D" type="Sprite2D" parent="delete"]
-position = Vector2(51, 47)
-texture = ExtResource("4_53g1v")
+[node name="Sprite2D" type="TextureRect" parent="delete"]
+layout_mode = 0
+offset_left = -1.0
+offset_top = -3.999977
+offset_right = 1816.576
+offset_bottom = 601.11597
+scale = Vector2(0.14414802, 0.23631842)
+texture = ExtResource("18_jc13p")
+expand_mode = 2
+stretch_mode = 4
 
 [node name="TextureRect3" type="TextureRect" parent="."]
 layout_mode = 0
