@@ -60,11 +60,11 @@ texture = ExtResource("4_uae8j")
 
 [node name="Bandeja" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 1982.968
-offset_top = 15.000028
-offset_right = 6549.968
-offset_bottom = 7015.0
-rotation = 1.5707964
+offset_left = 1358.0109
+offset_top = 466.3503
+offset_right = 5925.0107
+offset_bottom = 7466.35
+rotation = 4.702392
 scale = Vector2(0.087852575, 0.087852575)
 texture = ExtResource("5_s887n")
 flip_v = true
@@ -81,15 +81,14 @@ columns = 2
 
 [node name="passive_inventory" type="Control" parent="."]
 anchors_preset = 0
-offset_left = 1943.968
-offset_top = 60.000027
-offset_right = 2616.671
-offset_bottom = 1202.9517
+offset_left = 1966.9789
+offset_top = 127.35034
+offset_right = 2639.6816
+offset_bottom = 1270.302
 rotation = 1.5707964
 scale = Vector2(0.5, 0.5)
 
 [node name="cchance" type="TextureRect" parent="passive_inventory"]
-z_index = 1
 layout_mode = 0
 offset_left = 278.00003
 offset_top = 572.0
@@ -168,6 +167,7 @@ offset_right = 4436.318
 offset_bottom = 2402.0012
 scale = Vector2(0.25786263, 0.17371413)
 texture = ExtResource("13_40feg")
+stretch_mode = 4
 
 [node name="VBoxContainer" type="VBoxContainer" parent="TextureRect3"]
 layout_mode = 0
@@ -237,7 +237,7 @@ size_flags_horizontal = 3
 [node name="TextureRect" type="TextureRect" parent="TextureRect3/SpeedCOntainer"]
 layout_mode = 2
 texture = ExtResource("11_fiysm")
-stretch_mode = 2
+stretch_mode = 4
 
 [node name="Label" type="Label" parent="TextureRect3/SpeedCOntainer"]
 layout_mode = 2

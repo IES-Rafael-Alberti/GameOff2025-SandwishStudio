@@ -491,11 +491,11 @@ func _update_reroll_button_visuals():
 		return
 	var cost = _calculate_reroll_cost()
 	if cost == 0:
-		reroll_label.text = "GRATIS"
+		reroll_label.text = "FREE!"
 		reroll_label.modulate = Color(0.2, 1.0, 0.2) 
 		reroll_button.modulate = Color.WHITE
 	else:
-		reroll_label.text = "-%d €" % cost
+		reroll_label.text = "-%d" % cost
 		if PlayerData.has_enough_currency(cost):
 			reroll_label.modulate = Color(1.0, 0.9, 0.4) 
 			reroll_button.modulate = Color.WHITE
