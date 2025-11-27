@@ -1,6 +1,6 @@
 extends Panel
 
-@onready var sprite: Sprite2D = $Sprite2D
+@onready var sprite: TextureRect = $Sprite2D
 
 var normal_color = Color.WHITE
 var hover_color = Color(1.0, 1.0, 1.0, 0.7)
@@ -34,17 +34,12 @@ func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 	var game_manager = get_tree().current_scene
 	
 	if game_manager and "current_state" in game_manager:
-		# Basado en tu GameManager:
-		# GameState.SHOP = 0
-		# GameState.ROULETTE = 1
-		# GameState.SPINNING = 2  <-- Bloquear
-		# GameState.COMBAT = 3    <-- Bloquear
+
 		
 		if game_manager.current_state == 2 or game_manager.current_state == 3:
 			return false
-	# --- FIN NUEVA LÓGICA DE BLOQUEO ---
+
 	
-	# Fallback: Si no encuentra el GameManager, usa tu variable local anterior
 	if _is_roulette_spinning:
 		return false
 
