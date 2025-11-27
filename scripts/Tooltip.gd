@@ -385,7 +385,7 @@ func show_passive_list_tooltip(active_passives: Dictionary) -> void:
 	for child in units_grid.get_children(): child.queue_free()
 	
 	# --- ESTILO DEL PANEL ---
-	name_label.text = "ESTADÍSTICAS"
+	name_label.text = "STATS"
 	var theme_font := get_theme_default_font() # Godot 4
 	var ls := LabelSettings.new()
 	ls.font = theme_font

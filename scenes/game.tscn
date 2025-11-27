@@ -20,6 +20,7 @@
 script = ExtResource("1_lbhrr")
 gold_round_base = 2
 gladiators_per_day = 4
+max_days = 4
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
 position = Vector2(176.00003, 88.99997)
@@ -47,6 +48,18 @@ offset_top = 394.0
 offset_right = 416.0
 offset_bottom = 394.0
 scale = Vector2(0.8860778, 0.88381195)
+max_copies = 3
+duplicate_piece_mult = 0.5
+duplicate_passive_mult = 0.5
+COLOR_NORMAL_BG = Color(0, 0, 0, 0.6)
+COLOR_UNAFFORD_BG = Color(1, 0, 0, 0.6)
+reroll_base_cost = 2
+reroll_cost_multiplier = 1.5
+prob_comun = 70
+prob_raro = 20
+prob_epico = 8
+prob_legendario = 2
+keep_lock_on_new_day = false
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
 z_index = 4
@@ -152,6 +165,27 @@ offset_right = 841.0
 offset_bottom = 386.0
 theme_override_font_sizes/font_size = 72
 text = "Has ganado crack :)"
+
+[node name="Lose" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="LoseImage" type="TextureRect" parent="Lose"]
+z_index = 4
+offset_left = -4.0
+offset_top = -2.0
+offset_right = 1681.0
+offset_bottom = 1093.0
+mouse_filter = 0
+texture = ExtResource("12_dinhu")
+
+[node name="Label" type="Label" parent="Lose"]
+z_index = 4
+offset_left = 333.0
+offset_top = 287.0
+offset_right = 841.0
+offset_bottom = 386.0
+theme_override_font_sizes/font_size = 72
+text = "Cagaste"
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
