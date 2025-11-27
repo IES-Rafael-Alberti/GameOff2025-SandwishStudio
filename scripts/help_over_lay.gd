@@ -20,6 +20,16 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	print("HelpOverlay READY")
 
+	var empty_style := StyleBoxEmpty.new()
+	for b in [btn_prev, btn_next]:
+		b.flat = true
+		b.focus_mode = Control.FOCUS_NONE
+		b.add_theme_stylebox_override("normal", empty_style)
+		b.add_theme_stylebox_override("hover", empty_style)
+		b.add_theme_stylebox_override("pressed", empty_style)
+		b.add_theme_stylebox_override("focus", empty_style)
+		b.add_theme_stylebox_override("hover_pressed", empty_style)
+
 	# Que el papiro no robe el ratón si pasa por encima del botón
 	panel_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
