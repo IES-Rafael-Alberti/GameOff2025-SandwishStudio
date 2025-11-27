@@ -25,11 +25,12 @@ max_days = 4
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
 position = Vector2(176.00003, 88.99997)
 scale = Vector2(0.35115045, 0.22791663)
-scaling_hp_mult = 1.7
+scaling_hp_mult = 2.0
 scaling_damage_mult = 1.5
+scaling_speed_flat = 0.5
 defeat_hp_mult = 1.5
-defeat_damage_mult = 1.4
-defeat_speed_flat = 0.1
+defeat_damage_mult = 1.1
+defeat_speed_flat = 0.3
 defeat_crit_dmg_flat = 0.04
 
 [node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
