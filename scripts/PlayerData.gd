@@ -2,7 +2,7 @@ extends Node
 
 signal currency_changed(new_amount: int)
 
-@export var initial_currency: int = 3
+@export var initial_currency: int = 300
 
 var current_currency: int = 0
 
