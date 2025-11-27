@@ -110,7 +110,7 @@ func on_roulette_combat_requested(piece_resource: Resource) -> void:
 		if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 			var g := enemy_npcs[0]
 			if g.position == enemy_battle_slot.position:
-				_move_with_tween(g, enemy_wait_slot.position, 0.5)
+				_move_with_tween_global(g, enemy_wait_slot.global_position, 0.5)
 		
 		return
 		
@@ -137,8 +137,8 @@ func on_roulette_combat_requested(piece_resource: Resource) -> void:
 		print("Gladiador de la ronda anterior sigue vivo. Reutilizándolo.")
 		if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 			var g := enemy_npcs[0]
-			if g.position != enemy_wait_slot.position:
-				_move_with_tween(g, enemy_wait_slot.position, 0.5)
+			if g.global_position != enemy_wait_slot.global_position:
+				_move_with_tween_global(g, enemy_wait_slot.global_position, 0.5)
 
 	_start_pre_battle_sequence()
 
@@ -180,7 +180,7 @@ func _stop_combat() -> void:
 	# Si el gladiador sobrevive, lo mandamos al slot de espera
 	if not player_won_round:
 		if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
-			_move_with_tween(enemy_npcs[0], enemy_wait_slot.position, 0.5)
+			_move_with_tween_global(enemy_npcs[0], enemy_wait_slot.global_position, 0.5)
 
 	# Esperamos un poco y enviamos la señal directamente
 	await get_tree().create_timer(1.0).timeout
@@ -258,7 +258,7 @@ func reset_for_new_day() -> void:
 func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 	var n: npc = NPC_SCENE.instantiate()
 	n.team = team
-	n.position = pos
+	n.global_position = pos
 	n.npc_res = res_override
 	
 	if n is AnimatedSprite2D:
@@ -738,7 +738,7 @@ func _start_pre_battle_sequence() -> void:
 func _advance_to_battle_and_start() -> void:
 	if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 		var g := enemy_npcs[0]
-		_move_with_tween(g, enemy_battle_slot.position, 0.8)
+		_move_with_tween_global(g, enemy_battle_slot.global_position, 0.8)
 	
 	for a in ally_npcs:
 		if is_instance_valid(a):
@@ -748,6 +748,7 @@ func _advance_to_battle_and_start() -> void:
 	if not combat_running:
 		combat_running = true
 		start_timer.start(0.8)
+
 func _process_ally_wave_logic() -> void:
 	# 1. Contamos el ataque actual
 	current_wave_attacks += 1
@@ -775,3 +776,11 @@ func _process_ally_wave_logic() -> void:
 					# Llamamos a la nueva función que creamos en npc.gd
 					if a.has_method("charge_jap_synergy"):
 						a.charge_jap_synergy()
+
+func _move_with_tween_global(n: npc, target_pos: Vector2, duration: float = 1.8) -> void:
+	if not is_instance_valid(n):
+		return
+	var tween := create_tween()
+	tween.tween_property(n, "global_position", target_pos, duration) \
+		.set_trans(Tween.TRANS_SINE) \
+		.set_ease(Tween.EASE_OUT)
