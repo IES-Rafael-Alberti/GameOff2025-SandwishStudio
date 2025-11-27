@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://cxhtyg5j77yqb" path="res://assets/Combat_scene/allies_final/Oni.png" id="1_g2r3x"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_dd4jn"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_g2r3x"]
 atlas = ExtResource("1_g2r3x")
 region = Rect2(0, 0, 209, 263)
 
@@ -10,7 +10,7 @@ region = Rect2(0, 0, 209, 263)
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_dd4jn")
+"texture": SubResource("AtlasTexture_g2r3x")
 }],
 "loop": true,
 "name": &"idle",

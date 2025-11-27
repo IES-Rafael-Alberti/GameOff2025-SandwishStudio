@@ -15,6 +15,7 @@ const ENEMY_LIMIT := 1
 var current_wave_attacks: int = 0 # Cuantos ataques llevamos en esta oleada
 var jap_wave_counter: int = 0     # Cuantas oleadas han pasado (1, 2, 3 -> ACTIVAR)
 var round_gold_loot: int = 0
+const BASE_ROUND_GOLD := 2
 
 # Animacion de golpear aliados y enemigos
 @export_group("Animación de Ataque")
@@ -83,8 +84,6 @@ var combat_running := false
 var start_timer: Timer
 var ally_timers: Array[Timer] = []
 var enemy_timers: Array[Timer] = []
-var enemy_hp_round_start: float = 0.0
-var enemy_gold_round_start: int = 0
 var round_number := 0
 
 func _ready() -> void:
@@ -144,23 +143,6 @@ func on_roulette_combat_requested(piece_resource: Resource) -> void:
 	_start_pre_battle_sequence()
 
 func _stop_combat() -> void:
-
-	if enemy_npcs.size() > 0 and ally_npcs.is_empty():
-		var w: npc = enemy_npcs[0]
-		if is_instance_valid(w) and w.health > 0.0:
-			var hp_lost: float = max(0.0, enemy_hp_round_start - w.health)
-			var damage_frac: float = clamp(hp_lost / w.max_health, 0.0, 1.0)
-			var base_gold: int = enemy_gold_round_start
-			var payout: int = int(floor(base_gold * damage_frac))
-			payout = clamp(payout, 0, int(w.gold_pool))
-
-			if payout > 0:
-				PlayerData.add_currency(payout)
-				w.gold_pool = int(w.gold_pool) - payout
-
-				round_gold_loot += payout
-				print("Round reward (partial): +", payout)
-	
 	for t in ally_timers:
 		if is_instance_valid(t):
 			t.stop()
@@ -190,11 +172,9 @@ func _stop_combat() -> void:
 
 	var player_won_round = not enemy_alive
 	
-	# --- MODIFICADO: Contar victoria si ganamos ---
 	if player_won_round:
 		daily_defeat_count += 1
 		print("Victoria de ronda. Derrotas acumuladas hoy: ", daily_defeat_count)
-	# ----------------------------------------------
 	
 	# Resultado de la ronda
 	# Si el gladiador sobrevive, lo mandamos al slot de espera
@@ -205,6 +185,10 @@ func _stop_combat() -> void:
 	# Esperamos un poco y enviamos la señal directamente
 	await get_tree().create_timer(1.0).timeout
 	
+	PlayerData.add_currency(BASE_ROUND_GOLD)
+	round_gold_loot += BASE_ROUND_GOLD
+	print("Base round reward: +", BASE_ROUND_GOLD, " gold.")
+
 	_cleanup_allies_and_reset()
 	combat_finished.emit(player_won_round, round_gold_loot)
 		
@@ -518,10 +502,6 @@ func _begin_combat() -> void:
 	current_wave_attacks = 0
 	jap_wave_counter = 0
 	round_gold_loot = 0 
-	if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
-		var w: npc = enemy_npcs[0]
-		enemy_hp_round_start = w.health
-		enemy_gold_round_start = int(w.gold_pool)
 
 	for i in range(ally_npcs.size()):
 		var a: npc = ally_npcs[i]
