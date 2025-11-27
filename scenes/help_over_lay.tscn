@@ -94,17 +94,17 @@ offset_top = 1048.0
 offset_right = 1528.0
 offset_bottom = 1080.0
 
-[node name="ProgressBar" type="ProgressBar" parent="PanelBg"]
-layout_mode = 0
-offset_left = 152.0
-offset_top = 680.0
-offset_right = 992.0
-offset_bottom = 707.0
-show_percentage = false
-
 [node name="progress_label" type="Label" parent="PanelBg"]
-layout_mode = 0
-offset_left = 440.0
-offset_top = 632.0
-offset_right = 480.0
-offset_bottom = 661.0
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -21.0
+offset_top = -161.0
+offset_right = 19.0
+offset_bottom = -83.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 45

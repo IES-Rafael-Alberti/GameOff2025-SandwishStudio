@@ -12,15 +12,14 @@ var is_animating: bool = false
 @onready var btn_next: Button = $PanelBg/BtnNext
 @onready var dots: HBoxContainer = $PanelBg/Dots
 @onready var help_button: Button = $HelpButton
-@onready var slide_base_pos: Vector2 = slide_current.position
-@onready var progress_bar: ProgressBar = $PanelBg/ProgressBar
 @onready var progress_label: Label = $PanelBg/progress_label
+
+var slide_base_pos: Vector2
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	print("HelpOverlay READY")
 
-	panel_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	# Que el papiro no robe el ratón si pasa por encima del botón
 	panel_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -34,19 +33,23 @@ func _ready() -> void:
 	visible = true
 	panel_bg.visible = false
 
+	# Guardamos la posición base de las slides (la que tienes puesta en el editor)
+	slide_base_pos = slide_current.position
+
 	if not slides.is_empty():
 		current_index = 0
 		slide_current.texture = slides[current_index]
 		slide_current.position = slide_base_pos
-		_update_progress_bar()
+	else:
+		current_index = 0
 
 	slide_next.visible = false
 	slide_next.position = slide_base_pos
 
 	_build_dots()
-	_init_progress_bar()
 	_update_buttons()
 	_update_dots()
+	_update_progress_bar()
 
 	btn_prev.pressed.connect(_on_btn_prev_pressed)
 	btn_next.pressed.connect(_on_btn_next_pressed)
@@ -67,6 +70,8 @@ func toggle_overlay() -> void:
 
 func _open_overlay() -> void:
 	print("HelpOverlay: _open_overlay")
+
+	# Mientras el help está abierto, bloqueamos clicks al juego
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
 	panel_bg.visible = true
@@ -88,8 +93,10 @@ func _close_overlay() -> void:
 		panel_bg.visible = false
 		panel_bg.position = Vector2.ZERO
 		panel_bg.modulate.a = 1.0
+		# Cuando cerramos, dejamos de bloquear el juego
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 	)
+
 
 # Dots, botones
 func _build_dots() -> void:
@@ -196,27 +203,10 @@ func _show_slide(new_index: int, direction: int) -> void:
 		_update_progress_bar()
 	)
 
-func _init_progress_bar() -> void:
-	if progress_bar == null:
-		return
-
-	# si no hay slides, evita valores raros
-	if slides.is_empty():
-		progress_bar.min_value = 0
-		progress_bar.max_value = 0
-		progress_bar.value = 0
-		if progress_label:
-			progress_label.text = "0 / 0"
-		return
-
-	progress_bar.min_value = 0
-	progress_bar.max_value = slides.size() - 1
-	progress_bar.step = 1
-	_update_progress_bar()
 
 func _update_progress_bar() -> void:
-	if progress_bar:
-		progress_bar.value = current_index
-
 	if progress_label:
-		progress_label.text = "%d / %d" % [current_index + 1, slides.size()]
+		if slides.is_empty():
+			progress_label.text = "0 / 0"
+		else:
+			progress_label.text = "%d / %d" % [current_index + 1, slides.size()]
