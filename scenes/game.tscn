@@ -190,6 +190,7 @@ text = "Cagaste"
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="HelpOverLay" parent="CanvasLayer" instance=ExtResource("13_kvuet")]
+visible = false
 
 [node name="elJetas" parent="." instance=ExtResource("13_trtic")]
 z_index = 4
