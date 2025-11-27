@@ -384,7 +384,7 @@ func _on_piece_slot_pressed(slot) -> void:
 		return
 
 	if PlayerData.spend_currency(price):
-		inventory.add_item(data)
+		inventory.add_item(data, 1, get_global_mouse_position())
 		slot.disable_interaction() 
 		_update_shop_visuals()
 		_save_current_shop_state()

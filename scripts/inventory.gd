@@ -188,18 +188,16 @@ func get_item_count(target_res: Resource) -> int:
 	
 	return 0
 
-func add_item(data: Resource, amount: int = 1) -> bool:
+func add_item(data: Resource, amount: int = 1, from_pos: Vector2 = Vector2.ZERO) -> bool:
 	if not data:
 		push_error("add_item: Se intentó añadir un item NULO.")
 		return false
 		
-	print("--- add_item() llamado con: %s (Cantidad: %d) ---" % [data.resource_name, amount])
-
 	var id: String = _get_item_id(data)
 
-	# --- LÓGICA DE PASIVAS (MODIFICADA) ---
+	# --- LÓGICA DE PASIVAS ---
 	if data is PassiveData:
-		# 1. Guardar en PlayerData (Base de datos global)
+		# 1. Guardar en PlayerData
 		PlayerData.add_passive_global(data, amount)
 		
 		# 2. Actualizar espejo local
@@ -207,18 +205,23 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 			passive_counts[id]["count"] += amount
 		else:
 			passive_counts[id] = { "data": data, "count": amount }
-			# Es nueva, activamos el nodo visual estático
 			_activate_passive_visual(data.type)
 			
 		_update_passive_stats_display()
 		
-		# Si el ratón ya está encima, actualizamos el tooltip al momento
 		if tooltip and tooltip.visible:
 			_on_passive_inventory_mouse_entered()
+		
+		# --- EFECTO VISUAL (PASIVAS) ---
+		if from_pos != Vector2.ZERO:
+			# Buscamos el nodo visual correspondiente a esta pasiva
+			var target_node = passive_nodes_map.get(data.type)
+			if target_node:
+				_play_arena_return_effect(data, from_pos, target_node)
 			
 		return true
 
-	# --- LÓGICA DE PIEZAS (ORIGINAL) ---
+	# --- LÓGICA DE PIEZAS ---
 	var context = _get_inventory_context(data)
 	if not context: return false
 	
@@ -231,18 +234,15 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 		current_count = inventory_map[id]["count"]
 	
 	if current_count >= max_piece_copies:
-		print("... FALLO: Límite de %d copias ya alcanzado." % max_piece_copies)
 		return false
 	
 	if (current_count + amount) > max_piece_copies:
 		final_amount = max_piece_copies - current_count
-		print("... ADVERTENCIA: Se comprarán %d en lugar de %d para no superar el límite." % [final_amount, amount])
 
 	if final_amount <= 0: return false
 
-	# Caso 1: Apilar
+	# Caso 1: Apilar (Ya existe)
 	if inventory_map.has(id):
-		print("... Item ya existe. Apilando %d." % final_amount)
 		var entry = inventory_map[id]
 		entry["count"] += final_amount
 		var slot_node: Node = entry["slot_node"]
@@ -251,13 +251,17 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 			slot_node.update_count(entry["count"])
 			
 		GlobalSignals.piece_count_changed.emit(data, entry["count"])
+		
+		# --- EFECTO VISUAL (STACK) ---
+		if from_pos != Vector2.ZERO and slot_node:
+			_play_arena_return_effect(data, from_pos, slot_node)
+			
 		return true
 
 	# Caso 2: Slot Nuevo
 	var empty_slot: Node = _find_empty_slot(context.slots)
 	
 	if empty_slot:
-		print("... Item nuevo. Slot vacío encontrado.")
 		if not data.has_meta("max_uses"):
 			data.set_meta("max_uses", data.uses)
 		
@@ -273,11 +277,14 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 		}
 		inventory_map[id] = new_entry
 		GlobalSignals.piece_count_changed.emit(data, new_entry["count"])
+		
+		# --- EFECTO VISUAL (NUEVO) ---
+		if from_pos != Vector2.ZERO:
+			_play_arena_return_effect(data, from_pos, empty_slot)
+			
 		return true
 
-	print("... FALLO INESPERADO: No se pudo apilar ni encontrar slot vacío.")
 	return false
-
 # --- FUNCIONES DE VISUALES PASIVAS (Ya no usamos _display_passive_visual dinámica) ---
 # (Función eliminada porque usamos _activate_passive_visual con el mapa estático)
 
