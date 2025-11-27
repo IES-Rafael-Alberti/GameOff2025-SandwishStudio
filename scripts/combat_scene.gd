@@ -194,21 +194,30 @@ func _stop_combat() -> void:
 		
 	print("Battle stopped. Player won: ", player_won_round, " Loot: ", round_gold_loot)
 
-func spawn_enemy_one() -> void:
-	if enemy_npcs.size() >= ENEMY_LIMIT:
-		return
+func _spawn_enemy(enemy_data: npcRes, spawn_pos: Vector2) -> void:
+	var npc := NPC_SCENE.instantiate()
+	add_child(npc)
+	npc.global_position = spawn_pos
 
-	if enemy_res.is_empty():
-		push_error("enemy_res está vacío en combat_scene.gd.")
-		return
+	var base_stats := enemy_data.get_stats_for_day(current_day)
+	var base_hp: float = base_stats["hp"]
+	var base_dmg: float = base_stats["dmg"]
+	var base_aps: float = base_stats["aps"]
+	var base_crit_chance: int = base_stats["crit_chance"]
+	var base_crit_mult: float = base_stats["crit_mult"]
 
-	var pos := enemy_spawn.position
-	var war_res: npcRes = enemy_res[randi() % enemy_res.size()]
+	var hp := base_hp
+	var dmg := base_dmg
+	var aps := base_aps
+	var cchance := base_crit_chance
+	var cmult := base_crit_mult
 
-	var e := _spawn_npc(npc.Team.ENEMY, pos, war_res)
-	if e:
-		enemy_npcs.append(e)
-		_move_with_tween(e, enemy_wait_slot.position, 0.8)
+	npc.max_health = hp
+	npc.health = hp
+	npc.damage = dmg
+	npc.atack_speed = aps
+	npc.critical_chance = cchance
+	npc.critical_damage = cmult
 
 func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 	var n: npc = NPC_SCENE.instantiate()
