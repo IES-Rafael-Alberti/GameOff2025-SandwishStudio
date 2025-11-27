@@ -188,18 +188,16 @@ func get_item_count(target_res: Resource) -> int:
 	
 	return 0
 
-func add_item(data: Resource, amount: int = 1) -> bool:
+func add_item(data: Resource, amount: int = 1, from_pos: Vector2 = Vector2.ZERO) -> bool:
 	if not data:
 		push_error("add_item: Se intentó añadir un item NULO.")
 		return false
 		
-	print("--- add_item() llamado con: %s (Cantidad: %d) ---" % [data.resource_name, amount])
-
 	var id: String = _get_item_id(data)
 
-	# --- LÓGICA DE PASIVAS (MODIFICADA) ---
+	# --- LÓGICA DE PASIVAS ---
 	if data is PassiveData:
-		# 1. Guardar en PlayerData (Base de datos global)
+		# 1. Guardar en PlayerData
 		PlayerData.add_passive_global(data, amount)
 		
 		# 2. Actualizar espejo local
@@ -207,18 +205,23 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 			passive_counts[id]["count"] += amount
 		else:
 			passive_counts[id] = { "data": data, "count": amount }
-			# Es nueva, activamos el nodo visual estático
 			_activate_passive_visual(data.type)
 			
 		_update_passive_stats_display()
 		
-		# Si el ratón ya está encima, actualizamos el tooltip al momento
 		if tooltip and tooltip.visible:
 			_on_passive_inventory_mouse_entered()
+		
+		# --- EFECTO VISUAL (PASIVAS) ---
+		if from_pos != Vector2.ZERO:
+			# Buscamos el nodo visual correspondiente a esta pasiva
+			var target_node = passive_nodes_map.get(data.type)
+			if target_node:
+				_play_arena_return_effect(data, from_pos, target_node)
 			
 		return true
 
-	# --- LÓGICA DE PIEZAS (ORIGINAL) ---
+	# --- LÓGICA DE PIEZAS ---
 	var context = _get_inventory_context(data)
 	if not context: return false
 	
@@ -231,18 +234,15 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 		current_count = inventory_map[id]["count"]
 	
 	if current_count >= max_piece_copies:
-		print("... FALLO: Límite de %d copias ya alcanzado." % max_piece_copies)
 		return false
 	
 	if (current_count + amount) > max_piece_copies:
 		final_amount = max_piece_copies - current_count
-		print("... ADVERTENCIA: Se comprarán %d en lugar de %d para no superar el límite." % [final_amount, amount])
 
 	if final_amount <= 0: return false
 
-	# Caso 1: Apilar
+	# Caso 1: Apilar (Ya existe)
 	if inventory_map.has(id):
-		print("... Item ya existe. Apilando %d." % final_amount)
 		var entry = inventory_map[id]
 		entry["count"] += final_amount
 		var slot_node: Node = entry["slot_node"]
@@ -251,13 +251,17 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 			slot_node.update_count(entry["count"])
 			
 		GlobalSignals.piece_count_changed.emit(data, entry["count"])
+		
+		# --- EFECTO VISUAL (STACK) ---
+		if from_pos != Vector2.ZERO and slot_node:
+			_play_arena_return_effect(data, from_pos, slot_node)
+			
 		return true
 
 	# Caso 2: Slot Nuevo
 	var empty_slot: Node = _find_empty_slot(context.slots)
 	
 	if empty_slot:
-		print("... Item nuevo. Slot vacío encontrado.")
 		if not data.has_meta("max_uses"):
 			data.set_meta("max_uses", data.uses)
 		
@@ -273,14 +277,95 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 		}
 		inventory_map[id] = new_entry
 		GlobalSignals.piece_count_changed.emit(data, new_entry["count"])
+		
+		# --- EFECTO VISUAL (NUEVO) ---
+		if from_pos != Vector2.ZERO:
+			_play_arena_return_effect(data, from_pos, empty_slot)
+			
 		return true
 
-	print("... FALLO INESPERADO: No se pudo apilar ni encontrar slot vacío.")
 	return false
-
 # --- FUNCIONES DE VISUALES PASIVAS (Ya no usamos _display_passive_visual dinámica) ---
 # (Función eliminada porque usamos _activate_passive_visual con el mapa estático)
+# Añadir en inventory.gd, en la sección de Funciones Públicas
 
+# En scripts/inventory.gd
+
+func add_item_visually_delayed(data: Resource, from_pos: Vector2) -> bool:
+	if not data: return false
+
+	# 1. Pasivas (Sin cambios)
+	if data is PassiveData:
+		var target_node = passive_nodes_map.get(data.type)
+		if target_node:
+			_play_arena_return_effect(data, from_pos, target_node, func():
+				add_item(data, 1, Vector2.ZERO)
+			)
+			return true
+		else:
+			return add_item(data, 1, Vector2.ZERO)
+
+	# 2. Piezas
+	elif data is PieceData:
+		var context = _get_inventory_context(data)
+		var id = _get_item_id(data)
+		
+		var target_slot_node: Node = null
+		var is_leveling_up = false 
+		var next_count = 1 # Variable para saber a qué nivel subimos
+		
+		# A) STACK (Level Up)
+		if context.map.has(id):
+			var current_count = context.map[id]["count"]
+			if current_count >= max_piece_copies: return false 
+			
+			target_slot_node = context.map[id]["slot_node"]
+			is_leveling_up = true 
+			next_count = current_count + 1 # Calculamos el siguiente nivel
+			
+		# B) NUEVO
+		else:
+			target_slot_node = _find_empty_slot(context.slots)
+			if not target_slot_node: return false
+		
+		# Ejecutar Animación
+		if target_slot_node:
+			if target_slot_node.has_node("TextureButton"):
+				target_slot_node.get_node("TextureButton").disabled = true
+				
+			_play_arena_return_effect(data, from_pos, target_slot_node, func():
+				add_item(data, 1, Vector2.ZERO)
+				
+				if is_leveling_up:
+					var final_pos = Vector2.ZERO
+					# AJUSTE MANUAL (Usa tus valores aquí)
+					var ajuste_manual = Vector2(90, 60) 
+					
+					if target_slot_node is Control:
+						final_pos = target_slot_node.global_position + ajuste_manual
+					else:
+						final_pos = target_slot_node.global_position + ajuste_manual
+					
+					# --- LÓGICA DE COLOR ---
+					var burst_color = Color(0.95, 0.8, 0.3) # Oro por defecto
+					
+					if next_count == 2:
+						# PLATA (Blanco Brillante)
+						# Usamos valores > 1.0 para efecto HDR/Glow si tienes WorldEnvironment
+						burst_color = Color(1.5, 1.5, 2.0) 
+					elif next_count >= 3:
+						# ORO
+						burst_color = Color(0.95, 0.8, 0.3)
+					
+					# Llamamos a la función pasando el color
+					_play_levelup_particles(final_pos, burst_color)
+				
+				if target_slot_node.has_node("TextureButton"):
+					target_slot_node.get_node("TextureButton").disabled = false
+			)
+			return true
+			
+	return false
 ## ------------------------------------------------------------------
 ## Funciones de Eliminación de Items (SOLO PIEZAS)
 ## ------------------------------------------------------------------
@@ -417,14 +502,13 @@ func _on_piece_placed(piece_data: PieceData):
 	_update_slot_visuals_for_piece(piece_data)
 	call_deferred("_update_passive_stats_display")
 
+# Reemplaza la función existente _on_piece_returned en inventory.gd
+
 func _on_piece_returned(piece_data: PieceData):
 	if not piece_data: return
 	if not piece_data is PieceData: return
-		
-	piece_data.uses += 1
-	print("... Pieza devuelta. Usos restantes: %d" % piece_data.uses)
-
-	_update_slot_visuals_for_piece(piece_data)
+	
+	# NO actualizamos 'uses' todavía.
 	
 	var id = _get_item_id(piece_data)
 	if piece_counts.has(id):
@@ -433,11 +517,26 @@ func _on_piece_returned(piece_data: PieceData):
 		
 		if target_slot_node:
 			var start_pos = get_global_mouse_position()
-			_play_arena_return_effect(piece_data, start_pos, target_slot_node)
-	# -----------------------------------------
-	
-
-	call_deferred("_update_passive_stats_display")
+			
+			# Lanzamos animación con callback
+			_play_arena_return_effect(piece_data, start_pos, target_slot_node, func():
+				# ESTO SE EJECUTA CUANDO LLEGA AL SLOT
+				piece_data.uses += 1
+				print("... Pieza devuelta (anim fin). Usos: %d" % piece_data.uses)
+				
+				# Actualizar visuales del slot (números, barras)
+				_update_slot_visuals_for_piece(piece_data)
+				
+				# Recalcular pasivas (por si las moscas)
+				call_deferred("_update_passive_stats_display")
+			)
+		else:
+			# Fallback si no hay slot visual (raro)
+			piece_data.uses += 1
+			_update_slot_visuals_for_piece(piece_data)
+	else:
+		# Si la pieza no estaba en el mapa (error raro), solo sumamos usos
+		piece_data.uses += 1
 
 
 func _update_slot_visuals_for_piece(piece_data: PieceData):
@@ -520,19 +619,22 @@ func _get_empty_roulette_slots() -> int:
 	
 # --- EFECTOS VISUALES (ESTILO ROMA/ARENA) ---
 
-# En GameOff2025-SandwishStudio/scripts/inventory.gd
 
-func _play_arena_return_effect(item_data: Resource, start_pos: Vector2, target_slot: Node):
+# BUSCA LA FUNCIÓN _play_arena_return_effect Y REEMPLÁZALA POR ESTA VERSIÓN:
+func _play_arena_return_effect(item_data: Resource, start_pos: Vector2, target_slot: Node, on_finish_callback: Callable = Callable()):
 	if not item_data or not "icon" in item_data:
+		# Si no hay animación posible, ejecutamos el callback inmediatamente para no romper el flujo
+		if on_finish_callback.is_valid(): on_finish_callback.call()
 		return
 	
-	var target_pos = Vector2.ZERO
+	var target_pos_vec = Vector2.ZERO
 	
 	if "item_icon" in target_slot and target_slot.item_icon and target_slot.item_icon.visible:
-		target_pos = target_slot.item_icon.get_global_rect().get_center()
+		target_pos_vec = target_slot.item_icon.get_global_rect().get_center()
 	else:
-		target_pos = target_slot.get_global_rect().get_center()
+		target_pos_vec = target_slot.get_global_rect().get_center()
 
+	# ... (El resto de la creación de partículas y nodos sigue igual hasta la parte del Tween) ...
 	# Nodo raíz del efecto
 	var effect_root = Node2D.new()
 	effect_root.z_index = 4096
@@ -546,7 +648,7 @@ func _play_arena_return_effect(item_data: Resource, start_pos: Vector2, target_s
 
 	# --- MARCO ---
 	var frame = Sprite2D.new()
-	frame.texture = preload("res://assets/QuesoVacio9.png")  # <<<<<<<< CAMBIA ESTA RUTA
+	frame.texture = preload("res://assets/QuesoVacio9.png") 
 	frame.centered = true
 	frame.scale = Vector2(0.4, 0.4)
 	container.add_child(frame)
@@ -561,6 +663,7 @@ func _play_arena_return_effect(item_data: Resource, start_pos: Vector2, target_s
 
 	# --- PARTÍCULAS ---
 	var particles = CPUParticles2D.new()
+	# ... (Configuración de partículas igual que antes) ...
 	particles.amount = 25
 	particles.lifetime = 0.5
 	particles.local_coords = false
@@ -581,11 +684,10 @@ func _play_arena_return_effect(item_data: Resource, start_pos: Vector2, target_s
 
 	# --- CURVA (Bezier) ---
 	var p0 = start_pos
-	var p2 = target_pos
+	var p2 = target_pos_vec # Usamos la variable calculada arriba
 
 	var distance = p0.distance_to(p2)
 	var arc_height = min(distance * 0.5, 300.0) * -1.0
-
 	var center_x = (p0.x + p2.x) / 2.0
 	var base_y = min(p0.y, p2.y)
 	var p1 = Vector2(center_x, base_y + arc_height)
@@ -594,17 +696,15 @@ func _play_arena_return_effect(item_data: Resource, start_pos: Vector2, target_s
 	var t = create_tween()
 	t.set_parallel(true)
 
-	# Movimiento curvo
 	t.tween_method(
 		func(val):
-			effect_root.global_position = _bezier_quadratic(p0, p1, p2, val),
+			if is_instance_valid(effect_root):
+				effect_root.global_position = _bezier_quadratic(p0, p1, p2, val),
 		0.0, 1.0, 0.55
 	).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_SINE)
 
-	# Rotación del contenedor completo
 	t.tween_property(container, "rotation", deg_to_rad(360), 0.55).set_ease(Tween.EASE_OUT)
-
-	# Escalado dinámico (zoom hacia dentro)
+	
 	var t_scale = create_tween()
 	t_scale.tween_property(container, "scale", Vector2(1.3, 1.3), 0.25).set_ease(Tween.EASE_OUT)
 	t_scale.chain().tween_property(container, "scale", Vector2(0.8, 0.8), 0.3).set_ease(Tween.EASE_IN)
@@ -619,6 +719,10 @@ func _play_arena_return_effect(item_data: Resource, start_pos: Vector2, target_s
 		cleanup.tween_callback(effect_root.queue_free)
 
 		_play_slot_impact(target_slot)
+		
+		# AQUÍ EJECUTAMOS EL CALLBACK CON LA LÓGICA DE DATOS
+		if on_finish_callback.is_valid():
+			on_finish_callback.call()
 	)
 
 # --- FUNCIONES AUXILIARES (Añadir al final de inventory.gd) ---
@@ -664,3 +768,45 @@ func _on_passive_inventory_mouse_entered() -> void:
 func _on_passive_inventory_mouse_exited() -> void:
 	if tooltip:
 		tooltip.hide_tooltip()
+
+
+func _play_levelup_particles(pos: Vector2, target_color: Color = Color(0.95, 0.8, 0.3)):
+	var particles = CPUParticles2D.new()
+	
+	add_child(particles)
+	particles.top_level = true
+	particles.global_position = pos
+	particles.z_index = 4096 
+	
+	# --- CONFIGURACIÓN ---
+	particles.amount = 60 
+	particles.lifetime = 0.8 
+	particles.explosiveness = 1.0 
+	
+	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
+	particles.emission_sphere_radius = 20.0 
+	particles.direction = Vector2(0, 0) 
+	particles.spread = 180.0
+	particles.gravity = Vector2(0, 0) 
+	
+	particles.initial_velocity_min = 150.0
+	particles.initial_velocity_max = 250.0
+	particles.scale_amount_min = 10.0
+	particles.scale_amount_max = 18.0
+	
+	# --- COLOR DINÁMICO ---
+	particles.color = target_color # Usamos el color que nos pasan
+	
+	# Creamos el gradiente usando el color recibido
+	var gradient = Gradient.new()
+	# Color sólido al principio
+	gradient.set_color(0, Color(target_color.r, target_color.g, target_color.b, 1.0))
+	# Color transparente al final
+	gradient.set_color(1, Color(target_color.r, target_color.g, target_color.b, 0.0))
+	particles.color_ramp = gradient
+	
+	particles.emitting = true
+	
+	var t = create_tween()
+	t.tween_interval(1.5)
+	t.tween_callback(particles.queue_free)

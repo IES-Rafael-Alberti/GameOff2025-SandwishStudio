@@ -131,6 +131,11 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 			piece_texture_rect.visible = true 
 			if item_icon:
 				item_icon.visible = true 
+				
+				# --- CAMBIO IMPORTANTE: Usar call_deferred ---
+				call_deferred("_play_appearance_effect")
+				# ---------------------------------------------
+
 	GlobalSignals.piece_placed_on_roulette.emit(current_piece_data)
 	GlobalSignals.synergy_update_requested.emit()
 	_refresh_visuals()
@@ -232,3 +237,51 @@ func _process(delta):
 		glow_sprite.modulate.a = lerp(float(glow_sprite.modulate.a), 0.0, delta * highlight_speed)
 		glow_sprite.scale = glow_sprite.scale.lerp(Vector2(min_scale, min_scale), delta * highlight_speed)
 		particles.emitting = false
+		
+func _play_appearance_effect() -> void:
+	if not item_icon: return
+	
+	# 1. Guardar la escala actual (para volver a ella luego)
+	var current_scale = item_icon.scale
+	if current_scale.length_squared() < 0.01:
+		current_scale = Vector2.ONE
+
+	# 2. CORRECCIÓN DE PIVOTE Y POSICIÓN (La solución al desplazamiento)
+	# Solo recalculamos si el pivote no está ya en el centro
+	var target_pivot = item_icon.size / 2.0
+	if item_icon.pivot_offset != target_pivot:
+		# Calculamos dónde está el centro visualmente AHORA MISMO
+		# Asumimos que el pivote anterior era (0,0), que es el defecto
+		var visual_center_global = item_icon.global_position + (item_icon.size / 2.0 * current_scale)
+		
+		# Cambiamos el pivote al centro
+		item_icon.pivot_offset = target_pivot
+		
+		# Recalculamos la posición global para que el centro visual siga donde estaba
+		# Fórmula: NuevaPos = CentroVisualAnterior - (NuevoPivote * EscalaActual)
+		# Nota: Al rotar/escalar desde el centro, la posición visual del centro coincide con Pos + Pivote
+		# Pero como el scale afecta desde el pivote, aquí simplificamos alineando el punto de anclaje.
+		
+		# Ajuste fino: Movemos la posición local hacia atrás para compensar el cambio de pivote
+		# Desplazamiento = (NuevoPivote - ViejoPivote) * (1 - Escala) ? No, es más simple:
+		# Simplemente reposicionamos usando el centro global calculado.
+		item_icon.global_position = visual_center_global - (target_pivot * current_scale)
+		
+		# Nota: Si esto sigue fallando ligeramente por temas de jerarquía, la opción B es forzar la posición:
+		# item_icon.position = (size - item_icon.size * current_scale) / 2.0 # (Solo si el padre es del mismo tamaño)
+
+	# 3. Animación (Squish)
+	var t = create_tween()
+	t.set_parallel(true)
+	t.set_trans(Tween.TRANS_ELASTIC)
+	t.set_ease(Tween.EASE_OUT)
+	
+	# Aplastamiento relativo a su escala actual
+	item_icon.scale = current_scale * Vector2(1.4, 0.6)
+	
+	# Recuperación: Vuelve a su escala original
+	t.tween_property(item_icon, "scale", current_scale, 0.5)
+	
+	# Flash
+	item_icon.modulate = Color(2.5, 2.5, 2.0)
+	t.tween_property(item_icon, "modulate", Color.WHITE, 0.3).set_trans(Tween.TRANS_SINE)

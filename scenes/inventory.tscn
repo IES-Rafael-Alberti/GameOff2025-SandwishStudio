@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://hbcgudcjh0wn"]
+[gd_scene load_steps=27 format=3 uid="uid://hbcgudcjh0wn"]
 
 [ext_resource type="Script" uid="uid://cmqqk0nk7sejg" path="res://scripts/inventory.gd" id="1_hj2ta"]
 [ext_resource type="PackedScene" uid="uid://n7qqfs70w4b" path="res://scenes/inventory_slot.tscn" id="2_ty45s"]
@@ -24,6 +24,7 @@
 [ext_resource type="Texture2D" uid="uid://v7nekwjyhuij" path="res://assets/Manzana.png" id="15_5kq8a"]
 [ext_resource type="PackedScene" uid="uid://dblnjb14cqaif" path="res://scenes/tooltip.tscn" id="16_jc13p"]
 [ext_resource type="Texture2D" uid="uid://qkb8tvmapwdv" path="res://assets/Bujero.png" id="18_jc13p"]
+[ext_resource type="Texture2D" uid="uid://cq1a6vlkyil2v" path="res://assets/CoinUp.png" id="19_iqxo6"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jc13p"]
 bg_color = Color(0.004019165, 0.004019165, 0.004019165, 0)
@@ -169,6 +170,16 @@ scale = Vector2(0.14414802, 0.23631842)
 texture = ExtResource("18_jc13p")
 expand_mode = 2
 stretch_mode = 4
+
+[node name="CoinUp" type="TextureRect" parent="delete"]
+visible = false
+layout_mode = 0
+offset_left = 68.0
+offset_top = -83.0
+offset_right = 190.0
+offset_bottom = -8.0
+texture = ExtResource("19_iqxo6")
+stretch_mode = 5
 
 [node name="TextureRect3" type="TextureRect" parent="."]
 layout_mode = 0
