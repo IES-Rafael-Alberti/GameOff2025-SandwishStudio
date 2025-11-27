@@ -98,6 +98,7 @@ offset_left = 152.0
 offset_top = 680.0
 offset_right = 992.0
 offset_bottom = 707.0
+show_percentage = false
 
 [node name="progress_label" type="Label" parent="PanelBg"]
 layout_mode = 0
