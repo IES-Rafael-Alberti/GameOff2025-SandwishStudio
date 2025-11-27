@@ -274,8 +274,12 @@ func _on_combat_finished(player_won: bool = false, loot_from_combat: int = 0):
 	else:
 		current_round += 1
 		_update_ui_labels()
-		set_state(GameState.SHOP)
+		
+		# --- CORRECCIÓN: PRIMERO GENERAMOS, LUEGO ABRIMOS LA TIENDA ---
 		store.start_new_round()
+		set_state(GameState.SHOP)
+		# --------------------------------------------------------------
+		
 		if combat_scene:
 			combat_scene.spawn_enemy_one()
 
