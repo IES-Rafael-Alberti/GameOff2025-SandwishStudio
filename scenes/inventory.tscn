@@ -172,6 +172,7 @@ expand_mode = 2
 stretch_mode = 4
 
 [node name="CoinUp" type="TextureRect" parent="delete"]
+visible = false
 layout_mode = 0
 offset_left = 68.0
 offset_top = -83.0
