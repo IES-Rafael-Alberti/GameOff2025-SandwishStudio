@@ -372,25 +372,33 @@ func _on_piece_slot_pressed(slot) -> void:
 	if slot.is_purchased:
 		_animate_error_shake(slot.get_node("TextureButton"))
 		return
+		
+	# Chequeo previo de límites (necesario porque la función delayed devuelve true si "cabe")
 	var current_count = _get_item_count_safe(data)
 	if current_count >= max_copies:
 		_animate_error_shake(slot.get_node("TextureButton"))
 		return
+		
 	if not PlayerData.has_enough_currency(price):
 		_animate_error_shake(slot.get_node("TextureButton"))
 		return
+		
+	# Usamos can_add_item de inventario para saber si hay hueco ANTES de cobrar
 	if not inventory.can_add_item(data):
 		_animate_error_shake(slot.get_node("TextureButton"))
 		return
 
+	# Si pasa todos los filtros:
 	if PlayerData.spend_currency(price):
-		inventory.add_item(data)
+		# Llamamos a la nueva función VISUAL CON RETRASO
+		# Pasamos la posición del ratón como inicio de la animación
+		inventory.add_item_visually_delayed(data, get_global_mouse_position())
+		
 		slot.disable_interaction() 
 		_update_shop_visuals()
 		_save_current_shop_state()
 	else:
 		_animate_error_shake(slot.get_node("TextureButton"))
-
 # --- INTERACCIÓN PASIVAS (LÓGICA ACTUALIZADA) ---
 func _on_passive_slot_pressed(slot_ref) -> void:
 	if is_rerolling: return
