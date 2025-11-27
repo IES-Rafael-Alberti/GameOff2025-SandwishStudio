@@ -195,20 +195,65 @@ func _stop_combat() -> void:
 	print("Battle stopped. Player won: ", player_won_round, " Loot: ", round_gold_loot)
 
 func spawn_enemy_one() -> void:
-	if enemy_npcs.size() >= ENEMY_LIMIT:
-		return
+	# 1) Si ya hay un gladiador vivo, no hagas nada
+	for e in enemy_npcs:
+		if is_instance_valid(e) and e.health > 0.0:
+			print("spawn_enemy_one(): ya hay un gladiador vivo, no spawneo otro.")
+			return
+	
+	# 2) Limpieza de referencias muertas en el array
+	var cleaned: Array[npc] = []
+	for e in enemy_npcs:
+		if is_instance_valid(e):
+			cleaned.append(e)
+	enemy_npcs = cleaned
 
+	# 3) Elegimos el recurso del gladiador
 	if enemy_res.is_empty():
-		push_error("enemy_res está vacío en combat_scene.gd.")
+		push_error("spawn_enemy_one(): enemy_res vacío, no puedo crear gladiador.")
 		return
+	
+	var template: npcRes = enemy_res[randi() % enemy_res.size()]
 
-	var pos := enemy_spawn.global_position
-	var war_res: npcRes = enemy_res[randi() % enemy_res.size()]
+	# 4) Día actual desde el GameManager (padre)
+	var gm = get_parent()
+	var day := 1
+	if gm and "current_day" in gm:
+		day = gm.current_day
 
-	var e := _spawn_npc(npc.Team.ENEMY, pos, war_res)
-	if e:
-		enemy_npcs.append(e)
-		_move_with_tween_global(e, enemy_wait_slot.global_position, 0.8)
+	# 5) Stats del día desde el recurso
+	var s := template.get_stats_for_day(day)
+
+	# 6) Duplicamos el resource para no tocar el original
+	var res := template.duplicate() as npcRes
+	res.max_health        = s["hp"]
+	res.health            = s["hp"]
+	res.damage            = s["dmg"]
+	res.atack_speed       = s["aps"]
+	res.critical_chance   = s["crit_chance"]
+	res.critical_damage   = s["crit_mult"]
+
+	# 7) Spawneamos usando _spawn_npc para aplicar escalados y sinergias
+	var g: npc = _spawn_npc(npc.Team.ENEMY, enemy_spawn.position, res)
+	if g:
+		enemy_npcs.append(g)
+		# opcional: que espere en el slot de espera
+		_move_with_tween(g, enemy_wait_slot.position, 0.0)
+		print("spawn_enemy_one(): gladiador spawneado para día ", day)
+
+func reset_for_new_day() -> void:
+	# 1) Borrar gladiadores actuales (si quedara alguno vivo o en el array)
+	for e in enemy_npcs:
+		if is_instance_valid(e):
+			e.queue_free()
+	enemy_npcs.clear()
+
+	# 2) Resetear contadores internos de dificultad por derrotas
+	daily_defeat_count = 0
+	last_recorded_day = 0  # forzamos que _apply_enemy_daily_scaling detecte día nuevo
+
+	# 3) Spawnear un gladiador nuevo con las stats del día actual
+	spawn_enemy_one()
 
 func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 	var n: npc = NPC_SCENE.instantiate()
