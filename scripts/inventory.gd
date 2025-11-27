@@ -8,7 +8,7 @@ signal item_sold(refund_amount: int)
 @onready var piece_inventory: GridContainer = $piece_inventory
 @onready var passive_inventory: Control = $passive_inventory 
 @onready var refund_percent: int = 50
-# Asegúrate de que la ruta al Tooltip sea correcta. Si es hijo directo de Inventory: $Tooltip
+# Asegúrate de que la ruta al Tooltip sea correcta.
 @onready var tooltip = $passive_inventory/Tooltip 
 
 # Etiquetas de Stats
@@ -33,7 +33,7 @@ signal item_sold(refund_amount: int)
 ## Datos del Inventario
 ## ------------------------------------------------------------------
 var piece_counts: Dictionary = {}
-# passive_counts ahora es un espejo de PlayerData.owned_passives para cálculos locales de stats
+# passive_counts ahora es un espejo de PlayerData.owned_passives para cálculos locales 
 var passive_counts: Dictionary = {} 
 
 var piece_slots: Array[Node] = []
@@ -188,16 +188,18 @@ func get_item_count(target_res: Resource) -> int:
 	
 	return 0
 
-func add_item(data: Resource, amount: int = 1) -> bool:
+# --- MODIFICADO PARA ANIMACIÓN ÉPICA ---
+# Ahora devuelve el NODO (Slot) donde cayó el item, o null si falló.
+func add_item(data: Resource, amount: int = 1) -> Node:
 	if not data:
 		push_error("add_item: Se intentó añadir un item NULO.")
-		return false
+		return null
 		
 	print("--- add_item() llamado con: %s (Cantidad: %d) ---" % [data.resource_name, amount])
 
 	var id: String = _get_item_id(data)
 
-	# --- LÓGICA DE PASIVAS (MODIFICADA) ---
+	# --- LÓGICA DE PASIVAS ---
 	if data is PassiveData:
 		# 1. Guardar en PlayerData (Base de datos global)
 		PlayerData.add_passive_global(data, amount)
@@ -216,11 +218,14 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 		if tooltip and tooltip.visible:
 			_on_passive_inventory_mouse_entered()
 			
-		return true
+		# Devolvemos el contenedor de la pasiva si existe, para animaciones
+		if passive_nodes_map.has(data.type):
+			return passive_nodes_map[data.type]
+		return null
 
-	# --- LÓGICA DE PIEZAS (ORIGINAL) ---
+	# --- LÓGICA DE PIEZAS (ORIGINAL CON RETORNO DE NODO) ---
 	var context = _get_inventory_context(data)
-	if not context: return false
+	if not context: return null
 	
 	var inventory_map = context.map
 	var final_amount = amount
@@ -232,13 +237,13 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 	
 	if current_count >= max_piece_copies:
 		print("... FALLO: Límite de %d copias ya alcanzado." % max_piece_copies)
-		return false
+		return null
 	
 	if (current_count + amount) > max_piece_copies:
 		final_amount = max_piece_copies - current_count
 		print("... ADVERTENCIA: Se comprarán %d en lugar de %d para no superar el límite." % [final_amount, amount])
 
-	if final_amount <= 0: return false
+	if final_amount <= 0: return null
 
 	# Caso 1: Apilar
 	if inventory_map.has(id):
@@ -251,7 +256,7 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 			slot_node.update_count(entry["count"])
 			
 		GlobalSignals.piece_count_changed.emit(data, entry["count"])
-		return true
+		return slot_node # <--- DEVOLVEMOS EL SLOT EXISTENTE
 
 	# Caso 2: Slot Nuevo
 	var empty_slot: Node = _find_empty_slot(context.slots)
@@ -273,10 +278,10 @@ func add_item(data: Resource, amount: int = 1) -> bool:
 		}
 		inventory_map[id] = new_entry
 		GlobalSignals.piece_count_changed.emit(data, new_entry["count"])
-		return true
+		return empty_slot # <--- DEVOLVEMOS EL SLOT NUEVO
 
 	print("... FALLO INESPERADO: No se pudo apilar ni encontrar slot vacío.")
-	return false
+	return null
 
 # --- FUNCIONES DE VISUALES PASIVAS (Ya no usamos _display_passive_visual dinámica) ---
 # (Función eliminada porque usamos _activate_passive_visual con el mapa estático)
@@ -399,7 +404,9 @@ func _on_item_return_requested(item_data_packet: Variant, on_complete_callback: 
 	var item_data: Resource = item_data_packet.data
 	var item_count: int = item_data_packet.count
 	
-	var success: bool = add_item(item_data, item_count)
+	# Nota: add_item ahora devuelve Node, pero en un bool context (if result:) Node se evalúa como true si no es null
+	var result_node = add_item(item_data, item_count)
+	var success = (result_node != null)
 	
 	if on_complete_callback.is_valid():
 		on_complete_callback.call(success)
@@ -550,6 +557,7 @@ func _play_arena_return_effect(item_data: Resource, start_pos: Vector2, target_s
 	particles.amount = 25
 	particles.lifetime = 0.5
 	particles.local_coords = false 
+	
 	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
 	particles.emission_sphere_radius = 15.0
 	particles.direction = Vector2(-1, 0)

@@ -64,6 +64,7 @@ func _ready() -> void:
 	PlayerData.currency_changed.connect(_update_shop_visuals)
 	
 	if reroll_button:
+		reroll_button.pivot_offset = reroll_button.size / 2 # IMPORTANTE para que gire desde el centro
 		reroll_button.mouse_entered.connect(func(): if not reroll_button.disabled: reroll_button.material = highlight_material)
 		reroll_button.mouse_exited.connect(func(): reroll_button.material = null)
 	
@@ -245,7 +246,7 @@ func _create_single_passive_slot(data: PassiveData, price: int, is_purchased: bo
 		slot.modulate.a = 0.0
 
 # ========================================================
-# --- SISTEMA DE ANIMACIÓN AVANZADO (GHOST SYSTEM) ---
+# --- SISTEMA DE ANIMACIÓN AVANZADO (Reroll & Ghosts) ---
 # ========================================================
 
 func generate():
@@ -262,7 +263,17 @@ func generate():
 	is_rerolling = true
 	reroll_button.disabled = true 
 	
-	# FASE 1: SALIDA
+	# --- EFECTO JUICE AL BOTÓN REROLL ---
+	reroll_button.pivot_offset = reroll_button.size / 2 # Aseguramos centro
+	var btn_tween = create_tween().set_parallel(true)
+	btn_tween.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	# Giro completo
+	btn_tween.tween_property(reroll_button, "rotation_degrees", 360.0, 0.5).as_relative()
+	# Efecto de latido (Scale punch)
+	btn_tween.tween_property(reroll_button, "scale", Vector2(1.2, 1.2), 0.15)
+	btn_tween.chain().tween_property(reroll_button, "scale", Vector2.ONE, 0.15)
+	
+	# FASE 1: SALIDA DE ITEMS
 	var exit_tween = create_tween().set_parallel(true)
 	var items_exiting = false
 	var exit_snapshots = []
@@ -282,7 +293,7 @@ func generate():
 		await exit_tween.finished
 		await get_tree().create_timer(0.1).timeout 
 
-	# FASE 2: REFRESCO
+	# FASE 2: REFRESCO LÓGICO
 	if current_cost > 0: PlayerData.spend_currency(current_cost)
 	_rerolls_this_round += 1
 	_update_reroll_button_visuals()
@@ -292,7 +303,7 @@ func generate():
 	await get_tree().process_frame
 	await get_tree().process_frame 
 	
-	# FASE 3: ENTRADA
+	# FASE 3: ENTRADA (Caída desde arriba)
 	var entry_tween = create_tween().set_parallel(true)
 	var delay = 0.0
 	var drop_height = 150.0 
@@ -363,7 +374,7 @@ func _detach_and_animate_drop_safe(node: Control, old_global_pos: Vector2, old_s
 	tween.tween_property(node, "modulate:a", 0.0, 0.2).set_delay(0.1) 
 	tween.tween_callback(node.queue_free).set_delay(drop_duration)
 
-# --- INTERACCIÓN PIEZAS (CON ANIMACIÓN DE VUELO) ---
+# --- INTERACCIÓN PIEZAS (CON ANIMACIÓN DE VUELO ÉPICA) ---
 func _on_piece_slot_pressed(slot) -> void:
 	if is_rerolling: return 
 	var data = slot.item_data
@@ -384,16 +395,42 @@ func _on_piece_slot_pressed(slot) -> void:
 		return
 
 	if PlayerData.spend_currency(price):
-		# --- NUEVA ANIMACIÓN ÉPICA ---
-		_animate_purchase_fly(slot, data)
-		# -----------------------------
-		
-		inventory.add_item(data)
-		slot.disable_interaction() 
-		_update_shop_visuals()
-		_save_current_shop_state()
+		# Intentamos añadir al inventario
+		if inventory.add_item(data):
+			# Buscar DÓNDE ha caído la pieza para enviar la animación
+			var target_slot_node = _find_slot_with_item_in_inventory(data)
+			
+			if target_slot_node:
+				_animate_precise_fly(slot, target_slot_node, data)
+			
+			slot.disable_interaction() 
+			_update_shop_visuals()
+			_save_current_shop_state()
+		else:
+			# Reembolso si falla (inventario lleno o error)
+			PlayerData.add_currency(price)
+			_animate_error_shake(slot.get_node("TextureButton"))
 	else:
 		_animate_error_shake(slot.get_node("TextureButton"))
+
+# Función auxiliar para encontrar el slot visual en el inventario
+func _find_slot_with_item_in_inventory(data: Resource) -> Node:
+	# Esta función busca en los slots del inventario cuál tiene la pieza que acabamos de comprar.
+	# Es necesaria porque inventory.add_item devuelve bool, no el nodo.
+	if not inventory: return null
+	
+	# Accedemos a la lista de slots del inventario (variable 'piece_slots' en inventory.gd)
+	if "piece_slots" in inventory:
+		# Recorremos al revés porque probablemente se añadió en el último hueco libre o stackeado
+		var slots = inventory.piece_slots
+		# Primero buscamos si hay uno igual con cantidad > 0
+		for s in slots:
+			if "item_data" in s and s.item_data:
+				# Comparamos si es la misma data (stacking) o si es lo que acabamos de meter
+				# Nota: _get_item_id en inventory.gd gestiona unicidad, aquí hacemos un chequeo básico
+				if s.item_data == data or (s.item_data is PieceData and data is PieceData and s.item_data.piece_origin == data.piece_origin):
+					return s
+	return null
 
 # --- INTERACCIÓN PASIVAS ---
 func _on_passive_slot_pressed(slot_ref) -> void:
@@ -401,32 +438,17 @@ func _on_passive_slot_pressed(slot_ref) -> void:
 	
 	var data = slot_ref.current_passive
 	var price = slot_ref.current_price
-	
-	# Obtenemos referencia al botón visual para el efecto de shake
 	var btn_visual = slot_ref.texture_button
 	
-	# 1. Comprobamos si ya se compró -> Shake de error
 	if slot_ref.is_purchased:
-		_animate_error_shake(btn_visual)
-		return
-	
-	# 2. Comprobamos Dinero -> Shake de error
+		_animate_error_shake(btn_visual); return
 	if not PlayerData.has_enough_currency(price):
-		_animate_error_shake(btn_visual)
-		return
-		
-	# 3. Comprobamos Espacio (si aplica) -> Shake de error
+		_animate_error_shake(btn_visual); return
 	if not inventory.can_add_item(data):
-		_animate_error_shake(btn_visual)
-		return
+		_animate_error_shake(btn_visual); return
 
-	# 4. Si todo ok -> Compramos
 	if PlayerData.spend_currency(price):
 		print("Tienda: Pasiva adquirida: ", data.name_passive if "name_passive" in data else "Pasiva")
-		
-		# (Opcional) Si quieres que las pasivas también vuelen, descomenta la siguiente línea:
-		# _animate_purchase_fly(slot_ref, data)
-		
 		inventory.add_item(data)
 		slot_ref.disable_interaction()
 		_update_shop_visuals()
@@ -470,32 +492,26 @@ func _on_hover_item(data: Resource) -> void:
 
 func _on_exit_item() -> void:
 	if tooltip: tooltip.hide_tooltip()
-	
+
 func _setup_reroll_label():
 	reroll_label = Label.new()
 	reroll_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	reroll_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	
-	# --- MEJORA VISUAL ---
-	# Borde negro más grueso para que se lea sobre cualquier color
+	# MEJORA VISUAL DEL TEXTO
 	reroll_label.add_theme_color_override("font_outline_color", Color.BLACK)
 	reroll_label.add_theme_constant_override("outline_size", 12) 
+	reroll_label.add_theme_font_size_override("font_size", 36) # Más grande
 	
-	# Fuente más grande y negrita (si la fuente lo soporta)
-	reroll_label.add_theme_font_size_override("font_size", 25)
-	
-	# Añadir sombra para dar profundidad
 	reroll_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.5))
 	reroll_label.add_theme_constant_override("shadow_offset_x", 4)
 	reroll_label.add_theme_constant_override("shadow_offset_y", 4)
 
 	reroll_button.add_child(reroll_label)
 	
-	# --- POSICIONAMIENTO ---
-	# Usamos PRESET_FULL_RECT para que ocupe todo el botón y se centre solo
+	# Ocupa todo el botón y se centra solo
 	reroll_label.layout_mode = 1
 	reroll_label.anchors_preset = Control.PRESET_FULL_RECT
-	# Ya no modificamos position.y manualmente para evitar que se salga
 
 func _calculate_reroll_cost() -> int:
 	if _rerolls_this_round == 0: return 0 
@@ -528,9 +544,7 @@ func _update_reroll_button_visuals():
 
 func _animate_error_shake(node: Control):
 	if not node: return
-	
 	var original_pos_x = node.position.x
-	
 	var tween = create_tween()
 	tween.tween_property(node, "position:x", original_pos_x + 5, 0.05)
 	tween.tween_property(node, "position:x", original_pos_x - 5, 0.05)
@@ -595,66 +609,68 @@ func _pick_from_pool(rarity: int) -> Resource:
 		return _pieces_by_rarity[rarity].pick_random()
 	return null
 
-# --- EFECTO VISUAL DE COMPRA (VUELO AL INVENTARIO) ---
-func _animate_purchase_fly(origin_slot: Control, item_data: Resource) -> void:
-	# 1. Crear el fantasma visual (Icono flotante)
-	var ghost = TextureRect.new()
-	# Intentamos obtener la textura del item (asumiendo que tiene propiedad 'icon' o 'texture')
-	if "icon" in item_data and item_data.icon:
-		ghost.texture = item_data.icon
-	elif "texture" in item_data and item_data.texture:
-		ghost.texture = item_data.texture
-	elif "piece_origin" in item_data and item_data.piece_origin and "icon" in item_data.piece_origin:
-		# Fallback por si la textura está en el piece_origin (caso común en PieceData)
-		ghost.texture = item_data.piece_origin.icon
-
-	# Si no hay textura, abortamos la animación (pero la compra sigue)
-	if not ghost.texture: return
-
-	# Configuración visual del fantasma
-	ghost.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	ghost.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	ghost.size = Vector2(50, 50) # Tamaño fijo para que se vea bien
-	ghost.pivot_offset = ghost.size / 2 # Pivote al centro para rotar bien
-	ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ghost.z_index = 100 # ¡Por encima de todo!
+# --- EFECTO VISUAL DE COMPRA (VUELO PRECISO AL SLOT) ---
+func _animate_precise_fly(origin_slot: Control, target_slot: Node, data: Resource) -> void:
+	# A. Hacer invisible el item en el inventario temporalmente (esperando la llegada)
+	target_slot.modulate.a = 0.0
 	
-	# Lo añadimos a la escena (al padre de la tienda o al root para que vuele libre)
-	# Usar 'get_tree().root' asegura que no se corte por los bordes de la tienda
+	# B. CREAR EL "GHOST" (La pieza entera voladora)
+	var ghost = store_slot_scene.instantiate()
+	# Configuramos el ghost igual que el de la tienda
+	ghost.set_item(data, origin_slot.current_price, null, true, 0)
+	ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ghost.z_index = 100 # Encima de todo
+	
 	get_tree().root.add_child(ghost)
 	
-	# Posición inicial: Donde está el slot que clicamos
-	ghost.global_position = origin_slot.global_position + (origin_slot.size / 2) - (ghost.size / 2)
+	# C. POSICIONAMIENTO INICIAL
+	ghost.size = origin_slot.size
+	ghost.global_position = origin_slot.global_position
 	
-	# 2. Calcular Destino (El centro del inventario)
-	var target_pos = Vector2.ZERO
-	if inventory:
-		target_pos = inventory.global_position + (inventory.size / 2) - (ghost.size / 2)
-	else:
-		# Fallback si no hay inventario visible: vuela hacia abajo
-		target_pos = ghost.global_position + Vector2(0, 300)
+	# D. CÁLCULO DE TRAYECTORIA
+	var start_pos = ghost.global_position
+	var end_pos = target_slot.global_position
 	
-	# 3. Secuencia de Animación (Tween)
+	# El slot de tienda es más grande que el de inventario, calculamos la escala
+	var end_scale = target_slot.size / ghost.size 
+	
+	# E. ANIMACIÓN (TWEEN)
 	var tween = create_tween().set_parallel(true)
+	var duration = 0.55
 	
-	# A. POP INICIAL: Crece de golpe (Jugo visual)
-	ghost.scale = Vector2.ZERO
-	tween.tween_property(ghost, "scale", Vector2(1.5, 1.5), 0.15)\
-		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	# 1. Movimiento Curvo (Parábola)
+	var control_point = (start_pos + end_pos) / 2.0
+	control_point.y -= 200.0 # Arco pronunciado hacia arriba
 	
-	# B. VUELO: Viaja hacia el inventario
-	var fly_duration = 0.5
-	tween.tween_property(ghost, "global_position", target_pos, fly_duration)\
-		.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_CUBIC).set_delay(0.1)
+	tween.tween_method(func(t): 
+		ghost.global_position = _quadratic_bezier(start_pos, control_point, end_pos, t),
+		0.0, 1.0, duration).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_SINE)
 	
-	# C. ROTACIÓN: Gira mientras vuela
-	tween.tween_property(ghost, "rotation", deg_to_rad(360), fly_duration).set_delay(0.1)
+	# 2. Escalado (Se hace pequeño mientras viaja)
+	tween.tween_property(ghost, "scale", end_scale, duration).set_ease(Tween.EASE_OUT)
 	
-	# D. ATERRIZAJE: Se encoge al llegar
-	tween.tween_property(ghost, "scale", Vector2.ZERO, 0.2).set_delay(fly_duration)
-	
-	# 4. Limpieza y Efecto final
-	tween.chain().tween_callback(ghost.queue_free)
-	# Opcional: Sacudir el inventario cuando llega el objeto
-	if inventory:
-		tween.tween_callback(func(): _animate_error_shake(inventory))
+	# 3. Rotación (Giro rápido al viajar)
+	ghost.pivot_offset = ghost.size / 2
+	tween.tween_property(ghost, "rotation_degrees", 360.0, duration * 0.9).set_trans(Tween.TRANS_BACK)
+
+	# F. IMPACTO Y LIMPIEZA
+	tween.chain().tween_callback(func():
+		ghost.queue_free()
+		target_slot.modulate.a = 1.0 # Revelar el real
+		_animate_slot_land(target_slot) # Efecto de golpe
+	)
+
+# Función matemática para la curva
+func _quadratic_bezier(p0: Vector2, p1: Vector2, p2: Vector2, t: float) -> Vector2:
+	var q0 = p0.lerp(p1, t)
+	var q1 = p1.lerp(p2, t)
+	return q0.lerp(q1, t)
+
+# Efecto de aterrizaje (Squash & Stretch)
+func _animate_slot_land(slot: Control):
+	var original_scale = Vector2.ONE 
+	var t = create_tween()
+	# Se aplasta al recibir el impacto
+	slot.scale = Vector2(1.25, 0.75)
+	# Rebota a su forma original
+	t.tween_property(slot, "scale", original_scale, 0.3).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
