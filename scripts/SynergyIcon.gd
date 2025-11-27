@@ -15,17 +15,17 @@ class_name SynergyIcon
 var tooltip_ref: PanelContainer 
 
 var synergy_definitions = {
-	"Europea": [
-		{"required": 2, "desc": "Aumenta la vida máxima un 25%"},
-		{"required": 4, "desc": "Aumenta la vida máxima un 50%"}
+	"European": [
+		{"required": 2, "desc": "Max health + 25%"},
+		{"required": 4, "desc": "Max health + 50%"}
 	],
-	"Japonesa": [
-		{"required": 2, "desc": "Cada tres ataques hace un 50% mas de daño"},
-		{"required": 4, "desc": "Cada tres ataques hace un 100% mas de daño"}
+	"Japanese": [
+		{"required": 2, "desc": "For each three attacks deal +50% dmg"},
+		{"required": 4, "desc": "For each three attacks deal +100% dmg"}
 	],
-	"Nordica": [
-		{"required": 2, "desc": "Cuando las tropas llegan a 25% de vida, se curan hasta el 50%"},
-		{"required": 4, "desc": "Cuando las tropas llegan a 25% de vida, se curan hasta el 75%"}
+	"Nordic": [
+		{"required": 2, "desc": "When troops reach 25% health, they heal up to 50%."},
+		{"required": 4, "desc": "When troops reach 25% health, they heal up to 75%."}
 	]
 }
 

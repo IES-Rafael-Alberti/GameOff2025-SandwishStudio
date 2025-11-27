@@ -520,11 +520,11 @@ func _get_rarity_name(rarity_enum: int) -> String:
 func _get_passive_stats_string(data: PassiveData) -> String:
 	var val = data.value
 	match data.type:
-		PassiveData.PassiveType.HEALTH_INCREASE: return "[color=#4ecdc4]✚ Vida Max:[/color] [b]+%s[/b]" % val
-		PassiveData.PassiveType.CRITICAL_DAMAGE_INCREASE: return "[color=#ff9f43]💥 Daño Crítico:[/color] [b]+%s[/b]" % val
-		PassiveData.PassiveType.CRITICAL_CHANCE_INCREASE: return "[color=#ff9f43]🎯 Prob. Crítico:[/color] [b]+%s%%[/b]" % val
-		PassiveData.PassiveType.ATTACK_SPEED_INCREASE: return "[color=#ffe66d]⚡ Vel. Ataque:[/color] [b]+%s[/b]" % val
-		PassiveData.PassiveType.BASE_DAMAGE_INCREASE: return "[color=#ff6b6b]⚔️ Daño Base:[/color] [b]+%s[/b]" % val
+		PassiveData.PassiveType.HEALTH_INCREASE: return "[color=#4ecdc4] Max health:[/color] [b]+%s[/b]" % val
+		PassiveData.PassiveType.CRITICAL_DAMAGE_INCREASE: return "[color=#ff9f43] Crit. damage:[/color] [b]+%s[/b]" % val
+		PassiveData.PassiveType.CRITICAL_CHANCE_INCREASE: return "[color=#ff9f43] Crit. chance:[/color] [b]+%s%%[/b]" % val
+		PassiveData.PassiveType.ATTACK_SPEED_INCREASE: return "[color=#ffe66d] Atk. speed:[/color] [b]+%s[/b]" % val
+		PassiveData.PassiveType.BASE_DAMAGE_INCREASE: return "[color=#ff6b6b] Base Damage:[/color] [b]+%s[/b]" % val
 	return ""
 func show_passive_summary(passive_counts: Dictionary, multiplier: float) -> void:
 	if passive_counts.is_empty(): return 
