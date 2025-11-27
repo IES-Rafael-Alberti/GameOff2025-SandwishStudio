@@ -260,7 +260,6 @@ func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int 
 # ==============================================================================
 func show_synergy_tooltip(race_name: String, current_count: int, max_count: int, bonuses: Array, color_theme: Color, all_pieces: Array = [], active_ids: Array = []) -> void:
 	_ensure_units_grid_exists()
-	
 	name_label.text = race_name.to_upper()
 	var theme_font := get_theme_default_font() # Godot 4
 	var ls := LabelSettings.new()
@@ -279,7 +278,7 @@ func show_synergy_tooltip(race_name: String, current_count: int, max_count: int,
 
 	var text = ""
 	var count_color = "#ffffff" if current_count > 0 else "#777777"
-	text += "[center][color=#aaaaaa]Sinergia Activa:[/color] [color=%s][b]%d / %d[/b] Unidades[/color][/center]\n" % [count_color, current_count, max_count]
+	text += "[center][color=#aaaaaa]active synergies:[/color] [color=%s][b]%d / %d[/b] Unidades[/color][/center]\n" % [count_color, current_count, max_count]
 	text += "[center][color=#444444]━━━━━━━━━━━━━━━━━━[/color][/center]\n"
 	
 	text += "[table=1]"
@@ -350,7 +349,6 @@ func show_synergy_tooltip(race_name: String, current_count: int, max_count: int,
 			if p_name:
 				# Construimos la ruta específica ignorando cualquier icono que tenga el recurso
 				var path_attempt = "res://assets/piezas/blanco/" + p_name + ".png"
-				
 				if ResourceLoader.exists(path_attempt):
 					final_texture = load(path_attempt)
 				else:
