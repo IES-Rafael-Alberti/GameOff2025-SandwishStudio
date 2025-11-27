@@ -14,9 +14,7 @@ var current_round: int = 1
 var current_day: int = 1
 var gladiators_defeated: int = 0 
 
-## ------------------------------------------------------------------
-## Nodos
-## ------------------------------------------------------------------
+# Nodos
 @onready var buttonShop: Button = $elJetas/ButtonShop
 @onready var sprite_show: Sprite2D = $elJetas/ButtonShop/EyeSprite
 @onready var pupil: Sprite2D = $elJetas/ButtonShop/EyeSprite/Pupil
@@ -31,7 +29,9 @@ var gladiators_defeated: int = 0
 @onready var roulette: Node2D = $Roulette
 @onready var combat_scene: Node2D = $combat_scene
 @onready var announcement_label: Label = $AnnouncementLabel
-# --- CONFIGURACIÓN ---
+@onready var help_overlay: Control = $HelpOverLay
+@onready var help_button: Button = $HelpOverLay/HelpButton
+# CONFIGURACIÓN
 @export var gold_round_base: int = 100
 @export var gold_day_mult: float = 1
 @export var rounds_per_day: int = 10
@@ -107,6 +107,11 @@ func _ready():
 	buttonShop.connect("pressed", Callable(self, "_on_shop_button_pressed"))
 	buttonShop.connect("mouse_entered", Callable(self, "_on_shop_hover"))
 	buttonShop.connect("mouse_exited", Callable(self, "_on_shop_exit"))
+	if help_button:
+		help_button.pressed.connect(_on_help_button_pressed)
+	else:
+		push_error("HelpButton no encontrado en HelpOverLay")
+
 	PlayerData.currency_changed.connect(_on_PlayerData_currency_changed)
 	if inventory.has_signal("item_sold"):
 		inventory.item_sold.connect(PlayerData.add_currency)
@@ -431,7 +436,7 @@ func pausar():
 	var pause_instance = pause_scene.instantiate()
 	add_child(pause_instance)
 	get_tree().paused = true
-	
+
 func get_inventory_piece_count(resource_to_check: Resource) -> int:
 	var item_to_search = resource_to_check
 	if resource_to_check is PieceData: item_to_search = resource_to_check.piece_origin
@@ -439,9 +444,13 @@ func get_inventory_piece_count(resource_to_check: Resource) -> int:
 		return inventory.get_item_count(item_to_search)
 	return 0
 
-## ------------------------------------------------------------------
-## SISTEMA DE SINERGIAS
-## ------------------------------------------------------------------
+func _on_help_button_pressed() -> void:
+	print("HELP BUTTON PULSADO")
+	if not is_instance_valid(help_overlay):
+		return
+	help_overlay.toggle_overlay()
+
+# SISTEMA DE SINERGIAS
 func get_active_unit_ids_for_race(target_race_enum: int) -> Array:
 	var active_ids = []
 	
@@ -466,7 +475,7 @@ func get_active_unit_ids_for_race(target_race_enum: int) -> Array:
 	
 	return active_ids
 
-# --- NUEVA FUNCIÓN: Obtener todas las piezas de una raza (para el tooltip) ---
+# Obtener todas las piezas de una raza (para el tooltip) 
 func get_all_pieces_for_race(race_name: String) -> Array:
 	var list = []
 	# Instanciamos el registro para consultar el mapa
