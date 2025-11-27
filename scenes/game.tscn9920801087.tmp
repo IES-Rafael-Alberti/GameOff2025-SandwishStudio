@@ -1,0 +1,205 @@
+[gd_scene load_steps=16 format=3 uid="uid://dd8wqmfs2cj1j"]
+
+[ext_resource type="Script" uid="uid://bpnxk43sopml" path="res://scripts/gameManager.gd" id="1_lbhrr"]
+[ext_resource type="PackedScene" uid="uid://hbcgudcjh0wn" path="res://scenes/inventory.tscn" id="2_lbhrr"]
+[ext_resource type="PackedScene" uid="uid://bwh1obe7043i" path="res://scenes/store.tscn" id="3_iywne"]
+[ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="3_kvpfn"]
+[ext_resource type="PackedScene" uid="uid://0dvayl6271no" path="res://scenes/combat_scene.tscn" id="3_lnu2h"]
+[ext_resource type="Resource" uid="uid://57d6mtngeb8t" path="res://resources/pieces/draugr.tres" id="4_dinhu"]
+[ext_resource type="PackedScene" uid="uid://bv3r20c0gu33v" path="res://scenes/roulette.tscn" id="5_iywne"]
+[ext_resource type="Resource" uid="uid://b065ie430glv1" path="res://resources/pieces/banshie.tres" id="5_kvuet"]
+[ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/jotun.tres" id="6_trtic"]
+[ext_resource type="Resource" uid="uid://cxbloivuqkrwe" path="res://resources/pieces/valkirias.tres" id="7_ir15t"]
+[ext_resource type="Texture2D" uid="uid://dycbttp2vpnv1" path="res://assets/Tiny Swords (Free Pack)/Terrain/Water Background color.png" id="12_dinhu"]
+[ext_resource type="Texture2D" uid="uid://bse428jrn0sbc" path="res://assets/Waves.png" id="12_trtic"]
+[ext_resource type="PackedScene" uid="uid://cj8n2p21wqyqt" path="res://scenes/help_over_lay.tscn" id="13_kvuet"]
+[ext_resource type="PackedScene" uid="uid://bbfqm8pblt056" path="res://scenes/el_jetas.tscn" id="13_trtic"]
+[ext_resource type="Texture2D" uid="uid://ca521tx5dgil" path="res://assets/GladsIcon (1).png" id="15_ir15t"]
+
+[node name="game" type="Node2D"]
+script = ExtResource("1_lbhrr")
+gold_round_base = 2
+gladiators_per_day = 4
+
+[node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
+position = Vector2(176.00003, 88.99997)
+scale = Vector2(0.35115045, 0.22791663)
+
+[node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
+z_index = 4
+offset_left = 56.0
+offset_top = 380.0
+offset_right = 56.0
+offset_bottom = 780.0
+rotation = -0.00020483583
+scale = Vector2(0.77105117, 0.77105117)
+initial_pieces = Array[ExtResource("3_kvpfn")]([ExtResource("4_dinhu"), ExtResource("5_kvuet"), ExtResource("6_trtic"), ExtResource("7_ir15t")])
+
+[node name="Store" parent="." instance=ExtResource("3_iywne")]
+visible = false
+z_index = 4
+offset_left = 416.0
+offset_top = 394.0
+offset_right = 416.0
+offset_bottom = 394.0
+scale = Vector2(0.8860778, 0.88381195)
+max_copies = null
+duplicate_piece_mult = null
+duplicate_passive_mult = null
+COLOR_NORMAL_BG = null
+COLOR_UNAFFORD_BG = null
+reroll_base_cost = null
+reroll_cost_multiplier = null
+prob_comun = null
+prob_raro = null
+prob_epico = null
+prob_legendario = null
+keep_lock_on_new_day = null
+
+[node name="Roulette" parent="." instance=ExtResource("5_iywne")]
+z_index = 4
+position = Vector2(132, 361.00003)
+scale = Vector2(0.8845031, 0.8845031)
+friction = null
+min_impulse_force = null
+min_impulse_random_range = null
+bounce_angle = null
+bounce_time = null
+lever_max_angle = null
+drag_sensitivity = null
+activation_threshold = null
+ratchet_step_angle = null
+tension_color = null
+speed_glow_color = null
+flash_color = null
+flash_time = null
+final_highlight_intensity = null
+shake_intensity_lever = null
+screen_shake_force = null
+zoom_strength = null
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(902, 590)
+zoom = Vector2(0.7, 0.7)
+
+[node name="RoundLabel" type="Label" parent="."]
+z_index = 4
+offset_left = 928.0
+offset_top = 44.0
+offset_right = 1045.0
+offset_bottom = 92.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 28
+
+[node name="TextureRect" type="TextureRect" parent="RoundLabel"]
+layout_mode = 0
+offset_left = -48.0
+offset_top = 5.999999
+offset_right = 1727.0
+offset_bottom = 1633.0
+scale = Vector2(0.021465681, 0.020558907)
+texture = ExtResource("12_trtic")
+
+[node name="GladiatorLabel" type="Label" parent="."]
+z_index = 4
+offset_left = 807.0
+offset_top = 42.0
+offset_right = 866.0
+offset_bottom = 90.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 28
+vertical_alignment = 1
+
+[node name="gladiatorLabel" type="TextureRect" parent="GladiatorLabel"]
+z_index = 4
+layout_mode = 0
+offset_left = -46.0
+offset_top = 2.0
+offset_right = -7.0
+offset_bottom = 47.0
+texture = ExtResource("15_ir15t")
+expand_mode = 1
+stretch_mode = 4
+
+[node name="GameOver" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="GameOverImage" type="TextureRect" parent="GameOver"]
+z_index = 4
+offset_left = -4.0
+offset_top = -2.0
+offset_right = 1681.0
+offset_bottom = 1093.0
+mouse_filter = 0
+texture = ExtResource("12_dinhu")
+
+[node name="Label" type="Label" parent="GameOver"]
+z_index = 4
+offset_left = 433.0
+offset_top = 294.0
+offset_right = 747.0
+offset_bottom = 393.0
+theme_override_font_sizes/font_size = 72
+text = "CAGASTE"
+
+[node name="DayFinished" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="NextDayImage" type="TextureRect" parent="DayFinished"]
+z_index = 4
+offset_left = -4.0
+offset_top = -2.0
+offset_right = 1165.0
+offset_bottom = 766.0
+mouse_filter = 0
+texture = ExtResource("12_dinhu")
+
+[node name="NextDayLabel" type="Label" parent="DayFinished"]
+z_index = 4
+offset_left = 367.0
+offset_top = 142.0
+offset_right = 875.0
+offset_bottom = 241.0
+theme_override_font_sizes/font_size = 72
+
+[node name="HSlider" type="HSlider" parent="DayFinished"]
+z_index = 4
+offset_left = 358.0
+offset_top = 334.0
+offset_right = 857.0
+offset_bottom = 350.0
+
+[node name="InfoLabel" type="Label" parent="DayFinished"]
+z_index = 4
+anchors_preset = -1
+anchor_bottom = 0.015000001
+offset_left = 469.0
+offset_top = 369.0
+offset_right = 743.0
+offset_bottom = 683.6
+
+[node name="Win" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="WinImage" type="TextureRect" parent="Win"]
+z_index = 4
+offset_left = -4.0
+offset_top = -2.0
+offset_right = 1681.0
+offset_bottom = 1093.0
+mouse_filter = 0
+texture = ExtResource("12_dinhu")
+
+[node name="Label" type="Label" parent="Win"]
+z_index = 4
+offset_left = 333.0
+offset_top = 287.0
+offset_right = 841.0
+offset_bottom = 386.0
+theme_override_font_sizes/font_size = 72
+text = "Has ganado crack :)"
+
+[node name="HelpOverLay" parent="." instance=ExtResource("13_kvuet")]
+
+[node name="elJetas" parent="." instance=ExtResource("13_trtic")]
+z_index = 4

@@ -1,0 +1,110 @@
+[gd_scene load_steps=6 format=3 uid="uid://dwm7e2lsfw3q6"]
+
+[ext_resource type="Script" uid="uid://bm424wsrayqpk" path="res://scripts/passive_store_slot.gd" id="1_dvqxd"]
+[ext_resource type="Texture2D" uid="uid://c1p1k1g5f1uan" path="res://assets/Coin (1).png" id="4_yuxjf"]
+[ext_resource type="PackedScene" uid="uid://dblnjb14cqaif" path="res://scenes/tooltip.tscn" id="5_hy0i2"]
+
+[sub_resource type="FontVariation" id="FontVariation_80s66"]
+variation_embolden = 1.0
+spacing_top = -3
+spacing_bottom = -7
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_80s66"]
+bg_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+expand_margin_left = 3.0
+expand_margin_top = 3.0
+expand_margin_right = 3.0
+expand_margin_bottom = 3.0
+
+[node name="PassiveStoreSlot" type="Control"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -5.0
+offset_right = -829.0
+offset_bottom = -450.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_dvqxd")
+
+[node name="ItemIcon" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 69.0
+offset_top = 33.0
+offset_right = 258.0
+offset_bottom = 200.0
+mouse_filter = 2
+stretch_mode = 4
+
+[node name="PriceLabel" type="RichTextLabel" parent="ItemIcon"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.432
+anchor_bottom = 0.15400001
+offset_left = 43.0
+offset_top = -55.0
+offset_right = 22.351997
+offset_bottom = -24.718002
+theme_override_font_sizes/normal_font_size = 32
+bbcode_enabled = true
+text = "23"
+fit_content = true
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="ItemIcon"]
+layout_mode = 0
+offset_left = 98.0
+offset_top = -45.0
+offset_right = 136.0
+offset_bottom = -7.0
+texture = ExtResource("4_yuxjf")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="Tooltip" parent="." instance=ExtResource("5_hy0i2")]
+layout_mode = 0
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+grow_horizontal = 1
+grow_vertical = 1
+
+[node name="TooExpensiveLabel" type="Label" parent="."]
+z_index = 10
+layout_mode = 0
+offset_left = 113.0
+offset_top = 134.0
+offset_right = 223.0
+offset_bottom = 152.53772
+rotation = -0.65642446
+theme_override_colors/font_color = Color(0.5254902, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.16078432)
+theme_override_fonts/font = SubResource("FontVariation_80s66")
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_80s66")
+text = "TOO EXPENSIVE"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OutOfStockLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 123.00001
+offset_top = 68.0
+offset_right = 226.00003
+offset_bottom = 86.537704
+rotation = 0.43505508
+theme_override_colors/font_color = Color(0.5254902, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.16078432)
+theme_override_fonts/font = SubResource("FontVariation_80s66")
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_80s66")
+text = "OUT OF STOCK"
+horizontal_alignment = 1
+vertical_alignment = 1

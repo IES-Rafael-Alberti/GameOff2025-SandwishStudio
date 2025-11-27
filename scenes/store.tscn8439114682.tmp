@@ -1,0 +1,215 @@
+[gd_scene load_steps=36 format=3 uid="uid://bwh1obe7043i"]
+
+[ext_resource type="Script" uid="uid://boom6onvffdah" path="res://scripts/store.gd" id="1_atuvt"]
+[ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="2_n3io3"]
+[ext_resource type="Resource" uid="uid://dateynk6k5fui" path="res://resources/pieces/oni.tres" id="3_abbvk"]
+[ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/jotun.tres" id="4_3ro5p"]
+[ext_resource type="Resource" uid="uid://6rli8qlo7wmd" path="res://resources/pieces/duende.tres" id="5_klwl8"]
+[ext_resource type="PackedScene" uid="uid://dblnjb14cqaif" path="res://scenes/tooltip.tscn" id="6_5bups"]
+[ext_resource type="Resource" uid="uid://7qmqgai1xu80" path="res://resources/pieces/tengu.tres" id="6_5xsmt"]
+[ext_resource type="Resource" uid="uid://btl7owx64bo4s" path="res://resources/pieces/satiro.tres" id="6_h7duq"]
+[ext_resource type="Resource" uid="uid://cd2vljit13au2" path="res://resources/pieces/dragon.tres" id="7_burfl"]
+[ext_resource type="Resource" uid="uid://bjcjwt742by0m" path="res://resources/pieces/kappa.tres" id="8_5xsmt"]
+[ext_resource type="Script" uid="uid://berngf3tq220v" path="res://scripts/passive_data.gd" id="9_n3io3"]
+[ext_resource type="Resource" uid="uid://c6idh0tpgb7sa" path="res://resources/pieces/nornas.tres" id="9_wk1we"]
+[ext_resource type="Resource" uid="uid://dxkanog0fnw57" path="res://resources/passives/passive_1.tres" id="10_abbvk"]
+[ext_resource type="Resource" uid="uid://bqmnhrov7qvu7" path="res://resources/passives/passive_2.tres" id="11_3ro5p"]
+[ext_resource type="Resource" uid="uid://b065ie430glv1" path="res://resources/pieces/banshie.tres" id="11_ht5i3"]
+[ext_resource type="Resource" uid="uid://bbdpgtkgsv6an" path="res://resources/pieces/hitotsume.tres" id="12_816qq"]
+[ext_resource type="Resource" uid="uid://dfo807y07xegd" path="res://resources/passives/passive_3.tres" id="12_klwl8"]
+[ext_resource type="Resource" uid="uid://cxbloivuqkrwe" path="res://resources/pieces/valkirias.tres" id="13_7pi7j"]
+[ext_resource type="Resource" uid="uid://dyqha0iqhcdfr" path="res://resources/passives/passive_5.tres" id="14_burfl"]
+[ext_resource type="Resource" uid="uid://57d6mtngeb8t" path="res://resources/pieces/draugr.tres" id="14_ttn3v"]
+[ext_resource type="Resource" uid="uid://nytgdhu2kh46" path="res://resources/passives/passive_6.tres" id="15_5xsmt"]
+[ext_resource type="Shader" uid="uid://0gvrjar422gt" path="res://shaders/store.gdshader" id="16_3ro5p"]
+[ext_resource type="Texture2D" uid="uid://bht4fapjev55r" path="res://assets/Tienda.png" id="16_abbvk"]
+[ext_resource type="Texture2D" uid="uid://f2vw4p7fdno6" path="res://assets/lock_open.png" id="21_y1dpo"]
+[ext_resource type="Texture2D" uid="uid://byfhs562gleus" path="res://assets/lock_closed.png" id="22_rky2c"]
+[ext_resource type="Texture2D" uid="uid://clucu0hyocvrs" path="res://assets/CONTINUENEGRO.png" id="24_816qq"]
+[ext_resource type="Texture2D" uid="uid://dro10dcj34d2s" path="res://assets/REROLLBLANCO.png" id="25_7pi7j"]
+[ext_resource type="Texture2D" uid="uid://c1p1k1g5f1uan" path="res://assets/Coin (1).png" id="28_y1dpo"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_3ro5p"]
+shader = ExtResource("16_3ro5p")
+shader_parameter/roll_amount = 0.0
+shader_parameter/radius = 50.0
+shader_parameter/max_lift = 0.12
+
+[sub_resource type="Animation" id="Animation_klwl8"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1.7, 1.342)]
+}
+
+[sub_resource type="Animation" id="Animation_abbvk"]
+resource_name = "roll"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(1.7, 1.342), Vector2(0, 1.342)]
+}
+
+[sub_resource type="Animation" id="Animation_3ro5p"]
+resource_name = "unroll"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.033333335, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 1.342), Vector2(1.7, 1.342)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_h7duq"]
+_data = {
+&"RESET": SubResource("Animation_klwl8"),
+&"roll": SubResource("Animation_abbvk"),
+&"unroll": SubResource("Animation_3ro5p")
+}
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ttn3v"]
+bg_color = Color(0.3529412, 0.011764706, 0.0627451, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+expand_margin_left = 10.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y1dpo"]
+bg_color = Color(0.35188454, 0.010673957, 0.06309028, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+expand_margin_left = 10.0
+
+[node name="Store" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+scale = Vector2(1.0102348, 1.0076514)
+mouse_filter = 2
+script = ExtResource("1_atuvt")
+piece_origins = Array[ExtResource("2_n3io3")]([ExtResource("3_abbvk"), ExtResource("4_3ro5p"), ExtResource("8_5xsmt"), ExtResource("6_5xsmt"), ExtResource("7_burfl"), ExtResource("5_klwl8"), ExtResource("9_wk1we"), ExtResource("6_h7duq"), ExtResource("11_ht5i3"), ExtResource("12_816qq"), ExtResource("13_7pi7j"), ExtResource("14_ttn3v")])
+passive_origins = Array[ExtResource("9_n3io3")]([ExtResource("10_abbvk"), ExtResource("11_3ro5p"), ExtResource("12_klwl8"), ExtResource("14_burfl"), ExtResource("15_5xsmt")])
+texture_unlocked = ExtResource("21_y1dpo")
+texture_locked = ExtResource("22_rky2c")
+
+[node name="Sprite2D" type="TextureRect" parent="."]
+material = SubResource("ShaderMaterial_3ro5p")
+layout_mode = 0
+offset_left = 625.5971
+offset_top = 148.861
+offset_right = 1625.5972
+offset_bottom = 748.86096
+scale = Vector2(1.7, 1.342)
+pivot_offset = Vector2(930.4768, 266.21936)
+texture = ExtResource("16_abbvk")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_h7duq")
+}
+
+[node name="piece_label" type="Label" parent="."]
+layout_mode = 0
+offset_left = 199.9535
+offset_top = 117.10398
+offset_right = 1213.5792
+offset_bottom = 186.10399
+theme_override_font_sizes/font_size = 40
+theme_override_styles/normal = SubResource("StyleBoxFlat_ttn3v")
+text = "Roulette Pieces"
+
+[node name="piece_zone" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 351.40344
+offset_top = 216.34467
+offset_right = 1217.5387
+offset_bottom = 311.2176
+size_flags_horizontal = 4
+theme_override_constants/separation = 200
+
+[node name="passive_label" type="Label" parent="."]
+layout_mode = 0
+offset_left = 202.92311
+offset_top = 457.4995
+offset_right = 795.8545
+offset_bottom = 526.4995
+theme_override_font_sizes/font_size = 40
+theme_override_styles/normal = SubResource("StyleBoxFlat_y1dpo")
+text = "Fruits of Power"
+
+[node name="passive_zone" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 352.3933
+offset_top = 567.6566
+offset_right = 928.4971
+offset_bottom = 658.958
+size_flags_horizontal = 4
+size_flags_stretch_ratio = 0.85
+theme_override_constants/separation = 200
+
+[node name="Reroll" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 1363.0494
+offset_top = 481.31723
+offset_right = 1491.0494
+offset_bottom = 609.31726
+size_flags_horizontal = 4
+texture_normal = ExtResource("25_7pi7j")
+
+[node name="Lock" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 1363.0494
+offset_top = 645.06433
+offset_right = 1491.0494
+offset_bottom = 773.06433
+size_flags_horizontal = 4
+texture_normal = ExtResource("24_816qq")
+
+[node name="Tooltip" parent="." instance=ExtResource("6_5bups")]
+layout_mode = 0
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_right = 1.0
+offset_bottom = 54.0
+grow_horizontal = 1
+grow_vertical = 1
+
+[node name="gold_label" type="Label" parent="."]
+z_index = 3
+layout_mode = 0
+offset_left = 1369.9785
+offset_top = 116.11157
+offset_right = 1518.459
+offset_bottom = 181.61041
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 40
+
+[node name="Coin" type="Sprite2D" parent="."]
+position = Vector2(1319.4951, 147.86859)
+scale = Vector2(1.6846421, 1.6846421)
+texture = ExtResource("28_y1dpo")
+
+[connection signal="pressed" from="Reroll" to="." method="generate"]

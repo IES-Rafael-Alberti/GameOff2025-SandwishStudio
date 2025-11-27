@@ -23,7 +23,7 @@ var gladiators_defeated: int = 0
 
 @onready var mat = $Store/Sprite2D.material
 @onready var anim = $Store/AnimationPlayer
-@onready var gold_label: Label = $gold_label
+@onready var gold_label: Label = $Store/gold_label
 @onready var store: Control = $Store
 @onready var inventory: Control = $inventory
 @onready var roulette: Node2D = $Roulette
@@ -371,7 +371,7 @@ func _on_animation_finished(anim_name: String):
 	if anim_name == "roll": store.visible = false
 
 func _on_PlayerData_currency_changed(new_amount: int) -> void:
-	if gold_label: gold_label.text = str(new_amount) + "€"
+	if gold_label: gold_label.text = str(new_amount)
 
 func _toggle_eye_parpadeo() -> void:
 	# Parpadeo: Cambio textura a cerrada y oculto pupila temporalmente
