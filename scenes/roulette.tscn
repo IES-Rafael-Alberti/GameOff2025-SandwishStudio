@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_jyskt"]
 [ext_resource type="Texture2D" uid="uid://dpcgv05fqqjag" path="res://assets/Manivela (1) (1).png" id="2_gils2"]
 [ext_resource type="Texture2D" uid="uid://go30fno5akpc" path="res://assets/ruleta.png" id="2_jyskt"]
-[ext_resource type="Script" uid="uid://d1s3pk6cls46q" path="res://scripts/RouletteSlice.gd" id="4_jyskt"]
+[ext_resource type="Script" path="res://scripts/RouletteSlice.gd" id="4_jyskt"]
 [ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="4_k6evh"]
 [ext_resource type="Texture2D" uid="uid://qmthj5xqadhq" path="res://assets/Manilla (1).png" id="5_jyskt"]
 [ext_resource type="Script" uid="uid://bdsnaco1ib6yi" path="res://scripts/SynergyIcon.gd" id="7_ekxsn"]
@@ -36,6 +36,7 @@ offsets = PackedFloat32Array(0, 0, 1)
 colors = PackedColorArray(1, 1, 1, 1, 0.99215686, 0.47058824, 0, 1, 1, 0, 0, 1)
 
 [node name="Roulette" type="Node2D"]
+position = Vector2(66, -6)
 script = ExtResource("1_jyskt")
 
 [node name="Lever" type="Sprite2D" parent="."]
@@ -318,6 +319,7 @@ icon_display = NodePath("TextureRect")
 sinergia0 = ExtResource("8_6wnlc")
 sinergia1 = ExtResource("9_lp4gq")
 sinergia2 = ExtResource("10_waas3")
+metadata/_edit_use_anchors_ = true
 
 [node name="TextureRect" type="TextureRect" parent="Europea"]
 z_index = 5
@@ -331,6 +333,7 @@ offset_left = -20.0
 offset_top = -20.760002
 offset_right = 20.0
 offset_bottom = 32.0
+metadata/_edit_use_anchors_ = true
 
 [node name="Japonesa" type="Control" parent="." node_paths=PackedStringArray("icon_display")]
 layout_mode = 3
@@ -345,6 +348,7 @@ race_name = "Japonesa"
 sinergia0 = ExtResource("12_bjn61")
 sinergia1 = ExtResource("13_co0ci")
 sinergia2 = ExtResource("14_8wylf")
+metadata/_edit_use_anchors_ = true
 
 [node name="TextureRect" type="TextureRect" parent="Japonesa"]
 layout_mode = 1
@@ -357,6 +361,7 @@ offset_left = -102.0
 offset_top = -28.0
 offset_right = -38.0
 offset_bottom = 36.0
+metadata/_edit_use_anchors_ = true
 
 [node name="Nordica" type="Control" parent="." node_paths=PackedStringArray("icon_display")]
 layout_mode = 3
@@ -384,6 +389,7 @@ offset_right = -53.0
 offset_bottom = 43.0
 
 [node name="Tooltip" parent="." instance=ExtResource("10_8jefs")]
+metadata/_edit_use_anchors_ = true
 
 [connection signal="area_entered" from="Manecilla" to="." method="_on_AreaManecilla_area_entered"]
 [connection signal="timeout" from="Manecilla/Timer" to="." method="_on_Timer_timeout"]

@@ -50,7 +50,7 @@ scale = Vector2(0.8860778, 0.88381195)
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
 z_index = 4
-position = Vector2(132, 361.00003)
+position = Vector2(160, 361)
 scale = Vector2(0.8845031, 0.8845031)
 
 [node name="Camera2D" type="Camera2D" parent="."]
@@ -154,6 +154,7 @@ theme_override_font_sizes/font_size = 72
 text = "Has ganado crack :)"
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="HelpOverLay" parent="CanvasLayer" instance=ExtResource("13_kvuet")]
 

@@ -51,11 +51,11 @@ texture = ExtResource("8_jc13p")
 
 [node name="Alfombra" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 20.0
-offset_top = -18.000002
-offset_right = 3331.0
-offset_bottom = 7982.0
-scale = Vector2(0.143898, 0.12514244)
+offset_left = 57.0
+offset_top = -11.999998
+offset_right = 3368.0
+offset_bottom = 7988.0
+scale = Vector2(0.138361, 0.12032713)
 texture = ExtResource("4_uae8j")
 
 [node name="Bandeja" type="TextureRect" parent="."]
@@ -71,10 +71,10 @@ flip_v = true
 
 [node name="piece_inventory" type="GridContainer" parent="."]
 layout_mode = 0
-offset_left = 50.0
-offset_top = 69.0
-offset_right = 455.0
-offset_bottom = 713.0
+offset_left = 81.0
+offset_top = 44.0
+offset_right = 486.0
+offset_bottom = 688.0
 theme_override_constants/h_separation = 80
 theme_override_constants/v_separation = 115
 columns = 2
@@ -156,7 +156,7 @@ offset_bottom = 841.0
 script = ExtResource("4_yyk2a")
 
 [node name="Sprite2D" type="Sprite2D" parent="delete"]
-position = Vector2(51, 47)
+position = Vector2(54, 47)
 texture = ExtResource("4_53g1v")
 
 [node name="TextureRect3" type="TextureRect" parent="."]
@@ -167,7 +167,6 @@ offset_right = 4436.318
 offset_bottom = 2402.0012
 scale = Vector2(0.25786263, 0.17371413)
 texture = ExtResource("13_40feg")
-stretch_mode = 4
 
 [node name="VBoxContainer" type="VBoxContainer" parent="TextureRect3"]
 layout_mode = 0
