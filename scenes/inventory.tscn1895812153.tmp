@@ -159,78 +159,78 @@ script = ExtResource("4_yyk2a")
 position = Vector2(51, 47)
 texture = ExtResource("4_53g1v")
 
-[node name="TextureRect3" type="TextureRect" parent="."]
+[node name="Stats" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 1414.0
+offset_left = 1584.0
 offset_top = 672.0
-offset_right = 4419.318
+offset_right = 4589.318
 offset_bottom = 2422.0012
 scale = Vector2(0.25786263, 0.17371413)
 texture = ExtResource("13_40feg")
 stretch_mode = 4
 
-[node name="Health_container" type="HBoxContainer" parent="TextureRect3"]
+[node name="Health_container" type="HBoxContainer" parent="Stats"]
 layout_mode = 0
-offset_left = 93.072754
-offset_top = 713.8159
-offset_right = 241.98926
-offset_bottom = 792.1055
+offset_left = 158.99979
+offset_top = 667.7633
+offset_right = 307.9163
+offset_bottom = 750.6581
 scale = Vector2(5, 5)
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
-[node name="Health_img" type="TextureRect" parent="TextureRect3/Health_container"]
+[node name="Health_img" type="TextureRect" parent="Stats/Health_container"]
 layout_mode = 2
 texture = ExtResource("9_ylenm")
 expand_mode = 3
 stretch_mode = 4
 
-[node name="Label" type="Label" parent="TextureRect3/Health_container"]
+[node name="Health_label" type="Label" parent="Stats/Health_container"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 35
+theme_override_font_sizes/font_size = 45
 text = "+0"
 
-[node name="Damage_container" type="HBoxContainer" parent="TextureRect3"]
+[node name="Damage_container" type="HBoxContainer" parent="Stats"]
 layout_mode = 0
-offset_left = 950.11914
-offset_top = 679.27637
-offset_right = 1046.1191
-offset_bottom = 771.38165
+offset_left = 965.631
+offset_top = 667.76324
+offset_right = 1055.631
+offset_bottom = 750.658
 scale = Vector2(5, 5)
 size_flags_horizontal = 3
 
-[node name="Dmg_img" type="TextureRect" parent="TextureRect3/Damage_container"]
+[node name="Dmg_img" type="TextureRect" parent="Stats/Damage_container"]
 layout_mode = 2
 texture = ExtResource("10_0df5h")
 expand_mode = 3
 stretch_mode = 4
 
-[node name="Label" type="Label" parent="TextureRect3/Damage_container"]
+[node name="Dmg_label" type="Label" parent="Stats/Damage_container"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 35
+theme_override_font_sizes/font_size = 45
 text = "+0"
 
-[node name="SpeedCOntainer" type="HBoxContainer" parent="TextureRect3"]
+[node name="SpeedCOntainer" type="HBoxContainer" parent="Stats"]
 layout_mode = 0
-offset_left = 1566.7256
-offset_top = 713.8159
-offset_right = 1711.7256
-offset_bottom = 796.71063
+offset_left = 1524.0676
+offset_top = 667.76324
+offset_right = 1681.0676
+offset_bottom = 750.65796
 scale = Vector2(5, 5)
 size_flags_horizontal = 3
 
-[node name="Speed_img" type="TextureRect" parent="TextureRect3/SpeedCOntainer"]
+[node name="Speed_img" type="TextureRect" parent="Stats/SpeedCOntainer"]
 layout_mode = 2
 texture = ExtResource("11_fiysm")
-expand_mode = 2
+expand_mode = 3
 stretch_mode = 4
 
-[node name="Label" type="Label" parent="TextureRect3/SpeedCOntainer"]
+[node name="Speed_label" type="Label" parent="Stats/SpeedCOntainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 35
+theme_override_font_sizes/font_size = 45
 text = "+0"
 
-[node name="CChance_container" type="HBoxContainer" parent="TextureRect3"]
+[node name="CChance_container" type="HBoxContainer" parent="Stats"]
 layout_mode = 0
 offset_left = 414.95068
 offset_top = 1220.395
@@ -239,38 +239,38 @@ offset_bottom = 1303.2898
 scale = Vector2(5, 5)
 size_flags_horizontal = 3
 
-[node name="CChance_img" type="TextureRect" parent="TextureRect3/CChance_container"]
+[node name="CChance_img" type="TextureRect" parent="Stats/CChance_container"]
 layout_mode = 2
 texture = ExtResource("12_0df5h")
 expand_mode = 3
 stretch_mode = 4
 
-[node name="Label" type="Label" parent="TextureRect3/CChance_container"]
+[node name="CChance_label" type="Label" parent="Stats/CChance_container"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 35
+theme_override_font_sizes/font_size = 45
 text = "+0"
 
-[node name="CDamage_chance" type="HBoxContainer" parent="TextureRect3"]
+[node name="CDamage_chance" type="HBoxContainer" parent="Stats"]
 layout_mode = 0
-offset_left = 1357.312
+offset_left = 1322.4097
 offset_top = 1220.3955
-offset_right = 1506.2285
+offset_right = 1471.3262
 offset_bottom = 1303.2903
 scale = Vector2(5, 5)
 size_flags_horizontal = 3
 
-[node name="CDmg_img" type="TextureRect" parent="TextureRect3/CDamage_chance"]
+[node name="CDmg_img" type="TextureRect" parent="Stats/CDamage_chance"]
 layout_mode = 2
 texture = ExtResource("12_brsb2")
 expand_mode = 3
 stretch_mode = 4
 
-[node name="Label" type="Label" parent="TextureRect3/CDamage_chance"]
+[node name="CDmg_label" type="Label" parent="Stats/CDamage_chance"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 35
+theme_override_font_sizes/font_size = 45
 text = "+0"
 
-[node name="Testing" type="TextureRect" parent="TextureRect3"]
+[node name="Testing" type="TextureRect" parent="Stats"]
 visible = false
 layout_mode = 0
 offset_left = 1337.9222
