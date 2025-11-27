@@ -1,12 +1,17 @@
 extends Panel
 
-# Referencia al icono visual del pozo (asegúrate de que existe como hijo)
+# Referencias
 @onready var sprite: TextureRect = $Sprite2D
+@onready var coin_up: TextureRect = $CoinUp 
 
-# Configuración del efecto de caída
+# Configuración del efecto de caída (Item)
 @export var fall_duration: float = 0.6
 @export var fall_scale: Vector2 = Vector2(0.1, 0.1)
 @export var fall_rotation: float = 180.0
+
+# Configuración del efecto CoinUp
+@export var coin_float_distance: float = 60.0
+@export var coin_anim_duration: float = 0.8
 
 var normal_color = Color.WHITE
 var hover_color = Color(1.0, 1.0, 1.0, 0.7)
@@ -16,7 +21,10 @@ func _ready() -> void:
 	if sprite:
 		sprite.modulate = normal_color
 	
-	# Detectar si el ratón sale para quitar el brillo
+	if coin_up:
+		coin_up.visible = false
+		coin_up.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	
 	mouse_exited.connect(_on_mouse_exited)
 	
 	if GlobalSignals:
@@ -30,93 +38,119 @@ func _notification(what: int) -> void:
 # --- DRAG & DROP ---
 
 func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
-	# 1. Validaciones de estado del juego (Ruleta girando, etc.)
 	var game_manager = get_tree().current_scene
 	if game_manager and "current_state" in game_manager:
-		# Bloquear si estamos en combate (2) o recompensa (3)
 		if game_manager.current_state == 2 or game_manager.current_state == 3:
 			return false
 			
 	if _is_roulette_spinning:
 		return false
 
-	# 2. Validación del objeto
 	var can_drop = false
 	if data is Dictionary and "data" in data:
 		can_drop = (data.data is Resource)
 	
-	# 3. Feedback visual (brillo del pozo)
 	if can_drop and sprite:
 		sprite.modulate = hover_color
 		
 	return can_drop
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
-	# Restaurar color del pozo
 	if sprite:
 		sprite.modulate = normal_color
 
 	var item = data.data
 	if not item: return
 	
-	# 1. VENDER: Emitimos la señal original que tu sistema ya conoce
+	# 1. Vender (Lógica inmediata)
 	GlobalSignals.item_deleted.emit(item)
 	
-	# 2. EFECTO VISUAL: Reproducimos la animación de caída
-	_play_drop_effect(item)
+	# 2. Intentar Animación de Caída
+	# La función devuelve true si la animación comenzó, false si no pudo (por falta de sprites, etc.)
+	var animation_started = _play_drop_effect(item)
+	
+	# 3. Fallback: Si no hubo animación de caída, mostramos la moneda ya.
+	# Si SI hubo animación, la moneda saldrá al final del Tween (ver _play_drop_effect).
+	if not animation_started:
+		_play_coin_pop()
 
-# --- LÓGICA DEL EFECTO VISUAL (La parte nueva) ---
+# --- EFECTOS VISUALES ---
 
-func _play_drop_effect(item: Resource) -> void:
-	# Intentamos sacar la textura del PieceData
-	if not item or not "piece_origin" in item: return
-	if not item.piece_origin or not "frames" in item.piece_origin: return
+func _play_drop_effect(item: Resource) -> bool:
+	# Verificaciones de seguridad para extraer textura
+	if not item or not "piece_origin" in item: return false
+	if not item.piece_origin or not "frames" in item.piece_origin: return false
 	
 	var sprite_frames = item.piece_origin.frames
-	if not sprite_frames: return
+	if not sprite_frames: return false
 
-	# Buscar frame: intentamos "idle", si no "default"
 	var anim_name = "idle"
 	if not sprite_frames.has_animation(anim_name):
 		anim_name = "default"
-	
-	if not sprite_frames.has_animation(anim_name): return
+	if not sprite_frames.has_animation(anim_name): return false
 		
 	var texture = sprite_frames.get_frame_texture(anim_name, 0)
-	if not texture: return
+	if not texture: return false
 	
-	# Crear sprite temporal "cayendo"
+	# --- INICIO DE ANIMACIÓN ---
+	
 	var falling_sprite = Sprite2D.new()
 	falling_sprite.texture = texture
-	falling_sprite.z_index = 100 # Encima de todo
-	
-	# Añadirlo a la raíz para que sea independiente de la UI
+	falling_sprite.z_index = 100 
 	get_tree().root.add_child(falling_sprite)
 	
-	# Posición inicial: Donde está el ratón
 	falling_sprite.global_position = get_global_mouse_position()
-	
-	# Posición final: Centro del pozo (DeleteArea)
 	var target_pos = get_global_rect().get_center()
 	
-	# Animación
 	var t = create_tween()
 	t.set_parallel(true)
-	t.set_ease(Tween.EASE_IN) # Acelera al caer
+	t.set_ease(Tween.EASE_IN) 
 	t.set_trans(Tween.TRANS_QUAD)
 	
-	# Se mueve al centro, se encoge y gira
 	t.tween_property(falling_sprite, "global_position", target_pos, fall_duration)
 	t.tween_property(falling_sprite, "scale", fall_scale, fall_duration)
 	t.tween_property(falling_sprite, "rotation_degrees", fall_rotation, fall_duration)
-	
-	# Se oscurece/desvanece un poco al final
 	t.tween_property(falling_sprite, "modulate", Color(0.5, 0.5, 0.5, 0.0), fall_duration)
 
-	# Borrar al terminar
+	# --- CADENA DE FINALIZACIÓN ---
+	# Aquí ocurre la magia: Usamos chain() para esperar a que termine lo anterior
 	t.chain().tween_callback(falling_sprite.queue_free)
+	
+	# Y justo después, activamos la moneda
+	t.tween_callback(_play_coin_pop)
+	
+	return true
 
-# --- SIGNALS AUXILIARES ---
+func _play_coin_pop() -> void:
+	if not coin_up: return
+	
+	# Resetear estado
+	coin_up.visible = true
+	coin_up.modulate.a = 1.0
+	
+	# Posicionar
+	coin_up.pivot_offset = coin_up.size / 2.0
+	coin_up.position = (size - coin_up.size) / 2.0
+	coin_up.position.y -= 20.0 
+	
+	var start_pos_y = coin_up.position.y
+	var target_pos_y = start_pos_y - coin_float_distance
+	
+	# Animar
+	var t = create_tween()
+	t.set_parallel(true)
+	t.set_trans(Tween.TRANS_CUBIC)
+	t.set_ease(Tween.EASE_OUT)
+	
+	t.tween_property(coin_up, "position:y", target_pos_y, coin_anim_duration)
+	t.tween_property(coin_up, "modulate:a", 0.0, coin_anim_duration)
+	
+	coin_up.scale = Vector2(0.5, 0.5)
+	t.tween_property(coin_up, "scale", Vector2(1.2, 1.2), coin_anim_duration * 0.5).set_trans(Tween.TRANS_ELASTIC)
+	
+	t.chain().tween_callback(coin_up.hide)
+
+# --- SIGNALS ---
 
 func _on_mouse_exited() -> void:
 	if sprite:
