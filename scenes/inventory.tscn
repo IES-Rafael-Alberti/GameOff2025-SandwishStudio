@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://hbcgudcjh0wn"]
+[gd_scene load_steps=27 format=3 uid="uid://hbcgudcjh0wn"]
 
 [ext_resource type="Script" uid="uid://cmqqk0nk7sejg" path="res://scripts/inventory.gd" id="1_hj2ta"]
 [ext_resource type="PackedScene" uid="uid://n7qqfs70w4b" path="res://scenes/inventory_slot.tscn" id="2_ty45s"]
@@ -24,6 +24,7 @@
 [ext_resource type="Texture2D" uid="uid://v7nekwjyhuij" path="res://assets/Manzana.png" id="15_5kq8a"]
 [ext_resource type="PackedScene" uid="uid://dblnjb14cqaif" path="res://scenes/tooltip.tscn" id="16_jc13p"]
 [ext_resource type="Texture2D" uid="uid://qkb8tvmapwdv" path="res://assets/Bujero.png" id="18_jc13p"]
+[ext_resource type="Texture2D" uid="uid://cq1a6vlkyil2v" path="res://assets/CoinUp.png" id="19_iqxo6"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_iqxo6"]
 
@@ -164,6 +165,10 @@ scale = Vector2(0.05147077, 0.05147077)
 texture = ExtResource("18_jc13p")
 
 [node name="sell" type="Sprite2D" parent="delete"]
+visible = false
+position = Vector2(52.999996, 42.999996)
+scale = Vector2(-0.041024566, -0.041024566)
+texture = ExtResource("19_iqxo6")
 
 [node name="TextureRect3" type="TextureRect" parent="."]
 layout_mode = 0

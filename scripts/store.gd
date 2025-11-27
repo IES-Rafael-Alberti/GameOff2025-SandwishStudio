@@ -506,11 +506,14 @@ func _update_reroll_button_visuals():
 
 func _animate_error_shake(node: Control):
 	if not node: return
+	
+	var original_pos_x = node.position.x
+	
 	var tween = create_tween()
-	node.pivot_offset = node.size / 2
-	tween.tween_property(node, "rotation_degrees", 5, 0.05)
-	tween.tween_property(node, "rotation_degrees", -5, 0.05)
-	tween.tween_property(node, "rotation_degrees", 0, 0.05)
+	tween.tween_property(node, "position:x", original_pos_x + 5, 0.05)
+	tween.tween_property(node, "position:x", original_pos_x - 5, 0.05)
+	tween.tween_property(node, "position:x", original_pos_x + 5, 0.05)
+	tween.tween_property(node, "position:x", original_pos_x, 0.05)
 
 func _calculate_price(data) -> int:
 	if not "price" in data: return 0

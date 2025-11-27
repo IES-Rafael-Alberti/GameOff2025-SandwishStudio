@@ -18,7 +18,7 @@ signal roulette_spin_started
 @export var activation_threshold: float = 0.75
 @export var ratchet_step_angle: float = 10.0 
 
-# --- CONFIGURACIÓN DE JUICE (DOPAMINA) ---
+# --- CONFIGURACIÓN VISUAL (JUICE BÁSICO) ---
 @export_group("Visual Juice & FX")
 @export var tension_color: Color = Color(1.5, 0.5, 0.5)
 @export var speed_glow_color: Color = Color(1.2, 1.2, 1.3) 
@@ -33,15 +33,21 @@ signal roulette_spin_started
 @export var impact_squash_scale: Vector2 = Vector2(1.15, 0.9) 
 @export var sun_reflection_color: Color = Color(4.0, 3.5, 3.0, 1.0) 
 
-@export_subgroup("Particle References")
+# --- ATMÓSFERA ROMANA (SOLO TEXTO) ---
+@export_group("Roman Atmosphere (Text Only)")
+@export var mood_text_label: Label # ¡Asigna esto en el editor!
+
+var phrases_desolation = ["El público duerme...", "¿Eso es todo?", "Arena vacía...", "Sin honor.", "Silencio..."]
+var phrases_normal = ["Las puertas se abren.", "La arena espera.", "¡Por Júpiter!", "Acero preparado."]
+var phrases_glory = ["¡ROMA INVICTA!", "¡LOS DIOSES MIRAN!", "¡SANGRE Y GLORIA!", "¡AVE CÉSAR!", "¡EL COLISEO RUGE!"]
+
+# --- REFERENCIAS INTERNAS ---
+@export_subgroup("References")
 @export var lever_release_particles: GPUParticles2D
 @export var win_particles: GPUParticles2D
-
-@export_subgroup("Audio & Camera")
 @export var game_camera: Camera2D
 @export var lever_ratchet_audio: AudioStreamPlayer 
 
-# --- REFERENCIAS INTERNAS ---
 @onready var slots_container: Node2D = $SpriteRuleta/SlotsContainer
 @onready var lever_sprite: Sprite2D = $Lever
 @onready var lever_area: Area2D = $Lever/AreaLever
@@ -50,7 +56,6 @@ signal roulette_spin_started
 @onready var ticker_audio: AudioStreamPlayer = $Manecilla/AudioStreamPlayer
 
 # REFERENCIAS A LOS ICONOS DE SINERGIA
-# Asegúrate de que los nodos se llamen así en tu escena
 @onready var icon_japonesa = $Japonesa
 @onready var icon_nordica = $Nordica
 @onready var icon_europea = $Europea
@@ -77,10 +82,7 @@ var current_lever_rotation: float = 0.0
 var inertia: float = 0.0
 var _selected_area: Area2D = null
 var bouncing: bool = false
-
-# Variables FX
 var shake_trauma: float = 0.0
-var target_zoom: Vector2 = Vector2.ONE
 var last_ratchet_angle: float = 0.0
 
 # --- INICIO ---
@@ -100,10 +102,17 @@ func _ready() -> void:
 	
 	if game_camera:
 		camera_origin_zoom = game_camera.zoom
-		target_zoom = camera_origin_zoom
 	
+	# --- CONEXIONES DE SEÑALES (AQUÍ ESTÁ LA CLAVE DE LA REACTIVIDAD) ---
 	if GlobalSignals:
+		# 1. Cuando se borra un tipo de pieza
 		GlobalSignals.piece_type_deleted.connect(_on_piece_type_deleted)
+		
+		# 2. ¡NUEVO! Cuando pones una pieza en un slot (Drag & Drop)
+		GlobalSignals.piece_placed_on_roulette.connect(func(_piece): check_mood_update())
+		
+		# 3. ¡NUEVO! Cuando quitas una pieza del slot (Click para devolver)
+		GlobalSignals.piece_returned_from_roulette.connect(func(_piece): check_mood_update())
 	
 	if lever_area:
 		lever_area.input_pickable = true
@@ -114,8 +123,13 @@ func _ready() -> void:
 	if manecilla_area:
 		manecilla_area.area_entered.connect(_on_manecilla_area_entered)
 	
-	# INICIALIZAR LA UI DE SINERGIAS
+	if mood_text_label:
+		mood_text_label.visible = false 
+	
 	update_ui_synergies()
+	
+	# Llamada diferida para asegurar que los nodos hijos estén listos al arrancar
+	call_deferred("update_mood_text")
 
 # --- INPUT Y PALANCA ---
 func _on_lever_input_event(_viewport, event, _shape_idx):
@@ -150,9 +164,6 @@ func start_dragging():
 	var t = create_tween()
 	t.tween_property(lever_sprite, "scale", Vector2(1.1, 1.1), 0.1).set_trans(Tween.TRANS_BACK)
 
-func is_moving():
-	return state != State.IDLE
-
 func update_lever_drag():
 	var current_mouse_y = get_global_mouse_position().y
 	var diff = current_mouse_y - drag_start_mouse_y
@@ -183,7 +194,6 @@ func update_lever_drag():
 
 func release_lever():
 	is_dragging_lever = false
-	
 	var percentage_pulled = current_lever_rotation / lever_max_angle
 	
 	if percentage_pulled >= activation_threshold:
@@ -211,14 +221,15 @@ func release_lever():
 		t.chain().tween_callback(func(): lever_sprite.position = lever_origin_pos)
 		GlobalSignals.emit_signal("roulette_state_changed", true)
 
-# --- LÓGICA CENTRAL ---
+# --- GIRO ---
 func trigger_spin():
-	_reset()
 	state = State.SPINNING
 	_selected_area = null
+	
 	var pull_factor = current_lever_rotation / lever_max_angle
 	var base_force = min_impulse_force * pull_factor
 	var random_multiplier = randf_range(min_impulse_random_range.x, min_impulse_random_range.y)
+	
 	inertia = base_force * random_multiplier
 	roulette_spin_started.emit()
 
@@ -229,8 +240,7 @@ func _process(delta: float) -> void:
 		
 	if shake_trauma > 0:
 		shake_trauma = max(shake_trauma - delta * 2.0, 0)
-		if state == State.IDLE:
-			shake_trauma = 0
+		if state == State.IDLE and shake_trauma <= 0:
 			$SpriteRuleta.position = roulette_origin_pos
 			if game_camera: game_camera.zoom = camera_origin_zoom
 		else:
@@ -248,7 +258,7 @@ func _spin(_delta: float):
 		inertia = 0
 		$SpriteRuleta.modulate = Color.WHITE 
 		_reward()
-		_reset()
+		_reset_after_spin()
 
 func _process_zoom(delta: float):
 	if not game_camera: return
@@ -263,7 +273,7 @@ func _apply_screen_shake():
 	var offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * screen_shake_force * amount
 	$SpriteRuleta.position = roulette_origin_pos + offset
 
-# --- MANECILLA ---
+# --- INTERACCIONES Y VISUALES ---
 func _on_manecilla_area_entered(area: Area2D) -> void:
 	if state != State.SPINNING: return
 	_selected_area = area
@@ -294,35 +304,6 @@ func _bounce():
 	t.tween_property(spr, "modulate", Color.WHITE, 0.1)
 	t.chain().tween_callback(func(): bouncing = false)
 
-# --- RECOMPENSAS ---
-func _impact_slot(area: Area2D) -> void:
-	if not "slot_index" in area: return
-	var slot_index: int = area.slot_index
-	
-	var count = slots_container.get_child_count()
-	var safe_index = wrapi(slot_index, 0, count)
-	var slot_root = slots_container.get_child(safe_index)
-	
-	if slot_root and slot_root.has_node("slot"):
-		var actual_slot = slot_root.get_node("slot")
-		if actual_slot is CanvasItem:
-			if slot_root.has_method("kill_highlight_tween"):
-				slot_root.kill_highlight_tween()
-			
-			actual_slot.material = null
-			
-			var t = create_tween()
-			t.set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
-			
-			# --- MEJORA: Flash HDR "Explosivo" ---
-			# Usamos el color sun_reflection_color (muy brillante) para quemar la imagen
-			t.tween_property(actual_slot, "scale", impact_squash_scale, 0.04)
-			t.parallel().tween_property(actual_slot, "modulate", sun_reflection_color, 0.04)
-			
-			# Fase de enfriamiento (Cool down)
-			t.chain().tween_property(actual_slot, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_ELASTIC)
-			t.parallel().tween_property(actual_slot, "modulate", Color.WHITE, 0.2) # Vuelve a normalidad rápido
-			
 func _flash_segment(area: Area2D) -> void:
 	if not "slot_index" in area: return
 	var slot_index: int = area.slot_index
@@ -339,8 +320,9 @@ func _flash_segment(area: Area2D) -> void:
 			t.tween_property(actual_slot, "modulate", flash_color, flash_time)
 			t.chain().tween_property(actual_slot, "modulate", Color.WHITE, flash_time * 2.0)
 
+# --- RECOMPENSAS Y RESET ---
 func _reward(): 
-	get_current_synergies() # Calcular y actualizar visuales
+	get_current_synergies() 
 	
 	if win_particles:
 		win_particles.restart()
@@ -360,40 +342,30 @@ func _reward():
 	if winning_slot_root and winning_slot_root.has_node("slot"):
 		var actual_slot = winning_slot_root.get_node("slot")
 		if actual_slot is CanvasItem:
-			var final_highlight_color = highlight_color * final_highlight_intensity
 			
+			if winning_slot_root.has_method("kill_highlight_tween"):
+				winning_slot_root.kill_highlight_tween()
+
 			var t = create_tween()
-			t.set_trans(Tween.TRANS_ELASTIC)
-			t.tween_property(actual_slot, "modulate", final_highlight_color, 0.3)
-			t.chain().tween_property(actual_slot, "modulate", Color.WHITE, 0.5) 
-
-			if winning_slot_root.has_method("kill_highlight_tween"):
-				winning_slot_root.kill_highlight_tween()
-			
-			if winning_slot_root.has_method("kill_highlight_tween"):
-				winning_slot_root.kill_highlight_tween()
-
-			t.set_loops(3) # Tres latidos brillantes
+			t.set_loops(3) 
 			t.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 			
-			# Sube a oro HDR y baja a blanco
 			t.tween_property(actual_slot, "modulate", winner_highlight_color, 0.15)
 			t.tween_property(actual_slot, "modulate", Color.WHITE, 0.15)
 			
 			t.finished.connect(func(): 
-				actual_slot.modulate = Color(1.2, 1.1, 1.0) # Brillo residual
+				actual_slot.modulate = Color(1.2, 1.1, 1.0)
 			)
 
 		if actual_slot and "current_piece_data" in actual_slot:
 			var piece = actual_slot.current_piece_data
 			if piece and piece.get("piece_origin"):
-				print("¡Pieza obtenida: %s!" % piece.resource_name)
 				GlobalSignals.emit_signal("combat_requested", piece.piece_origin)
 				return
 	
 	GlobalSignals.emit_signal("combat_requested", null)
 
-func _reset():
+func _reset_after_spin():
 	_selected_area = null
 	inertia = 0.0
 	bouncing = false
@@ -422,39 +394,102 @@ func _reset():
 
 	GlobalSignals.emit_signal("roulette_state_changed", false)
 	update_ui_synergies()
-
-func reset_rotation_to_zero():
-	if state == State.IDLE:
-		$SpriteRuleta.rotation_degrees = 0.0
-		$SpriteRuleta.position = roulette_origin_pos
+	
+	# VOLVER A MOSTRAR EL TEXTO
+	update_mood_text()
 
 func set_interactive(interactive: bool):
 	is_interactive = interactive
 	if lever_sprite:
 		lever_sprite.modulate = Color.WHITE if interactive else Color(0.5, 0.5, 0.5)
 
-func _on_piece_type_deleted(piece_data: PieceData):
-	if not piece_data:
-		return
-		
-	print("... Ruleta ha recibido orden de borrado para: %s" % piece_data.resource_name)
+# --- CONTROL PIEZAS ---
+func _on_piece_type_deleted(piece_data):
+	if not piece_data: return
 	
 	for slot_root in slots_container.get_children():
-		if not slot_root.has_node("slot"):
-			continue
-			
+		if not slot_root.has_node("slot"): continue
 		var slot = slot_root.get_node("slot")
 		
 		if slot and "current_piece_data" in slot:
 			if slot.current_piece_data == piece_data:
 				if slot.has_method("clear_slot"):
-					print("... ... Limpiando slot %s" % slot.name)
 					slot.clear_slot()
 					update_ui_synergies()
-				else:
-					push_warning("Ruleta: El slot %s no tiene método clear_slot()" % slot.name)
+	
+	update_mood_text()
 
-# --- SISTEMA DE SINERGIAS CENTRALIZADO ---
+# --- FUNCIONES DE MOOD (SOLO TEXTO) ---
+
+# Función pública para llamar desde fuera si es necesario
+func check_mood_update():
+	update_mood_text()
+	update_ui_synergies()
+
+func update_mood_text() -> void:
+	if not mood_text_label: return
+	
+	var occupied_slots = 0
+	var total_slots = 0
+	
+	if slots_container:
+		total_slots = slots_container.get_child_count()
+		for slot_root in slots_container.get_children():
+			if slot_root.has_node("slot"):
+				var slot = slot_root.get_node("slot")
+				if "current_piece_data" in slot and slot.current_piece_data:
+					occupied_slots += 1
+	
+	var ratio = 0.0
+	if total_slots > 0:
+		ratio = float(occupied_slots) / float(total_slots)
+	
+	# Elegir texto y color basado en la cantidad
+	var text_to_show = ""
+	var color_to_show = Color.WHITE
+	
+	if ratio <= 0.2:
+		text_to_show = phrases_desolation.pick_random()
+		color_to_show = Color(0.7, 0.7, 0.7) # Grisáceo
+	elif ratio >= 0.8:
+		text_to_show = phrases_glory.pick_random()
+		color_to_show = Color(1.0, 0.85, 0.4) # Dorado suave
+	else:
+		text_to_show = phrases_normal.pick_random()
+		color_to_show = Color.WHITE
+
+	_animate_label(text_to_show, color_to_show)
+
+func _animate_label(text: String, color: Color):
+	mood_text_label.visible = true
+	mood_text_label.text = text
+	mood_text_label.modulate = color
+	mood_text_label.scale = Vector2.ZERO
+	mood_text_label.rotation_degrees = randf_range(-5, 5)
+	
+	# Animación simple: Pop In -> Espera -> Desaparece hacia arriba
+	var t = create_tween()
+	t.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	
+	# 1. Aparecer
+	t.tween_property(mood_text_label, "scale", Vector2(1.2, 1.2), 0.3)
+	t.parallel().tween_property(mood_text_label, "modulate:a", 1.0, 0.2)
+	
+	# 2. Esperar
+	t.chain().tween_interval(2.0)
+	
+	# 3. Desaparecer flotando
+	t.chain().set_trans(Tween.TRANS_CUBIC)
+	t.tween_property(mood_text_label, "position:y", mood_text_label.position.y - 30, 1.0)
+	t.parallel().tween_property(mood_text_label, "modulate:a", 0.0, 1.0)
+	
+	# 4. Reset posición original
+	t.chain().tween_callback(func(): 
+		mood_text_label.visible = false
+		mood_text_label.position.y += 30 
+	)
+
+# --- SINERGIAS (Igual) ---
 func _calculate_counts() -> Dictionary:
 	var unique_ids_jap = {}
 	var unique_ids_nor = {}
@@ -468,13 +503,13 @@ func _calculate_counts() -> Dictionary:
 		
 		if "current_piece_data" in actual_slot and actual_slot.current_piece_data:
 			var data = actual_slot.current_piece_data
-			if "piece_origin" in data and data.piece_origin is PieceRes:
+			if "piece_origin" in data and data.piece_origin:
 				var res = data.piece_origin
 				var id = res.id
 				match res.race:
-					PieceRes.PieceRace.JAPONESA: unique_ids_jap[id] = true
-					PieceRes.PieceRace.NORDICA: unique_ids_nor[id] = true
-					PieceRes.PieceRace.EUROPEA: unique_ids_eur[id] = true
+					1: unique_ids_jap[id] = true
+					0: unique_ids_nor[id] = true
+					2: unique_ids_eur[id] = true
 
 	return {
 		"jap_count": unique_ids_jap.size(),
