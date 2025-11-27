@@ -287,7 +287,60 @@ func add_item(data: Resource, amount: int = 1, from_pos: Vector2 = Vector2.ZERO)
 	return false
 # --- FUNCIONES DE VISUALES PASIVAS (Ya no usamos _display_passive_visual dinámica) ---
 # (Función eliminada porque usamos _activate_passive_visual con el mapa estático)
+# Añadir en inventory.gd, en la sección de Funciones Públicas
 
+func add_item_visually_delayed(data: Resource, from_pos: Vector2) -> bool:
+	if not data: return false
+
+	# 1. Validación PREDICTIVA (Simulamos si cabe)
+	# Si es pasiva, siempre cabe.
+	if data is PassiveData:
+		var target_node = passive_nodes_map.get(data.type)
+		if target_node:
+			# Animamos hacia el nodo de stats
+			_play_arena_return_effect(data, from_pos, target_node, func():
+				# AL TERMINAR: Lógica real
+				add_item(data, 1, Vector2.ZERO) # Vector2.ZERO evita que add_item lance otra animación
+			)
+			return true
+		else:
+			# Si no hay nodo visual, añadimos directo
+			return add_item(data, 1, Vector2.ZERO)
+
+	# Si es Pieza
+	elif data is PieceData:
+		var context = _get_inventory_context(data)
+		var id = _get_item_id(data)
+		
+		# Buscamos el nodo destino (slot existente o nuevo vacío)
+		var target_slot_node: Node = null
+		
+		# A) ¿Ya existe? -> Stack
+		if context.map.has(id):
+			var current_count = context.map[id]["count"]
+			if current_count >= max_piece_copies: return false # Lleno
+			target_slot_node = context.map[id]["slot_node"]
+			
+		# B) ¿Es nuevo? -> Buscar vacío
+		else:
+			target_slot_node = _find_empty_slot(context.slots)
+			if not target_slot_node: return false # Inventario lleno
+		
+		# 2. Ejecutar Animación
+		if target_slot_node:
+			# Desactivamos interacción temporalmente para evitar bugs visuales si el usuario clicka
+			if target_slot_node.has_node("TextureButton"):
+				target_slot_node.get_node("TextureButton").disabled = true
+				
+			_play_arena_return_effect(data, from_pos, target_slot_node, func():
+				# AL TERMINAR: Lógica real
+				add_item(data, 1, Vector2.ZERO)
+				if target_slot_node.has_node("TextureButton"):
+					target_slot_node.get_node("TextureButton").disabled = false
+			)
+			return true
+			
+	return false
 ## ------------------------------------------------------------------
 ## Funciones de Eliminación de Items (SOLO PIEZAS)
 ## ------------------------------------------------------------------
@@ -424,14 +477,13 @@ func _on_piece_placed(piece_data: PieceData):
 	_update_slot_visuals_for_piece(piece_data)
 	call_deferred("_update_passive_stats_display")
 
+# Reemplaza la función existente _on_piece_returned en inventory.gd
+
 func _on_piece_returned(piece_data: PieceData):
 	if not piece_data: return
 	if not piece_data is PieceData: return
-		
-	piece_data.uses += 1
-	print("... Pieza devuelta. Usos restantes: %d" % piece_data.uses)
-
-	_update_slot_visuals_for_piece(piece_data)
+	
+	# NO actualizamos 'uses' todavía.
 	
 	var id = _get_item_id(piece_data)
 	if piece_counts.has(id):
@@ -440,11 +492,26 @@ func _on_piece_returned(piece_data: PieceData):
 		
 		if target_slot_node:
 			var start_pos = get_global_mouse_position()
-			_play_arena_return_effect(piece_data, start_pos, target_slot_node)
-	# -----------------------------------------
-	
-
-	call_deferred("_update_passive_stats_display")
+			
+			# Lanzamos animación con callback
+			_play_arena_return_effect(piece_data, start_pos, target_slot_node, func():
+				# ESTO SE EJECUTA CUANDO LLEGA AL SLOT
+				piece_data.uses += 1
+				print("... Pieza devuelta (anim fin). Usos: %d" % piece_data.uses)
+				
+				# Actualizar visuales del slot (números, barras)
+				_update_slot_visuals_for_piece(piece_data)
+				
+				# Recalcular pasivas (por si las moscas)
+				call_deferred("_update_passive_stats_display")
+			)
+		else:
+			# Fallback si no hay slot visual (raro)
+			piece_data.uses += 1
+			_update_slot_visuals_for_piece(piece_data)
+	else:
+		# Si la pieza no estaba en el mapa (error raro), solo sumamos usos
+		piece_data.uses += 1
 
 
 func _update_slot_visuals_for_piece(piece_data: PieceData):
@@ -527,19 +594,22 @@ func _get_empty_roulette_slots() -> int:
 	
 # --- EFECTOS VISUALES (ESTILO ROMA/ARENA) ---
 
-# En GameOff2025-SandwishStudio/scripts/inventory.gd
 
-func _play_arena_return_effect(item_data: Resource, start_pos: Vector2, target_slot: Node):
+# BUSCA LA FUNCIÓN _play_arena_return_effect Y REEMPLÁZALA POR ESTA VERSIÓN:
+func _play_arena_return_effect(item_data: Resource, start_pos: Vector2, target_slot: Node, on_finish_callback: Callable = Callable()):
 	if not item_data or not "icon" in item_data:
+		# Si no hay animación posible, ejecutamos el callback inmediatamente para no romper el flujo
+		if on_finish_callback.is_valid(): on_finish_callback.call()
 		return
 	
-	var target_pos = Vector2.ZERO
+	var target_pos_vec = Vector2.ZERO
 	
 	if "item_icon" in target_slot and target_slot.item_icon and target_slot.item_icon.visible:
-		target_pos = target_slot.item_icon.get_global_rect().get_center()
+		target_pos_vec = target_slot.item_icon.get_global_rect().get_center()
 	else:
-		target_pos = target_slot.get_global_rect().get_center()
+		target_pos_vec = target_slot.get_global_rect().get_center()
 
+	# ... (El resto de la creación de partículas y nodos sigue igual hasta la parte del Tween) ...
 	# Nodo raíz del efecto
 	var effect_root = Node2D.new()
 	effect_root.z_index = 4096
@@ -553,7 +623,7 @@ func _play_arena_return_effect(item_data: Resource, start_pos: Vector2, target_s
 
 	# --- MARCO ---
 	var frame = Sprite2D.new()
-	frame.texture = preload("res://assets/QuesoVacio9.png")  # <<<<<<<< CAMBIA ESTA RUTA
+	frame.texture = preload("res://assets/QuesoVacio9.png") 
 	frame.centered = true
 	frame.scale = Vector2(0.4, 0.4)
 	container.add_child(frame)
@@ -568,6 +638,7 @@ func _play_arena_return_effect(item_data: Resource, start_pos: Vector2, target_s
 
 	# --- PARTÍCULAS ---
 	var particles = CPUParticles2D.new()
+	# ... (Configuración de partículas igual que antes) ...
 	particles.amount = 25
 	particles.lifetime = 0.5
 	particles.local_coords = false
@@ -588,11 +659,10 @@ func _play_arena_return_effect(item_data: Resource, start_pos: Vector2, target_s
 
 	# --- CURVA (Bezier) ---
 	var p0 = start_pos
-	var p2 = target_pos
+	var p2 = target_pos_vec # Usamos la variable calculada arriba
 
 	var distance = p0.distance_to(p2)
 	var arc_height = min(distance * 0.5, 300.0) * -1.0
-
 	var center_x = (p0.x + p2.x) / 2.0
 	var base_y = min(p0.y, p2.y)
 	var p1 = Vector2(center_x, base_y + arc_height)
@@ -601,17 +671,15 @@ func _play_arena_return_effect(item_data: Resource, start_pos: Vector2, target_s
 	var t = create_tween()
 	t.set_parallel(true)
 
-	# Movimiento curvo
 	t.tween_method(
 		func(val):
-			effect_root.global_position = _bezier_quadratic(p0, p1, p2, val),
+			if is_instance_valid(effect_root):
+				effect_root.global_position = _bezier_quadratic(p0, p1, p2, val),
 		0.0, 1.0, 0.55
 	).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_SINE)
 
-	# Rotación del contenedor completo
 	t.tween_property(container, "rotation", deg_to_rad(360), 0.55).set_ease(Tween.EASE_OUT)
-
-	# Escalado dinámico (zoom hacia dentro)
+	
 	var t_scale = create_tween()
 	t_scale.tween_property(container, "scale", Vector2(1.3, 1.3), 0.25).set_ease(Tween.EASE_OUT)
 	t_scale.chain().tween_property(container, "scale", Vector2(0.8, 0.8), 0.3).set_ease(Tween.EASE_IN)
@@ -626,6 +694,10 @@ func _play_arena_return_effect(item_data: Resource, start_pos: Vector2, target_s
 		cleanup.tween_callback(effect_root.queue_free)
 
 		_play_slot_impact(target_slot)
+		
+		# AQUÍ EJECUTAMOS EL CALLBACK CON LA LÓGICA DE DATOS
+		if on_finish_callback.is_valid():
+			on_finish_callback.call()
 	)
 
 # --- FUNCIONES AUXILIARES (Añadir al final de inventory.gd) ---
