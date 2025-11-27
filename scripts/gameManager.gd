@@ -20,7 +20,9 @@ var gladiators_defeated: int = 0
 @onready var pupil: Sprite2D = $elJetas/ButtonShop/EyeSprite/Pupil
 # Referencia al AnimationPlayer de elJetas
 @onready var el_jetas_anim: AnimationPlayer = $elJetas/AnimationPlayer
-
+@onready var piece_label: Label = $Store/piece_label
+@onready var passive_label: Label = $Store/passive_label
+@onready var coin_sprite: Sprite2D = $Store/Coin
 @onready var mat = $Store/Sprite2D.material
 @onready var anim = $Store/AnimationPlayer
 @onready var gold_label: Label = $Store/gold_label
@@ -359,7 +361,7 @@ func _toggle_store(close_store: bool):
 	var anim_duration = 1.0 
 	
 	if is_tended:
-	
+		# --- CERRAR TIENDA ---
 		_simple_items_fade(0.0, 0.2)
 		
 		await get_tree().create_timer(0.2).timeout
@@ -372,13 +374,50 @@ func _toggle_store(close_store: bool):
 		
 	else:
 		store.visible = true
-		_reset_items_visibility()
+		_reset_items_visibility() 
 		
 		anim.play("unroll")
 		var tween = create_tween()
-		tween.tween_property(mat, "shader_parameter/roll_amount", 0.0, anim_duration)
 		
-		tween.tween_callback(func(): _simple_items_fade(1.0, 0.3)).set_delay(anim_duration * 0.8)
+		tween.tween_property(mat, "shader_parameter/roll_amount", 0.0, anim_duration)\
+			.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+		
+		tween.chain().tween_callback(_animate_items_entry)
+		
+func _animate_items_entry():
+	var tween = create_tween().set_parallel(true)
+	
+	# Configuración "Romana": Pesada y contundente
+	var drop_height = 80.0  # Desde qué tan alto caen
+	var duration = 0.6      # Duración del impacto
+	var delay_step = 0.03   # Cascada rápida entre items
+	var current_delay = 0.0
+	
+	for item in _get_animatable_store_items():
+		if is_instance_valid(item):
+			# --- PREPARACIÓN (Fase oculta) ---
+			item.modulate.a = 0.0
+			
+			# Recuperamos su posición original guardada en _ready
+			# Si por alguna razón no está, usamos la actual como fallback
+			var final_pos = item.position
+			if original_positions.has(item):
+				final_pos = original_positions[item]
+			
+			# Posición inicial: Más arriba (para caer)
+			item.position = final_pos - Vector2(0, drop_height)
+			
+			# --- ANIMACIÓN (La Caída) ---
+			
+			# 1. Caída con Rebote (Simula peso)
+			tween.tween_property(item, "position", final_pos, duration)\
+				.set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT).set_delay(current_delay)
+			
+			# 2. Aparición (Fade in rápido para que no se vea el "fantasma" arriba)
+			tween.tween_property(item, "modulate:a", 1.0, duration * 0.5)\
+				.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT).set_delay(current_delay)
+			
+			current_delay += delay_step
 		
 func _reset_items_visibility():
 
@@ -398,12 +437,20 @@ func _simple_items_fade(target_alpha: float, duration: float):
 
 func _get_animatable_store_items() -> Array:
 	var items = []
+	
 	if store.has_node("piece_zone"):
 		for child in store.piece_zone.get_children(): items.append(child)
 	if store.has_node("passive_zone"):
 		for child in store.passive_zone.get_children(): items.append(child)
+		
 	if store.has_node("Reroll"): items.append(store.get_node("Reroll"))
 	if store.has_node("Lock"): items.append(store.get_node("Lock"))
+	
+	if coin_sprite: items.append(coin_sprite)
+	if gold_label: items.append(gold_label)
+	if piece_label: items.append(piece_label)    
+	if passive_label: items.append(passive_label) #
+	
 	return items
 		
 func _on_animation_finished(anim_name: String):

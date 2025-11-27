@@ -1,10 +1,9 @@
-[gd_scene load_steps=25 format=3 uid="uid://hbcgudcjh0wn"]
+[gd_scene load_steps=26 format=3 uid="uid://hbcgudcjh0wn"]
 
 [ext_resource type="Script" uid="uid://cmqqk0nk7sejg" path="res://scripts/inventory.gd" id="1_hj2ta"]
 [ext_resource type="PackedScene" uid="uid://n7qqfs70w4b" path="res://scenes/inventory_slot.tscn" id="2_ty45s"]
 [ext_resource type="PackedScene" uid="uid://7erbtxd030w2" path="res://scenes/piece.tscn" id="3_uae8j"]
 [ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="4_40feg"]
-[ext_resource type="Texture2D" uid="uid://boul6livclehs" path="res://assets/unnamed (1).jpg" id="4_53g1v"]
 [ext_resource type="Texture2D" uid="uid://b4bl7jr41p7bk" path="res://assets/inventario/Inventario.png" id="4_uae8j"]
 [ext_resource type="Script" uid="uid://cm67y0q4u1ot5" path="res://scripts/DeleteArea.gd" id="4_yyk2a"]
 [ext_resource type="Texture2D" uid="uid://b3gvhhihiil78" path="res://assets/inventario/Bandeja.png" id="5_s887n"]
@@ -24,6 +23,9 @@
 [ext_resource type="Texture2D" uid="uid://d1vgubqe84mhy" path="res://assets/Granada.png" id="14_y2qpb"]
 [ext_resource type="Texture2D" uid="uid://v7nekwjyhuij" path="res://assets/Manzana.png" id="15_5kq8a"]
 [ext_resource type="PackedScene" uid="uid://dblnjb14cqaif" path="res://scenes/tooltip.tscn" id="16_jc13p"]
+[ext_resource type="Texture2D" uid="uid://qkb8tvmapwdv" path="res://assets/Bujero.png" id="18_jc13p"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_iqxo6"]
 
 [node name="inventory" type="Control"]
 layout_mode = 3
@@ -149,15 +151,19 @@ grow_vertical = 1
 [node name="delete" type="Panel" parent="."]
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 0
-offset_left = 205.0
-offset_top = 741.0
-offset_right = 305.0
-offset_bottom = 841.0
+offset_left = 224.0
+offset_top = 742.0
+offset_right = 337.0
+offset_bottom = 842.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_iqxo6")
 script = ExtResource("4_yyk2a")
 
-[node name="Sprite2D" type="Sprite2D" parent="delete"]
-position = Vector2(54, 47)
-texture = ExtResource("4_53g1v")
+[node name="well" type="Sprite2D" parent="delete"]
+position = Vector2(54, 49)
+scale = Vector2(0.05147077, 0.05147077)
+texture = ExtResource("18_jc13p")
+
+[node name="sell" type="Sprite2D" parent="delete"]
 
 [node name="TextureRect3" type="TextureRect" parent="."]
 layout_mode = 0
