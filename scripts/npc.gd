@@ -267,55 +267,47 @@ func apply_passive_bonuses(p_health: float, p_damage: float, p_speed: float, p_c
 
 # CONTROLER BATTLE
 func get_damage(target: npc) -> float:
-	var val: float = npc_res.damage + bonus_damage
+	var val := npc_res.damage + bonus_damage
+	
 	# LÓGICA JAPONESA 
 	is_last_attack_special = false
 	
 	if synergy_jap_tier > 0 and jap_special_ready:
-		var mult: float = 1.0
-		if synergy_jap_tier == 1:
-			mult = 1.5
-		elif synergy_jap_tier == 2:
-			mult = 2.0
+		var mult = 1.0
+		if synergy_jap_tier == 1: mult = 1.5
+		elif synergy_jap_tier == 2: mult = 2.0
 		val *= mult
 		
 		is_last_attack_special = true
 		jap_special_ready = false 
 	
 	for ab in abilities:
-		if ab:
-			val = ab.modify_damage(val, self, target)
+		if ab: val = ab.modify_damage(val, self, target)
 	return max(0.0, val)
 	
-
 func get_attack_speed() -> float:
-	var val: float = npc_res.atack_speed + bonus_speed
+	var val := npc_res.atack_speed + bonus_speed
 	for ab in abilities:
-		if ab:
-			val = ab.modify_attack_speed(val, self)
+		if ab: val = ab.modify_attack_speed(val, self)
 
 	if val > ATTACK_SPEED_SOFT_CAP:
-		var over: float = val - ATTACK_SPEED_SOFT_CAP
+		var over := val - ATTACK_SPEED_SOFT_CAP
 		val = ATTACK_SPEED_SOFT_CAP + over * ATTACK_SPEED_OVER_FACTOR
 	
 	val = clamp(val, 0.1, ATTACK_SPEED_HARD_CAP)
 	return val
 
-
 func get_crit_chance(target: npc) -> int:
-	var val: float = npc_res.critical_chance + bonus_crit_chance
+	var val := npc_res.critical_chance + bonus_crit_chance
 	for ab in abilities:
-		if ab:
-			val = ab.modify_crit_chance(val, self, target)
-	return max(0, int(val))
-
+		if ab: val = ab.modify_crit_chance(val, self, target)
+	return max (0, val)
 
 func get_crit_mult(target: npc) -> float:
-	var val: float = npc_res.critical_damage + bonus_crit_damage
+	var val := npc_res.critical_damage + bonus_crit_damage
 	for ab in abilities:
-		if ab:
-			val = ab.modify_crit_damage(val, self, target)
-	return max(1.0, val)
+		if ab: val = ab.modify_crit_damage(val, self, target)
+	return max (1.0, val)
 
 # DAMAGE AND EVENTS
 func take_damage(amount: float, from: npc = null, was_crit: bool = false) -> void:

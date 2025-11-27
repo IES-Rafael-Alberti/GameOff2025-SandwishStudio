@@ -15,22 +15,6 @@ position = Vector2(-24.999998, 4)
 scale = Vector2(1.0102993, 1.021862)
 script = ExtResource("1_ivkwx")
 enemy_res = Array[ExtResource("2_0vylu")]([ExtResource("3_2edba"), ExtResource("4_6ovae"), ExtResource("5_ivkwx"), ExtResource("6_6sw3s")])
-ally_attack_offset = null
-ally_attack_rotation_deg = null
-enemy_attack_offset = null
-enemy_attack_rotation_deg = null
-attack_lunge_duration = null
-attack_return_duration = null
-scaling_hp_mult = null
-scaling_damage_mult = null
-scaling_speed_flat = null
-scaling_crit_chance_flat = null
-scaling_crit_dmg_flat = null
-defeat_hp_mult = null
-defeat_damage_mult = null
-defeat_speed_flat = null
-defeat_crit_chance_flat = null
-defeat_crit_dmg_flat = null
 
 [node name="Control" type="Control" parent="."]
 layout_mode = 3

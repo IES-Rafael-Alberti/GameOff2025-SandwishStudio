@@ -37,7 +37,7 @@ var gladiators_defeated: int = 0
 @export var rounds_per_day: int = 10
 @export var gladiators_per_day: int = 1
 @export var gladiators_mult: int = 1
-@export var max_days: int = 3
+@export var max_days: int = 2
 
 
 # --- UI LABELS ---
@@ -335,8 +335,8 @@ func _advance_to_next_day() -> void:
 	set_state(GameState.SHOP)
 	store.generate()
 	store.start_new_round()
-	if combat_scene and combat_scene.has_method("reset_for_new_day"):
-		combat_scene.reset_for_new_day()
+	if combat_scene:
+		combat_scene.spawn_enemy_one()
 
 func _give_initial_piece():
 	if not inventory.has_method("get_random_initial_piece"): return
