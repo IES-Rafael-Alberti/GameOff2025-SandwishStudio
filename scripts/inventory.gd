@@ -289,52 +289,77 @@ func add_item(data: Resource, amount: int = 1, from_pos: Vector2 = Vector2.ZERO)
 # (Función eliminada porque usamos _activate_passive_visual con el mapa estático)
 # Añadir en inventory.gd, en la sección de Funciones Públicas
 
+# En scripts/inventory.gd
+
 func add_item_visually_delayed(data: Resource, from_pos: Vector2) -> bool:
 	if not data: return false
 
-	# 1. Validación PREDICTIVA (Simulamos si cabe)
-	# Si es pasiva, siempre cabe.
+	# 1. Pasivas (Sin cambios)
 	if data is PassiveData:
 		var target_node = passive_nodes_map.get(data.type)
 		if target_node:
-			# Animamos hacia el nodo de stats
 			_play_arena_return_effect(data, from_pos, target_node, func():
-				# AL TERMINAR: Lógica real
-				add_item(data, 1, Vector2.ZERO) # Vector2.ZERO evita que add_item lance otra animación
+				add_item(data, 1, Vector2.ZERO)
 			)
 			return true
 		else:
-			# Si no hay nodo visual, añadimos directo
 			return add_item(data, 1, Vector2.ZERO)
 
-	# Si es Pieza
+	# 2. Piezas
 	elif data is PieceData:
 		var context = _get_inventory_context(data)
 		var id = _get_item_id(data)
 		
-		# Buscamos el nodo destino (slot existente o nuevo vacío)
 		var target_slot_node: Node = null
+		var is_leveling_up = false 
+		var next_count = 1 # Variable para saber a qué nivel subimos
 		
-		# A) ¿Ya existe? -> Stack
+		# A) STACK (Level Up)
 		if context.map.has(id):
 			var current_count = context.map[id]["count"]
-			if current_count >= max_piece_copies: return false # Lleno
-			target_slot_node = context.map[id]["slot_node"]
+			if current_count >= max_piece_copies: return false 
 			
-		# B) ¿Es nuevo? -> Buscar vacío
+			target_slot_node = context.map[id]["slot_node"]
+			is_leveling_up = true 
+			next_count = current_count + 1 # Calculamos el siguiente nivel
+			
+		# B) NUEVO
 		else:
 			target_slot_node = _find_empty_slot(context.slots)
-			if not target_slot_node: return false # Inventario lleno
+			if not target_slot_node: return false
 		
-		# 2. Ejecutar Animación
+		# Ejecutar Animación
 		if target_slot_node:
-			# Desactivamos interacción temporalmente para evitar bugs visuales si el usuario clicka
 			if target_slot_node.has_node("TextureButton"):
 				target_slot_node.get_node("TextureButton").disabled = true
 				
 			_play_arena_return_effect(data, from_pos, target_slot_node, func():
-				# AL TERMINAR: Lógica real
 				add_item(data, 1, Vector2.ZERO)
+				
+				if is_leveling_up:
+					var final_pos = Vector2.ZERO
+					# AJUSTE MANUAL (Usa tus valores aquí)
+					var ajuste_manual = Vector2(90, 60) 
+					
+					if target_slot_node is Control:
+						final_pos = target_slot_node.global_position + ajuste_manual
+					else:
+						final_pos = target_slot_node.global_position + ajuste_manual
+					
+					# --- LÓGICA DE COLOR ---
+					var burst_color = Color(0.95, 0.8, 0.3) # Oro por defecto
+					
+					if next_count == 2:
+						# PLATA (Blanco Brillante)
+						# Usamos valores > 1.0 para efecto HDR/Glow si tienes WorldEnvironment
+						burst_color = Color(1.5, 1.5, 2.0) 
+					elif next_count >= 3:
+						# ORO
+						burst_color = Color(0.95, 0.8, 0.3)
+					
+					# Llamamos a la función pasando el color
+					_play_levelup_particles(final_pos, burst_color)
+				
 				if target_slot_node.has_node("TextureButton"):
 					target_slot_node.get_node("TextureButton").disabled = false
 			)
@@ -743,3 +768,45 @@ func _on_passive_inventory_mouse_entered() -> void:
 func _on_passive_inventory_mouse_exited() -> void:
 	if tooltip:
 		tooltip.hide_tooltip()
+
+
+func _play_levelup_particles(pos: Vector2, target_color: Color = Color(0.95, 0.8, 0.3)):
+	var particles = CPUParticles2D.new()
+	
+	add_child(particles)
+	particles.top_level = true
+	particles.global_position = pos
+	particles.z_index = 4096 
+	
+	# --- CONFIGURACIÓN ---
+	particles.amount = 60 
+	particles.lifetime = 0.8 
+	particles.explosiveness = 1.0 
+	
+	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
+	particles.emission_sphere_radius = 20.0 
+	particles.direction = Vector2(0, 0) 
+	particles.spread = 180.0
+	particles.gravity = Vector2(0, 0) 
+	
+	particles.initial_velocity_min = 150.0
+	particles.initial_velocity_max = 250.0
+	particles.scale_amount_min = 10.0
+	particles.scale_amount_max = 18.0
+	
+	# --- COLOR DINÁMICO ---
+	particles.color = target_color # Usamos el color que nos pasan
+	
+	# Creamos el gradiente usando el color recibido
+	var gradient = Gradient.new()
+	# Color sólido al principio
+	gradient.set_color(0, Color(target_color.r, target_color.g, target_color.b, 1.0))
+	# Color transparente al final
+	gradient.set_color(1, Color(target_color.r, target_color.g, target_color.b, 0.0))
+	particles.color_ramp = gradient
+	
+	particles.emitting = true
+	
+	var t = create_tween()
+	t.tween_interval(1.5)
+	t.tween_callback(particles.queue_free)
