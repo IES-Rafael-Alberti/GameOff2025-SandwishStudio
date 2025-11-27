@@ -349,53 +349,43 @@ func _toggle_store(close_store: bool):
 	is_tended = close_store
 	_update_eye_state()
 	
-	# Animaciones del Jetas
 	if is_tended:
 		if el_jetas_anim: el_jetas_anim.play("return_up")
 	else:
 		if el_jetas_anim: el_jetas_anim.play("hide_down")
 
 	if not is_tended: roulette.visible = false
-	
-	# CORRECCIÓN: 1.0s exacto para coincidir con la animación de la alfombra
+
 	var anim_duration = 1.0 
 	
 	if is_tended:
-		# --- CERRAR ---
-		# 1. Ocultar items inmediatamente (simple fade out rápido)
+	
 		_simple_items_fade(0.0, 0.2)
 		
-		# 2. Esperar un instante para que no se vea feo
 		await get_tree().create_timer(0.2).timeout
-		
-		# 3. Enrollar alfombra
+
 		anim.play("roll")
 		var tween = create_tween()
 		tween.tween_property(mat, "shader_parameter/roll_amount", 1.0, anim_duration)
 		
-		# 4. Ocultar la tienda SOLO al terminar la animación completa
 		tween.tween_callback(func(): store.visible = false)
 		
 	else:
-		# --- ABRIR ---
 		store.visible = true
-		# 1. Asegurar que los items sean invisibles antes de abrir
 		_reset_items_visibility()
 		
-		# 2. Desenrollar alfombra
 		anim.play("unroll")
 		var tween = create_tween()
 		tween.tween_property(mat, "shader_parameter/roll_amount", 0.0, anim_duration)
 		
-		# 3. Mostrar items suavemente cuando la alfombra casi termina (al 80% del camino)
 		tween.tween_callback(func(): _simple_items_fade(1.0, 0.3)).set_delay(anim_duration * 0.8)
 		
 func _reset_items_visibility():
-	# Pone todo transparente y resetea la escala por si acaso
+
 	for item in _get_animatable_store_items():
 		if is_instance_valid(item):
 			item.modulate.a = 0.0
-			item.scale = Vector2.ONE # Reseteamos escala por seguridad
+			item.scale = Vector2.ONE 
 			# Restauramos posición original si existe
 			if original_positions.has(item):
 				item.position = original_positions[item]

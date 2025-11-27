@@ -520,20 +520,15 @@ func _get_empty_roulette_slots() -> int:
 	
 # --- EFECTOS VISUALES (ESTILO ROMA/ARENA) ---
 
-# En GameOff2025-SandwishStudio/scripts/inventory.gd
-
 func _play_arena_return_effect(item_data: Resource, start_pos: Vector2, target_slot: Node):
 	if not item_data or not "icon" in item_data: return
-	
-	# --- CORRECCIÓN DE PUNTERÍA ---
+
 	var target_pos = Vector2.ZERO
 	
-	# 1. Intentamos buscar el icono específico dentro del slot para ser precisos
 	if "item_icon" in target_slot and target_slot.item_icon and target_slot.item_icon.visible:
-		# Obtenemos el centro EXACTO de la imagen en pantalla
+
 		target_pos = target_slot.item_icon.get_global_rect().get_center()
 	else:
-		# Fallback: Si no encontramos el icono, vamos al centro del slot
 		target_pos = target_slot.get_global_rect().get_center()
 	# -----------------------------
 

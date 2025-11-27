@@ -493,15 +493,16 @@ func _update_reroll_button_visuals():
 	if cost == 0:
 		reroll_label.text = "FREE!"
 		reroll_label.modulate = Color(0.2, 1.0, 0.2) 
-		reroll_button.modulate = Color.WHITE
+		reroll_button.modulate = Color(1.0, 1.0, 1.0, 1.0) 
 	else:
 		reroll_label.text = "-%d" % cost
 		if PlayerData.has_enough_currency(cost):
-			reroll_label.modulate = Color(1.0, 0.9, 0.4) 
-			reroll_button.modulate = Color.WHITE
+			reroll_label.modulate = Color(1.0, 0.729, 0.0, 1.0) 
+			reroll_button.modulate = Color(1.0, 1.0, 1.0, 1.0) 
+			
 		else:
-			reroll_label.modulate = Color(1.0, 0.2, 0.2) 
-			reroll_button.modulate = Color(0.6, 0.6, 0.6) 
+			reroll_label.modulate = Color(1.0, 0.0, 0.094, 1.0) 
+			reroll_button.modulate = Color(1.0, 1.0, 1.0, 1.0) 
 
 func _animate_error_shake(node: Control):
 	if not node: return

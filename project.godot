@@ -13,6 +13,8 @@ config_version=5
 config/name="Those_who_are_about_to_spin"
 run/main_scene="uid://dd8wqmfs2cj1j"
 config/features=PackedStringArray("4.5", "GL Compatibility")
+boot_splash/fullsize=false
+boot_splash/image="uid://c8bvmre4uoq70"
 
 [autoload]
 
