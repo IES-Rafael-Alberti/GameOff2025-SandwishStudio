@@ -40,6 +40,7 @@ scale = Vector2(0.77105117, 0.77105117)
 initial_pieces = Array[ExtResource("3_kvpfn")]([ExtResource("5_ir15t"), ExtResource("6_ca42v"), ExtResource("7_rysoc"), ExtResource("4_dinhu")])
 
 [node name="Store" parent="." instance=ExtResource("3_iywne")]
+visible = false
 z_index = 4
 offset_left = 416.0
 offset_top = 394.0
