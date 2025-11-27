@@ -28,6 +28,7 @@ GlobalStats="*res://scripts/GlobalStats.gd"
 window/size/viewport_width=1162
 window/size/viewport_height=760
 window/stretch/mode="canvas_items"
+mouse_cursor/custom_image="uid://bvpa1kx5vhn6q"
 
 [gui]
 

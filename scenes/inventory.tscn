@@ -11,7 +11,7 @@
 [ext_resource type="Resource" uid="uid://57d6mtngeb8t" path="res://resources/pieces/draugr.tres" id="5_tla8l"]
 [ext_resource type="Resource" uid="uid://b065ie430glv1" path="res://resources/pieces/banshie.tres" id="6_w24ly"]
 [ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/jotun.tres" id="7_ohgsq"]
-[ext_resource type="Texture2D" uid="uid://bnarhlk7ktg1q" path="res://assets/inventario/Mesa (1).png" id="8_40feg"]
+[ext_resource type="Texture2D" uid="uid://c3la6l5jf54v6" path="res://assets/Mesa.png" id="8_jc13p"]
 [ext_resource type="Texture2D" uid="uid://d32k775bkfw00" path="res://assets/inventario/VIDA.png" id="9_ylenm"]
 [ext_resource type="Texture2D" uid="uid://xr5sxokqvql1" path="res://assets/inventario/ADMG.png" id="10_0df5h"]
 [ext_resource type="Texture2D" uid="uid://cql2kfp3rbsgn" path="res://assets/Higo.png" id="11_5mlvw"]
@@ -47,7 +47,7 @@ offset_right = 3295.0
 offset_bottom = 8000.0
 scale = Vector2(0.6684356, 0.13833442)
 mouse_filter = 2
-texture = ExtResource("8_40feg")
+texture = ExtResource("8_jc13p")
 
 [node name="Alfombra" type="TextureRect" parent="."]
 layout_mode = 0
