@@ -57,7 +57,7 @@ z_index = 1
 scale = Vector2(0.99999994, 0.99999994)
 
 [node name="GladiatorSpawn" type="Marker2D" parent="."]
-position = Vector2(-165.29755, 747.6547)
+position = Vector2(-101.95001, 747.6547)
 scale = Vector2(0.99999994, 0.99999994)
 
 [node name="AlliesSpawn" type="Marker2D" parent="."]
@@ -65,7 +65,7 @@ position = Vector2(5029.2026, 810.2855)
 scale = Vector2(0.99999994, 0.99999994)
 
 [node name="AllyFinalSlots" type="Node2D" parent="."]
-position = Vector2(-537.4645, -223.1221)
+position = Vector2(24.745178, -183.97787)
 scale = Vector2(0.99999994, 0.99999994)
 
 [node name="AllyFinalSlot1" type="Marker2D" parent="AllyFinalSlots"]
@@ -111,11 +111,11 @@ position = Vector2(4073.0508, 818.11444)
 position = Vector2(4144.317, 1045.151)
 
 [node name="EnemySlots" type="Node2D" parent="."]
-position = Vector2(286.05383, -137.00479)
+position = Vector2(72.25581, -583.249)
 scale = Vector2(0.99999994, 0.99999994)
 
 [node name="EnemyWaitSlot" type="Marker2D" parent="EnemySlots"]
-position = Vector2(594.8733, 872.9164)
+position = Vector2(799.7631, 1377.877)
 
 [node name="EnemyBattleSlot" type="Marker2D" parent="EnemySlots"]
-position = Vector2(1473.8208, 872.9164)
+position = Vector2(2003.367, 1319.1606)
