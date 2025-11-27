@@ -167,6 +167,7 @@ offset_right = 4436.318
 offset_bottom = 2402.0012
 scale = Vector2(0.25786263, 0.17371413)
 texture = ExtResource("13_40feg")
+stretch_mode = 5
 
 [node name="VBoxContainer" type="VBoxContainer" parent="TextureRect3"]
 layout_mode = 0
@@ -198,10 +199,11 @@ theme_override_constants/separation = 4
 [node name="TextureRect" type="TextureRect" parent="TextureRect3/Health_container"]
 layout_mode = 2
 texture = ExtResource("9_ylenm")
-stretch_mode = 2
+stretch_mode = 5
 
 [node name="Label" type="Label" parent="TextureRect3/Health_container"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 30
 text = "+0"
 
@@ -217,10 +219,11 @@ size_flags_horizontal = 3
 [node name="TextureRect" type="TextureRect" parent="TextureRect3/Damage_container"]
 layout_mode = 2
 texture = ExtResource("10_0df5h")
-stretch_mode = 2
+stretch_mode = 5
 
 [node name="Label" type="Label" parent="TextureRect3/Damage_container"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 30
 text = "+0"
 
@@ -236,10 +239,11 @@ size_flags_horizontal = 3
 [node name="TextureRect" type="TextureRect" parent="TextureRect3/SpeedCOntainer"]
 layout_mode = 2
 texture = ExtResource("11_fiysm")
-stretch_mode = 4
+stretch_mode = 5
 
 [node name="Label" type="Label" parent="TextureRect3/SpeedCOntainer"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 30
 text = "+0"
 
@@ -255,10 +259,11 @@ size_flags_horizontal = 3
 [node name="TextureRect" type="TextureRect" parent="TextureRect3/CChance_container"]
 layout_mode = 2
 texture = ExtResource("12_0df5h")
-stretch_mode = 4
+stretch_mode = 5
 
 [node name="Label" type="Label" parent="TextureRect3/CChance_container"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 30
 text = "+0"
 
@@ -274,10 +279,11 @@ size_flags_horizontal = 3
 [node name="TextureRect" type="TextureRect" parent="TextureRect3/CDamage_chance"]
 layout_mode = 2
 texture = ExtResource("12_brsb2")
-stretch_mode = 3
+stretch_mode = 5
 
 [node name="Label" type="Label" parent="TextureRect3/CDamage_chance"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 30
 text = "+0"
 
