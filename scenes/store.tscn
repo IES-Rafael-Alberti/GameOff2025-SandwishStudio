@@ -154,10 +154,10 @@ text = "Roulette Pieces"
 
 [node name="piece_zone" type="HBoxContainer" parent="."]
 layout_mode = 0
-offset_left = 351.40344
-offset_top = 216.34467
-offset_right = 1217.5387
-offset_bottom = 311.2176
+offset_left = 239.54826
+offset_top = 210.39021
+offset_right = 1105.6835
+offset_bottom = 305.26312
 size_flags_horizontal = 4
 theme_override_constants/separation = 200
 
@@ -208,6 +208,11 @@ offset_right = 1.0
 offset_bottom = 54.0
 grow_horizontal = 1
 grow_vertical = 1
+icon_health = null
+icon_damage = null
+icon_speed = null
+icon_crit_chance = null
+icon_crit_damage = null
 
 [node name="gold_label" type="Label" parent="."]
 z_index = 3
