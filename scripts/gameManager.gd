@@ -48,7 +48,7 @@ var gladiators_defeated: int = 0
 # --- VISTAS (UI) ---
 @onready var day_finished_view: CanvasLayer = $DayFinished
 @onready var next_day_image: TextureRect = $DayFinished/NextDayImage 
-@onready var game_over_view: CanvasLayer = $GameOver
+@onready var game_over_view: CanvasLayer = $Lose
 @onready var win_view: CanvasLayer = $Win
 
 # --- Referencias NUEVAS para DayFinished ---

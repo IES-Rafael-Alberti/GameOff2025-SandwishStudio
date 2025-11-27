@@ -4,7 +4,7 @@ class_name SynergyIcon
 # --- NUEVO: Referencia al nodo que muestra la imagen ---
 @export var icon_display: TextureRect
 
-@export_enum("Europea", "Japonesa", "Nordica") var race_name: String = "Europea"
+@export_enum("European", "Japanese", "Nordic") var race_name: String = "European"
 @export var theme_color: Color = Color.WHITE
 
 @export_group("tier Icons")
