@@ -2,15 +2,15 @@
 
 [ext_resource type="Texture2D" uid="uid://cuffytq477a2f" path="res://assets/Combat_scene/Gladiadores/3.png" id="1_s5bl4"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_iro54"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_s5bl4"]
 atlas = ExtResource("1_s5bl4")
-region = Rect2(0, 0, 319, 357)
+region = Rect2(0, 0, 239, 268)
 
 [resource]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_iro54")
+"texture": SubResource("AtlasTexture_s5bl4")
 }],
 "loop": false,
 "name": &"idle",
