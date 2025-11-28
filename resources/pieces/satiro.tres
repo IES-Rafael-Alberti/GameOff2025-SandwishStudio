@@ -9,4 +9,6 @@ script = ExtResource("3_58fsx")
 piece_name = "Satyr"
 piece_origin = ExtResource("2_1ddhv")
 icon = ExtResource("1_6x4qf")
+uses = 3
+price = 3
 metadata/_custom_type_script = "uid://8urlsjkkl8pw"
