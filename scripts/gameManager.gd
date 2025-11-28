@@ -151,6 +151,10 @@ func _ready():
 		set_state(GameState.SHOP)
 
 func _process(delta: float) -> void:
+	var clicking_now = Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+	if clicking_now != _is_clicking:
+		_is_clicking = clicking_now
+		_update_cursor_on_click()
 	# Gestionamos el temporizador del parpadeo
 	blink_timer -= delta
 	
@@ -362,12 +366,9 @@ func _give_initial_piece():
 		inventory.add_item(initial_piece)
 		
 func _apply_default_cursors():
-	# 1. Base: Se queda en 'null' para usar la config del proyecto
-	Input.set_custom_mouse_cursor(null, Input.CURSOR_ARROW)
 	
-	# 2. Hover: Asignamos 'Hover.png' al estado POINTING_HAND
-	if tex_hover:
-		Input.set_custom_mouse_cursor(tex_hover, Input.CURSOR_POINTING_HAND, cursor_hotspot)
+	if tex_click:
+		Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_POINTING_HAND, cursor_hotspot)
 	
 	# 3. Grab: Asignamos 'Grab.png' al estado DRAG (arrastrar)
 	if tex_grab:
@@ -376,9 +377,7 @@ func _apply_default_cursors():
 
 func _update_cursor_on_click():
 	if _is_clicking:
-		# AL CLICAR: Forzamos TODO a ser 'tex_click' (Point.png)
 		if tex_click:
-			Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_ARROW, cursor_hotspot)
 			Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_POINTING_HAND, cursor_hotspot)
 			Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_DRAG, cursor_hotspot)
 	else:
