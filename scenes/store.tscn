@@ -106,6 +106,8 @@ expand_margin_left = 10.0
 [node name="Store" type="Control"]
 layout_mode = 3
 anchors_preset = 0
+offset_left = 1.0
+offset_right = 1.0
 scale = Vector2(1.0102348, 1.0076514)
 mouse_filter = 2
 script = ExtResource("1_atuvt")
@@ -183,19 +185,19 @@ theme_override_constants/separation = 200
 
 [node name="Reroll" type="TextureButton" parent="."]
 layout_mode = 0
-offset_left = 1363.0494
-offset_top = 481.31723
-offset_right = 1491.0494
-offset_bottom = 609.31726
+offset_left = 1258.123
+offset_top = 264.97256
+offset_right = 1386.123
+offset_bottom = 392.9726
 size_flags_horizontal = 4
 texture_normal = ExtResource("25_7pi7j")
 
 [node name="Lock" type="TextureButton" parent="."]
 layout_mode = 0
-offset_left = 1363.0494
-offset_top = 645.06433
-offset_right = 1491.0494
-offset_bottom = 773.06433
+offset_left = 1258.123
+offset_top = 515.0592
+offset_right = 1386.123
+offset_bottom = 643.0592
 size_flags_horizontal = 4
 texture_normal = ExtResource("24_816qq")
 
@@ -217,15 +219,15 @@ icon_crit_damage = null
 [node name="gold_label" type="Label" parent="."]
 z_index = 3
 layout_mode = 0
-offset_left = 1369.9785
-offset_top = 116.11157
-offset_right = 1518.459
-offset_bottom = 181.61041
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+offset_left = 1342.262
+offset_top = 112.141945
+offset_right = 1490.7424
+offset_bottom = 181.14195
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 40
 
 [node name="Coin" type="Sprite2D" parent="."]
-position = Vector2(1319.4951, 147.86859)
+position = Vector2(1291.7795, 147.86859)
 scale = Vector2(1.6846421, 1.6846421)
 texture = ExtResource("28_y1dpo")
 

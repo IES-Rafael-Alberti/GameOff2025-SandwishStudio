@@ -20,7 +20,9 @@ var gladiators_defeated: int = 0
 @onready var pupil: Sprite2D = $elJetas/ButtonShop/EyeSprite/Pupil
 # Referencia al AnimationPlayer de elJetas
 @onready var el_jetas_anim: AnimationPlayer = $elJetas/AnimationPlayer
-
+@onready var piece_label: Label = $Store/piece_label
+@onready var passive_label: Label = $Store/passive_label
+@onready var coin_sprite: Sprite2D = $Store/Coin
 @onready var mat = $Store/Sprite2D.material
 @onready var anim = $Store/AnimationPlayer
 @onready var gold_label: Label = $Store/gold_label
@@ -31,6 +33,13 @@ var gladiators_defeated: int = 0
 @onready var announcement_label: Label = $AnnouncementLabel
 @onready var help_overlay: Control = $HelpOverLay
 @onready var help_button: Button = $HelpOverLay/HelpButton
+# --- CURSORES PERSONALIZADOS ---
+@export_group("Cursores Personalizados")
+@export var tex_hover: Texture2D ## Arrastra 'Hover.png' (Sobre botones)
+@export var tex_grab: Texture2D  ## Arrastra 'Grab.png' (Arrastrar/Agarrar)
+@export var tex_click: Texture2D ## Arrastra 'Point.png' (Al hacer click)
+@export var cursor_hotspot: Vector2 = Vector2(0, 0) ## Ajusta la punta del cursor
+
 # CONFIGURACIÓN
 @export var gold_round_base: int = 100
 @export var gold_day_mult: float = 1
@@ -56,6 +65,7 @@ var gladiators_defeated: int = 0
 @onready var day_slider: HSlider = $DayFinished/HSlider
 @onready var info_label: Label = $DayFinished/InfoLabel
 
+var _is_clicking: bool = false
 var pupil_offset: Vector2
 var original_eye_texture: Texture2D
 var eye_closed_texture: Texture2D
@@ -80,6 +90,13 @@ var daily_gold_loot: int = 0
 func _ready():
 	# IMPORTANTE: Añadir al grupo para que SynergyIcon pueda encontrarnos
 	add_to_group("game_manager")
+	
+	_apply_default_cursors()
+	
+	# Truco: Asignar cursor de mano a todos los botones para que usen 'tex_hover'
+	if buttonShop: buttonShop.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	if help_button: help_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	_set_hand_cursor_recursively(store)
 	
 	daily_gold_salary = 0
 	daily_gold_loot = 0
@@ -343,52 +360,83 @@ func _give_initial_piece():
 	var initial_piece: Resource = inventory.get_random_initial_piece()
 	if initial_piece and inventory.can_add_item(initial_piece):
 		inventory.add_item(initial_piece)
+		
+func _apply_default_cursors():
+	# 1. Base: Se queda en 'null' para usar la config del proyecto
+	Input.set_custom_mouse_cursor(null, Input.CURSOR_ARROW)
+	
+	# 2. Hover: Asignamos 'Hover.png' al estado POINTING_HAND
+	if tex_hover:
+		Input.set_custom_mouse_cursor(tex_hover, Input.CURSOR_POINTING_HAND, cursor_hotspot)
+	
+	# 3. Grab: Asignamos 'Grab.png' al estado DRAG (arrastrar)
+	if tex_grab:
+		Input.set_custom_mouse_cursor(tex_grab, Input.CURSOR_DRAG, cursor_hotspot)
+		Input.set_custom_mouse_cursor(tex_grab, Input.CURSOR_CAN_DROP, cursor_hotspot)
+
+func _update_cursor_on_click():
+	if _is_clicking:
+		# AL CLICAR: Forzamos TODO a ser 'tex_click' (Point.png)
+		if tex_click:
+			Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_ARROW, cursor_hotspot)
+			Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_POINTING_HAND, cursor_hotspot)
+			Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_DRAG, cursor_hotspot)
+	else:
+		# AL SOLTAR: Restauramos los roles normales
+		_apply_default_cursors()
+
+func _set_hand_cursor_recursively(node: Node):
+	for child in node.get_children():
+		if child is Button or child is TextureButton:
+			child.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		if child.get_child_count() > 0:
+			_set_hand_cursor_recursively(child)
+
 
 func _toggle_store(close_store: bool):
 	if anim.is_playing(): return
 	is_tended = close_store
 	_update_eye_state()
 	
-	# Animaciones del Jetas
 	if is_tended:
 		if el_jetas_anim: el_jetas_anim.play("return_up")
 	else:
 		if el_jetas_anim: el_jetas_anim.play("hide_down")
 
 	if not is_tended: roulette.visible = false
-	
-	# CORRECCIÓN: 1.0s exacto para coincidir con la animación de la alfombra
+
 	var anim_duration = 1.0 
-	
 	if is_tended:
-		# --- CERRAR ---
-		# 1. Ocultar items inmediatamente (simple fade out rápido)
 		_simple_items_fade(0.0, 0.2)
-		
-		# 2. Esperar un instante para que no se vea feo
 		await get_tree().create_timer(0.2).timeout
-		
-		# 3. Enrollar alfombra
 		anim.play("roll")
 		var tween = create_tween()
 		tween.tween_property(mat, "shader_parameter/roll_amount", 1.0, anim_duration)
-		
-		# 4. Ocultar la tienda SOLO al terminar la animación completa
 		tween.tween_callback(func(): store.visible = false)
-		
 	else:
-		# --- ABRIR ---
 		store.visible = true
-		# 1. Asegurar que los items sean invisibles antes de abrir
-		_reset_items_visibility()
-		
-		# 2. Desenrollar alfombra
+		_reset_items_visibility() 
 		anim.play("unroll")
 		var tween = create_tween()
-		tween.tween_property(mat, "shader_parameter/roll_amount", 0.0, anim_duration)
+		tween.tween_property(mat, "shader_parameter/roll_amount", 0.0, anim_duration).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+		tween.chain().tween_callback(_animate_items_entry)
 		
-		# 3. Mostrar items suavemente cuando la alfombra casi termina (al 80% del camino)
-		tween.tween_callback(func(): _simple_items_fade(1.0, 0.3)).set_delay(anim_duration * 0.8)
+func _animate_items_entry():
+	var tween = create_tween().set_parallel(true)
+	var drop_height = 80.0
+	var duration = 0.6
+	var delay_step = 0.03
+	var current_delay = 0.0
+	
+	for item in _get_animatable_store_items():
+		if is_instance_valid(item):
+			item.modulate.a = 0.0
+			var final_pos = item.position
+			if original_positions.has(item): final_pos = original_positions[item]
+			item.position = final_pos - Vector2(0, drop_height)
+			tween.tween_property(item, "position", final_pos, duration).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT).set_delay(current_delay)
+			tween.tween_property(item, "modulate:a", 1.0, duration * 0.5).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT).set_delay(current_delay)
+			current_delay += delay_step
 		
 func _reset_items_visibility():
 	# Pone todo transparente y resetea la escala por si acaso
@@ -414,6 +462,10 @@ func _get_animatable_store_items() -> Array:
 		for child in store.passive_zone.get_children(): items.append(child)
 	if store.has_node("Reroll"): items.append(store.get_node("Reroll"))
 	if store.has_node("Lock"): items.append(store.get_node("Lock"))
+	if coin_sprite: items.append(coin_sprite)
+	if gold_label: items.append(gold_label)
+	if piece_label: items.append(piece_label)    
+	if passive_label: items.append(passive_label)
 	return items
 		
 func _on_animation_finished(anim_name: String):
