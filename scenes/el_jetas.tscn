@@ -30,6 +30,35 @@ tracks/1/keys = {
 "values": [-0.7853982]
 }
 
+[sub_resource type="Animation" id="Animation_44tkv"]
+resource_name = "hide_down"
+length = 5.0
+step = 1.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1.0310602, 2.0333333, 3.0287826, 3.0333333, 3.2432637, 3.7666667, 4, 4.6003885, 5),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(1890, 482.99985), Vector2(1980, 528.00006), Vector2(2033.0001, 585.00006), Vector2(2130, 949.00006), Vector2(1867, 878.00006), Vector2(2093, 1196), Vector2(1427.0001, 1192.0001), Vector2(1406, 993.00006), Vector2(1406, 1006), Vector2(1406, 996)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:rotation")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(2.0097363, 3.0194445, 3.2432637, 3.488903, 3.9807324),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [-0.7853982, -1.0821041, -0.74010944, -0.3647738, 0.0]
+}
+
 [sub_resource type="Animation" id="Animation_5ctqt"]
 resource_name = "intro"
 length = 4.0
@@ -58,8 +87,8 @@ tracks/1/keys = {
 "values": [-0.7853982, -0.7853982]
 }
 
-[sub_resource type="Animation" id="Animation_44tkv"]
-resource_name = "hide_down"
+[sub_resource type="Animation" id="Animation_wl5wt"]
+resource_name = "return_up"
 length = 5.0
 step = 1.0
 tracks/0/type = "value"
@@ -69,36 +98,7 @@ tracks/0/path = NodePath(".:position")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 1.0310602, 2.0333333, 3.0287826, 3.0333333, 3.2432637, 3.7666667, 4.233333, 4.6003885, 5),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
-"update": 0,
-"values": [Vector2(1890, 482.99985), Vector2(1980, 528.00006), Vector2(2033.0001, 585.00006), Vector2(2130, 949.00006), Vector2(1867, 878.00006), Vector2(2093, 1196), Vector2(1427.0001, 1192.0001), Vector2(1406, 993.00006), Vector2(1406, 1006), Vector2(1406, 996)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath(".:rotation")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(2.0097363, 3.0194445, 3.2432637, 3.488903, 3.9807324),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
-"update": 0,
-"values": [-0.7853982, -1.0821041, -0.74010944, -0.3647738, 0.0]
-}
-
-[sub_resource type="Animation" id="Animation_wl5wt"]
-resource_name = "return_up"
-length = 9.0
-step = 1.0
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 1.9140798, 3.961082, 6.0346684, 8, 9),
+"times": PackedFloat32Array(0, 1, 2, 3, 4, 5),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
 "update": 0,
 "values": [Vector2(1404.0001, 1036), Vector2(1406.0001, 1114), Vector2(1404.0001, 1036), Vector2(1444.0001, 1477), Vector2(2295, 1347.9999), Vector2(1695, 551.00006)]
@@ -110,7 +110,7 @@ tracks/1/path = NodePath(".:rotation")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0, 2.0204177, 3.907913, 9),
+"times": PackedFloat32Array(0, 1, 2, 5),
 "transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 0,
 "values": [0.0, 0.0, 0.0, -0.7761237]
