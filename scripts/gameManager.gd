@@ -255,8 +255,17 @@ func _on_combat_finished(player_won: bool = false, loot_from_combat: int = 0):
 		current_round += 1
 		print("--- Empezando Ronda %d ---" % current_round)
 		_update_ui_labels()
-		set_state(GameState.SHOP)
+		
+		# --- CORRECCIÓN ---
+		# 1. Primero generamos el contenido de la nueva ronda
 		store.start_new_round()
+		
+		# 2. Después cambiamos el estado. Esto permite que la función _toggle_store
+		# y _animate_items_entry detecten los nuevos items creados arriba,
+		# los oculten (alpha 0) y reproduzcan la animación de caída.
+		set_state(GameState.SHOP)
+		# ------------------
+
 		if player_won and combat_scene and combat_scene.has_method("spawn_enemy_one"):
 			combat_scene.spawn_enemy_one()
 
