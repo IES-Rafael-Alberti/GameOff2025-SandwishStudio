@@ -279,7 +279,7 @@ func show_synergy_tooltip(race_name: String, current_count: int, max_count: int,
 
 	var text = ""
 	var count_color = "#ffffff" if current_count > 0 else "#777777"
-	text += "[center][color=#aaaaaa]Sinergia Activa:[/color] [color=%s][b]%d / %d[/b] Unidades[/color][/center]\n" % [count_color, current_count, max_count]
+	text += "[center][color=#aaaaaa]Active synergies:[/color] [color=%s][b]%d / %d[/b] Units[/color][/center]\n" % [count_color, current_count, max_count]
 	text += "[center][color=#444444]━━━━━━━━━━━━━━━━━━[/color][/center]\n"
 	
 	text += "[table=1]"

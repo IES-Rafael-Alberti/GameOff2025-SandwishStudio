@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_7ngc2")
-id = "nordica.Jotun"
+id = "nordic.Jotun"
 display_name = "Jotun"
 race = 0
 rarity = 3

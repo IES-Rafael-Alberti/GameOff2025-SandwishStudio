@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_brl1e")
-id = "nordica.Nornas"
+id = "nordic.Nornas"
 display_name = "Nornas"
 race = 0
 rarity = 2

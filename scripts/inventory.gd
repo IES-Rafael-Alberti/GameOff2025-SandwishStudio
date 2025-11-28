@@ -501,14 +501,17 @@ func _on_piece_placed(piece_data: PieceData):
 
 	_update_slot_visuals_for_piece(piece_data)
 	call_deferred("_update_passive_stats_display")
+	
+	# --- NUEVO: Solicitar actualización de sinergias ---
+	# Esperamos un frame (call_deferred) para asegurar que la pieza ya está "lógicamente" en el slot de la ruleta
+	if GlobalSignals.has_signal("synergy_update_requested"):
+		GlobalSignals.synergy_update_requested.emit.call_deferred()
 
 # Reemplaza la función existente _on_piece_returned en inventory.gd
 
 func _on_piece_returned(piece_data: PieceData):
 	if not piece_data: return
 	if not piece_data is PieceData: return
-	
-	# NO actualizamos 'uses' todavía.
 	
 	var id = _get_item_id(piece_data)
 	if piece_counts.has(id):
@@ -518,27 +521,27 @@ func _on_piece_returned(piece_data: PieceData):
 		if target_slot_node:
 			var start_pos = get_global_mouse_position()
 			
-			# Lanzamos animación con callback
 			_play_arena_return_effect(piece_data, start_pos, target_slot_node, func():
-				# ESTO SE EJECUTA CUANDO LLEGA AL SLOT
 				piece_data.uses += 1
 				print("... Pieza devuelta (anim fin). Usos: %d" % piece_data.uses)
 				
-				# Actualizar visuales del slot (números, barras)
 				_update_slot_visuals_for_piece(piece_data)
-				
-				# Recalcular pasivas (por si las moscas)
 				call_deferred("_update_passive_stats_display")
+				
+				# --- NUEVO: Solicitar actualización de sinergias al terminar la animación ---
+				if GlobalSignals.has_signal("synergy_update_requested"):
+					GlobalSignals.synergy_update_requested.emit()
 			)
 		else:
-			# Fallback si no hay slot visual (raro)
 			piece_data.uses += 1
 			_update_slot_visuals_for_piece(piece_data)
+			# Fallback por si no hay animación
+			if GlobalSignals.has_signal("synergy_update_requested"):
+				GlobalSignals.synergy_update_requested.emit()
 	else:
-		# Si la pieza no estaba en el mapa (error raro), solo sumamos usos
 		piece_data.uses += 1
-
-
+		if GlobalSignals.has_signal("synergy_update_requested"):
+			GlobalSignals.synergy_update_requested.emit()
 func _update_slot_visuals_for_piece(piece_data: PieceData):
 	var id = _get_item_id(piece_data)
 	if piece_counts.has(id):

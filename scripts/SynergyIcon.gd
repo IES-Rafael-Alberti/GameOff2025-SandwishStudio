@@ -68,7 +68,12 @@ func update_synergy_count(count: int):
 			icon_display.texture = sinergia0 
 	
 
+# En SynergyIcon.gd
+
 func _on_mouse_entered():
+	# --- NUEVO: Forzar actualización de datos antes de mostrar nada ---
+	_on_synergy_update_requested()
+	
 	var game_manager = get_tree().get_first_node_in_group("game_manager")
 	var all_pieces = []
 	var active_ids = []
@@ -81,10 +86,9 @@ func _on_mouse_entered():
 			var race_enum = game_manager.get_race_enum_from_name(race_name)
 			active_ids = game_manager.get_active_unit_ids_for_race(race_enum)
 	
-	# Usamos la cuenta real de piezas activas si es posible
-	var real_count_for_tooltip = current_count
-	if game_manager: 
-		real_count_for_tooltip = active_ids.size()
+	# Usamos la cuenta real de piezas activas recien calculada
+	# (active_ids.size() es más fiable que current_count en este momento exacto)
+	var real_count_for_tooltip = active_ids.size()
 	
 	if tooltip_ref and tooltip_ref.has_method("show_synergy_tooltip"):
 		var defs = synergy_definitions.get(race_name, [])

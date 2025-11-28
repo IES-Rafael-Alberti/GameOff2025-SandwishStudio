@@ -14,9 +14,10 @@
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lcqbf"]
 
 [node name="ButtonShop" type="Button"]
-offset_top = 158.0
-offset_right = 182.0
-offset_bottom = 303.0
+offset_left = -182.28003
+offset_top = -119.21744
+offset_right = 384.4112
+offset_bottom = 919.5724
 rotation = -0.002028451
 scale = Vector2(1.4113777, 1.4113777)
 theme_override_styles/normal = SubResource("StyleBoxEmpty_wvo3v")
@@ -27,9 +28,10 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_lcqbf")
 disabled = true
 shortcut_feedback = false
 shortcut_in_tooltip = false
+icon_alignment = 1
 
 [node name="EyeSprite" type="Sprite2D" parent="."]
-position = Vector2(91.319855, 69.28125)
+position = Vector2(167.00786, 198.88098)
 scale = Vector2(0.058143836, 0.056065775)
 texture = ExtResource("1_wvo3v")
 
