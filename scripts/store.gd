@@ -49,6 +49,8 @@ var reroll_label: Label
 
 var is_rerolling: bool = false
 
+var _purchase_buffer: Dictionary = {}
+
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	highlight_material = ShaderMaterial.new()
@@ -99,6 +101,7 @@ func _on_lock_pressed() -> void:
 # --- CAMBIO DE RONDA ---
 func start_new_round() -> void:
 	_rerolls_this_round = 0
+	_purchase_buffer.clear() 
 	_update_reroll_button_visuals()
 
 	if PlayerData.is_shop_locked:
@@ -390,8 +393,11 @@ func _on_piece_slot_pressed(slot) -> void:
 
 	# Si pasa todos los filtros:
 	if PlayerData.spend_currency(price):
-		# Llamamos a la nueva función VISUAL CON RETRASO
-		# Pasamos la posición del ratón como inicio de la animación
+		if _purchase_buffer.has(data):
+			_purchase_buffer[data] += 1
+		else:
+			_purchase_buffer[data] = 1
+			
 		inventory.add_item_visually_delayed(data, get_global_mouse_position())
 		
 		slot.disable_interaction() 
@@ -441,7 +447,7 @@ func _update_shop_visuals(_new_amount: int = 0) -> void:
 	# Actualizar Piezas
 	for slot in piece_zone.get_children():
 		if slot.has_method("update_count_visuals"):
-			var current_count = _get_item_count_safe(slot.item_data)
+			var current_count = _get_effective_count(slot.item_data)
 			slot.update_count_visuals(slot.item_data, current_count)
 			if slot.is_purchased: continue
 			
@@ -532,7 +538,7 @@ func _animate_error_shake(node: Control):
 func _calculate_price(data) -> int:
 	if not "price" in data: return 0
 	var base = data.price
-	var count = _get_item_count_safe(data)
+	var count = _get_effective_count(data)
 	var mult = 0.0
 	if data is PieceData: mult = duplicate_piece_mult
 	elif data is PassiveData: mult = duplicate_passive_mult
@@ -546,6 +552,12 @@ func _get_item_count_safe(data) -> int:
 	elif get_tree().current_scene and get_tree().current_scene.has_method("get_inventory_piece_count"): gm = get_tree().current_scene
 	if gm: return gm.get_inventory_piece_count(data)
 	return 0
+
+func _get_effective_count(data: Resource) -> int:
+	var base_count := _get_item_count_safe(data)
+	if _purchase_buffer.has(data):
+		base_count += int(_purchase_buffer[data])
+	return base_count
 
 func _filter_maxed_items(candidates: Array) -> Array:
 	var available = []
