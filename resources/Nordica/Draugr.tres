@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_tha16")
-id = "Nordica.Draugr"
+id = "Nordic.Draugr"
 display_name = "Draugr"
 race = 0
 health_bar_offset = Vector2(-30, -100)

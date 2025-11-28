@@ -5,8 +5,8 @@
 
 [resource]
 script = ExtResource("1_ngv5d")
-id = "europea.banshie"
-display_name = "Banshie"
+id = "european.banshie"
+display_name = "banshie"
 rarity = 1
 health_bar_offset = Vector2(-80, -170)
 frames = ExtResource("1_55f7c")

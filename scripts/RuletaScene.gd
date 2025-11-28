@@ -472,9 +472,9 @@ func _calculate_counts() -> Dictionary:
 				var res = data.piece_origin
 				var id = res.id
 				match res.race:
-					PieceRes.PieceRace.JAPONESA: unique_ids_jap[id] = true
-					PieceRes.PieceRace.NORDICA: unique_ids_nor[id] = true
-					PieceRes.PieceRace.EUROPEA: unique_ids_eur[id] = true
+					PieceRes.PieceRace.JAPANESE: unique_ids_jap[id] = true
+					PieceRes.PieceRace.NORDIC: unique_ids_nor[id] = true
+					PieceRes.PieceRace.EUROPEAN: unique_ids_eur[id] = true
 
 	return {
 		"jap_count": unique_ids_jap.size(),

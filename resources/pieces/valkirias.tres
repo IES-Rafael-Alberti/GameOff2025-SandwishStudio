@@ -6,7 +6,7 @@
 
 [resource]
 script = ExtResource("3_r2f30")
-piece_name = "valkyria"
+piece_name = "valkyrie"
 piece_origin = ExtResource("2_c118a")
 icon = ExtResource("1_idy3k")
 uses = 3

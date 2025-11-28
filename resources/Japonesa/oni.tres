@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_1t85r")
-id = "japonesa.oni"
+id = "japanese.oni"
 display_name = "oni"
 race = 1
 rarity = 3

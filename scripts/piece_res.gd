@@ -1,14 +1,14 @@
 extends Resource
 class_name PieceRes
 
-enum PieceRace { NORDICA, JAPONESA, EUROPEA }
+enum PieceRace { NORDIC, JAPANESE, EUROPEAN }
 enum PiecePowerTier { BRONCE, PLATA, ORO }
 enum PieceRarity { COMUN, RARO, EPICO, LEGENDARIO }
 
 # IDENTIDAD 
 @export var id: String = ""
 @export var display_name: String = ""
-@export var race: PieceRace = PieceRace.EUROPEA
+@export var race: PieceRace = PieceRace.EUROPEAN
 @export var rarity: PieceRarity = PieceRarity.COMUN
 
 # Barra de vida adaptable

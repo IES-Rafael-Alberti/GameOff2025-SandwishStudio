@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_ui1fk")
-id = "japonesa.Hitotsume_kozo"
+id = "japanese.Hitotsume_kozo"
 display_name = "Hitotsume_kozo"
 race = 1
 rarity = 1

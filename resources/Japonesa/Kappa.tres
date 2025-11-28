@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_vrrwg")
-id = "japonesa.Kappa"
+id = "japanese.Kappa"
 display_name = "Kappa"
 race = 1
 health_bar_offset = Vector2(-40, -100)

@@ -601,9 +601,9 @@ func get_all_pieces_for_race(race_name: String) -> Array:
 
 func get_race_enum_from_name(race_name: String) -> int:
 	match race_name:
-		"Europea": return 2 # PieceRes.PieceRace.EUROPEA
-		"Japonesa": return 1 # PieceRes.PieceRace.JAPONESA
-		"Nordica": return 0 # PieceRes.PieceRace.NORDICA
+		"European": return 2 # PieceRes.PieceRace.EUROPEA
+		"Japanese": return 1 # PieceRes.PieceRace.JAPONESA
+		"Nordic": return 0 # PieceRes.PieceRace.NORDICA
 	return -1
 	
 func get_active_synergies() -> Dictionary:
@@ -637,11 +637,11 @@ func get_active_synergies() -> Dictionary:
 				var id = res.id
 				
 				match res.race:
-					PieceRes.PieceRace.JAPONESA:
+					PieceRes.PieceRace.JAPANESE:
 						unique_ids_jap[id] = true
-					PieceRes.PieceRace.NORDICA:
+					PieceRes.PieceRace.NORDIC:
 						unique_ids_nor[id] = true
-					PieceRes.PieceRace.EUROPEA:
+					PieceRes.PieceRace.EUROPEAN:
 						unique_ids_eur[id] = true
 					
 					
