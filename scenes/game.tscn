@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3 uid="uid://dd8wqmfs2cj1j"]
+[gd_scene load_steps=33 format=3 uid="uid://dd8wqmfs2cj1j"]
 
 [ext_resource type="Script" uid="uid://bpnxk43sopml" path="res://scripts/gameManager.gd" id="1_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://hbcgudcjh0wn" path="res://scenes/inventory.tscn" id="2_lbhrr"]
@@ -20,6 +20,7 @@
 [ext_resource type="Texture2D" uid="uid://bydll86slt54g" path="res://assets/Anfora.png" id="16_1kice"]
 [ext_resource type="Texture2D" uid="uid://df8aw2ccd8ggn" path="res://assets/unnamed-removebg-preview.png" id="17_1kice"]
 [ext_resource type="Texture2D" uid="uid://tpgawnkb75gq" path="res://assets/BloqueEndDay (1).png" id="18_5newe"]
+[ext_resource type="Texture2D" uid="uid://cts7aexp87lsc" path="res://assets/Manivela (1).png" id="18_qouja"]
 [ext_resource type="Texture2D" uid="uid://clucu0hyocvrs" path="res://assets/CONTINUENEGRO.png" id="19_37s47"]
 [ext_resource type="Script" uid="uid://b1sgbkjfj17wq" path="res://scripts/next_day_button.gd" id="20_bt5mj"]
 [ext_resource type="Texture2D" uid="uid://dro10dcj34d2s" path="res://assets/REROLLBLANCO.png" id="21_bt5mj"]
@@ -61,8 +62,7 @@ script = ExtResource("1_lbhrr")
 tex_grab = ExtResource("3_264po")
 tex_click = ExtResource("4_1kice")
 gold_round_base = 2
-rounds_per_day = 1
-gladiators_per_day = 0
+gladiators_per_day = 4
 max_days = 4
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
@@ -170,7 +170,16 @@ fill_mode = 3
 texture_under = ExtResource("16_1kice")
 texture_progress = ExtResource("17_1kice")
 
-[node name="TextureRect" type="TextureRect" parent="DayFinished"]
+[node name="AnforaRota" type="TextureRect" parent="DayFinished"]
+z_index = 4
+offset_left = 325.0
+offset_top = 333.0
+offset_right = 413.0
+offset_bottom = 563.0
+texture = ExtResource("18_qouja")
+expand_mode = 1
+
+[node name="FondoTexto" type="TextureRect" parent="DayFinished"]
 z_index = 5
 offset_left = 407.0
 offset_top = 308.0
@@ -205,44 +214,26 @@ offset_right = 1162.0
 offset_bottom = 430.0
 texture = SubResource("AnimatedTexture_twgab")
 
-[node name="Win" type="CanvasLayer" parent="."]
-visible = false
-
-[node name="Label" type="Label" parent="Win"]
+[node name="WinLabel" type="Label" parent="DayFinished"]
 z_index = 5
-offset_left = 297.0
-offset_top = 148.0
-offset_right = 893.0
-offset_bottom = 271.0
-theme_override_font_sizes/font_size = 72
-text = "Viviras un dia mas."
+offset_left = 162.0
+offset_top = 168.0
+offset_right = 1078.0
+offset_bottom = 423.0
+theme_override_font_sizes/font_size = 48
+text = "Congratulations, you have entertained your people and you will live another day.
+"
+autowrap_mode = 2
 
-[node name="WinImage" type="TextureRect" parent="Win"]
-z_index = 4
-offset_left = -4.0
-offset_top = -12.0
-offset_right = 1161.0
-offset_bottom = 759.0
-mouse_filter = 0
-texture = ExtResource("15_e1j6l")
-expand_mode = 2
-
-[node name="RestartButton" type="TextureButton" parent="Win"]
+[node name="LoseLabel" type="Label" parent="DayFinished"]
 z_index = 5
-offset_left = 531.0
-offset_top = 454.0
-offset_right = 619.0
-offset_bottom = 536.0
-texture_normal = ExtResource("21_bt5mj")
-ignore_texture_size = true
-stretch_mode = 4
-script = ExtResource("20_bt5mj")
-
-[node name="Estrellas" type="TextureRect" parent="Win"]
-z_index = 4
-offset_right = 1162.0
-offset_bottom = 430.0
-texture = SubResource("AnimatedTexture_twgab")
+offset_left = 357.0
+offset_top = 170.0
+offset_right = 902.0
+offset_bottom = 425.0
+theme_override_font_sizes/font_size = 48
+text = "You have been executed"
+autowrap_mode = 2
 
 [node name="Lose" type="CanvasLayer" parent="."]
 visible = false
@@ -275,7 +266,7 @@ offset_top = 148.0
 offset_right = 893.0
 offset_bottom = 271.0
 theme_override_font_sizes/font_size = 72
-text = "Te han ejecutado"
+text = "You have been executed"
 
 [node name="fuego" type="TextureRect" parent="Lose"]
 z_index = 4
