@@ -35,7 +35,6 @@ var gladiators_defeated: int = 0
 @onready var help_button: Button = $HelpOverLay/HelpButton
 # --- CURSORES PERSONALIZADOS ---
 @export_group("Cursores Personalizados")
-@export var tex_hover: Texture2D ## Arrastra 'Hover.png' (Sobre botones)
 @export var tex_grab: Texture2D  ## Arrastra 'Grab.png' (Arrastrar/Agarrar)
 @export var tex_click: Texture2D ## Arrastra 'Point.png' (Al hacer click)
 @export var cursor_hotspot: Vector2 = Vector2(0, 0) ## Ajusta la punta del cursor
@@ -93,7 +92,6 @@ func _ready():
 	
 	_apply_default_cursors()
 	
-	# Truco: Asignar cursor de mano a todos los botones para que usen 'tex_hover'
 	if buttonShop: buttonShop.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	if help_button: help_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	_set_hand_cursor_recursively(store)
@@ -360,14 +358,8 @@ func _give_initial_piece():
 		inventory.add_item(initial_piece)
 		
 func _apply_default_cursors():
-	# 1. Base: Se queda en 'null' para usar la config del proyecto
-	Input.set_custom_mouse_cursor(null, Input.CURSOR_ARROW)
-	
-	# 2. Hover: Asignamos 'Hover.png' al estado POINTING_HAND
-	if tex_hover:
-		Input.set_custom_mouse_cursor(tex_hover, Input.CURSOR_POINTING_HAND, cursor_hotspot)
-	
-	# 3. Grab: Asignamos 'Grab.png' al estado DRAG (arrastrar)
+	if tex_click:
+		Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_POINTING_HAND, cursor_hotspot)
 	if tex_grab:
 		Input.set_custom_mouse_cursor(tex_grab, Input.CURSOR_DRAG, cursor_hotspot)
 		Input.set_custom_mouse_cursor(tex_grab, Input.CURSOR_CAN_DROP, cursor_hotspot)
