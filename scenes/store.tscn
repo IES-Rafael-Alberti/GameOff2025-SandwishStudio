@@ -113,20 +113,8 @@ mouse_filter = 2
 script = ExtResource("1_atuvt")
 piece_origins = Array[ExtResource("2_n3io3")]([ExtResource("3_abbvk"), ExtResource("4_3ro5p"), ExtResource("8_5xsmt"), ExtResource("6_5xsmt"), ExtResource("7_burfl"), ExtResource("5_klwl8"), ExtResource("9_wk1we"), ExtResource("6_h7duq"), ExtResource("11_ht5i3"), ExtResource("12_816qq"), ExtResource("13_7pi7j"), ExtResource("14_ttn3v")])
 passive_origins = Array[ExtResource("9_n3io3")]([ExtResource("10_abbvk"), ExtResource("11_3ro5p"), ExtResource("12_klwl8"), ExtResource("14_burfl"), ExtResource("15_5xsmt")])
-max_copies = null
-duplicate_piece_mult = null
-duplicate_passive_mult = null
-COLOR_NORMAL_BG = null
-COLOR_UNAFFORD_BG = null
-reroll_base_cost = null
-reroll_cost_multiplier = null
-prob_comun = null
-prob_raro = null
-prob_epico = null
-prob_legendario = null
 texture_unlocked = ExtResource("21_y1dpo")
 texture_locked = ExtResource("22_rky2c")
-keep_lock_on_new_day = null
 
 [node name="Sprite2D" type="TextureRect" parent="."]
 material = SubResource("ShaderMaterial_3ro5p")
