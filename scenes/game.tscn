@@ -245,6 +245,7 @@ offset_bottom = 430.0
 texture = SubResource("AnimatedTexture_twgab")
 
 [node name="Lose" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="LoseImage" type="TextureRect" parent="Lose"]
 z_index = 4
