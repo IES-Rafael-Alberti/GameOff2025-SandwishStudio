@@ -11,7 +11,7 @@
 [ext_resource type="Resource" uid="uid://57d6mtngeb8t" path="res://resources/pieces/draugr.tres" id="4_dinhu"]
 [ext_resource type="Resource" uid="uid://bjcjwt742by0m" path="res://resources/pieces/kappa.tres" id="5_ir15t"]
 [ext_resource type="PackedScene" uid="uid://bv3r20c0gu33v" path="res://scenes/roulette.tscn" id="5_iywne"]
-[ext_resource type="Resource" uid="uid://btl7owx64bo4s" path="res://resources/pieces/satiro.tres" id="6_ca42v"]
+[ext_resource type="Resource" uid="uid://bjr4t1dd6ig4b" path="res://resources/pieces/satiro.tres" id="6_ca42v"]
 [ext_resource type="Resource" uid="uid://6rli8qlo7wmd" path="res://resources/pieces/duende.tres" id="7_rysoc"]
 [ext_resource type="Texture2D" uid="uid://dycbttp2vpnv1" path="res://assets/Tiny Swords (Free Pack)/Terrain/Water Background color.png" id="12_dinhu"]
 [ext_resource type="Texture2D" uid="uid://bse428jrn0sbc" path="res://assets/Waves.png" id="12_trtic"]
@@ -31,6 +31,11 @@ max_days = 4
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
 position = Vector2(36.000004, 39.999996)
 scale = Vector2(0.35, 0.35)
+scaling_hp_mult = 2.0
+scaling_damage_mult = 1.6
+scaling_crit_chance_flat = 2.0
+defeat_hp_mult = 1.5
+defeat_damage_mult = 1.2
 
 [node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
 z_index = 4
@@ -50,18 +55,6 @@ offset_top = 394.0
 offset_right = 416.0
 offset_bottom = 394.0
 scale = Vector2(0.8860778, 0.88381195)
-max_copies = 3
-duplicate_piece_mult = 0.5
-duplicate_passive_mult = 0.5
-COLOR_NORMAL_BG = Color(0, 0, 0, 0.6)
-COLOR_UNAFFORD_BG = Color(1, 0, 0, 0.6)
-reroll_base_cost = 2
-reroll_cost_multiplier = 1.5
-prob_comun = 70
-prob_raro = 20
-prob_epico = 8
-prob_legendario = 2
-keep_lock_on_new_day = false
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
 z_index = 4
