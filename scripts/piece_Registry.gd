@@ -2,7 +2,7 @@ extends Node
 class_name PieceRegistry
 
 var _map := {
-	"european.satiro": "res://resources/Europea/atiro.tres",
+	"european.satiro": "res://resources/Europea/Satiro.tres",
 	"european.duende": "res://resources/Europea/Duende.tres",
 	"european.banshie": "res://resources/Europea/banshie.tres",
 	"european.dragon": "res://resources/Europea/dragon.tres",
