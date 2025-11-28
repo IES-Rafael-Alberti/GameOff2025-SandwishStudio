@@ -63,7 +63,7 @@ var ally_spawn_sfx_played: bool = false
 @onready var enemy_wait_slot: Marker2D = $EnemySlots/EnemyWaitSlot
 @onready var enemy_battle_slot: Marker2D = $EnemySlots/EnemyBattleSlot
 
-const ALLY_BATTLE_OFSET := Vector2(-880, 0)
+const ALLY_BATTLE_OFSET := Vector2(-700, 0)
 
 @onready var ally_final_slots: Array[Marker2D] = [
 	$AllyFinalSlots/AllyFinalSlot1, $AllyFinalSlots/AllyFinalSlot2,

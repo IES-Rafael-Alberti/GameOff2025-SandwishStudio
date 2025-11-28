@@ -14,5 +14,5 @@ critical_chance = 5
 critical_damage = 1.25
 raza = "Europeas"
 gold = 4
-health_bar_offset = Vector2(-60, -220)
+health_bar_offset = Vector2(-60, -180)
 metadata/_custom_type_script = "uid://bd1qpluesymyw"
