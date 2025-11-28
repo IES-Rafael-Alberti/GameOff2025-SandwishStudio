@@ -34,6 +34,10 @@ var color_dark: Color = Color(0.3, 0.3, 0.3, 1.0)
 
 func _ready() -> void:
 	if texture_button:
+		# --- FIX: FORZAR CURSOR DE MANO AL NACER ---
+		texture_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		# ---------------------------------------------
+		
 		texture_button.pressed.connect(func(): slot_pressed.emit(self))
 		texture_button.mouse_entered.connect(_on_mouse_entered)
 		texture_button.mouse_exited.connect(_on_mouse_exited)
@@ -182,6 +186,7 @@ func _on_mouse_exited() -> void:
 	if texture_button:
 		texture_button.material = null
 	slot_exited.emit()
+
 func update_price(new_price: int) -> void:
 	current_price = new_price
 	

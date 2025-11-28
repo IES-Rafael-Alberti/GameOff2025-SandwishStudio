@@ -2,6 +2,12 @@ extends TextureButton
 
 var item_data: Resource
 var item_count: int = 1
+
+func _ready() -> void:
+	# --- FIX: Forzar que salga la manita al pasar el ratón por la espada/item ---
+	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	# ----------------------------------------------------------------------------
+
 """
 Esta función se llama automáticamente cuando Godot detecta
 que un arrastre comienza sobre este botón.
@@ -22,13 +28,14 @@ func _get_drag_data(_at_position: Vector2) -> Variant:
 	
 	self.modulate = Color(0.5, 0.5, 0.5) 
 
-	# ¡CAMBIO CLAVE! Creamos un "paquete" (diccionario) con los datos Y la cantidad
+	# Creamos un "paquete" (diccionario) con los datos Y la cantidad
 	var drag_data_packet = {
 		"data": item_data,
 		"count": item_count 
 	}
 	
 	return drag_data_packet # <-- Devolvemos el paquete
+
 """
 Esta función virtual recibe notificaciones del motor.
 Detecta cuándo termina el arrastre.

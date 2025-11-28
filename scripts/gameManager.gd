@@ -36,8 +36,9 @@ var gladiators_defeated: int = 0
 
 # --- CURSORES PERSONALIZADOS ---
 @export_group("Cursores Personalizados")
-@export var tex_grab: Texture2D  
-@export var tex_click: Texture2D
+@export var tex_hover: Texture2D  # <-- Nuevo: Asigna aquí tu sprite 'Hover' (flecha normal)
+@export var tex_grab: Texture2D   # Asigna aquí tu sprite 'Grab' (arrastrar)
+@export var tex_click: Texture2D  # Asigna aquí tu sprite 'Click/Point' (mano interactuable)
 @export var cursor_hotspot: Vector2 = Vector2(0, 0) 
 
 # CONFIGURACIÓN
@@ -64,7 +65,6 @@ var gladiators_defeated: int = 0
 @onready var day_slider: HSlider = $DayFinished/HSlider
 @onready var info_label: Label = $DayFinished/InfoLabel
 
-var _is_clicking: bool = false
 var pupil_offset: Vector2
 var original_eye_texture: Texture2D
 var eye_closed_texture: Texture2D
@@ -89,10 +89,13 @@ var daily_gold_loot: int = 0
 func _ready():
 	add_to_group("game_manager")
 	
+	# Aplicamos los cursores personalizados al inicio
 	_apply_default_cursors()
 	
 	if buttonShop: buttonShop.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	if help_button: help_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	
+	# Configuramos recursivamente todos los botones de la tienda para que usen el cursor de mano (Click)
 	_set_hand_cursor_recursively(store)
 	
 	daily_gold_salary = 0
@@ -173,8 +176,6 @@ func _update_ui_labels() -> void:
 		gladiator_label.text = "%d/%d" % [gladiators_defeated, gladiators_per_day]
 	
 	if is_instance_valid(round_label):
-
-		var state_text = ""	
 		round_label.text = "Wave %d/%d" % [current_round, rounds_per_day]
 
 
@@ -256,15 +257,10 @@ func _on_combat_finished(player_won: bool = false, loot_from_combat: int = 0):
 		print("--- Empezando Ronda %d ---" % current_round)
 		_update_ui_labels()
 		
-		# --- CORRECCIÓN ---
-		# 1. Primero generamos el contenido de la nueva ronda
+		# --- FIX ORDEN DE TIENDA ---
 		store.start_new_round()
-		
-		# 2. Después cambiamos el estado. Esto permite que la función _toggle_store
-		# y _animate_items_entry detecten los nuevos items creados arriba,
-		# los oculten (alpha 0) y reproduzcan la animación de caída.
 		set_state(GameState.SHOP)
-		# ------------------
+		# ---------------------------
 
 		if player_won and combat_scene and combat_scene.has_method("spawn_enemy_one"):
 			combat_scene.spawn_enemy_one()
@@ -353,24 +349,24 @@ func _give_initial_piece():
 	var initial_piece: Resource = inventory.get_random_initial_piece()
 	if initial_piece and inventory.can_add_item(initial_piece):
 		inventory.add_item(initial_piece)
-		
+
+# ------------------------------------------------------------------
+# LÓGICA DE CURSORES ACTUALIZADA
+# ------------------------------------------------------------------
 func _apply_default_cursors():
+	# 1. ESTADO NORMAL (Tu textura "Hover")
+	# Reemplazamos la flecha del sistema por tu imagen de Hover
+	if tex_hover:
+		Input.set_custom_mouse_cursor(tex_hover, Input.CURSOR_ARROW, cursor_hotspot)
+	
 	if tex_click:
 		Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_POINTING_HAND, cursor_hotspot)
+
 	if tex_grab:
 		Input.set_custom_mouse_cursor(tex_grab, Input.CURSOR_DRAG, cursor_hotspot)
 		Input.set_custom_mouse_cursor(tex_grab, Input.CURSOR_CAN_DROP, cursor_hotspot)
-
-func _update_cursor_on_click():
-	if _is_clicking:
-		# AL CLICAR: Forzamos TODO a ser 'tex_click' (Point.png)
-		if tex_click:
-			Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_POINTING_HAND, cursor_hotspot)
-			Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_DRAG, cursor_hotspot)
-	else:
-		# AL SOLTAR: Restauramos los roles normales
-		_apply_default_cursors()
-
+		
+		Input.set_custom_mouse_cursor(tex_grab, Input.CURSOR_FORBIDDEN, cursor_hotspot)
 func _set_hand_cursor_recursively(node: Node):
 	for child in node.get_children():
 		if child is Button or child is TextureButton:
@@ -463,7 +459,6 @@ func _on_PlayerData_currency_changed(new_amount: int) -> void:
 
 func _toggle_eye_parpadeo() -> void:
 	# Parpadeo: Cambio textura a cerrada y oculto pupila temporalmente
-	# NOTA: Hemos quitado el chequeo "if not is_tended" para que parpadee siempre
 	sprite_show.texture = eye_closed_texture
 	pupil.visible = false
 	
@@ -567,7 +562,6 @@ func get_active_unit_ids_for_race(target_race_enum: int) -> Array:
 func get_all_pieces_for_race(race_name: String) -> Array:
 	var list = []
 	# Instanciamos el registro para consultar el mapa
-	# Asumimos que PieceRegistry es un script accesible.
 	var registry_script = load("res://scripts/piece_Registry.gd")
 	if not registry_script:
 		return []
@@ -629,8 +623,6 @@ func get_active_synergies() -> Dictionary:
 						unique_ids_nor[id] = true
 					PieceRes.PieceRace.EUROPEAN:
 						unique_ids_eur[id] = true
-					
-					
 
 	# --- CÁLCULO DE TIERS ---
 	var count_jap = unique_ids_jap.size()

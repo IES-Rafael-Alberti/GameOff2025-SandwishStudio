@@ -189,7 +189,6 @@ offset_right = 4419.318
 offset_bottom = 2422.0012
 scale = Vector2(0.25786263, 0.17371413)
 texture = ExtResource("13_40feg")
-stretch_mode = 4
 
 [node name="Health_container" type="HBoxContainer" parent="TextureRect3"]
 layout_mode = 0
