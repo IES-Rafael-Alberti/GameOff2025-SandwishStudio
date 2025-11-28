@@ -34,6 +34,8 @@ var gladiators_defeated: int = 0
 @onready var announcement_label: Label = $AnnouncementLabel
 @onready var help_overlay: Control = $HelpOverLay
 @onready var help_button: Button = $HelpOverLay/HelpButton
+@onready var win_restart_button = $Win/RestartButton
+@onready var lose_restart_button = $Lose/RestartButton
 # --- CURSORES PERSONALIZADOS ---
 @export_group("Cursores Personalizados")
 @export var tex_grab: Texture2D  ## Arrastra 'Grab.png' (Arrastrar/Agarrar)
@@ -145,6 +147,15 @@ func _ready():
 		if el_jetas_anim: el_jetas_anim.play("intro")
 	else:
 		set_state(GameState.SHOP)
+	if win_restart_button:
+		win_restart_button.pressed.connect(_restart_game)
+	else:
+		print("Aviso: No se encontró Win/RestartButton")
+
+	if lose_restart_button:
+		lose_restart_button.pressed.connect(_restart_game)
+	else:
+		print("Aviso: No se encontró Lose/RestartButton")
 
 func _process(delta: float) -> void:
 	# Gestionamos el temporizador del parpadeo
@@ -696,3 +707,8 @@ func build_day_summary_text() -> String:
 	text += "[center][b]TOTAL: %d gold[/b][/center]" % total_day
 
 	return text
+func _restart_game() -> void:
+	print("Volviendo al menú principal...")
+	get_tree().paused = false
+	
+	get_tree().change_scene_to_file("res://scenes/menu.tscn")
