@@ -18,10 +18,15 @@ func _on_options_pressed() -> void:
 
 	options_instance = options_scene.instantiate()
 
+	add_child(options_instance)  # PRIMERO se añade al árbol
+
+	# En el menú principal NO queremos que pause el juego
+	if options_instance.has_method("set_as_pause_menu"):
+		options_instance.set_as_pause_menu(false)
+
 	options_instance.opened.connect(_on_options_opened)
 	options_instance.closed.connect(_on_options_closed)
 
-	add_child(options_instance)
 	is_animating = true
 
 func _on_options_opened() -> void:
