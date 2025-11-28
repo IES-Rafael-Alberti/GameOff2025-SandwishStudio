@@ -119,4 +119,4 @@ scale = Vector2(0.99999994, 0.99999994)
 position = Vector2(847.27374, 1413.1068)
 
 [node name="EnemyBattleSlot" type="Marker2D" parent="EnemySlots"]
-position = Vector2(1908.3456, 1409.1924)
+position = Vector2(1654.9553, 1417.0212)
