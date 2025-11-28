@@ -7,7 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://b4bl7jr41p7bk" path="res://assets/inventario/Inventario.png" id="4_uae8j"]
 [ext_resource type="Script" uid="uid://cm67y0q4u1ot5" path="res://scripts/DeleteArea.gd" id="4_yyk2a"]
 [ext_resource type="Resource" uid="uid://57d6mtngeb8t" path="res://resources/pieces/draugr.tres" id="5_tla8l"]
-[ext_resource type="Resource" uid="uid://b065ie430glv1" path="res://resources/pieces/banshie.tres" id="6_w24ly"]
+[ext_resource type="Resource" uid="uid://bgw12qinammwu" path="res://resources/pieces/banshie.tres" id="6_w24ly"]
 [ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/jotun.tres" id="7_ohgsq"]
 [ext_resource type="Texture2D" uid="uid://bnarhlk7ktg1q" path="res://assets/inventario/Mesa (1).png" id="8_40feg"]
 [ext_resource type="Texture2D" uid="uid://d32k775bkfw00" path="res://assets/inventario/VIDA.png" id="9_ylenm"]
@@ -205,7 +205,7 @@ theme_override_constants/separation = 4
 layout_mode = 2
 texture = ExtResource("9_ylenm")
 expand_mode = 3
-stretch_mode = 4
+stretch_mode = 2
 
 [node name="Label" type="Label" parent="TextureRect3/Health_container"]
 layout_mode = 2
@@ -225,7 +225,7 @@ size_flags_horizontal = 3
 layout_mode = 2
 texture = ExtResource("10_0df5h")
 expand_mode = 3
-stretch_mode = 4
+stretch_mode = 2
 
 [node name="Label" type="Label" parent="TextureRect3/Damage_container"]
 layout_mode = 2
@@ -245,7 +245,7 @@ size_flags_horizontal = 3
 layout_mode = 2
 texture = ExtResource("11_fiysm")
 expand_mode = 2
-stretch_mode = 4
+stretch_mode = 2
 
 [node name="Label" type="Label" parent="TextureRect3/SpeedCOntainer"]
 layout_mode = 2
@@ -265,7 +265,7 @@ size_flags_horizontal = 3
 layout_mode = 2
 texture = ExtResource("12_0df5h")
 expand_mode = 3
-stretch_mode = 4
+stretch_mode = 2
 
 [node name="Label" type="Label" parent="TextureRect3/CChance_container"]
 layout_mode = 2
@@ -285,7 +285,7 @@ size_flags_horizontal = 3
 layout_mode = 2
 texture = ExtResource("12_brsb2")
 expand_mode = 3
-stretch_mode = 4
+stretch_mode = 2
 
 [node name="Label" type="Label" parent="TextureRect3/CDamage_chance"]
 layout_mode = 2

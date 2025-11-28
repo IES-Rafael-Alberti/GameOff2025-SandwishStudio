@@ -33,11 +33,12 @@ var gladiators_defeated: int = 0
 @onready var announcement_label: Label = $AnnouncementLabel
 @onready var help_overlay: Control = $HelpOverLay
 @onready var help_button: Button = $HelpOverLay/HelpButton
+
 # --- CURSORES PERSONALIZADOS ---
 @export_group("Cursores Personalizados")
-@export var tex_grab: Texture2D  ## Arrastra 'Grab.png' (Arrastrar/Agarrar)
-@export var tex_click: Texture2D ## Arrastra 'Point.png' (Al hacer click)
-@export var cursor_hotspot: Vector2 = Vector2(0, 0) ## Ajusta la punta del cursor
+@export var tex_grab: Texture2D  
+@export var tex_click: Texture2D
+@export var cursor_hotspot: Vector2 = Vector2(0, 0) 
 
 # CONFIGURACIÓN
 @export var gold_round_base: int = 100
@@ -46,7 +47,6 @@ var gladiators_defeated: int = 0
 @export var gladiators_per_day: int = 1
 @export var gladiators_mult: int = 1
 @export var max_days: int = 2
-
 
 # --- UI LABELS ---
 @onready var round_label: Label = $RoundLabel
@@ -87,7 +87,6 @@ var daily_gold_loot: int = 0
 ## ------------------------------------------------------------------
 
 func _ready():
-	# IMPORTANTE: Añadir al grupo para que SynergyIcon pueda encontrarnos
 	add_to_group("game_manager")
 	
 	_apply_default_cursors()
@@ -107,7 +106,6 @@ func _ready():
 			original_positions[child] = child.position
 			child.modulate.a = 1.0
 
-	# --- Conexiones ---
 	if roulette.has_signal("roulette_spin_started"):
 		roulette.roulette_spin_started.connect(_on_roulette_spin_started)
 	
@@ -143,7 +141,6 @@ func _ready():
 	if current_round == 1:
 		_give_initial_piece()
 		set_state(GameState.ROULETTE)
-		# --- CAMBIO AQUI: Forzamos la animación de entrada al inicio ---
 		if el_jetas_anim: el_jetas_anim.play("intro")
 	else:
 		set_state(GameState.SHOP)
@@ -181,10 +178,6 @@ func _update_ui_labels() -> void:
 		round_label.text = "Wave %d/%d" % [current_round, rounds_per_day]
 
 
-## ------------------------------------------------------------------
-## Máquina de Estados
-## ------------------------------------------------------------------
-
 func set_state(new_state: GameState):
 	if current_state == new_state: return
 	if anim.is_playing(): return
@@ -212,10 +205,6 @@ func set_state(new_state: GameState):
 			inventory.set_interactive(false)
 			roulette.set_interactive(false)
 
-## ------------------------------------------------------------------
-## Lógica Principal
-## ------------------------------------------------------------------
-
 func _on_shop_button_pressed():
 	if anim.is_playing():
 		return
@@ -227,7 +216,6 @@ func _on_shop_button_pressed():
 
 func _on_roulette_spin_started():
 	set_state(GameState.SPINNING)
-
 
 func _on_combat_requested(piece_resource: Resource):
 	if piece_resource and piece_resource is PieceRes:
@@ -368,7 +356,6 @@ func _update_cursor_on_click():
 	if _is_clicking:
 		# AL CLICAR: Forzamos TODO a ser 'tex_click' (Point.png)
 		if tex_click:
-			Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_ARROW, cursor_hotspot)
 			Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_POINTING_HAND, cursor_hotspot)
 			Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_DRAG, cursor_hotspot)
 	else:
