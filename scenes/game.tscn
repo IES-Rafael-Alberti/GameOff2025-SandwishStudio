@@ -104,6 +104,7 @@ expand_mode = 1
 stretch_mode = 4
 
 [node name="DayFinished" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="NextDayImage" type="TextureRect" parent="DayFinished"]
 z_index = 4
