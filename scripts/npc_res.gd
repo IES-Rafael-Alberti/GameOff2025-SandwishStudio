@@ -7,9 +7,9 @@ enum UnitType { GLADIATOR, PIECE }
 
 @export_group("Stats por día")
 @export var day_stats: Dictionary = {
-	1: { "hp": 55.0, "dmg": 7.0, "aps": 1.1, "crit_chance": 6,  "crit_mult": 1.5, "members": 5 },
-	2: { "hp": 65.0, "dmg": 8.0, "aps": 1.2, "crit_chance": 8,  "crit_mult": 1.6, "members": 5 },
-	3: { "hp": 80.0, "dmg": 9.0, "aps": 1.3, "crit_chance": 10, "crit_mult": 1.7, "members": 5 },
+	1: { "hp": 200.0, "dmg": 25.0, "aps": 2.0, "crit_chance": 5,  "crit_mult": 1.25, "members": 1 },
+	2: { "hp": 250.0, "dmg": 30.0, "aps": 2.2, "crit_chance": 10,  "crit_mult": 1.5, "members": 1 },
+	3: { "hp": 300.0, "dmg": 35.0, "aps": 2.4, "crit_chance": 15, "crit_mult": 1.8, "members": 1 },
 }
 @export_group("Stats legacy (compatibilidad)")
 @export var max_health: float = 55.0
