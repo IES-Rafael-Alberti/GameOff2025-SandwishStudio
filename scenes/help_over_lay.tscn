@@ -1,7 +1,6 @@
-[gd_scene load_steps=15 format=3 uid="uid://cj8n2p21wqyqt"]
+[gd_scene load_steps=16 format=3 uid="uid://cj8n2p21wqyqt"]
 
 [ext_resource type="Script" uid="uid://5rckgbgfkfc2" path="res://scripts/help_over_lay.gd" id="1_hw84m"]
-[ext_resource type="Texture2D" uid="uid://u680lxpfqu1" path="res://assets/help/papiroplaceholder-goodrotate.png" id="2_fgo0r"]
 [ext_resource type="Texture2D" uid="uid://bbx1q45j0mtkw" path="res://assets/numeros/1.png" id="2_l7um4"]
 [ext_resource type="Texture2D" uid="uid://clucu0hyocvrs" path="res://assets/CONTINUENEGRO.png" id="3_fgo0r"]
 [ext_resource type="Texture2D" uid="uid://d10bx8m2mx4st" path="res://assets/numeros/2.png" id="3_i8onr"]
@@ -14,6 +13,8 @@
 [ext_resource type="Texture2D" uid="uid://bvkulmex5ofh5" path="res://assets/numeros/9.png" id="10_0is05"]
 [ext_resource type="Texture2D" uid="uid://cp1bjcydc4w6w" path="res://assets/numeros/10.png" id="11_pbqil"]
 [ext_resource type="Texture2D" uid="uid://c4dy7n4u1td0l" path="res://assets/numeros/11.png" id="12_lw8u6"]
+[ext_resource type="Texture2D" uid="uid://cfodtyosy8c3o" path="res://assets/help/help.png" id="13_i8onr"]
+[ext_resource type="Texture2D" uid="uid://dvc8fw5kbox28" path="res://assets/help/Papiro.png" id="14_i8onr"]
 
 [node name="HelpOverLay" type="Control"]
 layout_mode = 3
@@ -28,11 +29,14 @@ slides = Array[Texture2D]([ExtResource("2_l7um4"), ExtResource("3_i8onr"), ExtRe
 [node name="HelpButton" type="Button" parent="."]
 z_index = 30
 layout_mode = 1
-offset_right = 104.0
-offset_bottom = 64.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 72.0
+offset_bottom = 70.0
 pivot_offset = Vector2(20, 20)
 theme_override_font_sizes/font_size = 32
-text = "Help"
+icon = ExtResource("13_i8onr")
+flat = true
 
 [node name="PanelBg" type="TextureRect" parent="."]
 z_index = 5
@@ -42,7 +46,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("2_fgo0r")
+texture = ExtResource("14_i8onr")
 
 [node name="SlideCurrent" type="TextureRect" parent="PanelBg"]
 layout_mode = 0
@@ -88,11 +92,18 @@ icon = ExtResource("3_fgo0r")
 flat = true
 
 [node name="Dots" type="HBoxContainer" parent="PanelBg"]
-layout_mode = 0
-offset_left = 480.0
-offset_top = 1048.0
-offset_right = 1528.0
-offset_bottom = 1080.0
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -87.25
+offset_top = -96.0
+offset_right = 87.25
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 0
 
 [node name="progress_label" type="Label" parent="PanelBg"]
 layout_mode = 1
@@ -102,9 +113,9 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -21.0
-offset_top = -161.0
+offset_top = -184.0
 offset_right = 19.0
-offset_bottom = -83.0
+offset_bottom = -106.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_font_sizes/font_size = 45
