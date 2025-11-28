@@ -6,6 +6,32 @@
 [resource]
 script = ExtResource("2_2xtdc")
 frames = ExtResource("1_73cgy")
+day_stats = {
+1: {
+"aps": 2.0,
+"crit_chance": 5,
+"crit_mult": 1.25,
+"dmg": 25.0,
+"hp": 200.0,
+"members": 1
+},
+2: {
+"aps": 1.2,
+"crit_chance": 8,
+"crit_mult": 1.6,
+"dmg": 8.0,
+"hp": 65.0,
+"members": 5
+},
+3: {
+"aps": 1.3,
+"crit_chance": 10,
+"crit_mult": 1.7,
+"dmg": 9.0,
+"hp": 80.0,
+"members": 5
+}
+}
 max_health = 200.0
 health = 200.0
 damage = 25.0
@@ -14,5 +40,5 @@ critical_chance = 5
 critical_damage = 1.25
 raza = "Japonesas"
 gold = 4
-health_bar_offset = Vector2(-20, -220)
+health_bar_offset = Vector2(-20, -180)
 metadata/_custom_type_script = "uid://bd1qpluesymyw"

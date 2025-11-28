@@ -239,13 +239,10 @@ func _on_combat_requested(piece_resource: Resource):
 		_on_combat_finished(false)
 
 func _on_combat_finished(player_won: bool = false, loot_from_combat: int = 0):
-	# 1. Ingreso Base (Salario por ronda)
 	var round_income = int(gold_round_base * gold_day_mult)
-	
-	# 2. Sumamos al jugador el salario (el loot ya se lo dio combat_scene)
+
 	PlayerData.add_currency(round_income)
 	
-	# 3. Acumulamos por separado para el desglose
 	daily_gold_salary += round_income
 	daily_gold_loot += loot_from_combat
 	
@@ -268,14 +265,13 @@ func _on_combat_finished(player_won: bool = false, loot_from_combat: int = 0):
 		else:
 			print("Cuota NO cumplida (%d/%d). GAME OVER." % [gladiators_defeated, gladiators_per_day])
 			_show_game_over_view()
-			
 	else:
 		current_round += 1
 		print("--- Empezando Ronda %d ---" % current_round)
 		_update_ui_labels()
 		set_state(GameState.SHOP)
 		store.start_new_round()
-		if combat_scene:
+		if player_won and combat_scene and combat_scene.has_method("spawn_enemy_one"):
 			combat_scene.spawn_enemy_one()
 
 func _show_day_finished_view() -> void:
@@ -352,8 +348,10 @@ func _advance_to_next_day() -> void:
 	set_state(GameState.SHOP)
 	store.generate()
 	store.start_new_round()
-	if combat_scene:
-		combat_scene.spawn_enemy_one()
+	
+	# Al pasar de día, reseteamos el gladiador y creamos uno nuevo
+	if combat_scene and combat_scene.has_method("reset_for_new_day"):
+		combat_scene.reset_for_new_day()
 
 func _give_initial_piece():
 	if not inventory.has_method("get_random_initial_piece"): return

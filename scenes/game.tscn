@@ -29,12 +29,8 @@ gladiators_per_day = 4
 max_days = 4
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
-position = Vector2(176.00003, 88.99997)
-scale = Vector2(0.35115045, 0.22791663)
-defeat_hp_mult = 1.2
-defeat_damage_mult = 1.3
-defeat_speed_flat = 0.1
-defeat_crit_dmg_flat = 0.04
+position = Vector2(36.000004, 39.999996)
+scale = Vector2(0.35, 0.35)
 
 [node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
 z_index = 4
@@ -78,9 +74,9 @@ zoom = Vector2(0.7, 0.7)
 
 [node name="RoundLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 928.0
+offset_left = 920.0
 offset_top = 44.0
-offset_right = 1045.0
+offset_right = 1037.0
 offset_bottom = 92.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28

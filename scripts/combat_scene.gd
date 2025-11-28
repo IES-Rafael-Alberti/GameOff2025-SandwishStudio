@@ -31,8 +31,6 @@ const BASE_ROUND_GOLD := 2
 @export var attack_lunge_duration: float = 0.08             # Ida
 @export var attack_return_duration: float = 0.12            # Vuelta
 
-# Variables de Escalado Diario (Scaling)
-
 @export_group("Escalado de Dificultad (Por Día)")
 @export_subgroup("Crecimiento Exponencial")
 @export var scaling_hp_mult: float = 1.4      
@@ -43,7 +41,6 @@ const BASE_ROUND_GOLD := 2
 @export var scaling_crit_chance_flat: float = 5.0
 @export var scaling_crit_dmg_flat: float = 0.05   
 
-# --- NUEVO: ESCALADO POR DERROTAS (INTRA-DÍA) ---
 @export_group("Escalado por Derrotas (Intra-Día)")
 @export_subgroup("Multiplicador por Derrota")
 @export var defeat_hp_mult: float = 1.1       # +10% HP (acumulativo) por cada derrota hoy
@@ -58,12 +55,15 @@ const BASE_ROUND_GOLD := 2
 var daily_defeat_count: int = 0
 var last_recorded_day: int = 1
 
+# Sonidos
+var ally_spawn_sfx_played: bool = false
+
 @onready var enemy_spawn: Marker2D = $GladiatorSpawn
 @onready var ally_entry_spawn: Marker2D = $AlliesSpawn
 @onready var enemy_wait_slot: Marker2D = $EnemySlots/EnemyWaitSlot
 @onready var enemy_battle_slot: Marker2D = $EnemySlots/EnemyBattleSlot
 
-const ALLY_BATTLE_OFSET := Vector2(-880, 0)
+const ALLY_BATTLE_OFSET := Vector2(-500, 0)
 
 @onready var ally_final_slots: Array[Marker2D] = [
 	$AllyFinalSlots/AllyFinalSlot1, $AllyFinalSlots/AllyFinalSlot2,
@@ -102,16 +102,13 @@ func _advance_round() -> void:
 	pass
 
 func on_roulette_combat_requested(piece_resource: Resource) -> void:
-	# --- CASO 1: Giro en VACÍO ---
 	if not piece_resource or not piece_resource is PieceRes:
 		push_error("on_roulette_combat_requested: Recurso nulo o inválido. Saltando combate.")
 		_cleanup_allies_and_reset()
 		
 		if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 			var g := enemy_npcs[0]
-			if g.position == enemy_battle_slot.position:
-				_move_with_tween(g, enemy_wait_slot.position, 0.5)
-		
+			_move_with_tween_global(g, enemy_wait_slot.global_position, 0.5)
 		return
 		
 	print("Señal de combate global recibida. Aliado: ", piece_resource.display_name)
@@ -137,8 +134,8 @@ func on_roulette_combat_requested(piece_resource: Resource) -> void:
 		print("Gladiador de la ronda anterior sigue vivo. Reutilizándolo.")
 		if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 			var g := enemy_npcs[0]
-			if g.position != enemy_wait_slot.position:
-				_move_with_tween(g, enemy_wait_slot.position, 0.5)
+			if g.global_position != enemy_wait_slot.global_position:
+				_move_with_tween_global(g, enemy_wait_slot.global_position, 0.5)
 
 	_start_pre_battle_sequence()
 
@@ -180,7 +177,7 @@ func _stop_combat() -> void:
 	# Si el gladiador sobrevive, lo mandamos al slot de espera
 	if not player_won_round:
 		if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
-			_move_with_tween(enemy_npcs[0], enemy_wait_slot.position, 0.5)
+			_move_with_tween_global(enemy_npcs[0], enemy_wait_slot.global_position, 0.5)
 
 	# Esperamos un poco y enviamos la señal directamente
 	await get_tree().create_timer(1.0).timeout
@@ -194,26 +191,93 @@ func _stop_combat() -> void:
 		
 	print("Battle stopped. Player won: ", player_won_round, " Loot: ", round_gold_loot)
 
-func spawn_enemy_one() -> void:
-	if enemy_npcs.size() >= ENEMY_LIMIT:
-		return
+func reset_for_new_day() -> void:
+	# Limpiar gladiador actual (por si sigue vivo)
+	for e in enemy_npcs:
+		if is_instance_valid(e):
+			e.queue_free()
+	enemy_npcs.clear()
 
+	# Reseteamos contador de derrotas del día
+	daily_defeat_count = 0
+
+	# Spawneamos el gladiador del nuevo día (con stats nuevas)
+	spawn_enemy_one()
+
+func spawn_enemy_one() -> void:
+	# Si ya hay un gladiador VIVO, no hacemos nada
+	for e in enemy_npcs:
+		if is_instance_valid(e) and e.health > 0.0:
+			print("spawn_enemy_one(): ya hay un gladiador vivo, no spawneo otro.")
+			return
+
+	# Limpiamos referencias muertas del array
+	var cleaned: Array[npc] = []
+	for e in enemy_npcs:
+		if is_instance_valid(e):
+			cleaned.append(e)
+	enemy_npcs = cleaned
+
+	# Elegir recurso base
 	if enemy_res.is_empty():
 		push_error("enemy_res está vacío en combat_scene.gd.")
 		return
 
-	var pos := enemy_spawn.position
-	var war_res: npcRes = enemy_res[randi() % enemy_res.size()]
+	var template: npcRes = enemy_res[randi() % enemy_res.size()]
 
-	var e := _spawn_npc(npc.Team.ENEMY, pos, war_res)
-	if e:
-		enemy_npcs.append(e)
-		_move_with_tween(e, enemy_wait_slot.position, 0.8)
+	var gm = get_parent()
+	var day := 1
+	if gm and "current_day" in gm:
+		day = gm.current_day
+
+	# Stats del día desde el recurso
+	if not template.has_method("get_stats_for_day"):
+		push_warning("npcRes no tiene get_stats_for_day, usando stats base.")
+		var res_fallback: npcRes = template.duplicate()
+		var g_fb: npc = _spawn_npc(npc.Team.ENEMY, enemy_spawn.global_position, res_fallback)
+		if g_fb:
+			enemy_npcs.append(g_fb)
+			_move_with_tween_global(g_fb, enemy_wait_slot.global_position, 0.0)
+		return
+
+	var s := template.get_stats_for_day(day)
+
+	# 🔹 DEBUG: log de stats del gladiador para este spawn
+	print("[ENEMY SPAWN] Día %d | HP=%.2f  DMG=%.2f  APS=%.2f  CRIT=%.2f%%  CRIT_MULT=%.2f" % [
+		day,
+		s["hp"],
+		s["dmg"],
+		s["aps"],
+		s["crit_chance"],
+		s["crit_mult"]
+	])
+
+	# 6) Duplicamos el recurso para no tocar el original
+	var res: npcRes = template.duplicate()
+	res.max_health        = s["hp"]
+	res.health            = s["hp"]
+	res.damage            = s["dmg"]
+	res.atack_speed       = s["aps"]
+	res.critical_chance   = s["crit_chance"]
+	res.critical_damage   = s["crit_mult"]
+
+	# Instanciamos el npc con esas stats
+	var g: npc = _spawn_npc(npc.Team.ENEMY, enemy_spawn.global_position, res)
+	if g:
+		enemy_npcs.append(g)
+		
+		# DEBUG opcional
+		print("[ENEMY PATH] spawn=", enemy_spawn.global_position,
+			" wait=", enemy_wait_slot.global_position)
+		
+		# Que camine desde el spawn hasta el wait slot
+		_move_with_tween_global(g, enemy_wait_slot.global_position, 0.8)
+		print("spawn_enemy_one(): gladiador spawneado para día ", day)
 
 func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 	var n: npc = NPC_SCENE.instantiate()
 	n.team = team
-	n.position = pos
+	n.global_position = pos
 	n.npc_res = res_override
 	
 	if n is AnimatedSprite2D:
@@ -239,7 +303,7 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 			
 	# APLICAR SINERGIAS DE RULETA 
 	if team == npc.Team.ALLY:
-		var game_manager = get_parent() # Asumiendo que CombatScene es hijo de Game
+		var game_manager = get_parent()
 		if game_manager and game_manager.has_method("get_active_synergies"):
 			var active_synergies = game_manager.get_active_synergies()
 			
@@ -250,8 +314,7 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 	
 	get_node("npcs").add_child(n)
 
-
-	# APLICAR BONUS A ENEMIGOS (Scaling Diario + Derrotas)
+	# APLICAR BONUS A ENEMIGOS
 	if team == npc.Team.ENEMY:
 		n.gold_pool = int(n.npc_res.gold)
 		_apply_enemy_daily_scaling(n)
@@ -260,48 +323,35 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 	n.tree_exited.connect(_on_npc_exited.bind(n))
 	return n
 
-# --- MODIFICADO: Cálculos de Escalado Combinado ---
 func _apply_enemy_daily_scaling(n: npc) -> void:
-	# Intentamos obtener el día actual del GameManager (Padre)
 	var gm = get_parent()
 	if not gm or not "current_day" in gm:
 		return
-	
-	# Detectar cambio de día para resetear contador de derrotas
+
+	# Si ha cambiado de día, reseteamos derrotas
 	if gm.current_day != last_recorded_day:
 		daily_defeat_count = 0
 		last_recorded_day = gm.current_day
 		print("Nuevo día detectado (", gm.current_day, "). Reseteando contador de derrotas.")
-	
-	# Indices para el cálculo
-	var day_index = max(0, gm.current_day - 1)
-	var kills_index = daily_defeat_count 
-	
-	if day_index == 0 and kills_index == 0:
-		return # Día 1, primera pelea: valores base
-		
-	# --- 1. CÁLCULO EXPONENCIAL (HP y DAÑO) ---
-	# Fórmula: Base * (BuffDia ^ Dias) * (BuffDerrota ^ Derrotas)
-	
-	var day_factor_hp = pow(scaling_hp_mult, day_index)
-	var day_factor_dmg = pow(scaling_damage_mult, day_index)
-	
+
+	var kills_index = daily_defeat_count
+	if kills_index == 0:
+		return 
+
+	# SOLO ESCALADO POR DERROTAS
 	var kill_factor_hp = pow(defeat_hp_mult, kills_index)
 	var kill_factor_dmg = pow(defeat_damage_mult, kills_index)
-	
-	var total_hp_mult = day_factor_hp * kill_factor_hp
-	var total_dmg_mult = day_factor_dmg * kill_factor_dmg
-	
-	# --- 2. CÁLCULO LINEAL (Velocidad y Críticos) ---
-	# Sumamos: (BaseDia * Dias) + (BaseDerrota * Derrotas)
-	var added_speed = (scaling_speed_flat * day_index) + (defeat_speed_flat * kills_index)
-	var added_crit_chance = (scaling_crit_chance_flat * day_index) + (defeat_crit_chance_flat * kills_index)
-	var added_crit_dmg = (scaling_crit_dmg_flat * day_index) + (defeat_crit_dmg_flat * kills_index)
-	
-	# Convertimos el multiplicador a porcentaje de bonus (ej. 1.4 -> +40%)
-	var bonus_hp_percent = (total_hp_mult - 1.0) * 100.0
+
+	var total_hp_mult = kill_factor_hp
+	var total_dmg_mult = kill_factor_dmg
+
+	var added_speed       = defeat_speed_flat * kills_index
+	var added_crit_chance = defeat_crit_chance_flat * kills_index
+	var added_crit_dmg    = defeat_crit_dmg_flat * kills_index
+
+	var bonus_hp_percent  = (total_hp_mult - 1.0) * 100.0
 	var bonus_dmg_percent = (total_dmg_mult - 1.0) * 100.0
-	
+
 	if n.has_method("apply_passive_bonuses"):
 		n.apply_passive_bonuses(
 			bonus_hp_percent,
@@ -310,16 +360,12 @@ func _apply_enemy_daily_scaling(n: npc) -> void:
 			added_crit_chance,
 			added_crit_dmg
 		)
-		# Actualizamos la vida actual al nuevo máximo
 		n.health = n.max_health
-		
-		print("Enemy Scaled (Day %d, Kills %d): HP +%d%%, DMG +%d%%, SPD +%.2f" % 
+		print("Enemy Defeat-Scaled (Day %d, Kills %d): HP +%d%%, DMG +%d%%, SPD +%.2f" %
 			[gm.current_day, kills_index, int(bonus_hp_percent), int(bonus_dmg_percent), added_speed])
 	else:
-		# Fallback por si no tiene el método
 		n.max_health *= total_hp_mult
 		n.health = n.max_health
-# ----------------------------------------------------
 
 func _move_with_tween(n: npc, target_pos: Vector2, duration: float = 1.8) -> void:
 	if not is_instance_valid(n):
@@ -336,13 +382,15 @@ func _get_free_ally_slots() -> Array[Marker2D]:
 			continue
 		var occupied := false
 		for a in ally_npcs:
-			if is_instance_valid(a) and a.position == slot.position:
-				occupied = true
-				break
+			if is_instance_valid(a):
+				# Comparamos en espacio global
+				if a.global_position.distance_to(slot.global_position) < 4.0:
+					occupied = true
+					break
 		if not occupied:
 			free.append(slot)
 	return free
-	
+
 func _get_piece_copies_owned(piece_data: Resource) -> int:
 	var game_manager = get_parent()
 	if game_manager and game_manager.has_method("get_inventory_piece_count"):
@@ -366,6 +414,8 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 	var members: int = int(pack["members"])
 
 	if team == npc.Team.ALLY:
+		ally_spawn_sfx_played = false   # 🔹 reseteamos por tirada
+
 		var free_slots_limit := ALLY_LIMIT - ally_npcs.size()
 		if free_slots_limit <= 0:
 			print("ALLY_LIMIT alcanzado, no se spawnea nada.")
@@ -386,44 +436,46 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 			var slot: Marker2D = free_markers[idx]
 			free_markers.remove_at(idx)
 
-			var n: npc = _spawn_npc(team, ally_entry_spawn.position, npc_template)
+			var n: npc = _spawn_npc(team, ally_entry_spawn.global_position, npc_template)
 			if n:
 				ally_npcs.append(n)
 
-				# USAMOS EL CONTADOR GLOBAL
+				# 🔊 Solo el PRIMER aliado reproduce el sfx_spawn
+				if (not ally_spawn_sfx_played) and n.npc_res and n.npc_res.sfx_spawn:
+					ally_spawn_sfx_played = true
+					n.play_sfx(n.npc_res.sfx_spawn)
+
 				var order_index := ally_spawn_order_counter
 				ally_spawn_order_counter += 1
 
-				_place_ally_in_slot_with_tween(n, slot.position, order_index)
+				_place_ally_in_slot_with_tween(n, slot.global_position, order_index)
 
 		if ally_spawn_order_counter > 0:
-			# El último que saldrá tiene índice ally_spawn_order_counter - 1
 			var last_index := ally_spawn_order_counter - 1
 			pre_battle_wait_time = last_index * delay_per_ally + total_move_time + 0.2
 		else:
 			pre_battle_wait_time = 0.5
-
 		return
 
-	# Enemigos:
+	# Enemigos igual que antes
 	var e := _spawn_npc(team, enemy_spawn.position, npc_template)
 	if e:
 		enemy_npcs.append(e)
 
 func _place_ally_in_slot_with_tween(n: npc, final_pos: Vector2, order_index: int) -> void:
-	n.position = ally_entry_spawn.position
+	# Posición inicial: spawn de aliados (global)
+	n.global_position = ally_entry_spawn.global_position
 
 	var delay_per_ally := 0.10
 
-	var mid_pos := Vector2(final_pos.x, ally_entry_spawn.position.y)
+	# Punto intermedio: misma Y que el spawn, X del slot final
+	var mid_pos := Vector2(final_pos.x, ally_entry_spawn.global_position.y)
 
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-
 	tween.tween_interval(order_index * delay_per_ally)
-
-	tween.tween_property(n, "position", mid_pos, 0.5)
-	tween.tween_property(n, "position", final_pos, 0.5)
+	tween.tween_property(n, "global_position", mid_pos, 0.5)
+	tween.tween_property(n, "global_position", final_pos, 0.5)
 
 func _spawn_death_particles(n: npc) -> void:
 	if not is_instance_valid(n):
@@ -693,7 +745,7 @@ func _start_pre_battle_sequence() -> void:
 func _advance_to_battle_and_start() -> void:
 	if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 		var g := enemy_npcs[0]
-		_move_with_tween(g, enemy_battle_slot.position, 0.8)
+		_move_with_tween_global(g, enemy_battle_slot.global_position, 0.8)
 	
 	for a in ally_npcs:
 		if is_instance_valid(a):
@@ -703,6 +755,7 @@ func _advance_to_battle_and_start() -> void:
 	if not combat_running:
 		combat_running = true
 		start_timer.start(0.8)
+
 func _process_ally_wave_logic() -> void:
 	# 1. Contamos el ataque actual
 	current_wave_attacks += 1
@@ -730,3 +783,11 @@ func _process_ally_wave_logic() -> void:
 					# Llamamos a la nueva función que creamos en npc.gd
 					if a.has_method("charge_jap_synergy"):
 						a.charge_jap_synergy()
+
+func _move_with_tween_global(n: npc, target_pos: Vector2, duration: float = 1.8) -> void:
+	if not is_instance_valid(n):
+		return
+	var tween := create_tween()
+	tween.tween_property(n, "global_position", target_pos, duration) \
+		.set_trans(Tween.TRANS_SINE) \
+		.set_ease(Tween.EASE_OUT)
