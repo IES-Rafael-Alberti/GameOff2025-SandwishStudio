@@ -1,8 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://bbfqm8pblt056"]
+[gd_scene load_steps=10 format=3 uid="uid://bbfqm8pblt056"]
 
 [ext_resource type="Texture2D" uid="uid://c0bn00jg5b5cb" path="res://assets/ELJETAS (1).png" id="1_5ctqt"]
-[ext_resource type="Script" path="res://scripts/el_jetas.gd" id="2_44tkv"]
+[ext_resource type="Script" uid="uid://ou0itnsyetsi" path="res://scripts/el_jetas.gd" id="2_44tkv"]
 [ext_resource type="PackedScene" uid="uid://bevacqmdtykqr" path="res://scenes/button_shop.tscn" id="2_qgppr"]
+[ext_resource type="Script" path="res://scripts/button_shop.gd" id="4_44tkv"]
 
 [sub_resource type="Animation" id="Animation_qgppr"]
 length = 0.001
@@ -147,3 +148,4 @@ offset_right = 96.342804
 offset_bottom = 282.90268
 disabled = false
 icon_alignment = 0
+script = ExtResource("4_44tkv")
