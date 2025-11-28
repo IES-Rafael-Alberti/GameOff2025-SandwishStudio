@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="PieceData" load_steps=4 format=3 uid="uid://b065ie430glv1"]
+[gd_resource type="Resource" script_class="PieceData" load_steps=4 format=3 uid="uid://bgw12qinammwu"]
 
 [ext_resource type="Texture2D" uid="uid://csl7aya5724wo" path="res://assets/piezas/Banshee.png" id="1_ot8qb"]
 [ext_resource type="Resource" uid="uid://cbu5pjmpj8vj2" path="res://resources/Europea/banshie.tres" id="2_6vs4s"]
@@ -6,8 +6,7 @@
 
 [resource]
 script = ExtResource("3_366k6")
-piece_name = "banshee"
+piece_name = "Banshee"
 piece_origin = ExtResource("2_6vs4s")
 icon = ExtResource("1_ot8qb")
-uses = 3
-price = 5
+metadata/_custom_type_script = "uid://8urlsjkkl8pw"
