@@ -475,13 +475,21 @@ func _setup_reroll_label():
 	reroll_label = Label.new()
 	reroll_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	reroll_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	
+	# MEJORA VISUAL DEL TEXTO
 	reroll_label.add_theme_color_override("font_outline_color", Color.BLACK)
-	reroll_label.add_theme_constant_override("outline_size", 6)
-	reroll_label.add_theme_font_size_override("font_size", 24)
+	reroll_label.add_theme_constant_override("outline_size", 12) 
+	reroll_label.add_theme_font_size_override("font_size", 26) # Más grande
+	
+	reroll_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.5))
+	reroll_label.add_theme_constant_override("shadow_offset_x", 4)
+	reroll_label.add_theme_constant_override("shadow_offset_y", 4)
+
 	reroll_button.add_child(reroll_label)
+	
+	# Ocupa todo el botón y se centra solo
 	reroll_label.layout_mode = 1
-	reroll_label.anchors_preset = Control.PRESET_CENTER_BOTTOM
-	reroll_label.position.y += 10 
+	reroll_label.anchors_preset = Control.PRESET_FULL_RECT
 
 func _calculate_reroll_cost() -> int:
 	if _rerolls_this_round == 0: return 0 
@@ -501,23 +509,25 @@ func _update_reroll_button_visuals():
 	if cost == 0:
 		reroll_label.text = "FREE!"
 		reroll_label.modulate = Color(0.2, 1.0, 0.2) 
-		reroll_button.modulate = Color.WHITE
+		reroll_button.modulate = Color(1.0, 1.0, 1.0, 1.0) 
 	else:
 		reroll_label.text = "-%d" % cost
 		if PlayerData.has_enough_currency(cost):
-			reroll_label.modulate = Color(1.0, 0.9, 0.4) 
-			reroll_button.modulate = Color.WHITE
+			reroll_label.modulate = Color(1.0, 0.729, 0.0, 1.0) 
+			reroll_button.modulate = Color(1.0, 1.0, 1.0, 1.0) 
+			
 		else:
-			reroll_label.modulate = Color(1.0, 0.2, 0.2) 
-			reroll_button.modulate = Color(0.6, 0.6, 0.6) 
+			reroll_label.modulate = Color(1.0, 0.0, 0.094, 1.0) 
+			reroll_button.modulate = Color(1.0, 1.0, 1.0, 1.0)
 
 func _animate_error_shake(node: Control):
 	if not node: return
+	var original_pos_x = node.position.x
 	var tween = create_tween()
-	node.pivot_offset = node.size / 2
-	tween.tween_property(node, "rotation_degrees", 5, 0.05)
-	tween.tween_property(node, "rotation_degrees", -5, 0.05)
-	tween.tween_property(node, "rotation_degrees", 0, 0.05)
+	tween.tween_property(node, "position:x", original_pos_x + 5, 0.05)
+	tween.tween_property(node, "position:x", original_pos_x - 5, 0.05)
+	tween.tween_property(node, "position:x", original_pos_x + 5, 0.05)
+	tween.tween_property(node, "position:x", original_pos_x, 0.05)
 
 func _calculate_price(data) -> int:
 	if not "price" in data: return 0
