@@ -13,6 +13,7 @@ var current_state: GameState
 var current_round: int = 1
 var current_day: int = 1
 var gladiators_defeated: int = 0 
+@onready var NextDayButton: TextureButton = $DayFinished/NextDayButton
 
 # Nodos
 @onready var buttonShop: Button = $elJetas/ButtonShop
@@ -33,6 +34,8 @@ var gladiators_defeated: int = 0
 @onready var announcement_label: Label = $AnnouncementLabel
 @onready var help_overlay: Control = $HelpOverLay
 @onready var help_button: Button = $HelpOverLay/HelpButton
+@onready var win_restart_button = $Win/RestartButton
+@onready var lose_restart_button = $Lose/RestartButton
 # --- CURSORES PERSONALIZADOS ---
 @export_group("Cursores Personalizados")
 @export var tex_grab: Texture2D  ## Arrastra 'Grab.png' (Arrastrar/Agarrar)
@@ -61,8 +64,8 @@ var gladiators_defeated: int = 0
 
 # --- Referencias NUEVAS para DayFinished ---
 @onready var next_day_label: Label = $DayFinished/NextDayLabel
-@onready var day_slider: HSlider = $DayFinished/HSlider
-@onready var info_label: Label = $DayFinished/InfoLabel
+@onready var day_slider: TextureProgressBar = $DayFinished/HSlider
+@onready var info_label: RichTextLabel = $DayFinished/InfoLabel
 
 var _is_clicking: bool = false
 var pupil_offset: Vector2
@@ -130,9 +133,6 @@ func _ready():
 	PlayerData.currency_changed.connect(_on_PlayerData_currency_changed)
 	if inventory.has_signal("item_sold"):
 		inventory.item_sold.connect(PlayerData.add_currency)
-		
-	if next_day_image:
-		next_day_image.gui_input.connect(_on_next_day_image_input)
 
 	blink_timer = randf_range(blink_interval_min, blink_interval_max)
 	_on_PlayerData_currency_changed(PlayerData.get_current_currency())
@@ -147,6 +147,15 @@ func _ready():
 		if el_jetas_anim: el_jetas_anim.play("intro")
 	else:
 		set_state(GameState.SHOP)
+	if win_restart_button:
+		win_restart_button.pressed.connect(_restart_game)
+	else:
+		print("Aviso: No se encontró Win/RestartButton")
+
+	if lose_restart_button:
+		lose_restart_button.pressed.connect(_restart_game)
+	else:
+		print("Aviso: No se encontró Lose/RestartButton")
 
 func _process(delta: float) -> void:
 	# Gestionamos el temporizador del parpadeo
@@ -273,42 +282,37 @@ func _on_combat_finished(player_won: bool = false, loot_from_combat: int = 0):
 			combat_scene.spawn_enemy_one()
 
 func _show_day_finished_view() -> void:
-	if day_finished_view:
-		if next_day_label:
-			next_day_label.text = "Día %d Finalizado" % current_day
-		
-		if day_slider:
-			day_slider.min_value = 0
-			day_slider.max_value = max_days
-			day_slider.value = current_day
-			day_slider.editable = false 
-		
-		if info_label:
-			var rounds_count = rounds_per_day 
-			var round_unit_price = 0
-			if rounds_count > 0:
-				round_unit_price = daily_gold_salary / rounds_count
-			
-			var glad_count = gladiators_defeated
-			var glad_unit_price = 0
-			if glad_count > 0:
-				glad_unit_price = daily_gold_loot / glad_count
-			
-			var total_day = daily_gold_salary + daily_gold_loot
-			
-			var info_text = "RESUMEN DEL DÍA:\n\n"
-			info_text += "Rondas (%d oro) x%d: %d oro\n" % [round_unit_price, rounds_count, daily_gold_salary]
-			info_text += "Gladiadores (%d oro) x%d: %d oro\n" % [glad_unit_price, glad_count, daily_gold_loot]
-			info_text += "\n--------------------------\n"
-			info_text += "TOTAL: %d oro" % total_day
-			
-			info_label.text = info_text
-
-		day_finished_view.visible = true
-		buttonShop.disabled = true
-	else:
+	if not day_finished_view:
 		_advance_to_next_day()
-		
+		return
+
+	day_finished_view.visible = true
+	buttonShop.disabled = true
+	NextDayButton.visible = false
+
+	if next_day_label:
+		next_day_label.text = "Day %d Finished" % current_day
+
+	if info_label:
+		info_label.bbcode_enabled = true
+		info_label.visible_characters = 0     
+		info_label.text = ""                   
+
+		var final_text = build_day_summary_text()
+		info_label.text = final_text          
+
+	# Animación 1: Llenar progress bar
+	var t1 = animate_day_progressbar()
+
+	# Cuando termine, animar texto
+	t1.finished.connect(func():
+		var t2 = animate_info_text()
+
+		t2.finished.connect(func():
+			reveal_next_day_button()
+		)
+	)
+
 func _show_game_over_view() -> void:
 	if game_over_view:
 		game_over_view.visible = true
@@ -322,11 +326,6 @@ func _show_win_view() -> void:
 		buttonShop.disabled = true
 	else:
 		push_error("GameManager: No se encontró el nodo 'Win'.")
-
-func _on_next_day_image_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		print("Click en imagen de Siguiente Día recibido.")
-		_advance_to_next_day()
 
 func _advance_to_next_day() -> void:
 	print("Iniciando Día %d..." % (current_day + 1))
@@ -656,3 +655,60 @@ func get_active_synergies() -> Dictionary:
 		result["eur"] = 1
 	
 	return result
+func animate_day_progressbar():
+	if not day_slider:
+		return
+
+	day_slider.value = 0  # Empieza vacío
+
+	var target_value = current_day
+	var tween := create_tween()
+	tween.tween_property(day_slider, "value", target_value, 2.5).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+	return tween
+func animate_info_text():
+	if not info_label:
+		return
+
+	info_label.visible_characters = 0
+	var tween := create_tween()
+	tween.tween_property(info_label, "visible_characters", info_label.get_total_character_count(), 1)
+	return tween
+func reveal_next_day_button():
+	if not NextDayButton:
+		return
+	
+	NextDayButton.visible = true
+	NextDayButton.modulate.a = 0.0  # empieza invisible
+	
+	var tween := create_tween()
+	tween.tween_property(NextDayButton, "modulate:a", 1.0, 1.0) \
+		.set_delay(1) 
+func build_day_summary_text() -> String:
+	var rounds_count = rounds_per_day
+	var round_unit_price = daily_gold_salary / rounds_count if rounds_count > 0 else 0
+
+	var glad_count = gladiators_defeated
+	var glad_unit_price = daily_gold_loot / glad_count if glad_count > 0 else 0
+
+	var total_day = daily_gold_salary + daily_gold_loot
+
+	var text := ""
+	text += "[center][b]SUMMARY OF THE DAY[/b][/center]\n\n"
+
+	text += "[img=24x24]res://assets/Coin (1).png[/img]  "
+	text += "[b]Rounds:[/b] %d × %d = [b]%d gold[/b]\n" % [round_unit_price, rounds_count, daily_gold_salary]
+
+	text += "[img=24x24]res://assets/GladsIcon (1).png[/img]  "
+	text += "[b]Gladiators:[/b] %d × %d = [b]%d gold[/b]\n" % [glad_unit_price, glad_count, daily_gold_loot]
+
+	text += "\n\n"
+
+	text += "[center][b]TOTAL: %d gold[/b][/center]" % total_day
+
+	return text
+func _restart_game() -> void:
+	print("Volviendo al menú principal...")
+	get_tree().paused = false
+	
+	get_tree().change_scene_to_file("res://scenes/menu.tscn")

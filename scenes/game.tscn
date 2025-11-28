@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://dd8wqmfs2cj1j"]
+[gd_scene load_steps=32 format=3 uid="uid://dd8wqmfs2cj1j"]
 
 [ext_resource type="Script" uid="uid://bpnxk43sopml" path="res://scripts/gameManager.gd" id="1_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://hbcgudcjh0wn" path="res://scenes/inventory.tscn" id="2_lbhrr"]
@@ -12,18 +12,57 @@
 [ext_resource type="PackedScene" uid="uid://bv3r20c0gu33v" path="res://scenes/roulette.tscn" id="5_iywne"]
 [ext_resource type="Resource" uid="uid://bjr4t1dd6ig4b" path="res://resources/pieces/satiro.tres" id="6_ca42v"]
 [ext_resource type="Resource" uid="uid://6rli8qlo7wmd" path="res://resources/pieces/duende.tres" id="7_rysoc"]
-[ext_resource type="Texture2D" uid="uid://dycbttp2vpnv1" path="res://assets/Tiny Swords (Free Pack)/Terrain/Water Background color.png" id="12_dinhu"]
 [ext_resource type="Texture2D" uid="uid://bse428jrn0sbc" path="res://assets/Waves.png" id="12_trtic"]
 [ext_resource type="PackedScene" uid="uid://cj8n2p21wqyqt" path="res://scenes/help_over_lay.tscn" id="13_kvuet"]
 [ext_resource type="PackedScene" uid="uid://bbfqm8pblt056" path="res://scenes/el_jetas.tscn" id="13_trtic"]
+[ext_resource type="Texture2D" uid="uid://dmmr4p1043bpq" path="res://assets/FinDia.png" id="15_e1j6l"]
 [ext_resource type="Texture2D" uid="uid://ca521tx5dgil" path="res://assets/GladsIcon (1).png" id="15_ir15t"]
+[ext_resource type="Texture2D" uid="uid://bydll86slt54g" path="res://assets/Anfora.png" id="16_1kice"]
+[ext_resource type="Texture2D" uid="uid://df8aw2ccd8ggn" path="res://assets/unnamed-removebg-preview.png" id="17_1kice"]
+[ext_resource type="Texture2D" uid="uid://tpgawnkb75gq" path="res://assets/BloqueEndDay (1).png" id="18_5newe"]
+[ext_resource type="Texture2D" uid="uid://clucu0hyocvrs" path="res://assets/CONTINUENEGRO.png" id="19_37s47"]
+[ext_resource type="Script" uid="uid://b1sgbkjfj17wq" path="res://scripts/next_day_button.gd" id="20_bt5mj"]
+[ext_resource type="Texture2D" uid="uid://dro10dcj34d2s" path="res://assets/REROLLBLANCO.png" id="21_bt5mj"]
+[ext_resource type="Texture2D" uid="uid://yyv8cyuhf0g2" path="res://assets/trellas10.png" id="21_sgl2t"]
+[ext_resource type="Texture2D" uid="uid://dwnpjmet0181f" path="res://assets/trellas25.png" id="22_qouja"]
+[ext_resource type="Texture2D" uid="uid://dw0ngo6sbgnu3" path="res://assets/trellas40.png" id="23_wljb1"]
+[ext_resource type="Texture2D" uid="uid://cvyyy373bgrcn" path="res://assets/trellas55.png" id="24_v2yb1"]
+[ext_resource type="Texture2D" uid="uid://bca7kf7c23occ" path="res://assets/trellas80.png" id="25_js0lu"]
+[ext_resource type="Texture2D" uid="uid://wryei3elf457" path="res://assets/trellas100.png" id="26_gxtfn"]
+[ext_resource type="Texture2D" uid="uid://di2o4x03m4fry" path="res://assets/fuego (1).png" id="28_sgl2t"]
+
+[sub_resource type="AnimatedTexture" id="AnimatedTexture_twgab"]
+frames = 11
+speed_scale = 1.5
+frame_0/texture = ExtResource("21_sgl2t")
+frame_1/texture = ExtResource("22_qouja")
+frame_1/duration = 1.0
+frame_2/texture = ExtResource("23_wljb1")
+frame_2/duration = 1.0
+frame_3/texture = ExtResource("24_v2yb1")
+frame_3/duration = 1.0
+frame_4/texture = ExtResource("25_js0lu")
+frame_4/duration = 1.0
+frame_5/texture = ExtResource("26_gxtfn")
+frame_5/duration = 1.0
+frame_6/texture = ExtResource("25_js0lu")
+frame_6/duration = 1.0
+frame_7/texture = ExtResource("24_v2yb1")
+frame_7/duration = 1.0
+frame_8/texture = ExtResource("23_wljb1")
+frame_8/duration = 1.0
+frame_9/texture = ExtResource("22_qouja")
+frame_9/duration = 1.0
+frame_10/texture = ExtResource("21_sgl2t")
+frame_10/duration = 1.0
 
 [node name="game" type="Node2D"]
 script = ExtResource("1_lbhrr")
 tex_grab = ExtResource("3_264po")
 tex_click = ExtResource("4_1kice")
 gold_round_base = 2
-gladiators_per_day = 4
+rounds_per_day = 1
+gladiators_per_day = 0
 max_days = 4
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
@@ -60,18 +99,18 @@ zoom = Vector2(0.7, 0.7)
 
 [node name="RoundLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 920.0
+offset_left = 916.0
 offset_top = 44.0
-offset_right = 1037.0
+offset_right = 1033.0
 offset_bottom = 92.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 
 [node name="TextureRect" type="TextureRect" parent="RoundLabel"]
 layout_mode = 0
-offset_left = -48.0
-offset_top = 5.999999
-offset_right = 1727.0
+offset_left = -50.0
+offset_top = 6.0
+offset_right = 1725.0
 offset_bottom = 1633.0
 scale = Vector2(0.021465681, 0.020558907)
 texture = ExtResource("12_trtic")
@@ -80,7 +119,7 @@ texture = ExtResource("12_trtic")
 z_index = 4
 offset_left = 807.0
 offset_top = 42.0
-offset_right = 866.0
+offset_right = 863.0
 offset_bottom = 90.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
@@ -103,77 +142,147 @@ visible = false
 [node name="NextDayImage" type="TextureRect" parent="DayFinished"]
 z_index = 4
 offset_left = -4.0
-offset_top = -2.0
-offset_right = 1165.0
-offset_bottom = 766.0
+offset_top = -12.0
+offset_right = 1161.0
+offset_bottom = 759.0
 mouse_filter = 0
-texture = ExtResource("12_dinhu")
+texture = ExtResource("15_e1j6l")
+expand_mode = 2
 
 [node name="NextDayLabel" type="Label" parent="DayFinished"]
-z_index = 4
-offset_left = 367.0
-offset_top = 142.0
-offset_right = 875.0
-offset_bottom = 241.0
+z_index = 5
+offset_left = 376.0
+offset_top = 150.0
+offset_right = 907.0
+offset_bottom = 273.0
 theme_override_font_sizes/font_size = 72
 
-[node name="HSlider" type="HSlider" parent="DayFinished"]
-z_index = 4
-offset_left = 358.0
-offset_top = 334.0
-offset_right = 857.0
-offset_bottom = 350.0
+[node name="HSlider" type="TextureProgressBar" parent="DayFinished"]
+z_index = 5
+offset_left = 317.0
+offset_top = 317.0
+offset_right = 573.0
+offset_bottom = 831.0
+scale = Vector2(0.5, 0.5)
+max_value = 5.0
+step = 0.0
+fill_mode = 3
+texture_under = ExtResource("16_1kice")
+texture_progress = ExtResource("17_1kice")
 
-[node name="InfoLabel" type="Label" parent="DayFinished"]
-z_index = 4
+[node name="TextureRect" type="TextureRect" parent="DayFinished"]
+z_index = 5
+offset_left = 407.0
+offset_top = 308.0
+offset_right = 858.0
+offset_bottom = 598.0
+texture = ExtResource("18_5newe")
+expand_mode = 2
+
+[node name="InfoLabel" type="RichTextLabel" parent="DayFinished"]
+z_index = 5
 anchors_preset = -1
 anchor_bottom = 0.015000001
-offset_left = 469.0
-offset_top = 369.0
-offset_right = 743.0
-offset_bottom = 683.6
+offset_left = 466.0
+offset_top = 365.0
+offset_right = 795.0
+offset_bottom = 526.6
+
+[node name="NextDayButton" type="TextureButton" parent="DayFinished"]
+z_index = 5
+offset_left = 934.0
+offset_top = 409.0
+offset_right = 1022.0
+offset_bottom = 491.0
+texture_normal = ExtResource("19_37s47")
+ignore_texture_size = true
+stretch_mode = 4
+script = ExtResource("20_bt5mj")
+
+[node name="Estrellas" type="TextureRect" parent="DayFinished"]
+z_index = 4
+offset_right = 1162.0
+offset_bottom = 430.0
+texture = SubResource("AnimatedTexture_twgab")
 
 [node name="Win" type="CanvasLayer" parent="."]
 visible = false
 
+[node name="Label" type="Label" parent="Win"]
+z_index = 5
+offset_left = 297.0
+offset_top = 148.0
+offset_right = 893.0
+offset_bottom = 271.0
+theme_override_font_sizes/font_size = 72
+text = "Viviras un dia mas."
+
 [node name="WinImage" type="TextureRect" parent="Win"]
 z_index = 4
 offset_left = -4.0
-offset_top = -2.0
-offset_right = 1681.0
-offset_bottom = 1093.0
+offset_top = -12.0
+offset_right = 1161.0
+offset_bottom = 759.0
 mouse_filter = 0
-texture = ExtResource("12_dinhu")
+texture = ExtResource("15_e1j6l")
+expand_mode = 2
 
-[node name="Label" type="Label" parent="Win"]
+[node name="RestartButton" type="TextureButton" parent="Win"]
+z_index = 5
+offset_left = 531.0
+offset_top = 454.0
+offset_right = 619.0
+offset_bottom = 536.0
+texture_normal = ExtResource("21_bt5mj")
+ignore_texture_size = true
+stretch_mode = 4
+script = ExtResource("20_bt5mj")
+
+[node name="Estrellas" type="TextureRect" parent="Win"]
 z_index = 4
-offset_left = 333.0
-offset_top = 287.0
-offset_right = 841.0
-offset_bottom = 386.0
-theme_override_font_sizes/font_size = 72
-text = "Has ganado crack :)"
+offset_right = 1162.0
+offset_bottom = 430.0
+texture = SubResource("AnimatedTexture_twgab")
 
 [node name="Lose" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="LoseImage" type="TextureRect" parent="Lose"]
 z_index = 4
 offset_left = -4.0
-offset_top = -2.0
-offset_right = 1681.0
-offset_bottom = 1093.0
+offset_top = -12.0
+offset_right = 1161.0
+offset_bottom = 759.0
 mouse_filter = 0
-texture = ExtResource("12_dinhu")
+texture = ExtResource("15_e1j6l")
+expand_mode = 2
+
+[node name="RestartButton" type="TextureButton" parent="Lose"]
+z_index = 4
+offset_left = 531.0
+offset_top = 454.0
+offset_right = 619.0
+offset_bottom = 536.0
+texture_normal = ExtResource("21_bt5mj")
+ignore_texture_size = true
+stretch_mode = 4
+script = ExtResource("20_bt5mj")
 
 [node name="Label" type="Label" parent="Lose"]
-z_index = 4
-offset_left = 333.0
-offset_top = 287.0
-offset_right = 841.0
-offset_bottom = 386.0
+z_index = 5
+offset_left = 297.0
+offset_top = 148.0
+offset_right = 893.0
+offset_bottom = 271.0
 theme_override_font_sizes/font_size = 72
-text = "Cagaste"
+text = "Te han ejecutado"
+
+[node name="fuego" type="TextureRect" parent="Lose"]
+z_index = 4
+offset_left = -1.0
+offset_top = -68.0
+offset_right = 1161.0
+offset_bottom = 754.0
+texture = ExtResource("28_sgl2t")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -182,3 +291,5 @@ visible = false
 
 [node name="elJetas" parent="." instance=ExtResource("13_trtic")]
 z_index = 4
+
+[connection signal="pressed" from="DayFinished/NextDayButton" to="." method="_advance_to_next_day"]

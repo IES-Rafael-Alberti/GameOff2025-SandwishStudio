@@ -1,5 +1,6 @@
-[gd_scene load_steps=8 format=3 uid="uid://bevacqmdtykqr"]
+[gd_scene load_steps=9 format=3 uid="uid://bevacqmdtykqr"]
 
+[ext_resource type="Script" uid="uid://cr1tsd8wau1kd" path="res://scripts/button_shop.gd" id="1_nx6ja"]
 [ext_resource type="Texture2D" uid="uid://c3egjovavg2yk" path="res://assets/Mostrada_retocada.png" id="1_wvo3v"]
 [ext_resource type="Texture2D" uid="uid://bcei2xif8grad" path="res://assets/Pupil_retocada.png" id="2_nx6ja"]
 
@@ -29,6 +30,7 @@ disabled = true
 shortcut_feedback = false
 shortcut_in_tooltip = false
 icon_alignment = 1
+script = ExtResource("1_nx6ja")
 
 [node name="EyeSprite" type="Sprite2D" parent="."]
 position = Vector2(167.00786, 198.88098)
