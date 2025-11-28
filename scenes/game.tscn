@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://dd8wqmfs2cj1j"]
+[gd_scene load_steps=32 format=3 uid="uid://dd8wqmfs2cj1j"]
 
 [ext_resource type="Script" uid="uid://bpnxk43sopml" path="res://scripts/gameManager.gd" id="1_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://hbcgudcjh0wn" path="res://scenes/inventory.tscn" id="2_lbhrr"]
@@ -15,21 +15,54 @@
 [ext_resource type="Texture2D" uid="uid://bse428jrn0sbc" path="res://assets/Waves.png" id="12_trtic"]
 [ext_resource type="PackedScene" uid="uid://cj8n2p21wqyqt" path="res://scenes/help_over_lay.tscn" id="13_kvuet"]
 [ext_resource type="PackedScene" uid="uid://bbfqm8pblt056" path="res://scenes/el_jetas.tscn" id="13_trtic"]
+[ext_resource type="Texture2D" uid="uid://dmmr4p1043bpq" path="res://assets/FinDia.png" id="15_e1j6l"]
 [ext_resource type="Texture2D" uid="uid://ca521tx5dgil" path="res://assets/GladsIcon (1).png" id="15_ir15t"]
-[ext_resource type="Texture2D" uid="uid://b3y0m7bm1i74f" path="res://assets/EndDay.png" id="15_ssvqc"]
 [ext_resource type="Texture2D" uid="uid://bydll86slt54g" path="res://assets/Anfora.png" id="16_1kice"]
 [ext_resource type="Texture2D" uid="uid://df8aw2ccd8ggn" path="res://assets/unnamed-removebg-preview.png" id="17_1kice"]
 [ext_resource type="Texture2D" uid="uid://tpgawnkb75gq" path="res://assets/BloqueEndDay (1).png" id="18_5newe"]
 [ext_resource type="Texture2D" uid="uid://clucu0hyocvrs" path="res://assets/CONTINUENEGRO.png" id="19_37s47"]
 [ext_resource type="Script" uid="uid://b1sgbkjfj17wq" path="res://scripts/next_day_button.gd" id="20_bt5mj"]
 [ext_resource type="Texture2D" uid="uid://dro10dcj34d2s" path="res://assets/REROLLBLANCO.png" id="21_bt5mj"]
+[ext_resource type="Texture2D" uid="uid://yyv8cyuhf0g2" path="res://assets/trellas10.png" id="21_sgl2t"]
+[ext_resource type="Texture2D" uid="uid://dwnpjmet0181f" path="res://assets/trellas25.png" id="22_qouja"]
+[ext_resource type="Texture2D" uid="uid://dw0ngo6sbgnu3" path="res://assets/trellas40.png" id="23_wljb1"]
+[ext_resource type="Texture2D" uid="uid://cvyyy373bgrcn" path="res://assets/trellas55.png" id="24_v2yb1"]
+[ext_resource type="Texture2D" uid="uid://bca7kf7c23occ" path="res://assets/trellas80.png" id="25_js0lu"]
+[ext_resource type="Texture2D" uid="uid://wryei3elf457" path="res://assets/trellas100.png" id="26_gxtfn"]
+[ext_resource type="Texture2D" uid="uid://di2o4x03m4fry" path="res://assets/fuego (1).png" id="28_sgl2t"]
+
+[sub_resource type="AnimatedTexture" id="AnimatedTexture_twgab"]
+frames = 11
+speed_scale = 1.5
+frame_0/texture = ExtResource("21_sgl2t")
+frame_1/texture = ExtResource("22_qouja")
+frame_1/duration = 1.0
+frame_2/texture = ExtResource("23_wljb1")
+frame_2/duration = 1.0
+frame_3/texture = ExtResource("24_v2yb1")
+frame_3/duration = 1.0
+frame_4/texture = ExtResource("25_js0lu")
+frame_4/duration = 1.0
+frame_5/texture = ExtResource("26_gxtfn")
+frame_5/duration = 1.0
+frame_6/texture = ExtResource("25_js0lu")
+frame_6/duration = 1.0
+frame_7/texture = ExtResource("24_v2yb1")
+frame_7/duration = 1.0
+frame_8/texture = ExtResource("23_wljb1")
+frame_8/duration = 1.0
+frame_9/texture = ExtResource("22_qouja")
+frame_9/duration = 1.0
+frame_10/texture = ExtResource("21_sgl2t")
+frame_10/duration = 1.0
 
 [node name="game" type="Node2D"]
 script = ExtResource("1_lbhrr")
 tex_grab = ExtResource("3_264po")
 tex_click = ExtResource("4_1kice")
 gold_round_base = 2
-gladiators_per_day = 4
+rounds_per_day = 1
+gladiators_per_day = 0
 max_days = 4
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
@@ -113,11 +146,11 @@ offset_top = -12.0
 offset_right = 1161.0
 offset_bottom = 759.0
 mouse_filter = 0
-texture = ExtResource("15_ssvqc")
+texture = ExtResource("15_e1j6l")
 expand_mode = 2
 
 [node name="NextDayLabel" type="Label" parent="DayFinished"]
-z_index = 4
+z_index = 5
 offset_left = 376.0
 offset_top = 150.0
 offset_right = 907.0
@@ -125,7 +158,7 @@ offset_bottom = 273.0
 theme_override_font_sizes/font_size = 72
 
 [node name="HSlider" type="TextureProgressBar" parent="DayFinished"]
-z_index = 4
+z_index = 5
 offset_left = 317.0
 offset_top = 317.0
 offset_right = 573.0
@@ -138,7 +171,7 @@ texture_under = ExtResource("16_1kice")
 texture_progress = ExtResource("17_1kice")
 
 [node name="TextureRect" type="TextureRect" parent="DayFinished"]
-z_index = 4
+z_index = 5
 offset_left = 407.0
 offset_top = 308.0
 offset_right = 858.0
@@ -147,7 +180,7 @@ texture = ExtResource("18_5newe")
 expand_mode = 2
 
 [node name="InfoLabel" type="RichTextLabel" parent="DayFinished"]
-z_index = 4
+z_index = 5
 anchors_preset = -1
 anchor_bottom = 0.015000001
 offset_left = 466.0
@@ -156,7 +189,7 @@ offset_right = 795.0
 offset_bottom = 526.6
 
 [node name="NextDayButton" type="TextureButton" parent="DayFinished"]
-z_index = 4
+z_index = 5
 offset_left = 934.0
 offset_top = 409.0
 offset_right = 1022.0
@@ -165,6 +198,12 @@ texture_normal = ExtResource("19_37s47")
 ignore_texture_size = true
 stretch_mode = 4
 script = ExtResource("20_bt5mj")
+
+[node name="Estrellas" type="TextureRect" parent="DayFinished"]
+z_index = 4
+offset_right = 1162.0
+offset_bottom = 430.0
+texture = SubResource("AnimatedTexture_twgab")
 
 [node name="Win" type="CanvasLayer" parent="."]
 visible = false
@@ -185,11 +224,11 @@ offset_top = -12.0
 offset_right = 1161.0
 offset_bottom = 759.0
 mouse_filter = 0
-texture = ExtResource("15_ssvqc")
+texture = ExtResource("15_e1j6l")
 expand_mode = 2
 
 [node name="RestartButton" type="TextureButton" parent="Win"]
-z_index = 4
+z_index = 5
 offset_left = 531.0
 offset_top = 454.0
 offset_right = 619.0
@@ -199,8 +238,13 @@ ignore_texture_size = true
 stretch_mode = 4
 script = ExtResource("20_bt5mj")
 
+[node name="Estrellas" type="TextureRect" parent="Win"]
+z_index = 4
+offset_right = 1162.0
+offset_bottom = 430.0
+texture = SubResource("AnimatedTexture_twgab")
+
 [node name="Lose" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="LoseImage" type="TextureRect" parent="Lose"]
 z_index = 4
@@ -209,7 +253,7 @@ offset_top = -12.0
 offset_right = 1161.0
 offset_bottom = 759.0
 mouse_filter = 0
-texture = ExtResource("15_ssvqc")
+texture = ExtResource("15_e1j6l")
 expand_mode = 2
 
 [node name="RestartButton" type="TextureButton" parent="Lose"]
@@ -231,6 +275,14 @@ offset_right = 893.0
 offset_bottom = 271.0
 theme_override_font_sizes/font_size = 72
 text = "Te han ejecutado"
+
+[node name="fuego" type="TextureRect" parent="Lose"]
+z_index = 4
+offset_left = -1.0
+offset_top = -68.0
+offset_right = 1161.0
+offset_bottom = 754.0
+texture = ExtResource("28_sgl2t")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
