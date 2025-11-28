@@ -16,19 +16,19 @@ day_stats = {
 "members": 1
 },
 2: {
-"aps": 2.1,
+"aps": 2.2,
 "crit_chance": 10,
 "crit_mult": 1.6,
-"dmg": 35.0,
-"hp": 250.0,
+"dmg": 40.0,
+"hp": 400.0,
 "members": 5
 },
 3: {
-"aps": 2.2,
+"aps": 2.3,
 "crit_chance": 12,
 "crit_mult": 1.7,
-"dmg": 40.0,
-"hp": 300.0,
+"dmg": 55.0,
+"hp": 700.0,
 "members": 5
 }
 }

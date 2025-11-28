@@ -12,27 +12,27 @@ health_bar_offset = Vector2(0, -100)
 frames = ExtResource("1_g02va")
 stats = {
 "BRONCE": {
-"aps": 1.1,
+"aps": 1.5,
 "crit_chance": 10,
 "crit_mult": 1.5,
-"dmg": 30.0,
-"hp": 300.0,
+"dmg": 50.0,
+"hp": 500.0,
 "members": 1
 },
 "ORO": {
-"aps": 1.3,
-"crit_chance": 14,
+"aps": 2.0,
+"crit_chance": 17,
 "crit_mult": 1.7,
-"dmg": 52.0,
-"hp": 590.0,
+"dmg": 90.0,
+"hp": 900.0,
 "members": 1
 },
 "PLATA": {
-"aps": 1.2,
-"crit_chance": 12,
-"crit_mult": 1.6,
-"dmg": 40.0,
-"hp": 420.0,
+"aps": 1.7,
+"crit_chance": 14,
+"crit_mult": 1.7,
+"dmg": 70.0,
+"hp": 700.0,
 "members": 1
 }
 }
