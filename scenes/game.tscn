@@ -225,7 +225,6 @@ offset_bottom = 430.0
 texture = SubResource("AnimatedTexture_twgab")
 
 [node name="WinLabel" type="Label" parent="DayFinished"]
-visible = false
 z_index = 5
 offset_left = 162.0
 offset_top = 168.0
