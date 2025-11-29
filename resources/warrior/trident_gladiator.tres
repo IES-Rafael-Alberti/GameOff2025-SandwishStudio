@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="npcRes" load_steps=3 format=3 uid="uid://b6dek55tm2no8"]
+[gd_resource type="Resource" script_class="npcRes" load_steps=4 format=3 uid="uid://b6dek55tm2no8"]
 
 [ext_resource type="SpriteFrames" uid="uid://c7jd0vdx5p4th" path="res://resources/warrior/trident_gladiator_animation.tres" id="1_1cl5e"]
 [ext_resource type="Script" uid="uid://bd1qpluesymyw" path="res://scripts/npc_res.gd" id="2_up70c"]
+[ext_resource type="AudioStream" uid="uid://cymjc0lrj1w2x" path="res://assets/Sfx/gladiadores/Laugh1.wav" id="3_58vrr"]
 
 [resource]
 script = ExtResource("2_up70c")
@@ -41,4 +42,5 @@ critical_damage = 1.25
 raza = "Nordicas"
 gold = 4
 health_bar_offset = Vector2(-70, -180)
+sfx_spawn = ExtResource("3_58vrr")
 metadata/_custom_type_script = "uid://bd1qpluesymyw"

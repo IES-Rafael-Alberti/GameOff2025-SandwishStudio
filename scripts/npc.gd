@@ -60,16 +60,17 @@ var synergy_hp_mult: float = 1.0
 var default_bar_style: StyleBox = null
 
 func _ready() -> void:
-	if npc_res and npc_res.sfx_spawn:
-		if team == Team.ENEMY:
-			play_sfx(npc_res.sfx_spawn)
+	# --- SFX de spawn (solo GLADIADOR) ---
+	if npc_res and npc_res.sfx_spawn and team == Team.ENEMY:
+		play_sfx(npc_res.sfx_spawn, "spawn_enemy")
+	
 	# CARGAR STATS BASE
 	if npc_res:
 		var base_hp = max(1.0, npc_res.max_health)
 		max_health = (base_hp + bonus_health) * synergy_hp_mult
 		
 		health = clamp(npc_res.health, 0.0, max_health)
-		if abs(npc_res.health - npc_res.max_health) < 0.1: 
+		if abs(npc_res.health - npc_res.max_health) < 0.1:
 			health = max_health
 			
 		gold_pool = int(npc_res.gold)
@@ -344,10 +345,15 @@ func take_damage(amount: float, from: npc = null, was_crit: bool = false) -> voi
 		_die(from)
 
 func _die(killer: npc = null) -> void:
+	# SFX de muerte para TODOS (gladiador y kappa)
 	if npc_res and npc_res.sfx_death:
-		play_sfx(npc_res.sfx_death)
+		var tag := "death_enemy" if team == Team.ENEMY else "death_ally"
+		play_sfx(npc_res.sfx_death, tag)
+
 	for ab in abilities:
-		if ab: ab.on_die(self, killer)
+		if ab:
+			ab.on_die(self, killer)
+
 	emit_signal("died", self)
 	queue_free()
 
@@ -410,7 +416,7 @@ func _setup_healthbar_z() -> void:
 	health_bar.z_as_relative = false
 	health_bar.z_index = 100
 
-func play_sfx(stream: AudioStream) -> void:
+func play_sfx(stream: AudioStream, debug_tag: String = "") -> void:
 	if stream == null:
 		return
 	if audio_player == null:
@@ -418,6 +424,17 @@ func play_sfx(stream: AudioStream) -> void:
 
 	audio_player.stream = stream
 	audio_player.play()
+
+	# DEBUG
+	var npc_name := ""
+	if npc_res and npc_res.resource_path != "":
+		npc_name = npc_res.resource_path.get_file().get_basename()
+
+	var tag_text := debug_tag if debug_tag != "" else "generic"
+	var team_text := "ALLY" if team == Team.ALLY else "ENEMY"
+
+	print("[SFX]", tag_text, "| NPC:", npc_name, "| Team:", team_text)
+
 func charge_jap_synergy() -> void:
 	if synergy_jap_tier > 0:
 		jap_special_ready = true
