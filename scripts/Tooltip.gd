@@ -625,7 +625,7 @@ func show_npc_tooltip(unit: npc) -> void:
 			child.queue_free()
 
 	# 2. Configuración Visual
-	var title_text = "GLADIATOR"
+	var title_text = unit.npc_res.raza.to_upper() if unit.npc_res.raza != "" else "GLADIATOR"
 	var rarity_color = Color(1.0, 0.3, 0.3) 
 	var bg_tint = Color(0.15, 0.05, 0.05, 0.98)
 
@@ -651,47 +651,91 @@ func show_npc_tooltip(unit: npc) -> void:
 
 	text += "[font_size=%d][table=3]" % table_font_size
 	
-	# --- CÁLCULO DE STATS ACTUALES ---
-	var current_dmg = unit.npc_res.damage + unit.bonus_damage
-	var current_speed = unit.get_attack_speed()
+	# --- CÁLCULO DE STATS ---
 	
-	# AQUÍ ESTÁ EL CAMBIO: Usamos unit.health (vida actual) y unit.max_health
+	# 1. DAÑO
+	var base_dmg = unit.npc_res.damage
+	var total_dmg = unit.npc_res.damage + unit.bonus_damage # O usar unit.get_damage(null) si quieres aplicar lógica de habilidades
+	var bonus_dmg = total_dmg - base_dmg
+	
+	var dmg_str = "[b]%d[/b]" % total_dmg
+	if bonus_dmg > 0:
+		dmg_str += " [color=#77ff77][font_size=%d](+%d)[/font_size][/color]" % [footer_font_size, int(bonus_dmg)]
+
+	# 2. VIDA (Actual / MaxTotal)
 	var hp_current = int(unit.health)
-	var hp_max = int(unit.max_health)
+	var hp_max_total = int(unit.max_health)
+	var hp_base = int(unit.npc_res.max_health)
+	var hp_bonus = hp_max_total - hp_base
 	
-	var current_crit = unit.get_crit_chance(null)
+	var hp_str = "[b]%d / %d[/b]" % [hp_current, hp_max_total]
+	if hp_bonus > 0:
+		hp_str += " [color=#77ff77][font_size=%d](+%d)[/font_size][/color]" % [footer_font_size, hp_bonus]
 
+	# 3. VELOCIDAD
+	var spd_base = unit.npc_res.atack_speed
+	var spd_total = unit.get_attack_speed()
+	var spd_bonus = spd_total - spd_base
+	
+	var spd_str = "[b]%.2f[/b]" % spd_total
+	if spd_bonus > 0.01:
+		spd_str += " [color=#77ff77][font_size=%d](+%.2f)[/font_size][/color]" % [footer_font_size, spd_bonus]
+
+	# 4. CRIT CHANCE
+	var crit_c_base = unit.npc_res.critical_chance
+	var crit_c_total = unit.get_crit_chance(null)
+	var crit_c_bonus = crit_c_total - crit_c_base
+	
+	var crit_c_str = "[b]%d%%[/b]" % crit_c_total
+	if crit_c_bonus > 0:
+		crit_c_str += " [color=#77ff77][font_size=%d](+%d%%)[/font_size][/color]" % [footer_font_size, crit_c_bonus]
+
+	# 5. CRIT DAMAGE (Multiplicador)
+	var crit_d_base = unit.npc_res.critical_damage
+	var crit_d_total = unit.get_crit_mult(null)
+	var crit_d_bonus = crit_d_total - crit_d_base
+	
+	var crit_d_str = "[b]x%.2f[/b]" % crit_d_total
+	if crit_d_bonus > 0.01:
+		crit_d_str += " [color=#77ff77][font_size=%d](+%.2f)[/font_size][/color]" % [footer_font_size, crit_d_bonus]
+
+	# --- RENDERIZADO TABLA ---
+	
 	# Fila 1: Daño
-	text += "[cell][font_size=%d][color=#ff7675] %s Damage     [/color][/font_size][/cell]" % [table_font_size, _get_icon_tag(icon_damage)]
+	text += "[cell][font_size=%d][color=#ff7675] %s Damage[/color][/font_size][/cell]" % [table_font_size, _get_icon_tag(icon_damage)]
 	text += "[cell]  [/cell]"
-	text += "[cell][p align=right][font_size=%d][b]%d[/b][/font_size][/p][/cell]" % [table_font_size, current_dmg]
+	text += "[cell][p align=right][font_size=%d]%s[/font_size][/p][/cell]" % [table_font_size, dmg_str]
 
-	# Fila 2: Vida (FORMATO ACTUAL / MAX)
-	text += "[cell][font_size=%d][color=#55efc4] %s Health     [/color][/font_size][/cell]" % [table_font_size, _get_icon_tag(icon_health)]
+	# Fila 2: Vida
+	text += "[cell][font_size=%d][color=#55efc4] %s Health[/color][/font_size][/cell]" % [table_font_size, _get_icon_tag(icon_health)]
 	text += "[cell]  [/cell]"
-	# Usamos un string formateado para mostrar ambas cifras
-	text += "[cell][p align=right][font_size=%d][b]%d / %d[/b][/font_size][/p][/cell]" % [table_font_size, hp_current, hp_max]
+	text += "[cell][p align=right][font_size=%d]%s[/font_size][/p][/cell]" % [table_font_size, hp_str]
 
 	# Fila 3: Velocidad
-	text += "[cell][font_size=%d][color=#ffeaa7] %s Atk. Spd   [/color][/font_size][/cell]" % [table_font_size, _get_icon_tag(icon_speed)]
+	text += "[cell][font_size=%d][color=#ffeaa7] %s Atk. Spd[/color][/font_size][/cell]" % [table_font_size, _get_icon_tag(icon_speed)]
 	text += "[cell]  [/cell]"
-	text += "[cell][p align=right][font_size=%d][b]%.1f[/b][/font_size][/p][/cell]" % [table_font_size, current_speed]
+	text += "[cell][p align=right][font_size=%d]%s[/font_size][/p][/cell]" % [table_font_size, spd_str]
 
-	# Fila 4: Crítico
-	if current_crit > 0:
-		text += "[cell][font_size=%d][color=#ff9f43] %s Crit Rate  [/color][/font_size][/cell]" % [table_font_size, _get_icon_tag(icon_crit_chance)]
+	# Fila 4: Crit Rate
+	if crit_c_total > 0:
+		text += "[cell][font_size=%d][color=#ff9f43] %s Crit Rate[/color][/font_size][/cell]" % [table_font_size, _get_icon_tag(icon_crit_chance)]
 		text += "[cell]  [/cell]"
-		text += "[cell][p align=right][font_size=%d][b]%d%%[/b][/font_size][/p][/cell]" % [table_font_size, current_crit]
+		text += "[cell][p align=right][font_size=%d]%s[/font_size][/p][/cell]" % [table_font_size, crit_c_str]
+
+	# Fila 5: Crit Damage
+	if crit_d_total > 1.0:
+		text += "[cell][font_size=%d][color=#ff9f43] %s Crit Dmg[/color][/font_size][/cell]" % [table_font_size, _get_icon_tag(icon_crit_damage)]
+		text += "[cell]  [/cell]"
+		text += "[cell][p align=right][font_size=%d]%s[/font_size][/p][/cell]" % [table_font_size, crit_d_str]
 
 	text += "[/table][/font_size]\n"
-
-	if unit.npc_res.description != "":
-		text += "\n[font_size=%d][color=#888888][i]%s[/i][/color][/font_size]" % [subtitle_font_size, unit.npc_res.description]
 
 	description_label.text = text
 	sell_price_label.hide()
 
-	custom_minimum_size = Vector2(270, 0)
+	# Aumentado a 340 para que quepan los textos largos tipo "x1.50 (+0.50)"
+	custom_minimum_size = Vector2(340, 0)
+	
 	show()
 	await get_tree().process_frame
 	size = Vector2.ZERO
