@@ -415,7 +415,6 @@ func _advance_to_next_day() -> void:
 	
 	_update_ui_labels()
 	set_state(GameState.SHOP)
-	store.generate()
 	store.start_new_round()
 	
 	# Al pasar de día, reseteamos el gladiador y creamos uno nuevo

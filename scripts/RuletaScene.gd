@@ -6,8 +6,8 @@ signal roulette_spin_started
 # --- CONFIGURACIÓN DE FÍSICA ---
 @export_group("Physics")
 @export var friction: float = 0.985
-@export var min_impulse_force: float = 60.0 
-@export var min_impulse_random_range: Vector2 = Vector2(1.0, 1.4) 
+@export var min_impulse_force: float = 30.0 
+@export var min_impulse_random_range: Vector2 = Vector2(1, 3) 
 @export var bounce_angle: float = 12.0
 @export var bounce_time: float = 0.08
 
