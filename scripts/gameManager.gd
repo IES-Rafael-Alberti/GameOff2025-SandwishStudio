@@ -41,6 +41,13 @@ var gladiators_defeated: int = 0
 @onready var fondo_texto: TextureRect = $DayFinished/FondoTexto
 @onready var anfora_rota: TextureRect = $DayFinished/AnforaRota
 var is_game_over_state: bool = false
+@onready var comic_root: CanvasLayer = $Comic
+@onready var Comic1: TextureRect = $Comic/Fondo/Frag1
+@onready var Comic2: TextureRect = $Comic/Fondo/Frag2
+@onready var Comic3: TextureRect = $Comic/Fondo/Frag3
+@onready var start_button: TextureButton = $Comic/StartButton
+@onready var comic_fondo: ColorRect = $Comic/Fondo 
+
 # --- CURSORES PERSONALIZADOS ---
 @export_group("Cursores Personalizados")
 @export var tex_grab: Texture2D  ## Arrastra 'Grab.png' (Arrastrar/Agarrar)
@@ -163,6 +170,15 @@ func _ready():
 		lose_restart_button.pressed.connect(_restart_game)
 	else:
 		print("Aviso: No se encontró Lose/RestartButton")
+	if start_button:
+		start_button.pressed.connect(_on_start_button_pressed)
+		start_button.visible = false # Oculto al principio
+
+	# Si es el día 1, lanzamos la intro visual encima del juego
+	if current_day == 1 and current_round == 1:
+		_play_simple_intro()
+	else:
+		comic_root.visible = false
 
 func _process(delta: float) -> void:
 	# Gestionamos el temporizador del parpadeo
@@ -874,3 +890,70 @@ func _animate_lose_transition() -> void:
 	
 	# 4. Mostrar botón
 	t.chain().tween_callback(reveal_next_day_button)
+## ------------------------------------------------------------------
+## INTRO COMIC SIMPLIFICADA
+## ------------------------------------------------------------------
+
+## ------------------------------------------------------------------
+## INTRO COMIC (Versión Final: TextureRect + CanvasLayer)
+## ------------------------------------------------------------------
+
+func _play_simple_intro():
+	# 1. Activamos la capa superior para ver la intro
+	comic_root.visible = true
+	
+	# Aseguramos que el fondo y las viñetas sean opacos al empezar
+	if comic_fondo: comic_fondo.modulate.a = 1.0
+	
+	# Bloqueamos la tienda de fondo para no clicar sin querer
+	buttonShop.disabled = true 
+	
+	# 2. Guardamos posiciones finales (donde las colocaste en el editor)
+	var pos1 = Comic1.position
+	var pos2 = Comic2.position
+	var pos3 = Comic3.position
+	
+	# 3. Posiciones de inicio (Fuera de la pantalla)
+	var screen_size = get_viewport_rect().size
+	
+	Comic1.position.x = -Comic1.size.x - 50      # Fuera Izquierda
+	Comic2.position.x = screen_size.x + 50       # Fuera Derecha
+	Comic3.position.y = screen_size.y + 50       # Fuera Abajo
+	
+	# 4. Secuencia de animación
+	var t = create_tween()
+	
+	# Viñeta 1 (Izquierda -> Centro) - Frena suave
+	t.tween_property(Comic1, "position", pos1, 0.7).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_interval(1) 
+	
+	# Viñeta 2 (Derecha -> Centro)
+	t.tween_property(Comic2, "position", pos2, 0.7).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_interval(1) 
+	
+	# Viñeta 3 (Abajo -> Centro)
+	t.tween_property(Comic3, "position", pos3, 0.7).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_interval(1) 
+	
+	# Aparece el botón (Fade In)
+	t.tween_callback(func(): 
+		if start_button:
+			start_button.visible = true
+			start_button.modulate.a = 0.0
+	)
+	if start_button:
+		t.tween_property(start_button, "modulate:a", 1.0, 0.5)
+
+func _on_start_button_pressed():
+	buttonShop.disabled = false
+	
+	var t = create_tween()
+	t.set_parallel(true) 
+	
+	if comic_fondo: 
+		t.tween_property(comic_fondo, "modulate:a", 0.0, 0.5) 
+	
+	if start_button: 
+		t.tween_property(start_button, "modulate:a", 0.0, 0.5)
+	
+	t.chain().tween_callback(func(): comic_root.visible = false)
