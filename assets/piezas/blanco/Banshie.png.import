@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://3rm1osme8qo3"
-path="res://.godot/imported/banshie.png-cca238743dee08188423e355d180bad1.ctex"
+path="res://.godot/imported/Banshie.png-9780b147b5c4642fb8f78dafea04d257.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/piezas/blanco/banshie.png"
-dest_files=["res://.godot/imported/banshie.png-cca238743dee08188423e355d180bad1.ctex"]
+source_file="res://assets/piezas/blanco/Banshie.png"
+dest_files=["res://.godot/imported/Banshie.png-9780b147b5c4642fb8f78dafea04d257.ctex"]
 
 [params]
 
