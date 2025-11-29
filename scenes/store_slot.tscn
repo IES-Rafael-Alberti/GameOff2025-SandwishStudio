@@ -95,7 +95,6 @@ grow_horizontal = 1
 grow_vertical = 1
 
 [node name="TooExpensiveLabel" type="Label" parent="."]
-visible = false
 z_index = 10
 layout_mode = 0
 offset_left = 76.0
@@ -103,7 +102,7 @@ offset_top = 139.0
 offset_right = 186.0
 offset_bottom = 157.53772
 rotation = -0.65642446
-theme_override_colors/font_color = Color(0.5254902, 0, 0, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.16078432)
 theme_override_fonts/font = SubResource("FontVariation_80s66")
 theme_override_font_sizes/font_size = 14
@@ -113,14 +112,13 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="OutOfStockLabel" type="Label" parent="."]
-visible = false
 layout_mode = 0
 offset_left = 68.0
 offset_top = 68.0
 offset_right = 171.00002
 offset_bottom = 86.537704
 rotation = 0.43505508
-theme_override_colors/font_color = Color(0.5254902, 0, 0, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.16078432)
 theme_override_fonts/font = SubResource("FontVariation_80s66")
 theme_override_font_sizes/font_size = 14
@@ -130,14 +128,13 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="MaxedLabel" type="Label" parent="."]
-visible = false
 layout_mode = 0
 offset_left = 84.0
 offset_top = 78.0
 offset_right = 151.95523
 offset_bottom = 96.537704
 rotation = 0.43505508
-theme_override_colors/font_color = Color(0.5254902, 0, 0, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.16078432)
 theme_override_fonts/font = SubResource("FontVariation_80s66")
 theme_override_font_sizes/font_size = 14
