@@ -64,8 +64,7 @@ script = ExtResource("1_lbhrr")
 tex_grab = ExtResource("3_264po")
 tex_click = ExtResource("4_1kice")
 gold_round_base = 2
-rounds_per_day = 1
-gladiators_per_day = 0
+gladiators_per_day = 4
 max_days = 3
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
@@ -152,7 +151,6 @@ expand_mode = 1
 stretch_mode = 4
 
 [node name="Comic" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="Fondo" type="ColorRect" parent="Comic"]
 z_index = 10
@@ -210,8 +208,8 @@ color = Color(0, 0, 0, 1)
 z_index = 4
 offset_left = -4.0
 offset_top = -12.0
-offset_right = 1161.0
-offset_bottom = 759.0
+offset_right = 1162.0
+offset_bottom = 762.0
 mouse_filter = 0
 texture = ExtResource("15_e1j6l")
 expand_mode = 2
@@ -295,12 +293,14 @@ autowrap_mode = 2
 
 [node name="LoseLabel" type="Label" parent="DayFinished"]
 z_index = 5
-offset_left = 370.0
+offset_left = 153.0
 offset_top = 170.0
-offset_right = 915.0
-offset_bottom = 425.0
+offset_right = 1031.0
+offset_bottom = 286.0
 theme_override_font_sizes/font_size = 48
-text = "You have been executed"
+text = "Your people have rebelled against you.
+You have been executed."
+horizontal_alignment = 1
 autowrap_mode = 2
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]

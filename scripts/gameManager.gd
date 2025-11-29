@@ -177,9 +177,15 @@ func _ready():
 	# Si es el día 1, lanzamos la intro visual encima del juego
 	if current_day == 1 and current_round == 1:
 		_play_simple_intro()
+		if comic_root: comic_root.visible = true
+		if comic_fondo: comic_fondo.modulate.a = 1.0
 	else:
 		comic_root.visible = false
-
+	if NextDayButton:
+			NextDayButton.disabled = false
+	if transition_rect:
+			transition_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	
 func _process(delta: float) -> void:
 	# Gestionamos el temporizador del parpadeo
 	blink_timer -= delta
@@ -311,69 +317,75 @@ func _show_day_finished_view() -> void:
 
 	day_finished_view.visible = true
 	buttonShop.disabled = true
-	NextDayButton.visible = false
+	
+	if NextDayButton:
+		NextDayButton.visible = false
+		NextDayButton.disabled = true 
 	
 	# -----------------------------------------------------------
-	# 1. SETUP INICIAL (Valores y Visibilidad)
+	# 1. SETUP INICIAL
 	# -----------------------------------------------------------
 	
-	# Aseguramos que el telón negro está transparente al principio
-	if transition_rect: transition_rect.modulate.a = 0.0
+	if transition_rect: 
+		transition_rect.visible = true 
+		transition_rect.modulate.a = 0.0 # Empezamos transparente
 	
-	# Ponemos todos los elementos visuales transparentes para hacer el Fade In luego
 	var ui_elements = [fondo_texto, next_day_image, next_day_label, info_label, win_label, lose_label, day_slider, anfora_rota]
 	for elem in ui_elements:
-		if elem: elem.modulate.a = 0.0
+		if elem: elem.modulate.a = 0.0 # Ocultamos todo el contenido UI
 
-	# --- CORRECCIÓN CRÍTICA DEL SLIDER ---
-	# Configuramos los valores FÍSICOS ahora, mientras es invisible.
-	if day_slider:
-		day_slider.max_value = max_days
-		# Lo ponemos en el valor de "ayer" para que luego suba animado
-		day_slider.value = current_day - 1 
-
-	# Textos
-	if next_day_label:
-		next_day_label.text = "Day %d Failed" % current_day if is_game_over_state else "Day %d Finished" % current_day
-
+	# Preparamos los textos
+	if win_label: win_label.visible_characters = 0
+	if lose_label: lose_label.visible_characters = 0
+	
 	if info_label:
 		info_label.bbcode_enabled = true
 		info_label.visible_characters = 0     
 		info_label.text = build_day_summary_text() 
 
+	if day_slider:
+		day_slider.step = 0.0 
+		day_slider.max_value = max_days
+		# Si pierdes el día 2, el slider se queda lleno hasta el 1.
+		day_slider.value = current_day - 1 
+
+	if next_day_label:
+		next_day_label.text = "Day %d Failed" % current_day if is_game_over_state else "Day %d Finished" % current_day
+
 	# -----------------------------------------------------------
-	# 2. SECUENCIA DE ENTRADA (FADE IN)
+	# 2. SECUENCIA DE ENTRADA
 	# -----------------------------------------------------------
 	var t = create_tween()
 	
-	# PASO A: Oscurecer el fondo (Fundido a Negro parcial para tapar el juego)
+	# PASO A: Fundido a NEGRO (Solo el fondo negro primero)
 	if transition_rect:
-		t.tween_property(transition_rect, "modulate:a", 1.0, 0.5)
+		# Duración de 1.0 segundo para ir a negro
+		t.tween_property(transition_rect, "modulate:a", 1.0, 1.0).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	
-	# PASO B: Aparece la Interfaz
-	t.chain() # Esperamos a que el fondo sea negro
+	# PASO B: Aparece la Interfaz (Encadenado DESPUÉS del negro)
+	t.chain()
+	
+	# Ahora animamos todos los elementos de la UI a la vez
 	t.set_parallel(true)
 	
-	# Lista de elementos que deben aparecer
 	var fade_in_list = [fondo_texto, next_day_image, next_day_label, info_label]
 	
-	# Si NO ha perdido, mostramos la barra (que ya está posicionada en current_day - 1)
-	if not is_game_over_state and day_slider:
+	# CAMBIO: Añadimos SIEMPRE el slider para que se vea el progreso actual antes de romperse
+	if day_slider:
 		fade_in_list.append(day_slider)
 	
+	# Hacemos aparecer la UI sobre el fondo negro
 	for elem in fade_in_list:
 		if elem: t.tween_property(elem, "modulate:a", 1.0, 0.5)
 	
-	# -----------------------------------------------------------
-	# 3. ANIMACIONES DE CONTENIDO (Barra subiendo / Ánfora)
-	# -----------------------------------------------------------
+	# 3. ANIMACIONES LÓGICAS (Barra de progreso / Ánfora)
+	# Usamos chain() de nuevo para que ocurra después de que aparezca la UI
 	t.chain().tween_callback(func():
 		var animation_tween : Tween
 		
 		if is_game_over_state:
 			animation_tween = animate_amphora_break()
 		else:
-			# Aquí llamamos a la animación de la barra
 			animation_tween = animate_day_progressbar()
 
 		if animation_tween:
@@ -823,18 +835,22 @@ func animate_info_text():
 func reveal_next_day_button():
 	if not NextDayButton:
 		return
-	if NextDayButton:
-		# Desconectamos si ya estaba conectado en el editor para evitar doble llamada
-		if NextDayButton.pressed.is_connected(_advance_to_next_day):
-			NextDayButton.pressed.disconnect(_advance_to_next_day)
-		# Conectamos a nuestra nueva función de control
+		
+	# Conexión limpia
+	if NextDayButton.pressed.is_connected(_advance_to_next_day):
+		NextDayButton.pressed.disconnect(_advance_to_next_day)
+	if not NextDayButton.pressed.is_connected(_on_next_day_button_pressed):
 		NextDayButton.pressed.connect(_on_next_day_button_pressed)
+		
 	NextDayButton.visible = true
-	NextDayButton.modulate.a = 0.0  # empieza invisible
+	NextDayButton.modulate.a = 0.0
+	
+	NextDayButton.move_to_front()
+	NextDayButton.disabled = false 
+	NextDayButton.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	
 	var tween := create_tween()
-	tween.tween_property(NextDayButton, "modulate:a", 1.0, 1.0) \
-		.set_delay(1) 
+	tween.tween_property(NextDayButton, "modulate:a", 1.0, 1.0)
 func build_day_summary_text() -> String:
 	var rounds_count = rounds_per_day
 	var round_unit_price = daily_gold_salary / rounds_count if rounds_count > 0 else 0
@@ -870,39 +886,38 @@ func _restart_game() -> void:
 func _on_next_day_button_pressed() -> void:
 	NextDayButton.disabled = true
 	
-	# CASO 1: FIN DEL JUEGO (Victoria o Derrota)
-	# Queremos ir a NEGRO TOTAL -> MENU
+	# CASO 1: FIN DEL JUEGO (Ir al Menú / Reiniciar para ver Cómic)
 	if is_game_over_state or current_day >= max_days:
 		var t = create_tween()
 		t.set_parallel(true)
 		
-		# 1. Aseguramos que el TransitionRect se vuelva NEGRO OPACO (tapando el juego)
-		# Nota: Como TransitionRect está al fondo, también tenemos que ocultar los textos para que se vea "todo negro"
+		# 1. Aseguramos que el TransitionRect se vuelva NEGRO OPACO
 		if transition_rect: 
-			# Forzamos color negro puro por si acaso y alpha 1
+			transition_rect.visible = true
 			transition_rect.color = Color.BLACK 
-			t.tween_property(transition_rect, "modulate:a", 1.0, 0.5)
+			# Forzamos alpha 1.0 (Opaco)
+			t.tween_property(transition_rect, "modulate:a", 1.0, 1.5) # 1.5 segundos para apreciar el negro
 			
-		# 2. Desvanecemos el resto de la UI (textos, botones) para que solo quede el negro del rect
+		# 2. Ocultamos la UI para que solo quede el negro
 		var ui_to_hide = [fondo_texto, next_day_label, info_label, win_label, lose_label, day_slider, anfora_rota, NextDayButton, next_day_image]
 		for elem in ui_to_hide:
 			if elem: t.tween_property(elem, "modulate:a", 0.0, 0.5)
 			
-		# 3. Al terminar (pantalla negra), cambiamos de escena
-		t.chain().tween_callback(_restart_game)
+		# 3. IMPORTANTE: Esperamos a que termine el fundido antes de cambiar de escena
+		await t.finished
+		
+		_restart_game()
 
 	# CASO 2: SIGUIENTE DÍA (Juego normal)
-	# Queremos ir TRANSPARENTE -> JUEGO
 	else:
 		var t = create_tween()
 		t.set_parallel(true)
 		
-		# Desvanecemos TODO el panel (incluido el fondo negro) para revelar la tienda debajo
+		# Desvanecemos TODO (incluido el fondo negro) para ver la tienda
 		for child in day_finished_view.get_children():
 			if child is CanvasItem:
 				t.tween_property(child, "modulate:a", 0.0, 0.5)
 				
-		# Al terminar, avanzamos lógica de día
 		t.chain().tween_callback(func():
 			NextDayButton.disabled = false 
 			_advance_to_next_day()
@@ -911,21 +926,20 @@ func animate_amphora_break():
 	if not day_slider or not anfora_rota:
 		return null
 	
-	# Fijamos el slider en su valor actual (el del día anterior)
-	# No lo llenamos más porque ha perdido.
+	# Aseguramos que el slider muestra el progreso hasta el día anterior
 	day_slider.max_value = max_days
 	day_slider.value = current_day - 1
 	
 	var tween = create_tween()
 	
-	# 1. Pequeña pausa dramática o temblor (opcional)
-	tween.tween_interval(0.5)
+	tween.tween_interval(1.0)
 	
-	# 2. Transición cruzada: Desaparece el slider, aparece el ánfora rota
+
 	tween.tween_callback(func(): anfora_rota.visible = true)
+	
 	tween.set_parallel(true)
-	tween.tween_property(day_slider, "modulate:a", 0.0, 0.5)
-	tween.tween_property(anfora_rota, "modulate:a", 1.0, 0.5)
+	tween.tween_property(day_slider, "modulate:a", 0.0, 0.5).set_trans(Tween.TRANS_SINE)
+	tween.tween_property(anfora_rota, "modulate:a", 1.0, 0.5).set_trans(Tween.TRANS_SINE)
 	
 	return tween
 func _animate_lose_transition() -> void:
