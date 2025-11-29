@@ -6,6 +6,32 @@
 [resource]
 script = ExtResource("2_up70c")
 frames = ExtResource("1_1cl5e")
+day_stats = {
+1: {
+"aps": 2.0,
+"crit_chance": 5,
+"crit_mult": 1.25,
+"dmg": 25.0,
+"hp": 200.0,
+"members": 1
+},
+2: {
+"aps": 2.2,
+"crit_chance": 10,
+"crit_mult": 1.6,
+"dmg": 40.0,
+"hp": 400.0,
+"members": 1
+},
+3: {
+"aps": 2.3,
+"crit_chance": 15,
+"crit_mult": 1.7,
+"dmg": 60.0,
+"hp": 850.0,
+"members": 1
+}
+}
 max_health = 200.0
 health = 200.0
 damage = 25.0
