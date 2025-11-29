@@ -1,78 +1,107 @@
-[gd_scene load_steps=2 format=3 uid="uid://ciiatrgpvtbi3"]
+[gd_scene load_steps=7 format=3 uid="uid://ciiatrgpvtbi3"]
 
 [ext_resource type="Script" uid="uid://dspam2m1k73ud" path="res://scripts/menu.gd" id="1_yqeox"]
+[ext_resource type="Texture2D" uid="uid://bkcnh02eyltgg" path="res://assets/Pantallas/FondoMenu.png" id="2_vjb58"]
+[ext_resource type="Texture2D" uid="uid://dvc8fw5kbox28" path="res://assets/help/Papiro.png" id="3_mhnvy"]
+[ext_resource type="Texture2D" uid="uid://bybjmeitwhm6b" path="res://assets/Pantallas/TituloMenu.png" id="4_4ytvr"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_g3eks"]
+texture = ExtResource("3_mhnvy")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_mhnvy"]
+texture = ExtResource("3_mhnvy")
 
 [node name="Menu" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -11.0
-offset_top = -12.0
-offset_right = -11.0
-offset_bottom = -12.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_yqeox")
 
-[node name="Control" type="Control" parent="."]
-anchors_preset = 0
-offset_left = 109.0
-offset_top = 137.0
-offset_right = 600.0
-offset_bottom = 764.0
-
-[node name="TextureRect" type="TextureRect" parent="Control"]
-layout_mode = 0
-offset_left = 195.0
-offset_top = 72.0
-offset_right = 290.0
-offset_bottom = 144.0
-
-[node name="VBoxContainer" type="VBoxContainer" parent="Control"]
+[node name="Fondo" type="TextureRect" parent="."]
 layout_mode = 1
-anchors_preset = -1
+offset_right = 3508.0
+offset_bottom = 2032.0
+scale = Vector2(0.3318925, 0.3757634)
+texture = ExtResource("2_vjb58")
+stretch_mode = 5
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 0.728
-offset_left = -159.5
-offset_top = -24.5
-offset_right = 39.5
-offset_bottom = 202.38
+anchor_bottom = 0.5
+offset_left = -253.0
+offset_top = -276.0
+offset_right = 238.0
+offset_bottom = 351.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 147.0
+offset_top = -4.0
+offset_right = 379.0
+offset_bottom = 314.0
+grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 39
 
 [node name="Play" type="Button" parent="Control/VBoxContainer"]
+custom_minimum_size = Vector2(250, 100)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0.9490196, 0, 1)
+theme_override_font_sizes/font_size = 50
+theme_override_styles/normal = SubResource("StyleBoxTexture_g3eks")
+theme_override_styles/hover = SubResource("StyleBoxTexture_g3eks")
+theme_override_styles/hover_pressed = SubResource("StyleBoxTexture_g3eks")
+theme_override_styles/focus = SubResource("StyleBoxTexture_g3eks")
 text = "Play
 "
 
 [node name="Options" type="Button" parent="Control/VBoxContainer"]
+custom_minimum_size = Vector2(250, 100)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_pressed_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 50
+theme_override_styles/normal = SubResource("StyleBoxTexture_mhnvy")
+theme_override_styles/hover = SubResource("StyleBoxTexture_g3eks")
+theme_override_styles/hover_pressed = SubResource("StyleBoxTexture_g3eks")
+theme_override_styles/focus = SubResource("StyleBoxTexture_g3eks")
 text = "Options
 "
-
-[node name="Quit" type="Button" parent="Control/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "Exit
-"
-
-[node name="Label" type="Label" parent="Control"]
-layout_mode = 0
-offset_left = 10.0
-offset_top = 48.0
-offset_right = 458.0
-offset_bottom = 100.0
-theme_override_font_sizes/font_size = 30
-text = "Those who area about to Spin"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Control"]
 autoplay = true
 
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 560.0
+offset_top = 32.0
+offset_right = 1128.0
+offset_bottom = 336.0
+texture = ExtResource("4_4ytvr")
+expand_mode = 1
+stretch_mode = 4
+
 [connection signal="pressed" from="Control/VBoxContainer/Play" to="." method="_on_play_pressed"]
 [connection signal="pressed" from="Control/VBoxContainer/Options" to="." method="_on_options_pressed"]
-[connection signal="pressed" from="Control/VBoxContainer/Quit" to="." method="_on_quit_pressed"]

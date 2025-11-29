@@ -15,6 +15,8 @@ var is_animating: bool = false
 @onready var progress_label: Label = $PanelBg/progress_label
 
 var slide_base_pos: Vector2
+var overlay_visible_pos: Vector2
+var overlay_hidden_pos: Vector2
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -39,11 +41,13 @@ func _ready() -> void:
 	help_button.mouse_filter = Control.MOUSE_FILTER_STOP
 	help_button.pressed.connect(toggle_overlay)
 
-	# El overlay existe siempre, pero el papiro empieza cerrado
 	visible = true
 	panel_bg.visible = false
 
-	# Guardamos la posición base de las slides (la que tienes puesta en el editor)
+	overlay_visible_pos = panel_bg.position
+	overlay_hidden_pos = Vector2(overlay_visible_pos.x, -panel_bg.size.y - 50.0)
+	panel_bg.position = overlay_hidden_pos     
+
 	slide_base_pos = slide_current.position
 
 	if not slides.is_empty():
@@ -81,32 +85,45 @@ func toggle_overlay() -> void:
 func _open_overlay() -> void:
 	print("HelpOverlay: _open_overlay")
 
+	is_animating = true
+
 	# Mientras el help está abierto, bloqueamos clicks al juego
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
 	panel_bg.visible = true
 	panel_bg.modulate.a = 0.0
-	panel_bg.position = Vector2(0, 0)
+	panel_bg.position = overlay_hidden_pos
 
 	var t := create_tween()
 	t.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	t.tween_property(panel_bg, "modulate:a", 1.0, 0.2)
-	t.parallel().tween_property(panel_bg, "position", Vector2.ZERO, 0.2)
+	t.tween_property(panel_bg, "modulate:a", 1.0, 0.25)
+	t.parallel().tween_property(panel_bg, "position", overlay_visible_pos, 0.25)
+
+	t.finished.connect(func():
+		is_animating = false
+		_update_buttons()  # por si las slides quieren reactivar botones
+	)
 
 func _close_overlay() -> void:
 	print("HelpOverlay: _close_overlay")
+
+	is_animating = true
+	_update_buttons()  # desactiva prev/next mientras cierra
+
 	var t := create_tween()
 	t.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
-	t.tween_property(panel_bg, "modulate:a", 0.0, 0.15)
-	t.parallel().tween_property(panel_bg, "position", Vector2(0, -40), 0.15)
+	t.tween_property(panel_bg, "modulate:a", 0.0, 0.2)
+	t.parallel().tween_property(panel_bg, "position", overlay_hidden_pos, 0.2)
+
 	t.finished.connect(func():
 		panel_bg.visible = false
-		panel_bg.position = Vector2.ZERO
+		panel_bg.position = overlay_hidden_pos
 		panel_bg.modulate.a = 1.0
+		is_animating = false
 		# Cuando cerramos, dejamos de bloquear el juego
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_update_buttons()
 	)
-
 
 # Dots, botones
 func _build_dots() -> void:

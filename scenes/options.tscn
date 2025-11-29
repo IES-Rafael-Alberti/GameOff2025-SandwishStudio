@@ -1,12 +1,10 @@
 [gd_scene load_steps=6 format=3 uid="uid://bcbwubibdy7an"]
 
 [ext_resource type="Script" uid="uid://fxaw6plqdeiu" path="res://scripts/options.gd" id="1_2iy26"]
+[ext_resource type="Texture2D" uid="uid://h3wjlov8ppq4" path="res://assets/help/PapiroVertical.png" id="2_1sggn"]
 [ext_resource type="Script" uid="uid://0pff7ugxf2r7" path="res://scripts/audio_control.gd" id="2_yjkok"]
 [ext_resource type="Script" uid="uid://ciwosb514mrs5" path="res://scripts/sfx_control.gd" id="4_1sggn"]
 [ext_resource type="AudioStream" uid="uid://ch0hnly1m0mxu" path="res://music/casino-lottery-casino-gambling-music-406445.mp3" id="4_kv8mn"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e6vpq"]
-bg_color = Color(0.13319641, 0.13319641, 0.13319635, 1)
 
 [node name="Menu" type="Control"]
 process_mode = 3
@@ -14,32 +12,108 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 721.0
-offset_top = 311.0
-offset_right = -713.0
-offset_bottom = -364.0
+offset_left = 648.0
+offset_top = 384.0
+offset_right = -514.0
+offset_bottom = -291.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_2iy26")
 
-[node name="Panel" type="Panel" parent="."]
-layout_mode = 0
-offset_left = -241.0
-offset_top = -147.0
-offset_right = 288.0
-offset_bottom = 226.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_e6vpq")
+[node name="Papiro" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -569.0
+offset_top = -257.5
+offset_right = -201.0
+offset_bottom = 382.5
+grow_vertical = 2
+texture = ExtResource("2_1sggn")
+expand_mode = 1
+stretch_mode = 4
 
-[node name="Label" type="Label" parent="."]
+[node name="Label" type="Label" parent="Papiro"]
 layout_mode = 0
-offset_left = -83.0
-offset_top = -85.0
-offset_right = 117.0
-offset_bottom = -62.0
+offset_left = 88.0
+offset_top = 48.0
+offset_right = 288.0
+offset_bottom = 134.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 50
 text = "Options"
 horizontal_alignment = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="Sonidos" type="Control" parent="Papiro"]
+anchors_preset = 0
+offset_left = 160.0
+offset_top = 240.0
+offset_right = 200.0
+offset_bottom = 280.0
+
+[node name="Master" type="Label" parent="Papiro/Sonidos"]
+layout_mode = 0
+offset_left = -96.0
+offset_top = -48.0
+offset_right = -21.0
+offset_bottom = -3.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 26
+text = "Master"
+
+[node name="Audio" type="Label" parent="Papiro/Sonidos"]
+layout_mode = 0
+offset_left = -88.0
+offset_right = -22.0
+offset_bottom = 45.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 26
+text = "Audio"
+
+[node name="SFX" type="Label" parent="Papiro/Sonidos"]
+layout_mode = 0
+offset_left = -56.0
+offset_top = 48.0
+offset_right = -11.0
+offset_bottom = 93.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 26
+text = "Sfx"
+
+[node name="SfxControl" type="HSlider" parent="Papiro/Sonidos"]
+layout_mode = 0
+offset_top = 64.0
+offset_right = 144.0
+offset_bottom = 88.0
+max_value = 1.0
+step = 0.05
+value = 1.0
+tick_count = 50
+script = ExtResource("4_1sggn")
+
+[node name="AudioControl2" type="HSlider" parent="Papiro/Sonidos"]
+layout_mode = 0
+offset_top = -40.0
+offset_right = 144.0
+max_value = 1.0
+step = 0.05
+value = 1.0
+tick_count = 50
+script = ExtResource("2_yjkok")
+
+[node name="AudioControl" type="HSlider" parent="Papiro/Sonidos"]
+layout_mode = 0
+offset_top = 16.0
+offset_right = 144.0
+offset_bottom = 40.0
+max_value = 1.0
+step = 0.05
+value = 1.0
+tick_count = 50
+script = ExtResource("2_yjkok")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Papiro"]
 custom_minimum_size = Vector2(1, 0)
 layout_mode = 1
 anchors_preset = 8
@@ -47,29 +121,23 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -80.0
-offset_top = -14.5
-offset_right = 120.0
-offset_bottom = 135.5
+offset_left = -88.0
+offset_top = 104.0
+offset_right = 112.0
+offset_bottom = 152.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Papiro/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
-[node name="Back" type="Button" parent="VBoxContainer"]
+[node name="Back" type="Button" parent="Papiro/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_font_sizes/font_size = 20
 text = "Back
-"
-
-[node name="Exit" type="Button" parent="VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "Exit
 "
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
@@ -80,75 +148,7 @@ bus = &"Music"
 [node name="SfxStreamPlayer" type="AudioStreamPlayer" parent="."]
 bus = &"SFX"
 
-[node name="Control" type="Control" parent="."]
-anchors_preset = 0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = 42.0
-offset_bottom = 42.0
-
-[node name="Label4" type="Label" parent="Control"]
-layout_mode = 0
-offset_left = -86.0
-offset_top = -64.0
-offset_right = -31.0
-offset_bottom = -41.0
-text = "Master"
-
-[node name="Label2" type="Label" parent="Control"]
-layout_mode = 0
-offset_left = -83.0
-offset_top = -35.0
-offset_right = -38.0
-offset_bottom = -12.0
-text = "Audio"
-
-[node name="Label3" type="Label" parent="Control"]
-layout_mode = 0
-offset_left = -81.0
-offset_top = -9.0
-offset_right = -36.0
-offset_bottom = 14.0
-text = "sfx"
-
-[node name="SfxControl" type="HSlider" parent="Control"]
-layout_mode = 0
-offset_left = -24.0
-offset_top = -9.0
-offset_right = 113.0
-offset_bottom = 7.0
-max_value = 1.0
-step = 0.05
-value = 1.0
-tick_count = 50
-script = ExtResource("4_1sggn")
-
-[node name="AudioControl2" type="HSlider" parent="Control"]
-layout_mode = 0
-offset_left = -23.0
-offset_top = -59.0
-offset_right = 114.0
-offset_bottom = -43.0
-max_value = 1.0
-step = 0.05
-value = 1.0
-tick_count = 50
-script = ExtResource("2_yjkok")
-
-[node name="AudioControl" type="HSlider" parent="Control"]
-layout_mode = 0
-offset_left = -23.0
-offset_top = -34.0
-offset_right = 114.0
-offset_bottom = -18.0
-max_value = 1.0
-step = 0.05
-value = 1.0
-tick_count = 50
-script = ExtResource("2_yjkok")
-
-[connection signal="pressed" from="VBoxContainer/Back" to="." method="_on_back_pressed"]
-[connection signal="pressed" from="VBoxContainer/Exit" to="." method="_on_exit_pressed"]
-[connection signal="value_changed" from="Control/SfxControl" to="Control/SfxControl" method="_on_value_changed"]
-[connection signal="value_changed" from="Control/AudioControl2" to="Control/AudioControl2" method="_on_value_changed"]
-[connection signal="value_changed" from="Control/AudioControl" to="Control/AudioControl" method="_on_value_changed"]
+[connection signal="value_changed" from="Papiro/Sonidos/SfxControl" to="Papiro/Sonidos/SfxControl" method="_on_value_changed"]
+[connection signal="value_changed" from="Papiro/Sonidos/AudioControl2" to="Papiro/Sonidos/AudioControl2" method="_on_value_changed"]
+[connection signal="value_changed" from="Papiro/Sonidos/AudioControl" to="Papiro/Sonidos/AudioControl" method="_on_value_changed"]
+[connection signal="pressed" from="Papiro/VBoxContainer/Back" to="." method="_on_back_pressed"]
