@@ -614,3 +614,84 @@ func _get_icon_tag(texture: Texture2D) -> String:
 	if texture:
 		return "[img=%dx%d]%s[/img]" % [icon_size, icon_size, texture.resource_path]
 	return ""
+func show_npc_tooltip(unit: npc) -> void:
+	if not is_instance_valid(unit) or not unit.npc_res: return
+
+	# 1. Limpieza
+	custom_minimum_size = Vector2.ZERO
+	size = Vector2.ZERO
+	if units_grid:
+		for child in units_grid.get_children():
+			child.queue_free()
+
+	# 2. Configuración Visual
+	var title_text = "GLADIATOR"
+	var rarity_color = Color(1.0, 0.3, 0.3) 
+	var bg_tint = Color(0.15, 0.05, 0.05, 0.98)
+
+	name_label.text = title_text
+	
+	var ls = name_label.label_settings
+	if not ls: ls = LabelSettings.new()
+	ls.font_color = rarity_color
+	ls.font_size = title_font_size
+	ls.outline_size = 4
+	ls.outline_color = Color.BLACK
+	name_label.label_settings = ls
+
+	if card_style:
+		card_style.border_color = rarity_color
+		card_style.bg_color = bg_tint
+
+	# 3. Construcción del Texto
+	var text = ""
+	var subtitle = unit.npc_res.rareza if unit.npc_res.rareza != "" else "Enemy Unit"
+	text += "[center][color=#cccccc][font_size=%d]%s[/font_size][/color][/center]\n" % [subtitle_font_size, subtitle]
+	text += "[center][color=#aa4444]━━━━━━━━━━━━━━━━━━[/color][/center]\n"
+
+	text += "[font_size=%d][table=3]" % table_font_size
+	
+	# --- CÁLCULO DE STATS ACTUALES ---
+	var current_dmg = unit.npc_res.damage + unit.bonus_damage
+	var current_speed = unit.get_attack_speed()
+	
+	# AQUÍ ESTÁ EL CAMBIO: Usamos unit.health (vida actual) y unit.max_health
+	var hp_current = int(unit.health)
+	var hp_max = int(unit.max_health)
+	
+	var current_crit = unit.get_crit_chance(null)
+
+	# Fila 1: Daño
+	text += "[cell][font_size=%d][color=#ff7675] %s Damage     [/color][/font_size][/cell]" % [table_font_size, _get_icon_tag(icon_damage)]
+	text += "[cell]  [/cell]"
+	text += "[cell][p align=right][font_size=%d][b]%d[/b][/font_size][/p][/cell]" % [table_font_size, current_dmg]
+
+	# Fila 2: Vida (FORMATO ACTUAL / MAX)
+	text += "[cell][font_size=%d][color=#55efc4] %s Health     [/color][/font_size][/cell]" % [table_font_size, _get_icon_tag(icon_health)]
+	text += "[cell]  [/cell]"
+	# Usamos un string formateado para mostrar ambas cifras
+	text += "[cell][p align=right][font_size=%d][b]%d / %d[/b][/font_size][/p][/cell]" % [table_font_size, hp_current, hp_max]
+
+	# Fila 3: Velocidad
+	text += "[cell][font_size=%d][color=#ffeaa7] %s Atk. Spd   [/color][/font_size][/cell]" % [table_font_size, _get_icon_tag(icon_speed)]
+	text += "[cell]  [/cell]"
+	text += "[cell][p align=right][font_size=%d][b]%.1f[/b][/font_size][/p][/cell]" % [table_font_size, current_speed]
+
+	# Fila 4: Crítico
+	if current_crit > 0:
+		text += "[cell][font_size=%d][color=#ff9f43] %s Crit Rate  [/color][/font_size][/cell]" % [table_font_size, _get_icon_tag(icon_crit_chance)]
+		text += "[cell]  [/cell]"
+		text += "[cell][p align=right][font_size=%d][b]%d%%[/b][/font_size][/p][/cell]" % [table_font_size, current_crit]
+
+	text += "[/table][/font_size]\n"
+
+	if unit.npc_res.description != "":
+		text += "\n[font_size=%d][color=#888888][i]%s[/i][/color][/font_size]" % [subtitle_font_size, unit.npc_res.description]
+
+	description_label.text = text
+	sell_price_label.hide()
+
+	custom_minimum_size = Vector2(270, 0)
+	show()
+	await get_tree().process_frame
+	size = Vector2.ZERO
