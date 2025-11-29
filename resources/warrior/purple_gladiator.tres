@@ -27,8 +27,8 @@ day_stats = {
 "aps": 2.3,
 "crit_chance": 15,
 "crit_mult": 1.7,
-"dmg": 55.0,
-"hp": 700.0,
+"dmg": 60.0,
+"hp": 850.0,
 "members": 1
 }
 }

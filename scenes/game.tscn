@@ -58,6 +58,10 @@ offset_top = 394.0
 offset_right = 416.0
 offset_bottom = 394.0
 scale = Vector2(0.8860778, 0.88381195)
+duplicate_passive_mult = 0.0
+prob_comun = 55
+prob_raro = 30
+prob_epico = 13
 
 [node name="Roulette" parent="." instance=ExtResource("5_iywne")]
 z_index = 4
