@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=3 uid="uid://bekys0sh7i1sf"]
+[gd_scene load_steps=41 format=3 uid="uid://bekys0sh7i1sf"]
 
 [ext_resource type="Shader" uid="uid://kl5qcx1hsdjw" path="res://assets/shaders/shock_damage.gdshader" id="1_rv78h"]
 [ext_resource type="Script" uid="uid://dkh16s35ytd1p" path="res://scripts/npc.gd" id="2_rv78h"]
@@ -172,6 +172,9 @@ animations = [{
 "speed": 5.0
 }]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_n0klm"]
+size = Vector2(407.7778, 285.55557)
+
 [node name="npc" type="AnimatedSprite2D"]
 material = SubResource("ShaderMaterial_7n8xq")
 scale = Vector2(1.8, 1.8)
@@ -294,3 +297,11 @@ sprite_frames = ExtResource("18_n0klm")
 animation = &"idle"
 
 [node name="AudioPlayer" type="AudioStreamPlayer2D" parent="."]
+
+[node name="MouseArea" type="Area2D" parent="."]
+z_index = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="MouseArea"]
+z_index = 8
+position = Vector2(25, -118.333336)
+shape = SubResource("RectangleShape2D_n0klm")

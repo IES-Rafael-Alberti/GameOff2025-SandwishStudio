@@ -183,20 +183,20 @@ stretch_mode = 5
 
 [node name="TextureRect3" type="TextureRect" parent="."]
 layout_mode = 0
-offset_left = 1414.0
-offset_top = 672.0
-offset_right = 4419.318
-offset_bottom = 2422.0012
-scale = Vector2(0.25786263, 0.17371413)
+offset_left = 1605.0001
+offset_top = 626.00006
+offset_right = 4859.999
+offset_bottom = 2520.9995
+scale = Vector2(0.18, 0.18)
 texture = ExtResource("13_40feg")
 stretch_mode = 4
 
 [node name="Health_container" type="HBoxContainer" parent="TextureRect3"]
 layout_mode = 0
-offset_left = 93.072754
-offset_top = 713.8159
-offset_right = 241.98926
-offset_bottom = 792.1055
+offset_left = 94.99951
+offset_top = 764.99976
+offset_right = 260.9995
+offset_bottom = 843.28937
 scale = Vector2(5, 5)
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
@@ -214,10 +214,10 @@ text = "+0"
 
 [node name="Damage_container" type="HBoxContainer" parent="TextureRect3"]
 layout_mode = 0
-offset_left = 950.11914
-offset_top = 679.27637
-offset_right = 1046.1191
-offset_bottom = 771.38165
+offset_left = 975.00146
+offset_top = 719.9995
+offset_right = 1111.0015
+offset_bottom = 812.1048
 scale = Vector2(5, 5)
 size_flags_horizontal = 3
 
@@ -234,10 +234,10 @@ text = "+0"
 
 [node name="SpeedCOntainer" type="HBoxContainer" parent="TextureRect3"]
 layout_mode = 0
-offset_left = 1566.7256
-offset_top = 713.8159
-offset_right = 1711.7256
-offset_bottom = 796.71063
+offset_left = 1700.0
+offset_top = 749.99976
+offset_right = 1868.0
+offset_bottom = 832.8945
 scale = Vector2(5, 5)
 size_flags_horizontal = 3
 
@@ -254,10 +254,10 @@ text = "+0"
 
 [node name="CChance_container" type="HBoxContainer" parent="TextureRect3"]
 layout_mode = 0
-offset_left = 414.95068
-offset_top = 1220.395
-offset_right = 563.8672
-offset_bottom = 1303.2898
+offset_left = 374.95068
+offset_top = 1285.395
+offset_right = 542.9507
+offset_bottom = 1368.2898
 scale = Vector2(5, 5)
 size_flags_horizontal = 3
 
@@ -274,10 +274,10 @@ text = "+0"
 
 [node name="CDamage_chance" type="HBoxContainer" parent="TextureRect3"]
 layout_mode = 0
-offset_left = 1357.312
-offset_top = 1220.3955
-offset_right = 1506.2285
-offset_bottom = 1303.2903
+offset_left = 1487.3125
+offset_top = 1285.3955
+offset_right = 1661.3125
+offset_bottom = 1368.2903
 scale = Vector2(5, 5)
 size_flags_horizontal = 3
 

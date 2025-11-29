@@ -80,7 +80,9 @@ var blink_timer := 0.0
 var blink_interval_min := 2.0
 var blink_interval_max := 5.0
 var blink_time := 0.1
-var pause_scene = preload("res://scenes/pause.tscn")
+var options_scene: PackedScene = preload("res://scenes/options.tscn")
+var options_instance: Control = null
+var options_animating: bool = false
 var is_tended = true
 var original_positions = {}
 var blink_tween: Tween = null
@@ -593,11 +595,35 @@ func animate_store(hide: bool, callback: Callable = Callable()):
 
 func _on_store_hidden(): store.visible = false
 
-func pausar():
-	var pause_instance = pause_scene.instantiate()
-	add_child(pause_instance)
-	get_tree().paused = true
+func pausar() -> void:
+	if options_animating:
+		return
 
+	if is_instance_valid(options_instance):
+		options_animating = true
+		options_instance.close_with_anim()
+		options_instance = null
+		options_animating = false
+		return
+
+	print("PAUSAR() llamada -> creando options como menú de pausa")
+	options_animating = true
+
+	options_instance = options_scene.instantiate() as Control
+	options_instance.name = "OptionsPause"
+
+	var root := get_tree().root
+	root.add_child(options_instance)
+
+	root.move_child(options_instance, root.get_child_count() - 1)
+
+	if options_instance.has_method("set_as_pause_menu"):
+		options_instance.set_as_pause_menu(true)
+	else:
+		get_tree().paused = true
+
+	options_animating = false
+	
 func get_inventory_piece_count(resource_to_check: Resource) -> int:
 	var item_to_search = resource_to_check
 	if resource_to_check is PieceData: item_to_search = resource_to_check.piece_origin
@@ -791,8 +817,12 @@ func build_day_summary_text() -> String:
 func _restart_game() -> void:
 	print("Volviendo al menú principal...")
 	get_tree().paused = false
+	PlayerData.reset_player_data()
+	if has_node("/root/GlobalStats"):
+		GlobalStats.update_stats({}) 
 	
 	get_tree().change_scene_to_file("res://scenes/menu.tscn")
+	
 func _on_next_day_button_pressed() -> void:
 	# Reiniciamos si es Game Over O si completamos todos los días
 	if is_game_over_state or current_day >= max_days:

@@ -60,3 +60,9 @@ func _get_resource_id(data: Resource) -> String:
 	if data.resource_path.is_empty() == false:
 		return data.resource_path
 	return "%s_%d" % [data.get_class(), data.get_instance_id()]
+func reset_player_data() -> void:
+	current_currency = initial_currency
+	owned_passives.clear()
+	is_shop_locked = false
+	shop_items_saved.clear()
+	print("PlayerData: Datos reiniciados (Pasivas borradas y Oro restablecido).")

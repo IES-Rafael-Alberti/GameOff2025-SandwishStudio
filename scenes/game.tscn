@@ -60,7 +60,7 @@ script = ExtResource("1_lbhrr")
 tex_grab = ExtResource("3_264po")
 tex_click = ExtResource("4_1kice")
 gold_round_base = 2
-gladiators_per_day = 4
+rounds_per_day = 2
 max_days = 3
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
