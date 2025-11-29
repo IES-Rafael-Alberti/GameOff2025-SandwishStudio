@@ -31,6 +31,10 @@ var can_afford_status: bool = true
 # --- COLORES ---
 var color_normal: Color = Color.WHITE
 var color_dark: Color = Color(0.3, 0.3, 0.3, 1.0) 
+var color_available: Color = Color(0.1, 1.0, 0.1) # verde
+var color_unaffordable: Color = Color(1.0, 0.1, 0.1) # rojo
+var color_neutral: Color = Color(1.0, 1.0, 1.0) # blanco
+var color_unavailable_bg: Color = Color(0.6, 0.0, 0.0, 1.0)
 
 func _ready() -> void:
 	if texture_button:
@@ -100,6 +104,7 @@ func set_item(data: Resource, price: int, shader: ShaderMaterial, can_afford: bo
 	
 	update_count_visuals(data, count)
 	update_affordability(can_afford)
+	update_price_color()
 
 func update_count_visuals(data: Resource, count: int) -> void:
 	if not count_label: return
@@ -137,15 +142,18 @@ func update_affordability(can_afford: bool) -> void:
 		texture_button.modulate = color_dark
 		if too_expensive_label: too_expensive_label.visible = true
 
+	update_price_color()
+
 func set_maxed_state(state: bool) -> void:
-	if is_purchased: return
+	if is_purchased: 
+		return
 	
 	is_maxed = state
 	
 	if is_maxed:
 		if texture_button:
 			texture_button.disabled = false
-			texture_button.modulate = color_dark
+			texture_button.modulate = color_unavailable_bg   # <<< ANTES color_dark
 		
 		if maxed_label: maxed_label.visible = true
 		if too_expensive_label: too_expensive_label.visible = false
@@ -156,18 +164,22 @@ func set_maxed_state(state: bool) -> void:
 			texture_button.modulate = color_normal
 			
 		if maxed_label: maxed_label.visible = false
+		
+	update_price_color()
 
 func disable_interaction() -> void:
 	if texture_button:
 		is_purchased = true
 		
-		texture_button.modulate = color_dark
+		texture_button.modulate = color_unavailable_bg
 		texture_button.material = null 
 		texture_button.disabled = false
 		
 		if out_of_stock_label: out_of_stock_label.visible = true
 		if too_expensive_label: too_expensive_label.visible = false
 		if maxed_label: maxed_label.visible = false
+
+	update_price_color()
 
 func _on_mouse_entered() -> void:
 	slot_hovered.emit(item_data)
@@ -182,6 +194,7 @@ func _on_mouse_exited() -> void:
 	if texture_button:
 		texture_button.material = null
 	slot_exited.emit()
+
 func update_price(new_price: int) -> void:
 	current_price = new_price
 	
@@ -192,3 +205,24 @@ func update_price(new_price: int) -> void:
 		
 		# Actualizamos el texto manteniendo el efecto wave
 		price_label.text = "[center][wave amp=25 freq=5]%d %s[/wave][/center]" % [current_price, icon_bbcode]
+
+	update_price_color()
+
+func update_price_color() -> void:
+	if not price_label:
+		return
+
+	if is_purchased:
+		price_label.modulate = color_neutral
+		return
+	
+	if is_maxed:
+		price_label.modulate = color_neutral
+		return
+	
+	if not can_afford_status:
+		price_label.modulate = color_unaffordable
+		return
+	
+	# Disponible y comprable
+	price_label.modulate = color_available

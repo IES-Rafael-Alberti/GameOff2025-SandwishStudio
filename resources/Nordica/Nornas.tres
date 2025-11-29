@@ -17,7 +17,7 @@ stats = {
 "crit_chance": 5,
 "crit_mult": 1.5,
 "dmg": 6.0,
-"hp": 160.0,
+"hp": 300.0,
 "members": 3
 },
 "ORO": {
@@ -25,7 +25,7 @@ stats = {
 "crit_chance": 7,
 "crit_mult": 1.7,
 "dmg": 15.0,
-"hp": 315.0,
+"hp": 450.0,
 "members": 3
 },
 "PLATA": {
@@ -33,7 +33,7 @@ stats = {
 "crit_chance": 6,
 "crit_mult": 1.6,
 "dmg": 11.0,
-"hp": 225.0,
+"hp": 350.0,
 "members": 3
 }
 }

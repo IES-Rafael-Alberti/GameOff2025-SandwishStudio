@@ -8,5 +8,5 @@ script = ExtResource("1_6gkcs")
 value = 0.5
 name_passive = "Pear of Health"
 icon = ExtResource("1_3myk8")
-price = 5
+price = 2
 metadata/_custom_type_script = "uid://berngf3tq220v"

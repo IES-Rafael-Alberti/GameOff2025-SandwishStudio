@@ -65,6 +65,12 @@ func _ready() -> void:
 	
 	PlayerData.currency_changed.connect(_update_shop_visuals)
 	
+	# --- CORRECCIÓN: Conectar señales del inventario para actualizar estado MAXED ---
+	# Esto detecta cuando una pieza llega al inventario o se fusiona/borra
+	GlobalSignals.piece_count_changed.connect(_on_piece_count_changed)
+	GlobalSignals.piece_type_deleted.connect(_on_piece_deleted)
+	# -----------------------------------------------------------------------------
+	
 	if reroll_button:
 		reroll_button.mouse_entered.connect(func(): if not reroll_button.disabled: reroll_button.material = highlight_material)
 		reroll_button.mouse_exited.connect(func(): reroll_button.material = null)
@@ -80,6 +86,21 @@ func _ready() -> void:
 		print("ALERTA: piece_origins está vacío en Store. Revisa el Inspector.")
 		
 	start_new_round()
+
+# --- LÓGICA DE CORRECCIÓN DE INVENTARIO ---
+func _on_piece_count_changed(data, _count) -> void:
+	# Si la pieza que cambió estaba en el buffer de compra (acaba de llegar),
+	# la quitamos del buffer para evitar contarla doble.
+	if _purchase_buffer.has(data) and _purchase_buffer[data] > 0:
+		_purchase_buffer[data] -= 1
+	
+	# Actualizamos visuales (esto arregla el estado 'Maxed' tras evolucionar)
+	_update_shop_visuals()
+
+func _on_piece_deleted(_data) -> void:
+	# Si se borra un tipo de pieza (ej. al fusionarse 3 en 1 de siguiente nivel), actualizamos.
+	_update_shop_visuals()
+# ------------------------------------------
 
 # --- LÓGICA DEL CANDADO ---
 func _update_lock_visuals() -> void:
@@ -405,6 +426,7 @@ func _on_piece_slot_pressed(slot) -> void:
 		_save_current_shop_state()
 	else:
 		_animate_error_shake(slot.get_node("TextureButton"))
+
 # --- INTERACCIÓN PASIVAS (LÓGICA ACTUALIZADA) ---
 func _on_passive_slot_pressed(slot_ref) -> void:
 	if is_rerolling: return

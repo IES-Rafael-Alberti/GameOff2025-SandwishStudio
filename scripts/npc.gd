@@ -61,7 +61,8 @@ var default_bar_style: StyleBox = null
 
 func _ready() -> void:
 	if npc_res and npc_res.sfx_spawn:
-		play_sfx(npc_res.sfx_spawn)
+		if team == Team.ENEMY:
+			play_sfx(npc_res.sfx_spawn)
 	# CARGAR STATS BASE
 	if npc_res:
 		var base_hp = max(1.0, npc_res.max_health)
@@ -115,7 +116,6 @@ func _update_healthbar() -> void:
 	health_bar.value = health
 	health_bar.visible = show_healthbar and (not hide_when_full or health < max_health)
 
-# --- LÓGICA VISUAL DE BARRA (Corrección Color) ---
 func _apply_bar_visuals():
 	if not is_instance_valid(health_bar): return
 	
@@ -123,15 +123,14 @@ func _apply_bar_visuals():
 	health_bar.modulate = Color.WHITE
 	health_bar.self_modulate = Color.WHITE
 	
-	# CASO 1: SIN SINERGIA (GLADIADORES O ALIADOS SIN BONUS) -> VERDE
+	# Sin sinergia barra de vida verde
 	if synergy_eur_tier == 0:
 		# Si tenemos guardado el estilo original (verde), lo restauramos
 		if default_bar_style:
 			health_bar.add_theme_stylebox_override("fill", default_bar_style)
 		return
 
-	# CASO 2: CON SINERGIA -> AZUL O MORADO
-	# print("[%s] Aplicando COLOR Europeo: Tier %d" % [name, synergy_eur_tier])
+	# Con sinergia barra de vida azul o morado
 
 	var sb = StyleBoxFlat.new()
 	sb.set_corner_radius_all(2) 

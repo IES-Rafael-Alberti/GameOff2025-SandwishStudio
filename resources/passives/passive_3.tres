@@ -9,4 +9,4 @@ type = 1
 value = 0.3
 name_passive = "Apple of critical damage"
 icon = ExtResource("1_bigkk")
-price = 5
+price = 2

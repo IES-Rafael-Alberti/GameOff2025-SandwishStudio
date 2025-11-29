@@ -28,7 +28,10 @@ var can_afford_status: bool = true
 
 # --- COLORES ---
 var color_normal: Color = Color.WHITE
-var color_dark: Color = Color(0.3, 0.3, 0.3, 1.0) 
+var color_available: Color = Color(0.1, 1.0, 0.1) # verde
+var color_unaffordable: Color = Color(1.0, 0.1, 0.1) # rojo
+var color_neutral: Color = Color(1.0, 1.0, 1.0) # blanco
+var color_unavailable_bg: Color = Color(0.6, 0.0, 0.0, 1.0) # Para cuando está comprado/bloqueado
 
 func _ready() -> void:
 	if not texture_button:
@@ -81,33 +84,33 @@ func update_price_visuals() -> void:
 
 func update_affordability(can_afford: bool) -> void:
 	can_afford_status = can_afford
+	
 	if is_purchased or not texture_button: return
 	
 	if can_afford:
 		texture_button.modulate = color_normal
 		if too_expensive_label: too_expensive_label.hide()
 	else:
-		texture_button.modulate = color_dark
+		# APLICAMOS ROJO (color_unaffordable) A LA PIEZA TAMBIÉN
+		texture_button.modulate = color_unaffordable
 		if too_expensive_label: too_expensive_label.show()
 
+	# Llamamos a la actualización de color del texto
+	update_price_color()
 # --- VISUALES AL COMPRAR ---
 func disable_interaction() -> void:
 	is_purchased = true
 	if texture_button:
-		# Cambiamos visualmente para indicar que está "gastado"
-		texture_button.modulate = color_dark
+		texture_button.modulate = color_unavailable_bg 
 		texture_button.material = null 
 		
-		# IMPORTANTE: NO bloqueamos el input (disabled = false)
-		# Esto permite que Store.gd detecte el clic y haga el "shake" de error
 		
 	if out_of_stock_label: out_of_stock_label.show()
 	if too_expensive_label: too_expensive_label.hide()
-	if price_label: price_label.hide()
-
-# --- INTERACCIÓN ---
+	
+	
+	update_price_color()
 func _on_button_pressed() -> void:
-	# Simplemente avisamos a Store.gd: "Me han clicado"
 	slot_pressed.emit(self)
 
 func _on_mouse_entered() -> void:
@@ -126,3 +129,17 @@ func _on_mouse_exited() -> void:
 		texture_button.material = null
 		var t = create_tween()
 		t.tween_property(texture_button, "scale", Vector2(1.0, 1.0), 0.1)
+func update_price_color() -> void:
+	if not price_label:
+		return
+
+	if is_purchased:
+		price_label.modulate = color_neutral
+		return
+	
+	if not can_afford_status:
+		price_label.modulate = color_unaffordable
+		return
+	
+	# Disponible y comprable
+	price_label.modulate = color_available

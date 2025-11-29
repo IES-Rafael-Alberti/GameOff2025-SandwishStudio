@@ -13,6 +13,7 @@ var current_state: GameState
 var current_round: int = 1
 var current_day: int = 1
 var gladiators_defeated: int = 0 
+@onready var NextDayButton: TextureButton = $DayFinished/NextDayButton
 
 # Nodos
 @onready var buttonShop: Button = $elJetas/ButtonShop
@@ -33,9 +34,15 @@ var gladiators_defeated: int = 0
 @onready var announcement_label: Label = $AnnouncementLabel
 @onready var help_overlay: Control = $HelpOverLay
 @onready var help_button: Button = $HelpOverLay/HelpButton
+@onready var win_restart_button = $Win/RestartButton
+@onready var lose_restart_button = $Lose/RestartButton
+@onready var win_label: Label = $DayFinished/WinLabel
+@onready var lose_label: Label = $DayFinished/LoseLabel
+@onready var fondo_texto: TextureRect = $DayFinished/FondoTexto
+@onready var anfora_rota: TextureRect = $DayFinished/AnforaRota
+var is_game_over_state: bool = false
 # --- CURSORES PERSONALIZADOS ---
 @export_group("Cursores Personalizados")
-@export var tex_hover: Texture2D ## Arrastra 'Hover.png' (Sobre botones)
 @export var tex_grab: Texture2D  ## Arrastra 'Grab.png' (Arrastrar/Agarrar)
 @export var tex_click: Texture2D ## Arrastra 'Point.png' (Al hacer click)
 @export var cursor_hotspot: Vector2 = Vector2(0, 0) ## Ajusta la punta del cursor
@@ -62,8 +69,8 @@ var gladiators_defeated: int = 0
 
 # --- Referencias NUEVAS para DayFinished ---
 @onready var next_day_label: Label = $DayFinished/NextDayLabel
-@onready var day_slider: HSlider = $DayFinished/HSlider
-@onready var info_label: Label = $DayFinished/InfoLabel
+@onready var day_slider: TextureProgressBar = $DayFinished/HSlider
+@onready var info_label: RichTextLabel = $DayFinished/InfoLabel
 
 var _is_clicking: bool = false
 var pupil_offset: Vector2
@@ -93,7 +100,6 @@ func _ready():
 	
 	_apply_default_cursors()
 	
-	# Truco: Asignar cursor de mano a todos los botones para que usen 'tex_hover'
 	if buttonShop: buttonShop.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	if help_button: help_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	_set_hand_cursor_recursively(store)
@@ -132,9 +138,6 @@ func _ready():
 	PlayerData.currency_changed.connect(_on_PlayerData_currency_changed)
 	if inventory.has_signal("item_sold"):
 		inventory.item_sold.connect(PlayerData.add_currency)
-		
-	if next_day_image:
-		next_day_image.gui_input.connect(_on_next_day_image_input)
 
 	blink_timer = randf_range(blink_interval_min, blink_interval_max)
 	_on_PlayerData_currency_changed(PlayerData.get_current_currency())
@@ -149,6 +152,15 @@ func _ready():
 		if el_jetas_anim: el_jetas_anim.play("intro")
 	else:
 		set_state(GameState.SHOP)
+	if win_restart_button:
+		win_restart_button.pressed.connect(_restart_game)
+	else:
+		print("Aviso: No se encontró Win/RestartButton")
+
+	if lose_restart_button:
+		lose_restart_button.pressed.connect(_restart_game)
+	else:
+		print("Aviso: No se encontró Lose/RestartButton")
 
 func _process(delta: float) -> void:
 	# Gestionamos el temporizador del parpadeo
@@ -239,13 +251,10 @@ func _on_combat_requested(piece_resource: Resource):
 		_on_combat_finished(false)
 
 func _on_combat_finished(player_won: bool = false, loot_from_combat: int = 0):
-	# 1. Ingreso Base (Salario por ronda)
 	var round_income = int(gold_round_base * gold_day_mult)
-	
-	# 2. Sumamos al jugador el salario (el loot ya se lo dio combat_scene)
+
 	PlayerData.add_currency(round_income)
 	
-	# 3. Acumulamos por separado para el desglose
 	daily_gold_salary += round_income
 	daily_gold_loot += loot_from_combat
 	
@@ -258,63 +267,122 @@ func _on_combat_finished(player_won: bool = false, loot_from_combat: int = 0):
 	if current_round >= rounds_per_day:
 		print("¡Fin del Día %d! Verificando cuota..." % current_day)
 		
+		# Verificamos si CUMPLIÓ o FALLÓ
 		if gladiators_defeated >= gladiators_per_day:
-			if current_day >= max_days:
-				print("¡Juego Completado! Victoria.")
-				_show_win_view()
-			else:
-				print("Cuota cumplida. Pasando a Siguiente Día.")
-				_show_day_finished_view()
+			is_game_over_state = false # Ganó el día
+			print("Cuota cumplida. Mostrando resumen.")
 		else:
-			print("Cuota NO cumplida (%d/%d). GAME OVER." % [gladiators_defeated, gladiators_per_day])
-			_show_game_over_view()
-			
+			is_game_over_state = true # Perdió el día
+			print("Cuota NO cumplida. GAME OVER (Modo Resumen).")
+
+		# En ambos casos mostramos la misma vista, la lógica interna cambiará
+		_show_day_finished_view()
 	else:
 		current_round += 1
 		print("--- Empezando Ronda %d ---" % current_round)
 		_update_ui_labels()
 		set_state(GameState.SHOP)
 		store.start_new_round()
-		if combat_scene:
+		if player_won and combat_scene and combat_scene.has_method("spawn_enemy_one"):
 			combat_scene.spawn_enemy_one()
 
 func _show_day_finished_view() -> void:
-	if day_finished_view:
-		if next_day_label:
-			next_day_label.text = "Día %d Finalizado" % current_day
-		
-		if day_slider:
-			day_slider.min_value = 0
-			day_slider.max_value = max_days
-			day_slider.value = current_day
-			day_slider.editable = false 
-		
-		if info_label:
-			var rounds_count = rounds_per_day 
-			var round_unit_price = 0
-			if rounds_count > 0:
-				round_unit_price = daily_gold_salary / rounds_count
-			
-			var glad_count = gladiators_defeated
-			var glad_unit_price = 0
-			if glad_count > 0:
-				glad_unit_price = daily_gold_loot / glad_count
-			
-			var total_day = daily_gold_salary + daily_gold_loot
-			
-			var info_text = "RESUMEN DEL DÍA:\n\n"
-			info_text += "Rondas (%d oro) x%d: %d oro\n" % [round_unit_price, rounds_count, daily_gold_salary]
-			info_text += "Gladiadores (%d oro) x%d: %d oro\n" % [glad_unit_price, glad_count, daily_gold_loot]
-			info_text += "\n--------------------------\n"
-			info_text += "TOTAL: %d oro" % total_day
-			
-			info_label.text = info_text
-
-		day_finished_view.visible = true
-		buttonShop.disabled = true
-	else:
+	if not day_finished_view:
 		_advance_to_next_day()
-		
+		return
+
+	day_finished_view.visible = true
+	buttonShop.disabled = true
+	NextDayButton.visible = false
+	
+	# --- RESETEO DE VISIBILIDAD ---
+	if win_label: 
+		win_label.modulate.a = 0.0
+		win_label.visible_characters = 0  # <--- CAMBIO: Empezar en 0, no en -1
+	if lose_label: 
+		lose_label.modulate.a = 0.0
+		lose_label.visible_characters = 0 # <--- CAMBIO: Empezar en 0
+	
+	# Resto de elementos visibles
+	if info_label: info_label.modulate.a = 1.0
+	if day_slider: day_slider.modulate.a = 1.0
+	if next_day_label: next_day_label.modulate.a = 1.0
+	if fondo_texto: fondo_texto.modulate.a = 1.0      
+	if next_day_image: next_day_image.modulate.a = 1.0 
+	
+	# Gestión de ánforas
+	if day_slider: day_slider.visible = true
+	if anfora_rota: 
+		anfora_rota.visible = false
+		anfora_rota.modulate.a = 0.0
+
+	# Textos
+	if next_day_label:
+		next_day_label.text = "Day %d Failed" % current_day if is_game_over_state else "Day %d Finished" % current_day
+
+	if info_label:
+		info_label.bbcode_enabled = true
+		info_label.visible_characters = 0     
+		info_label.text = build_day_summary_text() 
+
+	# --- SECUENCIA DE ANIMACIÓN ---
+	var animation_tween : Tween
+	
+	if is_game_over_state:
+		animation_tween = animate_amphora_break()
+	else:
+		animation_tween = animate_day_progressbar()
+
+	if animation_tween:
+		animation_tween.finished.connect(func():
+			var t2 = animate_info_text()
+			if t2:
+				t2.finished.connect(func():
+					_wait_and_decide_flow()
+				)
+		)
+
+func _wait_and_decide_flow() -> void:
+	# Si es fin de juego (victoria o derrota), esperamos más tiempo
+	if is_game_over_state or current_day >= max_days:
+		print("Esperando para mostrar resultado final...")
+		# 3.0 segundos de espera para leer el resumen
+		get_tree().create_timer(3.0).timeout.connect(_decide_post_summary_flow)
+	else:
+		# Si es un día normal, pasamos directamente (o con una micro espera si quieres)
+		_decide_post_summary_flow()
+
+func _decide_post_summary_flow() -> void:
+	if is_game_over_state:
+		_animate_lose_transition() # Transición a LoseLabel
+	elif current_day >= max_days:
+		_animate_win_transition()  # Transición a WinLabel
+	else:
+		reveal_next_day_button()   # Continuar al siguiente día
+# NUEVA FUNCIÓN: Maneja la transición suave de elementos a WinLabel
+func _animate_win_transition() -> void:
+	var t = create_tween()
+	
+	# 1. Desvanecer elementos del resumen
+	t.set_parallel(true)
+	if info_label: t.tween_property(info_label, "modulate:a", 0.0, 1.0)
+	if day_slider: t.tween_property(day_slider, "modulate:a", 0.0, 1.0)
+	if next_day_label: t.tween_property(next_day_label, "modulate:a", 0.0, 1.0)
+	if fondo_texto: t.tween_property(fondo_texto, "modulate:a", 0.0, 1.0) 
+	
+	# 2. Preparar WinLabel (Secuencial)
+	t.chain().tween_callback(func():
+		if win_label:
+			win_label.visible_characters = 0 # <--- PRIMERO: Caracteres a 0
+			win_label.modulate.a = 1.0       # <--- SEGUNDO: Hacer visible el contenedor
+	)
+	
+	# 3. Animar texto de Victoria
+	if win_label:
+		t.tween_property(win_label, "visible_characters", win_label.get_total_character_count(), 2.0)
+	
+	# 4. Mostrar botón
+	t.chain().tween_callback(reveal_next_day_button)
 func _show_game_over_view() -> void:
 	if game_over_view:
 		game_over_view.visible = true
@@ -328,11 +396,6 @@ func _show_win_view() -> void:
 		buttonShop.disabled = true
 	else:
 		push_error("GameManager: No se encontró el nodo 'Win'.")
-
-func _on_next_day_image_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		print("Click en imagen de Siguiente Día recibido.")
-		_advance_to_next_day()
 
 func _advance_to_next_day() -> void:
 	print("Iniciando Día %d..." % (current_day + 1))
@@ -352,8 +415,10 @@ func _advance_to_next_day() -> void:
 	set_state(GameState.SHOP)
 	store.generate()
 	store.start_new_round()
-	if combat_scene:
-		combat_scene.spawn_enemy_one()
+	
+	# Al pasar de día, reseteamos el gladiador y creamos uno nuevo
+	if combat_scene and combat_scene.has_method("reset_for_new_day"):
+		combat_scene.reset_for_new_day()
 
 func _give_initial_piece():
 	if not inventory.has_method("get_random_initial_piece"): return
@@ -362,14 +427,8 @@ func _give_initial_piece():
 		inventory.add_item(initial_piece)
 		
 func _apply_default_cursors():
-	# 1. Base: Se queda en 'null' para usar la config del proyecto
-	Input.set_custom_mouse_cursor(null, Input.CURSOR_ARROW)
-	
-	# 2. Hover: Asignamos 'Hover.png' al estado POINTING_HAND
-	if tex_hover:
-		Input.set_custom_mouse_cursor(tex_hover, Input.CURSOR_POINTING_HAND, cursor_hotspot)
-	
-	# 3. Grab: Asignamos 'Grab.png' al estado DRAG (arrastrar)
+	if tex_click:
+		Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_POINTING_HAND, cursor_hotspot)
 	if tex_grab:
 		Input.set_custom_mouse_cursor(tex_grab, Input.CURSOR_DRAG, cursor_hotspot)
 		Input.set_custom_mouse_cursor(tex_grab, Input.CURSOR_CAN_DROP, cursor_hotspot)
@@ -666,3 +725,123 @@ func get_active_synergies() -> Dictionary:
 		result["eur"] = 1
 	
 	return result
+func animate_day_progressbar():
+	if not day_slider:
+		return null
+
+	# Configuramos el máximo igual al número total de días
+	day_slider.max_value = max_days
+	
+	# El valor inicial es el día anterior (donde se quedó la barra ayer)
+	day_slider.value = current_day - 1 
+
+	var target_value = current_day
+	
+	var tween := create_tween()
+	# Animamos desde 'ayer' hasta 'hoy'
+	tween.tween_property(day_slider, "value", target_value, 2.5).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+	return tween
+func animate_info_text():
+	if not info_label:
+		return
+
+	info_label.visible_characters = 0
+	var tween := create_tween()
+	tween.tween_property(info_label, "visible_characters", info_label.get_total_character_count(), 1)
+	return tween
+func reveal_next_day_button():
+	if not NextDayButton:
+		return
+	if NextDayButton:
+		# Desconectamos si ya estaba conectado en el editor para evitar doble llamada
+		if NextDayButton.pressed.is_connected(_advance_to_next_day):
+			NextDayButton.pressed.disconnect(_advance_to_next_day)
+		# Conectamos a nuestra nueva función de control
+		NextDayButton.pressed.connect(_on_next_day_button_pressed)
+	NextDayButton.visible = true
+	NextDayButton.modulate.a = 0.0  # empieza invisible
+	
+	var tween := create_tween()
+	tween.tween_property(NextDayButton, "modulate:a", 1.0, 1.0) \
+		.set_delay(1) 
+func build_day_summary_text() -> String:
+	var rounds_count = rounds_per_day
+	var round_unit_price = daily_gold_salary / rounds_count if rounds_count > 0 else 0
+
+	var glad_count = gladiators_defeated
+	var glad_unit_price = daily_gold_loot / glad_count if glad_count > 0 else 0
+
+	var total_day = daily_gold_salary + daily_gold_loot
+
+	var text := ""
+	text += "[center][b]SUMMARY OF THE DAY[/b][/center]\n\n"
+
+	text += "[img=24x24]res://assets/Coin (1).png[/img]  "
+	text += "[b]Rounds:[/b] %d × %d = [b]%d gold[/b]\n" % [round_unit_price, rounds_count, daily_gold_salary]
+
+	text += "[img=24x24]res://assets/GladsIcon (1).png[/img]  "
+	text += "[b]Gladiators:[/b] %d × %d = [b]%d gold[/b]\n" % [glad_unit_price, glad_count, daily_gold_loot]
+
+	text += "\n\n"
+
+	text += "[center][b]TOTAL: %d gold[/b][/center]" % total_day
+
+	return text
+func _restart_game() -> void:
+	print("Volviendo al menú principal...")
+	get_tree().paused = false
+	
+	get_tree().change_scene_to_file("res://scenes/menu.tscn")
+func _on_next_day_button_pressed() -> void:
+	# Reiniciamos si es Game Over O si completamos todos los días
+	if is_game_over_state or current_day >= max_days:
+		_restart_game()
+	else:
+		_advance_to_next_day()
+func animate_amphora_break():
+	if not day_slider or not anfora_rota:
+		return null
+	
+	# Fijamos el slider en su valor actual (el del día anterior)
+	# No lo llenamos más porque ha perdido.
+	day_slider.max_value = max_days
+	day_slider.value = current_day - 1
+	
+	var tween = create_tween()
+	
+	# 1. Pequeña pausa dramática o temblor (opcional)
+	tween.tween_interval(0.5)
+	
+	# 2. Transición cruzada: Desaparece el slider, aparece el ánfora rota
+	tween.tween_callback(func(): anfora_rota.visible = true)
+	tween.set_parallel(true)
+	tween.tween_property(day_slider, "modulate:a", 0.0, 0.5)
+	tween.tween_property(anfora_rota, "modulate:a", 1.0, 0.5)
+	
+	return tween
+func _animate_lose_transition() -> void:
+	var t = create_tween()
+	
+	# 1. Ocultar elementos del resumen
+	t.set_parallel(true)
+	if info_label: t.tween_property(info_label, "modulate:a", 0.0, 1.0)
+	if next_day_label: t.tween_property(next_day_label, "modulate:a", 0.0, 1.0)
+	if fondo_texto: t.tween_property(fondo_texto, "modulate:a", 0.0, 1.0)
+	
+	if anfora_rota: t.tween_property(anfora_rota, "modulate:a", 0.0, 1.0)
+	if day_slider: t.tween_property(day_slider, "modulate:a", 0.0, 1.0)
+	
+	# 2. Preparar LoseLabel
+	t.chain().tween_callback(func():
+		if lose_label:
+			lose_label.visible_characters = 0 # <--- PRIMERO: Caracteres a 0
+			lose_label.modulate.a = 1.0       # <--- SEGUNDO: Hacer visible
+	)
+	
+	# 3. Animar texto de Derrota
+	if lose_label:
+		t.tween_property(lose_label, "visible_characters", lose_label.get_total_character_count(), 2.0)
+	
+	# 4. Mostrar botón
+	t.chain().tween_callback(reveal_next_day_button)
