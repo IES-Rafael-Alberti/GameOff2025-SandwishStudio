@@ -109,7 +109,7 @@ func hide_tooltip() -> void:
 func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int = 0) -> void:
 	if not item_data: return
 	
-	# 1. LIMPIEZA INICIAL: Reseteamos tamaños para evitar que se quede "grande"
+	# 1. LIMPIEZA INICIAL
 	custom_minimum_size = Vector2.ZERO
 	size = Vector2.ZERO
 	
@@ -216,15 +216,16 @@ func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int 
 		text += "[/table][/font_size]\n"
 
 		# --- TABLA DE STATS ---
+		# Añadimos espacios "     " al final de los nombres para separar visualmente la columna 1 de la 2
 		text += "[font_size=%d][table=3]" % table_font_size
-		text += _row_table("%s Damage" % _get_icon_tag(icon_damage), current_stats["dmg"], next_stats["dmg"], is_upgrade, "#ff7675", table_font_size)
-		text += _row_table("%s Health" % _get_icon_tag(icon_health), current_stats["hp"], next_stats["hp"], is_upgrade, "#55efc4", table_font_size)
-		text += _row_table("%s Atk. Spd" % _get_icon_tag(icon_speed), current_stats["aps"], next_stats["aps"], is_upgrade, "#ffeaa7", table_font_size)
+		text += _row_table("%s Damage     " % _get_icon_tag(icon_damage), current_stats["dmg"], next_stats["dmg"], is_upgrade, "#ff7675", table_font_size)
+		text += _row_table("%s Health     " % _get_icon_tag(icon_health), current_stats["hp"], next_stats["hp"], is_upgrade, "#55efc4", table_font_size)
+		text += _row_table("%s Atk. Spd   " % _get_icon_tag(icon_speed), current_stats["aps"], next_stats["aps"], is_upgrade, "#ffeaa7", table_font_size)
 		
 		if next_stats["crit_chance"] > 0:
-			text += _row_table("%s Crit Chance" % _get_icon_tag(icon_crit_chance), str(current_stats["crit_chance"]) + "%", str(next_stats["crit_chance"]) + "%", is_upgrade, "#ff9f43", table_font_size)
+			text += _row_table("%s Crit Rate  " % _get_icon_tag(icon_crit_chance), str(current_stats["crit_chance"]) + "%", str(next_stats["crit_chance"]) + "%", is_upgrade, "#ff9f43", table_font_size)
 		if next_stats["crit_mult"] > 1.0:
-			text += _row_table("%s Crit Dmg" % _get_icon_tag(icon_crit_damage), "x" + str(current_stats["crit_mult"]), "x" + str(next_stats["crit_mult"]), is_upgrade, "#ff9f43", table_font_size)
+			text += _row_table("%s Crit Dmg   " % _get_icon_tag(icon_crit_damage), "x" + str(current_stats["crit_mult"]), "x" + str(next_stats["crit_mult"]), is_upgrade, "#ff9f43", table_font_size)
 		text += "[/table][/font_size]\n"
 	
 	elif item_data is PassiveData:
@@ -267,13 +268,13 @@ func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int 
 		sell_price_label.hide()
 
 	# --- AJUSTE DE TAMAÑO ---
-	var min_width = 320 # Valor base más seguro
+	var min_width = 330 # Subido un poco el base por los espacios extra
 	
 	if item_data is PieceData:
 		if is_upgrade:
-			min_width = 350 # Ancho para upgrades (necesita espacio para "x -> y")
+			min_width = 270 
 		else:
-			min_width = 250 # Ancho estándar para piezas normales (antes 450 era mucho)
+			min_width = 220 # Más ancho que antes para que quepan los espacios
 			
 	elif item_data is PassiveData:
 		var name_length = 0
@@ -283,11 +284,9 @@ func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int 
 			name_length = item_data.name_passive.length()
 		min_width = clamp(name_length * 12, 250, 500)
 		
-	# Importante: Asignamos Vector2 completo para asegurarnos que Y es 0 (automático)
 	custom_minimum_size = Vector2(min_width, 0)
 	
 	show()
-	# Forzamos un update para que la caja se encoja al nuevo contenido
 	await get_tree().process_frame
 	size = Vector2.ZERO
 # ==============================================================================
