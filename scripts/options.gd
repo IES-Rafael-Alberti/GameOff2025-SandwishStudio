@@ -14,7 +14,7 @@ var is_pause_menu: bool = false
 func _ready() -> void:
 	# Que se dibuje por encima de todo y no herede transforms raros
 	top_level = true
-	z_index = 100
+	z_index = 500
 
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
