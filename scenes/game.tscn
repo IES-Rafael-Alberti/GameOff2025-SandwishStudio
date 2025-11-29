@@ -109,9 +109,9 @@ zoom = Vector2(0.7, 0.7)
 
 [node name="RoundLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 916.0
+offset_left = 909.0
 offset_top = 44.0
-offset_right = 1033.0
+offset_right = 1026.0
 offset_bottom = 92.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
