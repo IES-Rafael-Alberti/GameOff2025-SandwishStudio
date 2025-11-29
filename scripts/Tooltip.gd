@@ -625,7 +625,7 @@ func show_npc_tooltip(unit: npc) -> void:
 			child.queue_free()
 
 	# 2. Configuración Visual
-	var title_text = unit.npc_res.raza.to_upper() if unit.npc_res.raza != "" else "GLADIATOR"
+	var title_text = "GLADIATOR"
 	var rarity_color = Color(1.0, 0.3, 0.3) 
 	var bg_tint = Color(0.15, 0.05, 0.05, 0.98)
 
