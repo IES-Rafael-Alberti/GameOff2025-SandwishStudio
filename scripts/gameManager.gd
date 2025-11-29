@@ -817,8 +817,12 @@ func build_day_summary_text() -> String:
 func _restart_game() -> void:
 	print("Volviendo al menú principal...")
 	get_tree().paused = false
+	PlayerData.reset_player_data()
+	if has_node("/root/GlobalStats"):
+		GlobalStats.update_stats({}) 
 	
 	get_tree().change_scene_to_file("res://scenes/menu.tscn")
+	
 func _on_next_day_button_pressed() -> void:
 	# Reiniciamos si es Game Over O si completamos todos los días
 	if is_game_over_state or current_day >= max_days:

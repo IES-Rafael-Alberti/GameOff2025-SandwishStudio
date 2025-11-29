@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Those_who_are_about_to_spin"
-run/main_scene="uid://dd8wqmfs2cj1j"
+run/main_scene="uid://ciiatrgpvtbi3"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 boot_splash/fullsize=false
 boot_splash/image="uid://cmccecn5d1xyv"

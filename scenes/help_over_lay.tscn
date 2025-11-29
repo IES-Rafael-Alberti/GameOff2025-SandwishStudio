@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://cj8n2p21wqyqt"]
+[gd_scene load_steps=17 format=3 uid="uid://cj8n2p21wqyqt"]
 
 [ext_resource type="Script" uid="uid://5rckgbgfkfc2" path="res://scripts/help_over_lay.gd" id="1_hw84m"]
 [ext_resource type="Texture2D" uid="uid://bbx1q45j0mtkw" path="res://assets/numeros/1.png" id="2_l7um4"]
@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://cp1bjcydc4w6w" path="res://assets/numeros/10.png" id="11_pbqil"]
 [ext_resource type="Texture2D" uid="uid://c4dy7n4u1td0l" path="res://assets/numeros/11.png" id="12_lw8u6"]
 [ext_resource type="Texture2D" uid="uid://cfodtyosy8c3o" path="res://assets/help/help.png" id="13_i8onr"]
+[ext_resource type="Script" uid="uid://bhi3o8gkgmkk1" path="res://scripts/help_button.gd" id="14_eeyrb"]
 [ext_resource type="Texture2D" uid="uid://dvc8fw5kbox28" path="res://assets/help/Papiro.png" id="14_i8onr"]
 
 [node name="HelpOverLay" type="Control"]
@@ -37,6 +38,7 @@ pivot_offset = Vector2(20, 20)
 theme_override_font_sizes/font_size = 32
 icon = ExtResource("13_i8onr")
 flat = true
+script = ExtResource("14_eeyrb")
 
 [node name="PanelBg" type="TextureRect" parent="."]
 z_index = 5
