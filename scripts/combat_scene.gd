@@ -12,24 +12,34 @@ const NPC_DEATH_PARTICLES := preload("res://scenes/npc_death_particles.tscn")
 @export var enemy_res: Array[npcRes] = []
 const ALLY_LIMIT := 14
 const ENEMY_LIMIT := 1
-var current_wave_attacks: int = 0 # Cuantos ataques llevamos en esta oleada
-var jap_wave_counter: int = 0     # Cuantas oleadas han pasado (1, 2, 3 -> ACTIVAR)
+var current_wave_attacks: int = 0 
+var jap_wave_counter: int = 0     
 var round_gold_loot: int = 0
 const BASE_ROUND_GOLD := 2
+
+# --- CONFIGURACIÓN DE AUDIO (SATURACIÓN) ---
+# Tiempos mínimos en milisegundos entre sonidos del mismo tipo
+const COOLDOWN_ATTACK_MS := 60   # Máximo ~16 ataques por segundo audibles
+const COOLDOWN_DEATH_MS := 100   # Evita estruendo si mueren varios a la vez
+const COOLDOWN_SPAWN_MS := 50
+
+var last_attack_sfx_time: int = 0
+var last_death_sfx_time: int = 0
+var last_spawn_sfx_time: int = 0
 
 # Animacion de golpear aliados y enemigos
 @export_group("Animación de Ataque")
 @export_subgroup("Aliados (PieceRes)")
-@export var ally_attack_offset: Vector2 = Vector2(-125, -35) # Movimiento izquierda + salto
-@export var ally_attack_rotation_deg: float = -8.0          # Gira hacia la izquierda/abajo
+@export var ally_attack_offset: Vector2 = Vector2(-125, -35) 
+@export var ally_attack_rotation_deg: float = -8.0          
 
 @export_subgroup("Gladiador (npcRes)")
-@export var enemy_attack_offset: Vector2 = Vector2(25, 10)  # Derecha + un pelín hacia abajo
-@export var enemy_attack_rotation_deg: float = 8.0          # Gira hacia la derecha/abajo
+@export var enemy_attack_offset: Vector2 = Vector2(25, 10)  
+@export var enemy_attack_rotation_deg: float = 8.0          
 
 @export_subgroup("Tiempos")
-@export var attack_lunge_duration: float = 0.08             # Ida
-@export var attack_return_duration: float = 0.12            # Vuelta
+@export var attack_lunge_duration: float = 0.08             
+@export var attack_return_duration: float = 0.12            
 
 @export_group("Escalado de Dificultad (Por Día)")
 @export_subgroup("Crecimiento Exponencial")
@@ -43,8 +53,8 @@ const BASE_ROUND_GOLD := 2
 
 @export_group("Escalado por Derrotas (Intra-Día)")
 @export_subgroup("Multiplicador por Derrota")
-@export var defeat_hp_mult: float = 1.1       # +10% HP (acumulativo) por cada derrota hoy
-@export var defeat_damage_mult: float = 1.05  # +5% Daño (acumulativo) por cada derrota hoy
+@export var defeat_hp_mult: float = 1.1       
+@export var defeat_damage_mult: float = 1.05  
 
 @export_subgroup("Suma Plana por Derrota")
 @export var defeat_speed_flat: float = 0.05
@@ -101,9 +111,50 @@ func _ready() -> void:
 func _advance_round() -> void:
 	pass
 
+# --------------------------------------------------------------------------
+#  SISTEMA DE AUDIO CENTRALIZADO E INTELIGENTE
+# --------------------------------------------------------------------------
+func _play_controlled_sfx(stream: AudioStream, type: String, pos: Vector2 = Vector2.ZERO) -> void:
+	if not stream: return
+	
+	var now = Time.get_ticks_msec()
+	
+	# 1. Filtro de Saturación (Cooldowns)
+	match type:
+		"attack":
+			if now - last_attack_sfx_time < COOLDOWN_ATTACK_MS: return # Demasiado pronto, ignorar
+			last_attack_sfx_time = now
+		"death":
+			if now - last_death_sfx_time < COOLDOWN_DEATH_MS: return
+			last_death_sfx_time = now
+		"spawn":
+			# Spawn suele ser más permisivo o controlado por lógica externa, pero por si acaso:
+			if now - last_spawn_sfx_time < COOLDOWN_SPAWN_MS: return
+			last_spawn_sfx_time = now
+	
+	# 2. Fire & Forget: Crear reproductor temporal
+	# Esto permite que suenen flechas y espadas a la vez sin cortarse
+	var temp_player = AudioStreamPlayer2D.new()
+	temp_player.stream = stream
+	temp_player.global_position = pos
+	
+	# Variación de Pitch para evitar sonido robótico
+	temp_player.pitch_scale = randf_range(0.9, 1.1)
+	
+	# Asegurar que se escuche (puedes ajustar el Bus aquí si tienes uno)
+	# temp_player.bus = "SFX" 
+	
+	add_child(temp_player)
+	temp_player.play()
+	
+	# Autodestrucción cuando termine el sonido
+	temp_player.finished.connect(func(): temp_player.queue_free())
+
+# --------------------------------------------------------------------------
+
 func on_roulette_combat_requested(piece_resource: Resource) -> void:
 	if not piece_resource or not piece_resource is PieceRes:
-		push_error("on_roulette_combat_requested: Recurso nulo o inválido. Saltando combate.")
+		push_error("on_roulette_combat_requested: Recurso nulo o inválido.")
 		_cleanup_allies_and_reset()
 		
 		if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
@@ -159,32 +210,21 @@ func _stop_combat() -> void:
 			enemy_alive = true
 			break
 
-	var allies_alive := false
-	for a in ally_npcs:
-		if is_instance_valid(a) and a.health > 0.0:
-			allies_alive = true
-			break
-
 	combat_running = false
-
 	var player_won_round = not enemy_alive
 	
 	if player_won_round:
 		daily_defeat_count += 1
 		print("Victoria de ronda. Derrotas acumuladas hoy: ", daily_defeat_count)
 	
-	# Resultado de la ronda
-	# Si el gladiador sobrevive, lo mandamos al slot de espera
 	if not player_won_round:
 		if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 			_move_with_tween_global(enemy_npcs[0], enemy_wait_slot.global_position, 0.5)
 
-	# Esperamos un poco y enviamos la señal directamente
 	await get_tree().create_timer(1.0).timeout
 	
 	PlayerData.add_currency(BASE_ROUND_GOLD)
 	round_gold_loot += BASE_ROUND_GOLD
-	print("Base round reward: +", BASE_ROUND_GOLD, " gold.")
 
 	_cleanup_allies_and_reset()
 	combat_finished.emit(player_won_round, round_gold_loot)
@@ -192,35 +232,25 @@ func _stop_combat() -> void:
 	print("Battle stopped. Player won: ", player_won_round, " Loot: ", round_gold_loot)
 
 func reset_for_new_day() -> void:
-	# Limpiar gladiador actual (por si sigue vivo)
 	for e in enemy_npcs:
 		if is_instance_valid(e):
 			e.queue_free()
 	enemy_npcs.clear()
-
-	# Reseteamos contador de derrotas del día
 	daily_defeat_count = 0
-
-	# Spawneamos el gladiador del nuevo día (con stats nuevas)
 	spawn_enemy_one()
 
 func spawn_enemy_one() -> void:
-	# Si ya hay un gladiador VIVO, no hacemos nada
 	for e in enemy_npcs:
 		if is_instance_valid(e) and e.health > 0.0:
-			print("spawn_enemy_one(): ya hay un gladiador vivo, no spawneo otro.")
 			return
 
-	# Limpiamos referencias muertas del array
 	var cleaned: Array[npc] = []
 	for e in enemy_npcs:
 		if is_instance_valid(e):
 			cleaned.append(e)
 	enemy_npcs = cleaned
 
-	# Elegir recurso base
 	if enemy_res.is_empty():
-		push_error("enemy_res está vacío en combat_scene.gd.")
 		return
 
 	var template: npcRes = enemy_res[randi() % enemy_res.size()]
@@ -230,29 +260,19 @@ func spawn_enemy_one() -> void:
 	if gm and "current_day" in gm:
 		day = gm.current_day
 
-	# Stats del día desde el recurso
+	var s: Dictionary
 	if not template.has_method("get_stats_for_day"):
-		push_warning("npcRes no tiene get_stats_for_day, usando stats base.")
 		var res_fallback: npcRes = template.duplicate()
 		var g_fb: npc = _spawn_npc(npc.Team.ENEMY, enemy_spawn.global_position, res_fallback)
 		if g_fb:
 			enemy_npcs.append(g_fb)
 			_move_with_tween_global(g_fb, enemy_wait_slot.global_position, 0.0)
 		return
+	else:
+		s = template.get_stats_for_day(day)
 
-	var s := template.get_stats_for_day(day)
+	print("[ENEMY SPAWN] Día %d | HP=%.2f" % [day, s["hp"]])
 
-	# 🔹 DEBUG: log de stats del gladiador para este spawn
-	print("[ENEMY SPAWN] Día %d | HP=%.2f  DMG=%.2f  APS=%.2f  CRIT=%.2f%%  CRIT_MULT=%.2f" % [
-		day,
-		s["hp"],
-		s["dmg"],
-		s["aps"],
-		s["crit_chance"],
-		s["crit_mult"]
-	])
-
-	# 6) Duplicamos el recurso para no tocar el original
 	var res: npcRes = template.duplicate()
 	res.max_health        = s["hp"]
 	res.health            = s["hp"]
@@ -261,18 +281,10 @@ func spawn_enemy_one() -> void:
 	res.critical_chance   = s["crit_chance"]
 	res.critical_damage   = s["crit_mult"]
 
-	# Instanciamos el npc con esas stats
 	var g: npc = _spawn_npc(npc.Team.ENEMY, enemy_spawn.global_position, res)
 	if g:
 		enemy_npcs.append(g)
-		
-		# DEBUG opcional
-		print("[ENEMY PATH] spawn=", enemy_spawn.global_position,
-			" wait=", enemy_wait_slot.global_position)
-		
-		# Que camine desde el spawn hasta el wait slot
 		_move_with_tween_global(g, enemy_wait_slot.global_position, 0.8)
-		print("spawn_enemy_one(): gladiador spawneado para día ", day)
 
 func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 	var n: npc = NPC_SCENE.instantiate()
@@ -285,7 +297,7 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 			n.flip_h = true
 		else:
 			n.flip_h = false
-	# Aplicar bonos globales (GlobalStats)
+
 	if team == npc.Team.ALLY and has_node("/root/GlobalStats"):
 		var health_bonus = GlobalStats.get_health_bonus()
 		var damage_bonus = GlobalStats.get_damage_bonus()
@@ -293,35 +305,23 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 		var crit_chance_bonus = GlobalStats.get_crit_chance_bonus()
 		var crit_damage_bonus = GlobalStats.get_crit_damage_bonus()
 		if n.has_method("apply_passive_bonuses"):
-			n.apply_passive_bonuses(
-				health_bonus,
-				damage_bonus,
-				speed_bonus,
-				crit_chance_bonus,
-				crit_damage_bonus
-			)
+			n.apply_passive_bonuses(health_bonus, damage_bonus, speed_bonus, crit_chance_bonus, crit_damage_bonus)
 			
-	# APLICAR SINERGIAS DE RULETA 
 	if team == npc.Team.ALLY:
 		var game_manager = get_parent()
 		if game_manager and game_manager.has_method("get_active_synergies"):
 			var active_synergies = game_manager.get_active_synergies()
-			
 			if n.has_method("apply_synergies"):
 				n.apply_synergies(active_synergies)
-			else:
-				push_warning("NPC no tiene metodo apply_synergies")
 	
 	get_node("npcs").add_child(n)
 	
+	# SONIDO SPAWN (Corregido y Centralizado)
 	if n.npc_res and n.npc_res.sfx_spawn:
 		if team == npc.Team.ENEMY:
-			# Cada vez que aparece un nuevo gladiador
-			n.play_sfx(n.npc_res.sfx_spawn)
-		elif team == npc.Team.ALLY and not ally_spawn_sfx_played:
-			ally_spawn_sfx_played = true
-			n.play_sfx(n.npc_res.sfx_spawn)
-	# APLICAR BONUS A ENEMIGOS
+			_play_controlled_sfx(n.npc_res.sfx_spawn, "spawn", n.global_position)
+		# Los aliados se controlan en spawn_piece para que no suenen 10 a la vez
+
 	if team == npc.Team.ENEMY:
 		n.gold_pool = int(n.npc_res.gold)
 		_apply_enemy_daily_scaling(n)
@@ -332,65 +332,45 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 
 func _apply_enemy_daily_scaling(n: npc) -> void:
 	var gm = get_parent()
-	if not gm or not "current_day" in gm:
-		return
+	if not gm or not "current_day" in gm: return
 
-	# Si ha cambiado de día, reseteamos derrotas
 	if gm.current_day != last_recorded_day:
 		daily_defeat_count = 0
 		last_recorded_day = gm.current_day
-		print("Nuevo día detectado (", gm.current_day, "). Reseteando contador de derrotas.")
 
 	var kills_index = daily_defeat_count
-	if kills_index == 0:
-		return 
+	if kills_index == 0: return 
 
-	# SOLO ESCALADO POR DERROTAS
 	var kill_factor_hp = pow(defeat_hp_mult, kills_index)
 	var kill_factor_dmg = pow(defeat_damage_mult, kills_index)
-
 	var total_hp_mult = kill_factor_hp
 	var total_dmg_mult = kill_factor_dmg
 
 	var added_speed       = defeat_speed_flat * kills_index
 	var added_crit_chance = defeat_crit_chance_flat * kills_index
 	var added_crit_dmg    = defeat_crit_dmg_flat * kills_index
-
 	var bonus_hp_percent  = (total_hp_mult - 1.0) * 100.0
 	var bonus_dmg_percent = (total_dmg_mult - 1.0) * 100.0
 
 	if n.has_method("apply_passive_bonuses"):
-		n.apply_passive_bonuses(
-			bonus_hp_percent,
-			bonus_dmg_percent,
-			added_speed,
-			added_crit_chance,
-			added_crit_dmg
-		)
+		n.apply_passive_bonuses(bonus_hp_percent, bonus_dmg_percent, added_speed, added_crit_chance, added_crit_dmg)
 		n.health = n.max_health
-		print("Enemy Defeat-Scaled (Day %d, Kills %d): HP +%d%%, DMG +%d%%, SPD +%.2f" %
-			[gm.current_day, kills_index, int(bonus_hp_percent), int(bonus_dmg_percent), added_speed])
 	else:
 		n.max_health *= total_hp_mult
 		n.health = n.max_health
 
 func _move_with_tween(n: npc, target_pos: Vector2, duration: float = 1.8) -> void:
-	if not is_instance_valid(n):
-		return
+	if not is_instance_valid(n): return
 	var tween := create_tween()
-	tween.tween_property(n, "position", target_pos, duration) \
-		.set_trans(Tween.TRANS_SINE) \
-		.set_ease(Tween.EASE_OUT)
+	tween.tween_property(n, "position", target_pos, duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 func _get_free_ally_slots() -> Array[Marker2D]:
 	var free: Array[Marker2D] = []
 	for slot in ally_final_slots:
-		if slot == null:
-			continue
+		if slot == null: continue
 		var occupied := false
 		for a in ally_npcs:
 			if is_instance_valid(a):
-				# Comparamos en espacio global
 				if a.global_position.distance_to(slot.global_position) < 4.0:
 					occupied = true
 					break
@@ -401,37 +381,30 @@ func _get_free_ally_slots() -> Array[Marker2D]:
 func _get_piece_copies_owned(piece_data: Resource) -> int:
 	var game_manager = get_parent()
 	if game_manager and game_manager.has_method("get_inventory_piece_count"):
-		var count = game_manager.get_inventory_piece_count(piece_data)
-		return max(1, count)
+		return max(1, game_manager.get_inventory_piece_count(piece_data))
 	return 1 
 
 func spawn_piece(team: int, piece: PieceRes) -> void:
-	if piece == null:
-		return
+	if piece == null: return
 		
 	var num_copies: int = 1
 	var gold_per_enemy: int = 0
 	
 	if team == npc.Team.ALLY:
 		num_copies = _get_piece_copies_owned(piece)
-		print("Número de copias de la pieza en inventario: ", num_copies)
 
 	var pack: Dictionary = PieceAdapter.to_npc_res(piece, num_copies, gold_per_enemy)
 	var npc_template: npcRes = pack["res"]
 	var members: int = int(pack["members"])
 
 	if team == npc.Team.ALLY:
-		ally_spawn_sfx_played = false
+		ally_spawn_sfx_played = false # Reset flag para este lote
 
 		var free_slots_limit := ALLY_LIMIT - ally_npcs.size()
-		if free_slots_limit <= 0:
-			print("ALLY_LIMIT alcanzado, no se spawnea nada.")
-			return
+		if free_slots_limit <= 0: return
 
 		var free_markers: Array[Marker2D] = _get_free_ally_slots()
-		if free_markers.is_empty():
-			print("No hay slots libres en los aliados")
-			return
+		if free_markers.is_empty(): return
 
 		var to_spawn: int = min(members, free_slots_limit, free_markers.size())
 		var delay_per_ally := 0.10
@@ -446,15 +419,14 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 			var n: npc = _spawn_npc(team, ally_entry_spawn.global_position, npc_template)
 			if n:
 				ally_npcs.append(n)
-
+				
+				# [cite_start]SPAWN AUDIO LOGIC (Solo suena una vez por lote) [cite: 14]
 				if (not ally_spawn_sfx_played) and n.npc_res and n.npc_res.sfx_spawn:
 					ally_spawn_sfx_played = true
-					print("[SPAWN ALLY] Reproduciendo sfx_spawn del kappa")
-					n.play_sfx(n.npc_res.sfx_spawn, "spawn_ally")
+					_play_controlled_sfx(n.npc_res.sfx_spawn, "spawn", n.global_position)
 
 				var order_index := ally_spawn_order_counter
 				ally_spawn_order_counter += 1
-
 				_place_ally_in_slot_with_tween(n, slot.global_position, order_index)
 
 		if ally_spawn_order_counter > 0:
@@ -469,14 +441,9 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 		enemy_npcs.append(e)
 
 func _place_ally_in_slot_with_tween(n: npc, final_pos: Vector2, order_index: int) -> void:
-	# Posición inicial: spawn de aliados (global)
 	n.global_position = ally_entry_spawn.global_position
-
 	var delay_per_ally := 0.10
-
-	# Punto intermedio: misma Y que el spawn, X del slot final
 	var mid_pos := Vector2(final_pos.x, ally_entry_spawn.global_position.y)
-
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	tween.tween_interval(order_index * delay_per_ally)
@@ -484,27 +451,18 @@ func _place_ally_in_slot_with_tween(n: npc, final_pos: Vector2, order_index: int
 	tween.tween_property(n, "global_position", final_pos, 0.5)
 
 func _spawn_death_particles(n: npc) -> void:
-	if not is_instance_valid(n):
-		return
+	if not is_instance_valid(n): return
 
 	var particles : GPUParticles2D = NPC_DEATH_PARTICLES.instantiate()
-	
-	# Colocamos las partículas en el mismo sitio que el NPC
 	particles.position = n.position
 	
-	# Las añadimos al mismo padre que el NPC (la misma capa)
 	var parent := n.get_parent()
-	if parent:
-		parent.add_child(particles)
-	else:
-		add_child(particles) # fallback
+	if parent: parent.add_child(particles)
+	else: add_child(particles) 
 
-	# Intentar copiar la textura del sprite del NPC al shader
 	var tex: Texture2D = null
-
 	if n.has_node("AnimatedSprite2D"):
 		var anim_sprite: AnimatedSprite2D = n.get_node("AnimatedSprite2D")
-		# Coger la textura del frame actual (simplificado: primer frame)
 		if anim_sprite.sprite_frames:
 			var frames := anim_sprite.sprite_frames
 			var anim := anim_sprite.animation
@@ -519,32 +477,29 @@ func _spawn_death_particles(n: npc) -> void:
 		if mat is ShaderMaterial:
 			mat.set_shader_parameter("sprite", tex)
 
-	# Activar emisión
 	particles.emitting = true
-
-	# Opción: auto-destruir después de su lifetime
 	var life := particles.lifetime
 	get_tree().create_timer(life + 0.5).timeout.connect(func ():
-		if is_instance_valid(particles):
-			particles.queue_free()
+		if is_instance_valid(particles): particles.queue_free()
 	)
 
 func _on_npc_died(n: npc) -> void:
 	_spawn_death_particles(n)
+	
+	# [cite_start]SONIDO MUERTE (Centralizado) [cite: 16]
+	if n.npc_res and n.npc_res.sfx_death:
+		_play_controlled_sfx(n.npc_res.sfx_death, "death", n.global_position)
+
 	if n.team == npc.Team.ENEMY:
 		var amount: int = int(max(0, n.gold_pool))
 		if amount > 0:
 			PlayerData.add_currency(amount)
 			round_gold_loot += amount
-			print("Reward (death): +", amount, " gold.")
 		n.gold_pool = 0
-		print("¡Gladiador murió!")
 
 func _on_npc_exited(n: npc) -> void:
-	if n.team == npc.Team.ALLY:
-		ally_npcs.erase(n)
-	else:
-		enemy_npcs.erase(n)
+	if n.team == npc.Team.ALLY: ally_npcs.erase(n)
+	else: enemy_npcs.erase(n)
 	if combat_running and ( ally_npcs.is_empty() or enemy_npcs.is_empty() ):
 		_stop_combat()
 
@@ -552,11 +507,9 @@ func _on_start_pressed() -> void:
 	if combat_running: return
 	if ally_npcs.is_empty() or enemy_npcs.is_empty(): return
 	combat_running = true
-	print("Battle starts in 3 seconds")
 	start_timer.start(3.0)
 
 func _begin_combat() -> void:
-	print("Battle begins")
 	current_wave_attacks = 0
 	jap_wave_counter = 0
 	round_gold_loot = 0 
@@ -583,7 +536,6 @@ func _make_attack_timer(attacker: npc, defender: Variant, initial_delay: float =
 	var base_wait_time := 1.0 / aps
 	t.wait_time = base_wait_time
 
-	# Si nos pasan un delay inicial, lo usamos SOLO para el primer ataque
 	if initial_delay >= 0.0:
 		t.wait_time = initial_delay
 		t.set_meta("first_attack", true)
@@ -611,7 +563,6 @@ func _make_attack_timer(attacker: npc, defender: Variant, initial_delay: float =
 
 		_do_attack(attacker, target)
 
-		# Después del PRIMER ataque de este timer, volvemos al wait_time normal
 		if t.has_meta("first_attack") and t.get_meta("first_attack") == true:
 			t.set_meta("first_attack", false)
 			t.wait_time = base_wait_time
@@ -628,57 +579,38 @@ func _team_to_str(t: int) -> String:
 
 func _cleanup_allies_and_reset() -> void:
 	for a in ally_npcs:
-		if is_instance_valid(a):
-			a.queue_free()
+		if is_instance_valid(a): a.queue_free()
 	ally_npcs.clear()
 	ally_spawn_order_counter = 0
 
 func _play_attack_anim(attacker: npc) -> void:
-	if not is_instance_valid(attacker):
-		return
+	if not is_instance_valid(attacker): return
 
 	var original_pos: Vector2 = attacker.position
 	var original_rot_deg: float = attacker.rotation_degrees
 
-	# Limpiar tween anterior si existe
 	if attacker.has_meta("attack_tween"):
 		var old_tween: Tween = attacker.get_meta("attack_tween")
-		if is_instance_valid(old_tween):
-			old_tween.kill()
+		if is_instance_valid(old_tween): old_tween.kill()
 
 	var tween := create_tween()
 	attacker.set_meta("attack_tween", tween)
 	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
-	#   ANIMACIÓN ALIADOS
 	if attacker.team == npc.Team.ALLY:
-		# POSICIÓN EN EL "AIRE"
 		var jump_pos := original_pos + ally_attack_offset
 		var target_rot_deg := original_rot_deg + ally_attack_rotation_deg
-
-		# Salto hacia la izquierda
 		tween.tween_property(attacker, "position", jump_pos, attack_lunge_duration)
-
-		# En el aire, girar hasta la rotación de golpe
 		tween.chain().tween_property(attacker, "rotation_degrees", target_rot_deg, attack_lunge_duration)
-
-		# Siguen en el aire, volver a la rotación normal
 		tween.chain().tween_property(attacker, "rotation_degrees", original_rot_deg, attack_lunge_duration)
-
-		# Caer de vuelta a su posición original
 		tween.chain().tween_property(attacker, "position", original_pos, attack_return_duration)
-
 		return
-	#ANIMACIÓN GLADIADORES
+	
 	var offset := enemy_attack_offset
 	var target_rot_deg := original_rot_deg + enemy_attack_rotation_deg
 	var forward_pos := original_pos + offset
-
-	# 1) Empuje hacia delante + giro
 	tween.tween_property(attacker, "position", forward_pos, attack_lunge_duration)
 	tween.parallel().tween_property(attacker, "rotation_degrees", target_rot_deg, attack_lunge_duration)
-
-	# 2) Volver a sitio y rotación original
 	tween.chain().tween_property(attacker, "position", original_pos, attack_return_duration)
 	tween.parallel().tween_property(attacker, "rotation_degrees", original_rot_deg, attack_return_duration)
 
@@ -686,11 +618,11 @@ func _do_attack(attacker: npc, defender: npc) -> void:
 	if not attacker.can_damage(defender): return
 	if attacker.npc_res == null: return
 	
-	# Mostrar animacion
 	_play_attack_anim(attacker)
 	
+	# SONIDO ATAQUE (Centralizado y Controlado)
 	if attacker.npc_res.sfx_attack:
-		attacker.play_sfx(attacker.npc_res.sfx_attack)
+		_play_controlled_sfx(attacker.npc_res.sfx_attack, "attack", attacker.global_position)
 
 	attacker.notify_before_attack(defender)
 	var base := attacker.get_damage(defender)
@@ -699,13 +631,10 @@ func _do_attack(attacker: npc, defender: npc) -> void:
 	var crit := randf() < (crit_chance / 100.0)
 	var mult := attacker.get_crit_mult(defender) if crit else 1.0
 	dmg *= mult
-	var before_hp := defender.health
-	var target_max_hp := defender.max_health
-	var target_name := _who(defender)
+	var after_hp := 0.0
 	
 	defender.take_damage(dmg, attacker, crit)
 
-	var after_hp := 0.0
 	if is_instance_valid(defender):
 		after_hp = defender.health
 	
@@ -715,6 +644,7 @@ func _do_attack(attacker: npc, defender: npc) -> void:
 		attacker.notify_kill(defender)
 	if attacker.team == npc.Team.ALLY:
 		_process_ally_wave_logic()
+	
 	var crit_text := " (no crit)"
 	if crit: crit_text = " CRIT x" + _num(mult)
 	print("[HIT] ", _team_to_str(attacker.team), " -> ", _team_to_str(defender.team), " | final=", _num(dmg), crit_text)
@@ -730,7 +660,6 @@ func _start_pre_battle_sequence() -> void:
 	if ally_npcs.is_empty():
 		_stop_combat()
 		return
-	
 	if enemy_npcs.is_empty():
 		await get_tree().create_timer(0.1).timeout
 		if enemy_npcs.is_empty():
@@ -763,10 +692,7 @@ func _advance_to_battle_and_start() -> void:
 		start_timer.start(0.8)
 
 func _process_ally_wave_logic() -> void:
-	# 1. Contamos el ataque actual
 	current_wave_attacks += 1
-	
-	# 2. Calculamos cuántos aliados están vivos actualmente
 	var living_allies_count: int = 0
 	for a in ally_npcs:
 		if is_instance_valid(a) and a.health > 0:
@@ -774,26 +700,17 @@ func _process_ally_wave_logic() -> void:
 	
 	if living_allies_count == 0: return
 
-	# 3. Comprobamos si se ha completado una oleada (ataques >= num aliados vivos)
 	if current_wave_attacks >= living_allies_count:
-		current_wave_attacks = 0 # Reseteamos contador de ataques para la siguiente oleada
-		jap_wave_counter += 1    # Incrementamos el contador de "turnos/oleadas"
+		current_wave_attacks = 0 
+		jap_wave_counter += 1    
 		
-		# print("Oleada Aliada Completada. Contador Jap: ", jap_wave_counter)
-		
-		# 4. Cada 3 oleadas, activamos la carga especial
 		if jap_wave_counter % 3 == 0:
-			# print("¡Sinergia Japonesa Activada Globalmente!")
 			for a in ally_npcs:
 				if is_instance_valid(a) and a.health > 0:
-					# Llamamos a la nueva función que creamos en npc.gd
 					if a.has_method("charge_jap_synergy"):
 						a.charge_jap_synergy()
 
 func _move_with_tween_global(n: npc, target_pos: Vector2, duration: float = 1.8) -> void:
-	if not is_instance_valid(n):
-		return
+	if not is_instance_valid(n): return
 	var tween := create_tween()
-	tween.tween_property(n, "global_position", target_pos, duration) \
-		.set_trans(Tween.TRANS_SINE) \
-		.set_ease(Tween.EASE_OUT)
+	tween.tween_property(n, "global_position", target_pos, duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)

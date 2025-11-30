@@ -1,7 +1,9 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://di6l8arc2wa6y"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=5 format=3 uid="uid://di6l8arc2wa6y"]
 
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_7ngc2"]
 [ext_resource type="SpriteFrames" uid="uid://i1ppr1u5ps14" path="res://resources/allies_Frames/jotuun.tres" id="1_k7e38"]
+[ext_resource type="AudioStream" uid="uid://bnt6ug4qly0qq" path="res://assets/audios/Mythological Creatures/Jotun/Jotun_Death.wav" id="3_wx23b"]
+[ext_resource type="AudioStream" uid="uid://bbbhi7pp1rou6" path="res://assets/audios/Mythological Creatures/Jotun/Jotun_Intro.wav" id="4_q8tpr"]
 
 [resource]
 script = ExtResource("1_7ngc2")
@@ -10,6 +12,8 @@ display_name = "Jotun"
 race = 0
 rarity = 3
 health_bar_offset = Vector2(-20, -160)
+sfx_spawn = ExtResource("4_q8tpr")
+sfx_death = ExtResource("3_wx23b")
 frames = ExtResource("1_k7e38")
 stats = {
 "BRONCE": {

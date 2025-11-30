@@ -68,10 +68,6 @@ position = Vector2(722, 484)
 scale = Vector2(0.13809647, 0.13680618)
 texture = ExtResource("2_jyskt")
 
-[node name="Particles" type="CPUParticles2D" parent="SpriteRuleta"]
-position = Vector2(-5705.256, -3402.7043)
-scale = Vector2(11.164885, 11.083728)
-
 [node name="TickSound" type="AudioStreamPlayer2D" parent="SpriteRuleta"]
 
 [node name="SoundWin" type="AudioStreamPlayer2D" parent="SpriteRuleta"]

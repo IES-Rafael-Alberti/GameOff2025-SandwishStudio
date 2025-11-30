@@ -1,7 +1,10 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://b608x2o53lipk"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=6 format=3 uid="uid://b608x2o53lipk"]
 
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_n3ank"]
 [ext_resource type="SpriteFrames" uid="uid://ci0tv38g8v7at" path="res://resources/allies_Frames/tengu.tres" id="1_pgrif"]
+[ext_resource type="AudioStream" uid="uid://blcej6s5v0t1x" path="res://assets/audios/Mythological Creatures/Tengu/tengu_002.wav" id="3_a1c7w"]
+[ext_resource type="AudioStream" uid="uid://0yvnl31hqtqm" path="res://assets/audios/Mythological Creatures/Tengu/Tengu_Death.wav" id="4_4occ2"]
+[ext_resource type="AudioStream" uid="uid://cv8de8fcl7b8h" path="res://assets/audios/Mythological Creatures/Tengu/tengu_001.wav" id="5_u3l1a"]
 
 [resource]
 script = ExtResource("1_n3ank")
@@ -10,6 +13,9 @@ display_name = "tengu"
 race = 1
 rarity = 2
 health_bar_offset = Vector2(0, -130)
+sfx_spawn = ExtResource("5_u3l1a")
+sfx_attack = ExtResource("3_a1c7w")
+sfx_death = ExtResource("4_4occ2")
 frames = ExtResource("1_pgrif")
 stats = {
 "BRONCE": {
