@@ -1,9 +1,13 @@
-[gd_scene load_steps=36 format=3 uid="uid://bwh1obe7043i"]
+[gd_scene load_steps=40 format=3 uid="uid://bwh1obe7043i"]
 
 [ext_resource type="Script" uid="uid://boom6onvffdah" path="res://scripts/store.gd" id="1_atuvt"]
 [ext_resource type="Script" uid="uid://8urlsjkkl8pw" path="res://scripts/piece_data.gd" id="2_n3io3"]
+[ext_resource type="AudioStream" uid="uid://7txh71odogbr" path="res://assets/audios/Store/Reroll.wav" id="2_r3ct4"]
 [ext_resource type="Resource" uid="uid://dateynk6k5fui" path="res://resources/pieces/oni.tres" id="3_abbvk"]
+[ext_resource type="AudioStream" uid="uid://d2uyisy2mt7af" path="res://assets/audios/Store/Padlock_Lock.wav" id="3_vtn73"]
 [ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/jotun.tres" id="4_3ro5p"]
+[ext_resource type="AudioStream" uid="uid://878rnlwjcgi5" path="res://assets/audios/Store/Padlock_Unlock.wav" id="4_mwckc"]
+[ext_resource type="AudioStream" uid="uid://ck585r2b280sh" path="res://assets/audios/Store/buy.mp3" id="5_f0nre"]
 [ext_resource type="Resource" uid="uid://6rli8qlo7wmd" path="res://resources/pieces/duende.tres" id="5_klwl8"]
 [ext_resource type="PackedScene" uid="uid://dblnjb14cqaif" path="res://scenes/tooltip.tscn" id="6_5bups"]
 [ext_resource type="Resource" uid="uid://7qmqgai1xu80" path="res://resources/pieces/tengu.tres" id="6_5xsmt"]
@@ -111,6 +115,10 @@ offset_right = 1.0
 scale = Vector2(1.0102348, 1.0076514)
 mouse_filter = 2
 script = ExtResource("1_atuvt")
+sfx_reroll = ExtResource("2_r3ct4")
+sfx_lock = ExtResource("3_vtn73")
+sfx_unlock = ExtResource("4_mwckc")
+sfx_purchase = ExtResource("5_f0nre")
 piece_origins = Array[ExtResource("2_n3io3")]([ExtResource("3_abbvk"), ExtResource("4_3ro5p"), ExtResource("8_5xsmt"), ExtResource("6_5xsmt"), ExtResource("7_burfl"), ExtResource("5_klwl8"), ExtResource("9_wk1we"), ExtResource("6_h7duq"), ExtResource("11_ht5i3"), ExtResource("12_816qq"), ExtResource("13_7pi7j"), ExtResource("14_ttn3v")])
 passive_origins = Array[ExtResource("9_n3io3")]([ExtResource("10_abbvk"), ExtResource("11_3ro5p"), ExtResource("12_klwl8"), ExtResource("14_burfl"), ExtResource("15_5xsmt")])
 texture_unlocked = ExtResource("21_y1dpo")

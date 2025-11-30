@@ -11,6 +11,13 @@ extends Control
 @onready var reroll_button: TextureButton = $Reroll
 @onready var lock_button: TextureButton = $Lock 
 
+@export_group("Audio")
+@export var sfx_reroll: AudioStream
+@export var sfx_lock: AudioStream
+@export var sfx_unlock: AudioStream
+@export var sfx_purchase: AudioStream
+@export var sfx_bus_name: String = "SFX"
+
 # --- CONFIGURACIÓN ---
 @export_group("Configuración de Items")
 @export var piece_origins: Array[PieceData]
@@ -50,8 +57,12 @@ var reroll_label: Label
 var is_rerolling: bool = false
 
 var _purchase_buffer: Dictionary = {}
-
+var _sfx_player: AudioStreamPlayer 
 func _ready() -> void:
+	_sfx_player = AudioStreamPlayer.new()
+	_sfx_player.name = "StoreSFX"
+	_sfx_player.bus = sfx_bus_name
+	add_child(_sfx_player)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	highlight_material = ShaderMaterial.new()
 	highlight_material.shader = OUTLINE_SHADER
@@ -114,6 +125,10 @@ func _update_lock_visuals() -> void:
 func _on_lock_pressed() -> void:
 	if is_rerolling: return 
 	PlayerData.is_shop_locked = not PlayerData.is_shop_locked
+	if PlayerData.is_shop_locked:
+		_play_sound(sfx_lock)
+	else:
+		_play_sound(sfx_unlock)
 	_update_lock_visuals()
 	_update_reroll_button_visuals()
 	if PlayerData.is_shop_locked:
@@ -282,7 +297,7 @@ func generate():
 		if not PlayerData.has_enough_currency(current_cost):
 			_animate_error_shake(reroll_button)
 			return
-	
+	_play_sound(sfx_reroll)
 	is_rerolling = true
 	reroll_button.disabled = true 
 	
@@ -414,6 +429,7 @@ func _on_piece_slot_pressed(slot) -> void:
 
 	# Si pasa todos los filtros:
 	if PlayerData.spend_currency(price):
+		_play_sound(sfx_purchase)
 		if _purchase_buffer.has(data):
 			_purchase_buffer[data] += 1
 		else:
@@ -454,6 +470,7 @@ func _on_passive_slot_pressed(slot_ref) -> void:
 
 	# 4. Si todo ok -> Compramos
 	if PlayerData.spend_currency(price):
+		_play_sound(sfx_purchase)
 		print("Tienda: Pasiva adquirida: ", data.name_passive if "name_passive" in data else "Pasiva")
 		inventory.add_item(data)
 		slot_ref.disable_interaction()
@@ -620,3 +637,8 @@ func _pick_from_pool(rarity: int) -> Resource:
 	if _pieces_by_rarity.has(rarity) and not _pieces_by_rarity[rarity].is_empty():
 		return _pieces_by_rarity[rarity].pick_random()
 	return null
+func _play_sound(stream: AudioStream) -> void:
+	if stream and _sfx_player:
+		_sfx_player.stream = stream
+		_sfx_player.pitch_scale = randf_range(0.95, 1.05)
+		_sfx_player.play()

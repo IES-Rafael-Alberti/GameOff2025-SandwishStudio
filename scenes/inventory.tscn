@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://hbcgudcjh0wn"]
+[gd_scene load_steps=29 format=3 uid="uid://hbcgudcjh0wn"]
 
 [ext_resource type="Script" uid="uid://cmqqk0nk7sejg" path="res://scripts/inventory.gd" id="1_hj2ta"]
 [ext_resource type="PackedScene" uid="uid://n7qqfs70w4b" path="res://scenes/inventory_slot.tscn" id="2_ty45s"]
@@ -9,6 +9,7 @@
 [ext_resource type="Resource" uid="uid://57d6mtngeb8t" path="res://resources/pieces/draugr.tres" id="5_tla8l"]
 [ext_resource type="Resource" uid="uid://bgw12qinammwu" path="res://resources/pieces/banshie.tres" id="6_w24ly"]
 [ext_resource type="Resource" uid="uid://db80njsmhmbi6" path="res://resources/pieces/jotun.tres" id="7_ohgsq"]
+[ext_resource type="AudioStream" uid="uid://bbhxl02l48n5t" path="res://assets/audios/Inventory/Upgrade.wav" id="8_5kq8a"]
 [ext_resource type="Texture2D" uid="uid://bnarhlk7ktg1q" path="res://assets/inventario/Mesa (1).png" id="8_40feg"]
 [ext_resource type="Texture2D" uid="uid://d32k775bkfw00" path="res://assets/inventario/VIDA.png" id="9_ylenm"]
 [ext_resource type="Texture2D" uid="uid://xr5sxokqvql1" path="res://assets/inventario/ADMG.png" id="10_0df5h"]
@@ -24,6 +25,7 @@
 [ext_resource type="Texture2D" uid="uid://v7nekwjyhuij" path="res://assets/Manzana.png" id="15_5kq8a"]
 [ext_resource type="PackedScene" uid="uid://dblnjb14cqaif" path="res://scenes/tooltip.tscn" id="16_jc13p"]
 [ext_resource type="Texture2D" uid="uid://qkb8tvmapwdv" path="res://assets/Bujero.png" id="18_jc13p"]
+[ext_resource type="AudioStream" uid="uid://cugojh831jnbl" path="res://assets/audios/Inventory/Sell.wav" id="18_y2qpb"]
 [ext_resource type="Texture2D" uid="uid://cq1a6vlkyil2v" path="res://assets/CoinUp.png" id="19_iqxo6"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jc13p"]
@@ -42,6 +44,7 @@ script = ExtResource("1_hj2ta")
 inventory_slot_scene = ExtResource("2_ty45s")
 piece_scene = ExtResource("3_uae8j")
 initial_pieces = Array[ExtResource("4_40feg")]([ExtResource("5_tla8l"), ExtResource("6_w24ly"), ExtResource("7_ohgsq")])
+sfx_merge_item = ExtResource("8_5kq8a")
 
 [node name="MarmolMesa" type="TextureRect" parent="."]
 z_index = -2
@@ -159,6 +162,7 @@ offset_right = 374.0
 offset_bottom = 852.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_jc13p")
 script = ExtResource("4_yyk2a")
+sfx_sell_item = ExtResource("18_y2qpb")
 
 [node name="Sprite2D" type="TextureRect" parent="delete"]
 layout_mode = 0

@@ -47,6 +47,8 @@ var is_game_over_state: bool = false
 @onready var Comic3: TextureRect = $Comic/Fondo/Frag3
 @onready var start_button: TextureButton = $Comic/StartButton
 @onready var comic_fondo: ColorRect = $Comic/Fondo 
+@onready var fuego: TextureRect = $DayFinished/Fuego
+@onready var estrellas: TextureRect = $DayFinished/Estrellas
 
 # --- CURSORES PERSONALIZADOS ---
 @export_group("Cursores Personalizados")
@@ -88,7 +90,7 @@ var blink_interval_min := 2.0
 var blink_interval_max := 5.0
 var blink_time := 0.1
 var options_scene: PackedScene = preload("res://scenes/options.tscn")
-var options_instance: Control = null
+var options_instance: CanvasLayer = null
 var options_animating: bool = false
 var is_tended = true
 var original_positions = {}
@@ -317,21 +319,36 @@ func _show_day_finished_view() -> void:
 	if not day_finished_view:
 		_advance_to_next_day()
 		return
+		
+	# --- LÓGICA DE AUDIO ---
 	if is_game_over_state:
 		MusicManager.play_lose()
 	elif current_day >= max_days:
 		MusicManager.play_win()
 	else:
 		MusicManager.play_day_finished()
+		
 	day_finished_view.visible = true
 	buttonShop.disabled = true
 	
 	if NextDayButton:
 		NextDayButton.visible = false
 		NextDayButton.disabled = true 
-	
+
 	# -----------------------------------------------------------
-	# 1. SETUP INICIAL
+	# NUEVO: AJUSTE VISUAL (FUEGO VS ESTRELLAS) 
+	# -----------------------------------------------------------
+	if is_game_over_state:
+		# Modo Derrota: Fuego visible, Estrellas ocultas
+		if estrellas: estrellas.visible = false
+		if fuego: fuego.visible = true
+	else:
+		# Modo Normal/Victoria: Estrellas visibles, Fuego oculto
+		if estrellas: estrellas.visible = true
+		if fuego: fuego.visible = false
+
+	# -----------------------------------------------------------
+	# 1. SETUP INICIAL UI
 	# -----------------------------------------------------------
 	
 	if transition_rect: 
@@ -378,7 +395,7 @@ func _show_day_finished_view() -> void:
 	
 	var fade_in_list = [fondo_texto, next_day_image, next_day_label, info_label]
 	
-	# CAMBIO: Añadimos SIEMPRE el slider para que se vea el progreso actual antes de romperse
+	# Añadimos SIEMPRE el slider para que se vea el progreso actual antes de romperse
 	if day_slider:
 		fade_in_list.append(day_slider)
 	
@@ -387,7 +404,6 @@ func _show_day_finished_view() -> void:
 		if elem: t.tween_property(elem, "modulate:a", 1.0, 0.5)
 	
 	# 3. ANIMACIONES LÓGICAS (Barra de progreso / Ánfora)
-	# Usamos chain() de nuevo para que ocurra después de que aparezca la UI
 	t.chain().tween_callback(func():
 		var animation_tween : Tween
 		
@@ -692,7 +708,7 @@ func pausar() -> void:
 	print("PAUSAR() llamada -> creando options como menú de pausa")
 	options_animating = true
 
-	options_instance = options_scene.instantiate() as Control
+	options_instance = options_scene.instantiate() as CanvasLayer
 	options_instance.name = "OptionsPause"
 
 	var root := get_tree().root
