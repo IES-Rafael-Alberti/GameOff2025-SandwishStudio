@@ -127,7 +127,8 @@ func _ready() -> void:
 	
 	# Si hemos asignado un sonido de ticker específico
 	if ticker_audio:
-		ticker_audio.bus = "SFX"       
+		ticker_audio.bus = "SFX"
+		ticker_audio.max_polyphony = 12       
 		if sfx_ticker_hit:
 			ticker_audio.stream = sfx_ticker_hit
 	
@@ -291,6 +292,17 @@ func _on_manecilla_area_entered(area: Area2D) -> void:
 	_flash_segment(area) 
 
 func _bounce():
+	# --- 1. LÓGICA DE AUDIO (Siempre se ejecuta) ---
+	if ticker_audio:
+		# Modificamos el pitch según la inercia para dar realismo
+		# Usamos clamp para evitar valores extremos si la inercia es muy alta
+		var pitch = remap(clamp(inertia, 0, 50), 0, 50, 0.7, 1.3)
+		ticker_audio.pitch_scale = pitch
+		
+		# Forzamos la reproducción desde el inicio para que suene cada "clack"
+		ticker_audio.play(0.0)
+
+	# --- 2. LÓGICA VISUAL (Tiene 'cooldown' para evitar glitches) ---
 	if bouncing: return
 	bouncing = true
 	
@@ -301,13 +313,6 @@ func _bounce():
 	spr.rotation_degrees = -bounce_angle
 	spr.position.y -= 4
 	spr.modulate = Color(1.5, 1.5, 1.5)
-	
-	if ticker_audio:
-		# Modificamos el pitch según la inercia para dar realismo
-		var pitch = remap(clamp(inertia, 0, 50), 0, 50, 0.7, 1.3)
-		ticker_audio.pitch_scale = pitch
-		# El stream ya se configuró en _ready con sfx_ticker_hit
-		ticker_audio.play()
 	
 	var t = create_tween()
 	t.set_parallel(true)
