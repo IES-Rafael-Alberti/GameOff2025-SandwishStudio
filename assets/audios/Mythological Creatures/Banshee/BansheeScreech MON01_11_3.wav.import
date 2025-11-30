@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://cusebq4u7i03h"
+path="res://.godot/imported/BansheeScreech MON01_11_3.wav-13f98f36e88f036d94a46b0f14946b22.sample"
+
+[deps]
+
+source_file="res://assets/audios/Mythological Creatures/Banshee/BansheeScreech MON01_11_3.wav"
+dest_files=["res://.godot/imported/BansheeScreech MON01_11_3.wav-13f98f36e88f036d94a46b0f14946b22.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

@@ -123,3 +123,5 @@ position = Vector2(847.27374, 1413.1068)
 
 [node name="EnemyBattleSlot" type="Marker2D" parent="EnemySlots"]
 position = Vector2(1654.9553, 1417.0212)
+
+[node name="AudioNpcs" type="AudioStreamPlayer" parent="."]

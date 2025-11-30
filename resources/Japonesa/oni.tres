@@ -1,7 +1,9 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://d2fw815a8jk0d"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=5 format=3 uid="uid://d2fw815a8jk0d"]
 
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_1t85r"]
 [ext_resource type="SpriteFrames" uid="uid://liwdmac0s7io" path="res://resources/allies_Frames/oni.tres" id="1_3wukw"]
+[ext_resource type="AudioStream" uid="uid://nru3hf7nobgi" path="res://assets/audios/Mythological Creatures/Oni/Oni_Death.wav" id="3_ecuh0"]
+[ext_resource type="AudioStream" uid="uid://cbj3orc1tkddy" path="res://assets/audios/Mythological Creatures/Oni/Oni_Intro.wav" id="4_wa78y"]
 
 [resource]
 script = ExtResource("1_1t85r")
@@ -10,6 +12,8 @@ display_name = "oni"
 race = 1
 rarity = 3
 health_bar_offset = Vector2(-30, -160)
+sfx_spawn = ExtResource("4_wa78y")
+sfx_death = ExtResource("3_ecuh0")
 frames = ExtResource("1_3wukw")
 stats = {
 "BRONCE": {

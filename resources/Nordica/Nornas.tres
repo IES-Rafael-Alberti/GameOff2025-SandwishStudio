@@ -1,7 +1,9 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://dka8rkml1e0dr"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=5 format=3 uid="uid://dka8rkml1e0dr"]
 
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_brl1e"]
 [ext_resource type="SpriteFrames" uid="uid://8sg5xcm4pv0q" path="res://resources/allies_Frames/norna.tres" id="1_lo3au"]
+[ext_resource type="AudioStream" uid="uid://0jqpldbnabsc" path="res://assets/audios/Mythological Creatures/Norna/Norna_Death.wav" id="3_rpxts"]
+[ext_resource type="AudioStream" uid="uid://cvjlg1fyhprvp" path="res://assets/audios/Mythological Creatures/Norna/Norna_Intro.wav" id="4_7bv8e"]
 
 [resource]
 script = ExtResource("1_brl1e")
@@ -10,6 +12,8 @@ display_name = "Nornas"
 race = 0
 rarity = 2
 health_bar_offset = Vector2(-60, -100)
+sfx_spawn = ExtResource("4_7bv8e")
+sfx_death = ExtResource("3_rpxts")
 frames = ExtResource("1_lo3au")
 stats = {
 "BRONCE": {
