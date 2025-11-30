@@ -64,9 +64,9 @@ frame_10/duration = 1.0
 script = ExtResource("1_lbhrr")
 tex_grab = ExtResource("3_264po")
 tex_click = ExtResource("4_1kice")
-gold_round_base = 2
-gladiators_per_day = 4
-max_days = 3
+gold_round_base = 3
+rounds_per_day = 1
+max_days = 1
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
 position = Vector2(36.000004, 39.999996)
