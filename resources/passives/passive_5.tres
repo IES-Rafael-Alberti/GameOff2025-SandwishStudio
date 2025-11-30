@@ -9,4 +9,4 @@ type = 4
 value = 0.5
 name_passive = "Pomegranate of destruction"
 icon = ExtResource("1_c2a1e")
-price = 1
+price = 2

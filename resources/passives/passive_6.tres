@@ -9,5 +9,5 @@ type = 2
 value = 0.3
 name_passive = "Fig of the luck"
 icon = ExtResource("1_pukcq")
-price = 1
+price = 2
 metadata/_custom_type_script = "uid://berngf3tq220v"

@@ -9,4 +9,4 @@ type = 3
 value = 0.1
 name_passive = "Grapes of speed"
 icon = ExtResource("1_jokap")
-price = 1
+price = 2

@@ -99,6 +99,7 @@ offset_top = 394.0
 offset_right = 416.0
 offset_bottom = 394.0
 scale = Vector2(0.8860778, 0.88381195)
+duplicate_passive_mult = 0.33
 prob_comun = 55
 prob_raro = 30
 prob_epico = 13
