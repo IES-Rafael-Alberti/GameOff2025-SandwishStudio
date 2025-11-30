@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=5 format=3 uid="uid://drk6kcqcj2alx"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=6 format=3 uid="uid://drk6kcqcj2alx"]
 
 [ext_resource type="SpriteFrames" uid="uid://osibphf1sb75" path="res://resources/allies_Frames/kappa.tres" id="1_03by8"]
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_vrrwg"]
+[ext_resource type="AudioStream" uid="uid://dt4rt5f5bxp16" path="res://assets/audios/Mythological Creatures/Trasgu/Trasgu_Attack_4 (1).wav" id="3_t4u3a"]
 [ext_resource type="AudioStream" uid="uid://be6w2l7etjxyi" path="res://assets/Sfx/aliados/Kappa_Death.wav" id="3_uup3a"]
 [ext_resource type="AudioStream" uid="uid://d1lulndsxcpjd" path="res://assets/Sfx/aliados/Kappa_Intro.wav" id="4_t4u3a"]
 
@@ -12,6 +13,7 @@ display_name = "Kappa"
 race = 1
 health_bar_offset = Vector2(-40, -100)
 sfx_spawn = ExtResource("4_t4u3a")
+sfx_attack = ExtResource("3_t4u3a")
 sfx_death = ExtResource("3_uup3a")
 frames = ExtResource("1_03by8")
 stats = {

@@ -31,6 +31,7 @@ enum UnitType { GLADIATOR, PIECE }
 @export var sfx_spawn: AudioStream       # cuando aparece
 @export var sfx_attack: AudioStream      # cuando ataca
 @export var sfx_death: AudioStream       # cuando muere
+@export var sfx_attack_variations: Array[AudioStream] = []
 
 func get_stats_for_day(day: int) -> Dictionary:
 	# Fallback: si no hay tabla de stats por día, usamos los campos "legacy"

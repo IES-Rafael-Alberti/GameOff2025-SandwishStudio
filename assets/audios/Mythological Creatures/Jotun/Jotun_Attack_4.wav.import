@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://cemfxfmaa5vs2"
+path="res://.godot/imported/Jotun_Attack_4.wav-757890268ed6e3f2f939f6f15101b066.sample"
+
+[deps]
+
+source_file="res://assets/audios/Mythological Creatures/Jotun/Jotun_Attack_4.wav"
+dest_files=["res://.godot/imported/Jotun_Attack_4.wav-757890268ed6e3f2f939f6f15101b066.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

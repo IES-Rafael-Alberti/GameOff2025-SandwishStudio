@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://dru7liogwfc7b"
+path="res://.godot/imported/Dragon_Attack_3.wav-b0804561b9114cdd65ba101ee79d6324.sample"
+
+[deps]
+
+source_file="res://assets/audios/Mythological Creatures/Dragon/Dragon_Attack_3.wav"
+dest_files=["res://.godot/imported/Dragon_Attack_3.wav-b0804561b9114cdd65ba101ee79d6324.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

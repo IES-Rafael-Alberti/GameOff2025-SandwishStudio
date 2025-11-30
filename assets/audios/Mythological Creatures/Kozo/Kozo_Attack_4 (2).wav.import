@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://ce35t1j4hs45d"
+path="res://.godot/imported/Kozo_Attack_4 (2).wav-6d910b8d95a0982c864f70c32a346355.sample"
+
+[deps]
+
+source_file="res://assets/audios/Mythological Creatures/Kozo/Kozo_Attack_4 (2).wav"
+dest_files=["res://.godot/imported/Kozo_Attack_4 (2).wav-6d910b8d95a0982c864f70c32a346355.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2
