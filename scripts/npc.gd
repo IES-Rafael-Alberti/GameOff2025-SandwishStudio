@@ -6,7 +6,7 @@ signal died(n: npc)
 enum Team { ALLY, ENEMY }
 @export var team: Team = Team.ALLY
 const NpcRes = preload("res://scripts/npc_res.gd")
-
+var is_hovered: bool = false 
 # Speed Atack adaptable
 const ATTACK_SPEED_SOFT_CAP := 2.0   
 const ATTACK_SPEED_HARD_CAP := 4.0   
@@ -64,6 +64,17 @@ func _ready() -> void:
 	if npc_res and npc_res.sfx_spawn and team == Team.ENEMY:
 		play_sfx(npc_res.sfx_spawn, "spawn_enemy")
 	
+
+	if has_node("MouseArea"):
+		var area = get_node("MouseArea")
+		area.mouse_entered.connect(_on_mouse_entered)
+		area.mouse_exited.connect(_on_mouse_exited)
+	else:
+		# Fallback por si olvidaste crearlo, avisa en consola
+		push_warning("NPC: No se encontró 'MouseArea' para el tooltip.")
+	if npc_res and npc_res.sfx_spawn:
+		if team == Team.ENEMY:
+			play_sfx(npc_res.sfx_spawn)
 	# CARGAR STATS BASE
 	if npc_res:
 		var base_hp = max(1.0, npc_res.max_health)
@@ -343,9 +354,12 @@ func take_damage(amount: float, from: npc = null, was_crit: bool = false) -> voi
 	_update_healthbar()
 	if health <= 0.0:
 		_die(from)
+	if is_hovered:
+		_refresh_tooltip()
 
 func _die(killer: npc = null) -> void:
-	# SFX de muerte para TODOS (gladiador y kappa)
+
+	_on_mouse_exited()
 	if npc_res and npc_res.sfx_death:
 		var tag := "death_enemy" if team == Team.ENEMY else "death_ally"
 		play_sfx(npc_res.sfx_death, tag)
@@ -439,3 +453,22 @@ func charge_jap_synergy() -> void:
 	if synergy_jap_tier > 0:
 		jap_special_ready = true
 		# Opcional: Aquí podrías añadir un efecto visual (brillo) para indicar que está cargado
+func _on_mouse_entered() -> void:
+	if team != Team.ENEMY: return
+	
+	is_hovered = true # Marcamos que estamos encima
+	
+	if health <= 0: return
+	_refresh_tooltip()
+
+func _on_mouse_exited() -> void:
+	is_hovered = false # Marcamos que salimos
+	var tooltip_node = get_tree().get_first_node_in_group("tooltip")
+	if tooltip_node:
+		tooltip_node.hide_tooltip()
+
+# NUEVA FUNCIÓN HELPER
+func _refresh_tooltip() -> void:
+	var tooltip_node = get_tree().get_first_node_in_group("tooltip")
+	if tooltip_node and tooltip_node.has_method("show_npc_tooltip"):
+		tooltip_node.show_npc_tooltip(self)

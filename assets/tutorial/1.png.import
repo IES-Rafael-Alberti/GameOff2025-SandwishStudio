@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://3rm1osme8qo3"
-path="res://.godot/imported/banshie.png-cca238743dee08188423e355d180bad1.ctex"
+uid="uid://bausdfrexxmkw"
+path="res://.godot/imported/1.png-d5f61aae6f49010e7f7d0d12d8f79dcd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/piezas/blanco/banshie.png"
-dest_files=["res://.godot/imported/banshie.png-cca238743dee08188423e355d180bad1.ctex"]
+source_file="res://assets/tutorial/1.png"
+dest_files=["res://.godot/imported/1.png-d5f61aae6f49010e7f7d0d12d8f79dcd.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://3rm1osme8qo3"
-path="res://.godot/imported/banshie.png-cca238743dee08188423e355d180bad1.ctex"
+uid="uid://bspui8px3xpni"
+path="res://.godot/imported/AnforaLlena.png-08c7ff6710b1d477270844c82b20852b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/piezas/blanco/banshie.png"
-dest_files=["res://.godot/imported/banshie.png-cca238743dee08188423e355d180bad1.ctex"]
+source_file="res://assets/AnforaLlena.png"
+dest_files=["res://.godot/imported/AnforaLlena.png-08c7ff6710b1d477270844c82b20852b.ctex"]
 
 [params]
 

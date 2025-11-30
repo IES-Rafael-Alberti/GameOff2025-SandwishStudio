@@ -1,21 +1,23 @@
-[gd_scene load_steps=17 format=3 uid="uid://cj8n2p21wqyqt"]
+[gd_scene load_steps=19 format=3 uid="uid://cj8n2p21wqyqt"]
 
 [ext_resource type="Script" uid="uid://5rckgbgfkfc2" path="res://scripts/help_over_lay.gd" id="1_hw84m"]
-[ext_resource type="Texture2D" uid="uid://bbx1q45j0mtkw" path="res://assets/numeros/1.png" id="2_l7um4"]
+[ext_resource type="Texture2D" uid="uid://bausdfrexxmkw" path="res://assets/tutorial/1.png" id="2_ke5am"]
 [ext_resource type="Texture2D" uid="uid://clucu0hyocvrs" path="res://assets/CONTINUENEGRO.png" id="3_fgo0r"]
-[ext_resource type="Texture2D" uid="uid://d10bx8m2mx4st" path="res://assets/numeros/2.png" id="3_i8onr"]
-[ext_resource type="Texture2D" uid="uid://bax64tvmmgwut" path="res://assets/numeros/3.png" id="4_eeyrb"]
-[ext_resource type="Texture2D" uid="uid://dgw4hnfrj5i8c" path="res://assets/numeros/4.png" id="5_u2648"]
-[ext_resource type="Texture2D" uid="uid://nrvmvgwkx5kx" path="res://assets/numeros/5.png" id="6_ke5am"]
-[ext_resource type="Texture2D" uid="uid://dxohkfa48w504" path="res://assets/numeros/6.png" id="7_vie8v"]
-[ext_resource type="Texture2D" uid="uid://b0c23ys2bg6dh" path="res://assets/numeros/7.png" id="8_gh1o7"]
-[ext_resource type="Texture2D" uid="uid://byncgrx8fkjr" path="res://assets/numeros/8.png" id="9_wti8e"]
-[ext_resource type="Texture2D" uid="uid://bvkulmex5ofh5" path="res://assets/numeros/9.png" id="10_0is05"]
-[ext_resource type="Texture2D" uid="uid://cp1bjcydc4w6w" path="res://assets/numeros/10.png" id="11_pbqil"]
-[ext_resource type="Texture2D" uid="uid://c4dy7n4u1td0l" path="res://assets/numeros/11.png" id="12_lw8u6"]
+[ext_resource type="Texture2D" uid="uid://gyghm4f206g3" path="res://assets/tutorial/2.png" id="3_vie8v"]
+[ext_resource type="Texture2D" uid="uid://nk6pw2h2gryq" path="res://assets/tutorial/3.png" id="4_gh1o7"]
+[ext_resource type="Texture2D" uid="uid://8f2ly1o18lqr" path="res://assets/tutorial/4.png" id="5_wti8e"]
+[ext_resource type="Texture2D" uid="uid://b27c06xm87uns" path="res://assets/tutorial/5.png" id="6_0is05"]
+[ext_resource type="Texture2D" uid="uid://d1x1yh7leu4to" path="res://assets/tutorial/6.png" id="7_pbqil"]
+[ext_resource type="Texture2D" uid="uid://bb4bjjutwcev4" path="res://assets/tutorial/7.png" id="8_lw8u6"]
+[ext_resource type="Texture2D" uid="uid://clju5ffom2rj2" path="res://assets/tutorial/8.png" id="9_aaoib"]
+[ext_resource type="Texture2D" uid="uid://cgqua4goigiyw" path="res://assets/tutorial/9.png" id="10_davsl"]
+[ext_resource type="Texture2D" uid="uid://bunpiytju4mi8" path="res://assets/tutorial/10.png" id="11_pl3x7"]
+[ext_resource type="Texture2D" uid="uid://ceaxd3xfsh1cl" path="res://assets/tutorial/11.png" id="12_1weir"]
+[ext_resource type="Texture2D" uid="uid://cukmcmtne8rri" path="res://assets/tutorial/12.png" id="13_b7gt8"]
 [ext_resource type="Texture2D" uid="uid://cfodtyosy8c3o" path="res://assets/help/help.png" id="13_i8onr"]
 [ext_resource type="Script" uid="uid://bhi3o8gkgmkk1" path="res://scripts/help_button.gd" id="14_eeyrb"]
 [ext_resource type="Texture2D" uid="uid://dvc8fw5kbox28" path="res://assets/help/Papiro.png" id="14_i8onr"]
+[ext_resource type="Texture2D" uid="uid://ihk0dyesi1sy" path="res://assets/tutorial/13.png" id="14_vboka"]
 
 [node name="HelpOverLay" type="Control"]
 layout_mode = 3
@@ -25,7 +27,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_hw84m")
-slides = Array[Texture2D]([ExtResource("2_l7um4"), ExtResource("3_i8onr"), ExtResource("4_eeyrb"), ExtResource("5_u2648"), ExtResource("6_ke5am"), ExtResource("7_vie8v"), ExtResource("8_gh1o7"), ExtResource("9_wti8e"), ExtResource("10_0is05"), ExtResource("11_pbqil"), ExtResource("12_lw8u6")])
+slides = Array[Texture2D]([ExtResource("2_ke5am"), ExtResource("3_vie8v"), ExtResource("4_gh1o7"), ExtResource("5_wti8e"), ExtResource("6_0is05"), ExtResource("7_pbqil"), ExtResource("8_lw8u6"), ExtResource("9_aaoib"), ExtResource("10_davsl"), ExtResource("11_pl3x7"), ExtResource("12_1weir"), ExtResource("13_b7gt8"), ExtResource("14_vboka")])
 
 [node name="HelpButton" type="Button" parent="."]
 z_index = 30
@@ -51,19 +53,21 @@ grow_vertical = 2
 texture = ExtResource("14_i8onr")
 
 [node name="SlideCurrent" type="TextureRect" parent="PanelBg"]
+texture_filter = 1
 layout_mode = 0
-offset_left = 128.0
-offset_top = 128.0
-offset_right = 1032.0
-offset_bottom = 576.0
+offset_left = 2.0
+offset_top = 3.0
+offset_right = 1161.0
+offset_bottom = 763.0
 mouse_filter = 2
 
 [node name="SlideNext" type="TextureRect" parent="PanelBg"]
+texture_filter = 1
 layout_mode = 0
-offset_left = 128.0
-offset_top = 128.0
-offset_right = 1032.0
-offset_bottom = 576.0
+offset_left = 2.0
+offset_top = 1.0
+offset_right = 1163.0
+offset_bottom = 761.0
 mouse_filter = 2
 
 [node name="BtnPrev" type="Button" parent="PanelBg"]
@@ -71,11 +75,13 @@ layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 136.0
-offset_right = 272.0
-offset_bottom = 136.0
+offset_left = 101.000015
+offset_top = -6.0
+offset_right = 237.00002
+offset_bottom = 130.0
 grow_vertical = 0
 rotation = 3.1415927
+scale = Vector2(0.7, 0.7)
 icon = ExtResource("3_fgo0r")
 flat = true
 
@@ -86,10 +92,13 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -136.0
-offset_top = -136.0
+offset_left = -96.99988
+offset_top = -99.0
+offset_right = 39.000122
+offset_bottom = 37.0
 grow_horizontal = 0
 grow_vertical = 0
+scale = Vector2(0.7, 0.7)
 icon = ExtResource("3_fgo0r")
 flat = true
 
@@ -100,10 +109,10 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -87.25
-offset_top = -96.0
-offset_right = 87.25
-offset_bottom = -64.0
+offset_left = -75.0
+offset_top = -45.0
+offset_right = 99.5
+offset_bottom = -13.0
 grow_horizontal = 2
 grow_vertical = 0
 
@@ -114,10 +123,10 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -21.0
-offset_top = -184.0
-offset_right = 19.0
-offset_bottom = -106.0
+offset_left = -7.0
+offset_top = -96.0
+offset_right = 35.0
+offset_bottom = -14.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_font_sizes/font_size = 45
+theme_override_font_sizes/font_size = 32

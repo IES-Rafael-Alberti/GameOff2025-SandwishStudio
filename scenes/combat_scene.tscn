@@ -21,12 +21,14 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+mouse_filter = 2
 
 [node name="BattleField" type="TextureRect" parent="Control"]
 layout_mode = 1
 offset_right = 3507.0
 offset_bottom = 739.0
 scale = Vector2(1.4, 1.4)
+mouse_filter = 2
 texture = ExtResource("7_ivkwx")
 
 [node name="Doors" type="TextureRect" parent="Control"]
@@ -34,6 +36,7 @@ layout_mode = 1
 offset_right = 3507.0
 offset_bottom = 739.0
 scale = Vector2(1.4, 1.4)
+mouse_filter = 2
 texture = ExtResource("8_6sw3s")
 
 [node name="pillars" type="TextureRect" parent="Control"]

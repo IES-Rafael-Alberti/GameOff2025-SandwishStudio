@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://3rm1osme8qo3"
-path="res://.godot/imported/banshie.png-cca238743dee08188423e355d180bad1.ctex"
+uid="uid://c7seybp405mf4"
+path="res://.godot/imported/AnforaRota.png-85b7aabc5815a5c44377765fc8df3d70.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/piezas/blanco/banshie.png"
-dest_files=["res://.godot/imported/banshie.png-cca238743dee08188423e355d180bad1.ctex"]
+source_file="res://assets/AnforaRota.png"
+dest_files=["res://.godot/imported/AnforaRota.png-85b7aabc5815a5c44377765fc8df3d70.ctex"]
 
 [params]
 
