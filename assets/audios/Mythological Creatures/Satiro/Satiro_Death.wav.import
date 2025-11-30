@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://civb3l4pby51w"
+path="res://.godot/imported/Satiro_Death.wav-5bcc9c32df7eac64d462a0103bbecca5.sample"
+
+[deps]
+
+source_file="res://assets/audios/Mythological Creatures/Satiro/Satiro_Death.wav"
+dest_files=["res://.godot/imported/Satiro_Death.wav-5bcc9c32df7eac64d462a0103bbecca5.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

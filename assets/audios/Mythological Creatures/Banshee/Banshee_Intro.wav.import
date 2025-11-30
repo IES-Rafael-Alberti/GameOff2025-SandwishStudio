@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://b41i3b8ixm6qg"
+path="res://.godot/imported/Banshee_Intro.wav-407e64ca4b3b97c34639d1c8b861c8fb.sample"
+
+[deps]
+
+source_file="res://assets/audios/Mythological Creatures/Banshee/Banshee_Intro.wav"
+dest_files=["res://.godot/imported/Banshee_Intro.wav-407e64ca4b3b97c34639d1c8b861c8fb.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

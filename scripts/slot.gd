@@ -12,6 +12,10 @@ extends Panel
 @export var tier_silver_texture: Texture2D
 @export var tier_gold_texture: Texture2D
 
+@export_group("Sound Effects")
+@export var sfx_equip_piece: AudioStream   # "Al poner una pieza"
+@export var sfx_unequip_piece: AudioStream # "Al quitar una pieza"
+var sfx_player: AudioStreamPlayer
 # --- SHADER ---
 const OUTLINE_SHADER = preload("res://shaders/outline_highlight.gdshader")
 var highlight_material: ShaderMaterial
@@ -31,6 +35,9 @@ var current_piece_count: int = 0
 @onready var tier_label: TextureRect = $ItemIcon/TierLabel
 
 func _ready():
+	sfx_player = AudioStreamPlayer.new()
+	sfx_player.bus = "SFX"
+	add_child(sfx_player)
 	# 1. Configuración Visual del Highlight
 	if not has_node("Highlight"):
 		var h = Node2D.new()
@@ -90,10 +97,16 @@ func _on_gui_input(event: InputEvent) -> void:
 		if ruleta.is_moving() or not ruleta.is_interactive:
 			return
 
+	# --- NUEVO: Reproducir sonido de quitar ---
+	if sfx_unequip_piece:
+		sfx_player.stream = sfx_unequip_piece
+		sfx_player.pitch_scale = randf_range(0.9, 1.1)
+		sfx_player.play()
+	# ----------------------------------------
+
 	GlobalSignals.piece_returned_from_roulette.emit(current_piece_data)
 	clear_slot()
 	GlobalSignals.synergy_update_requested.emit()
-	
 func _on_mouse_entered() -> void:
 	if occupied and item_icon:
 		item_icon.material = highlight_material
@@ -119,7 +132,10 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 		GlobalSignals.piece_returned_from_roulette.emit(current_piece_data)
 	occupied = true
 	current_piece_data = data.data
-	
+	if sfx_equip_piece:
+		sfx_player.stream = sfx_equip_piece
+		sfx_player.pitch_scale = randf_range(0.9, 1.1)
+		sfx_player.play()
 	if "count" in data:
 		current_piece_count = data.count
 	else:

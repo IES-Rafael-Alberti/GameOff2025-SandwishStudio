@@ -92,7 +92,7 @@ value = 1.0
 tick_count = 50
 script = ExtResource("4_1sggn")
 
-[node name="AudioControl2" type="HSlider" parent="Papiro/Sonidos"]
+[node name="MasterControl" type="HSlider" parent="Papiro/Sonidos"]
 layout_mode = 0
 offset_top = -40.0
 offset_right = 144.0
@@ -102,7 +102,7 @@ value = 1.0
 tick_count = 50
 script = ExtResource("2_yjkok")
 
-[node name="AudioControl" type="HSlider" parent="Papiro/Sonidos"]
+[node name="MusicControl" type="HSlider" parent="Papiro/Sonidos"]
 layout_mode = 0
 offset_top = 16.0
 offset_right = 144.0
@@ -149,6 +149,6 @@ bus = &"Music"
 bus = &"SFX"
 
 [connection signal="value_changed" from="Papiro/Sonidos/SfxControl" to="Papiro/Sonidos/SfxControl" method="_on_value_changed"]
-[connection signal="value_changed" from="Papiro/Sonidos/AudioControl2" to="Papiro/Sonidos/AudioControl2" method="_on_value_changed"]
-[connection signal="value_changed" from="Papiro/Sonidos/AudioControl" to="Papiro/Sonidos/AudioControl" method="_on_value_changed"]
+[connection signal="value_changed" from="Papiro/Sonidos/MasterControl" to="Papiro/Sonidos/MasterControl" method="_on_value_changed"]
+[connection signal="value_changed" from="Papiro/Sonidos/MusicControl" to="Papiro/Sonidos/MusicControl" method="_on_value_changed"]
 [connection signal="pressed" from="Papiro/VBoxContainer/Back" to="." method="_on_back_pressed"]

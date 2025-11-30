@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://dlhux2y3k1fmw"
+path="res://.godot/imported/Kozo_Intro.wav-707c0468f0249396b5bc43e58ca5c11c.sample"
+
+[deps]
+
+source_file="res://assets/audios/Mythological Creatures/Kozo/Kozo_Intro.wav"
+dest_files=["res://.godot/imported/Kozo_Intro.wav-707c0468f0249396b5bc43e58ca5c11c.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

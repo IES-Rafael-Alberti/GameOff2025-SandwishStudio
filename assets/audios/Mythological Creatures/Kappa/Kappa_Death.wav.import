@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://bbgikri7ydc8n"
+path="res://.godot/imported/Kappa_Death.wav-11a3e4d69d59460cb5f78e10ac68ec06.sample"
+
+[deps]
+
+source_file="res://assets/audios/Mythological Creatures/Kappa/Kappa_Death.wav"
+dest_files=["res://.godot/imported/Kappa_Death.wav-11a3e4d69d59460cb5f78e10ac68ec06.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2
