@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://br424r07yr21t"
+path="res://.godot/imported/Laugh2 (1).wav-eb7ba7219af143a0501c45209a9a3895.sample"
+
+[deps]
+
+source_file="res://assets/Sfx/gladiadores/Laugh2 (1).wav"
+dest_files=["res://.godot/imported/Laugh2 (1).wav-eb7ba7219af143a0501c45209a9a3895.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2
