@@ -65,8 +65,8 @@ script = ExtResource("1_lbhrr")
 tex_grab = ExtResource("3_264po")
 tex_click = ExtResource("4_1kice")
 gold_round_base = 2
-gladiators_per_day = 4
-max_days = 3
+rounds_per_day = 1
+gladiators_per_day = 0
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
 position = Vector2(36.000004, 39.999996)
@@ -201,7 +201,7 @@ visible = false
 
 [node name="TransitionRect" type="ColorRect" parent="DayFinished"]
 z_index = 4
-offset_right = 1160.0
+offset_right = 1163.0
 offset_bottom = 759.0
 mouse_filter = 2
 color = Color(0, 0, 0, 1)

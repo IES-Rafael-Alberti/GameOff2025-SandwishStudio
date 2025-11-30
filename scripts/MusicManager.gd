@@ -3,7 +3,7 @@ extends Node
 # --- CONFIGURACIÓN DE PISTAS (RUTAS) ---
 const TRACK_MENU = "res://assets/audios/Music/MusicMainMenu.wav"
 const TRACK_GAMEPLAY = "res://assets/audios/Music/MainMusicGameplay.wav"
-const TRACK_DAY_FINISHED = "res://assets/audios/Music/GoodEndingMusic.wav"
+const TRACK_DAY_FINISHED = "res://assets/audios/Music/EndDayMusic.wav"
 const TRACK_WIN = "res://assets/audios/Music/GoodEndingMusic.wav"
 const TRACK_LOSE = "res://assets/audios/Music/BadEnding-Short.wav"
 
