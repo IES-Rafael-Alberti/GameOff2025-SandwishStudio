@@ -1,7 +1,9 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://ix02fceb4nh1"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=5 format=3 uid="uid://ix02fceb4nh1"]
 
 [ext_resource type="SpriteFrames" uid="uid://mp6dpbb2ijl8" path="res://resources/allies_Frames/valk.tres" id="1_tf6qj"]
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_wtwdx"]
+[ext_resource type="AudioStream" uid="uid://ca7fg3inekahd" path="res://assets/audios/Mythological Creatures/Valquire/Valquire_Death.wav" id="3_udnam"]
+[ext_resource type="AudioStream" uid="uid://cr0q34on0838f" path="res://assets/audios/Mythological Creatures/Valquire/Valquire_Intro.wav" id="4_uyti5"]
 
 [resource]
 script = ExtResource("1_wtwdx")
@@ -10,6 +12,8 @@ display_name = "valkirias"
 race = 0
 rarity = 1
 health_bar_offset = Vector2(-60, -140)
+sfx_spawn = ExtResource("4_uyti5")
+sfx_death = ExtResource("3_udnam")
 frames = ExtResource("1_tf6qj")
 stats = {
 "BRONCE": {

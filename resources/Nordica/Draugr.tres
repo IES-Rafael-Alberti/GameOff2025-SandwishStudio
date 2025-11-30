@@ -1,7 +1,9 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://by0quidpu73s0"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=5 format=3 uid="uid://by0quidpu73s0"]
 
 [ext_resource type="SpriteFrames" uid="uid://cv78gw7w1hu8y" path="res://resources/allies_Frames/draugr.tres" id="1_hd8bf"]
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_tha16"]
+[ext_resource type="AudioStream" uid="uid://bjfukvvkh8lqd" path="res://assets/audios/Mythological Creatures/Draugur/Draugur_Death.wav" id="3_gogko"]
+[ext_resource type="AudioStream" uid="uid://cuaefc2eyh1vt" path="res://assets/audios/Mythological Creatures/Draugur/Draugur_Intro.wav" id="4_wjq1s"]
 
 [resource]
 script = ExtResource("1_tha16")
@@ -9,6 +11,8 @@ id = "Nordic.Draugr"
 display_name = "Draugr"
 race = 0
 health_bar_offset = Vector2(-30, -100)
+sfx_spawn = ExtResource("4_wjq1s")
+sfx_death = ExtResource("3_gogko")
 frames = ExtResource("1_hd8bf")
 stats = {
 "BRONCE": {

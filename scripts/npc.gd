@@ -72,9 +72,6 @@ func _ready() -> void:
 	else:
 		# Fallback por si olvidaste crearlo, avisa en consola
 		push_warning("NPC: No se encontró 'MouseArea' para el tooltip.")
-	if npc_res and npc_res.sfx_spawn:
-		if team == Team.ENEMY:
-			play_sfx(npc_res.sfx_spawn)
 	# CARGAR STATS BASE
 	if npc_res:
 		var base_hp = max(1.0, npc_res.max_health)
@@ -432,8 +429,10 @@ func _setup_healthbar_z() -> void:
 
 func play_sfx(stream: AudioStream, debug_tag: String = "") -> void:
 	if stream == null:
+		print("ERROR: Intenté reproducir un sonido pero el Resource es NULL. Tag: ", debug_tag)
 		return
 	if audio_player == null:
+		print("ERROR: No encuentro el nodo $AudioPlayer en el NPC. Tag: ", debug_tag)
 		return
 
 	audio_player.stream = stream

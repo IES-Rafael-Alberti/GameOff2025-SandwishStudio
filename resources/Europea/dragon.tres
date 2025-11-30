@@ -1,7 +1,9 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://bpflwuvj3jt4f"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=5 format=3 uid="uid://bpflwuvj3jt4f"]
 
 [ext_resource type="SpriteFrames" uid="uid://cfn77wm5oqo8k" path="res://resources/allies_Frames/dragon.tres" id="1_g02va"]
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_x2ot1"]
+[ext_resource type="AudioStream" uid="uid://buhsb1kva2q5a" path="res://assets/audios/Mythological Creatures/Dragon/Dragon_Death.wav" id="3_fs6oh"]
+[ext_resource type="AudioStream" uid="uid://bdpq1l5t7f0wu" path="res://assets/audios/Mythological Creatures/Dragon/Dragon_Intro.wav" id="4_3qg4v"]
 
 [resource]
 script = ExtResource("1_x2ot1")
@@ -9,6 +11,8 @@ id = "european.dragon"
 display_name = "dragon"
 rarity = 3
 health_bar_offset = Vector2(0, -100)
+sfx_spawn = ExtResource("4_3qg4v")
+sfx_death = ExtResource("3_fs6oh")
 frames = ExtResource("1_g02va")
 stats = {
 "BRONCE": {
