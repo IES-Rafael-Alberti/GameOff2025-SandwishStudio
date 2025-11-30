@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://dd8wqmfs2cj1j"]
+[gd_scene load_steps=35 format=3 uid="uid://dd8wqmfs2cj1j"]
 
 [ext_resource type="Script" uid="uid://bpnxk43sopml" path="res://scripts/gameManager.gd" id="1_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://hbcgudcjh0wn" path="res://scenes/inventory.tscn" id="2_lbhrr"]
@@ -17,11 +17,15 @@
 [ext_resource type="PackedScene" uid="uid://bbfqm8pblt056" path="res://scenes/el_jetas.tscn" id="13_trtic"]
 [ext_resource type="Texture2D" uid="uid://dmmr4p1043bpq" path="res://assets/FinDia.png" id="15_e1j6l"]
 [ext_resource type="Texture2D" uid="uid://ca521tx5dgil" path="res://assets/GladsIcon (1).png" id="15_ir15t"]
+[ext_resource type="Texture2D" uid="uid://di7wkggxeot7x" path="res://assets/comic/Viñeta1.png" id="15_wljb1"]
 [ext_resource type="Texture2D" uid="uid://bydll86slt54g" path="res://assets/Anfora.png" id="16_1kice"]
-[ext_resource type="Texture2D" uid="uid://df8aw2ccd8ggn" path="res://assets/unnamed-removebg-preview.png" id="17_1kice"]
+[ext_resource type="Texture2D" uid="uid://056b2dy6mkq5" path="res://assets/comic/Viñeta2.png" id="16_v2yb1"]
+[ext_resource type="Texture2D" uid="uid://cf5sllxm6212o" path="res://assets/comic/Viñeta3.png" id="17_js0lu"]
+[ext_resource type="Texture2D" uid="uid://bspui8px3xpni" path="res://assets/AnforaLlena.png" id="17_suyxu"]
 [ext_resource type="Texture2D" uid="uid://tpgawnkb75gq" path="res://assets/BloqueEndDay (1).png" id="18_5newe"]
-[ext_resource type="Texture2D" uid="uid://cts7aexp87lsc" path="res://assets/Manivela (1).png" id="18_qouja"]
+[ext_resource type="Texture2D" uid="uid://c7seybp405mf4" path="res://assets/AnforaRota.png" id="18_sgl2t"]
 [ext_resource type="Texture2D" uid="uid://clucu0hyocvrs" path="res://assets/CONTINUENEGRO.png" id="19_37s47"]
+[ext_resource type="Script" uid="uid://b7ejyiqikmkoh" path="res://scripts/start_button.gd" id="19_v2yb1"]
 [ext_resource type="Script" uid="uid://b1sgbkjfj17wq" path="res://scripts/next_day_button.gd" id="20_bt5mj"]
 [ext_resource type="Texture2D" uid="uid://yyv8cyuhf0g2" path="res://assets/trellas10.png" id="21_sgl2t"]
 [ext_resource type="Texture2D" uid="uid://dwnpjmet0181f" path="res://assets/trellas25.png" id="22_qouja"]
@@ -60,7 +64,7 @@ script = ExtResource("1_lbhrr")
 tex_grab = ExtResource("3_264po")
 tex_click = ExtResource("4_1kice")
 gold_round_base = 2
-rounds_per_day = 2
+gladiators_per_day = 4
 max_days = 3
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
@@ -68,12 +72,13 @@ position = Vector2(36.000004, 39.999996)
 scale = Vector2(0.35, 0.35)
 scaling_hp_mult = 1.8
 scaling_damage_mult = 1.3
+scaling_speed_flat = 0.15
 scaling_crit_chance_flat = 2.0
 scaling_crit_dmg_flat = 0.1
 defeat_hp_mult = 1.5
 defeat_damage_mult = 1.1
-defeat_speed_flat = 0.2
-defeat_crit_dmg_flat = 0.05
+defeat_speed_flat = 0.1
+defeat_crit_dmg_flat = 0.1
 
 [node name="inventory" parent="." instance=ExtResource("2_lbhrr")]
 z_index = 4
@@ -93,7 +98,6 @@ offset_top = 394.0
 offset_right = 416.0
 offset_bottom = 394.0
 scale = Vector2(0.8860778, 0.88381195)
-duplicate_passive_mult = 0.0
 prob_comun = 55
 prob_raro = 30
 prob_epico = 13
@@ -109,9 +113,9 @@ zoom = Vector2(0.7, 0.7)
 
 [node name="RoundLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 909.0
+offset_left = 905.0
 offset_top = 44.0
-offset_right = 1026.0
+offset_right = 1022.0
 offset_bottom = 92.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
@@ -146,15 +150,66 @@ texture = ExtResource("15_ir15t")
 expand_mode = 1
 stretch_mode = 4
 
+[node name="Comic" type="CanvasLayer" parent="."]
+
+[node name="Fondo" type="ColorRect" parent="Comic"]
+z_index = 10
+offset_right = 1162.0
+offset_bottom = 762.0
+
+[node name="Frag1" type="TextureRect" parent="Comic/Fondo"]
+z_index = 10
+layout_mode = 0
+offset_left = -1.0
+offset_top = 6.0
+offset_right = 1161.0
+offset_bottom = 766.0
+texture = ExtResource("15_wljb1")
+
+[node name="Frag2" type="TextureRect" parent="Comic/Fondo"]
+z_index = 10
+layout_mode = 0
+offset_left = -1.0
+offset_top = 4.0
+offset_right = 1161.0
+offset_bottom = 764.0
+texture = ExtResource("16_v2yb1")
+
+[node name="Frag3" type="TextureRect" parent="Comic/Fondo"]
+z_index = 10
+layout_mode = 0
+offset_left = -1.0
+offset_top = 3.0
+offset_right = 1161.0
+offset_bottom = 763.0
+texture = ExtResource("17_js0lu")
+
+[node name="StartButton" type="TextureButton" parent="Comic"]
+z_index = 10
+offset_left = 1041.0
+offset_top = 650.00006
+offset_right = 1169.0
+offset_bottom = 778.00006
+scale = Vector2(0.7, 0.7)
+texture_normal = ExtResource("19_37s47")
+script = ExtResource("19_v2yb1")
+
 [node name="DayFinished" type="CanvasLayer" parent="."]
 visible = false
+
+[node name="TransitionRect" type="ColorRect" parent="DayFinished"]
+z_index = 4
+offset_right = 1160.0
+offset_bottom = 759.0
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
 
 [node name="NextDayImage" type="TextureRect" parent="DayFinished"]
 z_index = 4
 offset_left = -4.0
 offset_top = -12.0
-offset_right = 1161.0
-offset_bottom = 759.0
+offset_right = 1162.0
+offset_bottom = 762.0
 mouse_filter = 0
 texture = ExtResource("15_e1j6l")
 expand_mode = 2
@@ -174,20 +229,21 @@ offset_top = 317.0
 offset_right = 573.0
 offset_bottom = 831.0
 scale = Vector2(0.5, 0.5)
-max_value = 5.0
+max_value = 3.0
 step = 0.0
 fill_mode = 3
 texture_under = ExtResource("16_1kice")
-texture_progress = ExtResource("17_1kice")
+texture_progress = ExtResource("17_suyxu")
 
 [node name="AnforaRota" type="TextureRect" parent="DayFinished"]
 z_index = 4
-offset_left = 325.0
-offset_top = 333.0
-offset_right = 413.0
-offset_bottom = 563.0
-texture = ExtResource("18_qouja")
+offset_left = 323.0
+offset_top = 323.0
+offset_right = 420.0
+offset_bottom = 574.0
+texture = ExtResource("18_sgl2t")
 expand_mode = 1
+stretch_mode = 4
 
 [node name="FondoTexto" type="TextureRect" parent="DayFinished"]
 z_index = 5
@@ -237,12 +293,14 @@ autowrap_mode = 2
 
 [node name="LoseLabel" type="Label" parent="DayFinished"]
 z_index = 5
-offset_left = 370.0
+offset_left = 153.0
 offset_top = 170.0
-offset_right = 915.0
-offset_bottom = 425.0
+offset_right = 1031.0
+offset_bottom = 286.0
 theme_override_font_sizes/font_size = 48
-text = "You have been executed"
+text = "Your people have rebelled against you.
+You have been executed."
+horizontal_alignment = 1
 autowrap_mode = 2
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]

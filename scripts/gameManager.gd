@@ -41,6 +41,13 @@ var gladiators_defeated: int = 0
 @onready var fondo_texto: TextureRect = $DayFinished/FondoTexto
 @onready var anfora_rota: TextureRect = $DayFinished/AnforaRota
 var is_game_over_state: bool = false
+@onready var comic_root: CanvasLayer = $Comic
+@onready var Comic1: TextureRect = $Comic/Fondo/Frag1
+@onready var Comic2: TextureRect = $Comic/Fondo/Frag2
+@onready var Comic3: TextureRect = $Comic/Fondo/Frag3
+@onready var start_button: TextureButton = $Comic/StartButton
+@onready var comic_fondo: ColorRect = $Comic/Fondo 
+
 # --- CURSORES PERSONALIZADOS ---
 @export_group("Cursores Personalizados")
 @export var tex_grab: Texture2D  ## Arrastra 'Grab.png' (Arrastrar/Agarrar)
@@ -71,7 +78,7 @@ var is_game_over_state: bool = false
 @onready var next_day_label: Label = $DayFinished/NextDayLabel
 @onready var day_slider: TextureProgressBar = $DayFinished/HSlider
 @onready var info_label: RichTextLabel = $DayFinished/InfoLabel
-
+@onready var transition_rect: ColorRect = $DayFinished/TransitionRect
 var _is_clicking: bool = false
 var pupil_offset: Vector2
 var original_eye_texture: Texture2D
@@ -163,7 +170,22 @@ func _ready():
 		lose_restart_button.pressed.connect(_restart_game)
 	else:
 		print("Aviso: No se encontró Lose/RestartButton")
+	if start_button:
+		start_button.pressed.connect(_on_start_button_pressed)
+		start_button.visible = false # Oculto al principio
 
+	# Si es el día 1, lanzamos la intro visual encima del juego
+	if current_day == 1 and current_round == 1:
+		_play_simple_intro()
+		if comic_root: comic_root.visible = true
+		if comic_fondo: comic_fondo.modulate.a = 1.0
+	else:
+		comic_root.visible = false
+	if NextDayButton:
+			NextDayButton.disabled = false
+	if transition_rect:
+			transition_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	
 func _process(delta: float) -> void:
 	# Gestionamos el temporizador del parpadeo
 	blink_timer -= delta
@@ -295,55 +317,89 @@ func _show_day_finished_view() -> void:
 
 	day_finished_view.visible = true
 	buttonShop.disabled = true
-	NextDayButton.visible = false
 	
-	# --- RESETEO DE VISIBILIDAD ---
-	if win_label: 
-		win_label.modulate.a = 0.0
-		win_label.visible_characters = 0  # <--- CAMBIO: Empezar en 0, no en -1
-	if lose_label: 
-		lose_label.modulate.a = 0.0
-		lose_label.visible_characters = 0 # <--- CAMBIO: Empezar en 0
+	if NextDayButton:
+		NextDayButton.visible = false
+		NextDayButton.disabled = true 
 	
-	# Resto de elementos visibles
-	if info_label: info_label.modulate.a = 1.0
-	if day_slider: day_slider.modulate.a = 1.0
-	if next_day_label: next_day_label.modulate.a = 1.0
-	if fondo_texto: fondo_texto.modulate.a = 1.0      
-	if next_day_image: next_day_image.modulate.a = 1.0 
+	# -----------------------------------------------------------
+	# 1. SETUP INICIAL
+	# -----------------------------------------------------------
 	
-	# Gestión de ánforas
-	if day_slider: day_slider.visible = true
-	if anfora_rota: 
-		anfora_rota.visible = false
-		anfora_rota.modulate.a = 0.0
+	if transition_rect: 
+		transition_rect.visible = true 
+		transition_rect.modulate.a = 0.0 # Empezamos transparente
+	
+	var ui_elements = [fondo_texto, next_day_image, next_day_label, info_label, win_label, lose_label, day_slider, anfora_rota]
+	for elem in ui_elements:
+		if elem: elem.modulate.a = 0.0 # Ocultamos todo el contenido UI
 
-	# Textos
-	if next_day_label:
-		next_day_label.text = "Day %d Failed" % current_day if is_game_over_state else "Day %d Finished" % current_day
-
+	# Preparamos los textos
+	if win_label: win_label.visible_characters = 0
+	if lose_label: lose_label.visible_characters = 0
+	
 	if info_label:
 		info_label.bbcode_enabled = true
 		info_label.visible_characters = 0     
 		info_label.text = build_day_summary_text() 
 
-	# --- SECUENCIA DE ANIMACIÓN ---
-	var animation_tween : Tween
+	if day_slider:
+		day_slider.step = 0.0 
+		day_slider.max_value = max_days
+		# Si pierdes el día 2, el slider se queda lleno hasta el 1.
+		day_slider.value = current_day - 1 
+
+	if next_day_label:
+		next_day_label.text = "Day %d Failed" % current_day if is_game_over_state else "Day %d Finished" % current_day
+
+	# -----------------------------------------------------------
+	# 2. SECUENCIA DE ENTRADA
+	# -----------------------------------------------------------
+	var t = create_tween()
 	
-	if is_game_over_state:
-		animation_tween = animate_amphora_break()
+	# PASO A: Fundido a NEGRO (Solo el fondo negro primero)
+	if transition_rect:
+		# Duración de 1.0 segundo para ir a negro
+		t.tween_property(transition_rect, "modulate:a", 1.0, 1.0).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	
+	# PASO B: Aparece la Interfaz (Encadenado DESPUÉS del negro)
+	t.chain()
+	
+	# Ahora animamos todos los elementos de la UI a la vez
+	t.set_parallel(true)
+	
+	var fade_in_list = [fondo_texto, next_day_image, next_day_label, info_label]
+	
+	# CAMBIO: Añadimos SIEMPRE el slider para que se vea el progreso actual antes de romperse
+	if day_slider:
+		fade_in_list.append(day_slider)
+	
+	# Hacemos aparecer la UI sobre el fondo negro
+	for elem in fade_in_list:
+		if elem: t.tween_property(elem, "modulate:a", 1.0, 0.5)
+	
+	# 3. ANIMACIONES LÓGICAS (Barra de progreso / Ánfora)
+	# Usamos chain() de nuevo para que ocurra después de que aparezca la UI
+	t.chain().tween_callback(func():
+		var animation_tween : Tween
+		
+		if is_game_over_state:
+			animation_tween = animate_amphora_break()
+		else:
+			animation_tween = animate_day_progressbar()
+
+		if animation_tween:
+			animation_tween.finished.connect(_start_text_animation)
+		else:
+			_start_text_animation()
+	)
+# Función auxiliar para iniciar el texto (más limpio)
+func _start_text_animation():
+	var t2 = animate_info_text()
+	if t2:
+		t2.finished.connect(_wait_and_decide_flow)
 	else:
-		animation_tween = animate_day_progressbar()
-
-	if animation_tween:
-		animation_tween.finished.connect(func():
-			var t2 = animate_info_text()
-			if t2:
-				t2.finished.connect(func():
-					_wait_and_decide_flow()
-				)
-		)
-
+		_wait_and_decide_flow()
 func _wait_and_decide_flow() -> void:
 	# Si es fin de juego (victoria o derrota), esperamos más tiempo
 	if is_game_over_state or current_day >= max_days:
@@ -415,7 +471,6 @@ func _advance_to_next_day() -> void:
 	
 	_update_ui_labels()
 	set_state(GameState.SHOP)
-	store.generate()
 	store.start_new_round()
 	
 	# Al pasar de día, reseteamos el gladiador y creamos uno nuevo
@@ -754,18 +809,19 @@ func get_active_synergies() -> Dictionary:
 func animate_day_progressbar():
 	if not day_slider:
 		return null
-
-	# Configuramos el máximo igual al número total de días
-	day_slider.max_value = max_days
 	
-	# El valor inicial es el día anterior (donde se quedó la barra ayer)
-	day_slider.value = current_day - 1 
-
+	# El slider YA debería estar visible y en (current_day - 1) gracias al setup anterior.
 	var target_value = current_day
 	
 	var tween := create_tween()
-	# Animamos desde 'ayer' hasta 'hoy'
-	tween.tween_property(day_slider, "value", target_value, 2.5).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	
+	# Pequeña pausa inicial para que el ojo del jugador ubique la barra antes de que se mueva
+	tween.tween_interval(0.3)
+	
+	# Animación fluida hacia el nuevo día
+	tween.tween_property(day_slider, "value", target_value, 2.0)\
+		.set_trans(Tween.TRANS_CUBIC)\
+		.set_ease(Tween.EASE_OUT)
 
 	return tween
 func animate_info_text():
@@ -779,18 +835,22 @@ func animate_info_text():
 func reveal_next_day_button():
 	if not NextDayButton:
 		return
-	if NextDayButton:
-		# Desconectamos si ya estaba conectado en el editor para evitar doble llamada
-		if NextDayButton.pressed.is_connected(_advance_to_next_day):
-			NextDayButton.pressed.disconnect(_advance_to_next_day)
-		# Conectamos a nuestra nueva función de control
+		
+	# Conexión limpia
+	if NextDayButton.pressed.is_connected(_advance_to_next_day):
+		NextDayButton.pressed.disconnect(_advance_to_next_day)
+	if not NextDayButton.pressed.is_connected(_on_next_day_button_pressed):
 		NextDayButton.pressed.connect(_on_next_day_button_pressed)
+		
 	NextDayButton.visible = true
-	NextDayButton.modulate.a = 0.0  # empieza invisible
+	NextDayButton.modulate.a = 0.0
+	
+	NextDayButton.move_to_front()
+	NextDayButton.disabled = false 
+	NextDayButton.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	
 	var tween := create_tween()
-	tween.tween_property(NextDayButton, "modulate:a", 1.0, 1.0) \
-		.set_delay(1) 
+	tween.tween_property(NextDayButton, "modulate:a", 1.0, 1.0)
 func build_day_summary_text() -> String:
 	var rounds_count = rounds_per_day
 	var round_unit_price = daily_gold_salary / rounds_count if rounds_count > 0 else 0
@@ -824,30 +884,62 @@ func _restart_game() -> void:
 	get_tree().change_scene_to_file("res://scenes/menu.tscn")
 	
 func _on_next_day_button_pressed() -> void:
-	# Reiniciamos si es Game Over O si completamos todos los días
+	NextDayButton.disabled = true
+	
+	# CASO 1: FIN DEL JUEGO (Ir al Menú / Reiniciar para ver Cómic)
 	if is_game_over_state or current_day >= max_days:
+		var t = create_tween()
+		t.set_parallel(true)
+		
+		# 1. Aseguramos que el TransitionRect se vuelva NEGRO OPACO
+		if transition_rect: 
+			transition_rect.visible = true
+			transition_rect.color = Color.BLACK 
+			# Forzamos alpha 1.0 (Opaco)
+			t.tween_property(transition_rect, "modulate:a", 1.0, 1.5) # 1.5 segundos para apreciar el negro
+			
+		# 2. Ocultamos la UI para que solo quede el negro
+		var ui_to_hide = [fondo_texto, next_day_label, info_label, win_label, lose_label, day_slider, anfora_rota, NextDayButton, next_day_image]
+		for elem in ui_to_hide:
+			if elem: t.tween_property(elem, "modulate:a", 0.0, 0.5)
+			
+		# 3. IMPORTANTE: Esperamos a que termine el fundido antes de cambiar de escena
+		await t.finished
+		
 		_restart_game()
+
+	# CASO 2: SIGUIENTE DÍA (Juego normal)
 	else:
-		_advance_to_next_day()
+		var t = create_tween()
+		t.set_parallel(true)
+		
+		# Desvanecemos TODO (incluido el fondo negro) para ver la tienda
+		for child in day_finished_view.get_children():
+			if child is CanvasItem:
+				t.tween_property(child, "modulate:a", 0.0, 0.5)
+				
+		t.chain().tween_callback(func():
+			NextDayButton.disabled = false 
+			_advance_to_next_day()
+		)
 func animate_amphora_break():
 	if not day_slider or not anfora_rota:
 		return null
 	
-	# Fijamos el slider en su valor actual (el del día anterior)
-	# No lo llenamos más porque ha perdido.
+	# Aseguramos que el slider muestra el progreso hasta el día anterior
 	day_slider.max_value = max_days
 	day_slider.value = current_day - 1
 	
 	var tween = create_tween()
 	
-	# 1. Pequeña pausa dramática o temblor (opcional)
-	tween.tween_interval(0.5)
+	tween.tween_interval(1.0)
 	
-	# 2. Transición cruzada: Desaparece el slider, aparece el ánfora rota
+
 	tween.tween_callback(func(): anfora_rota.visible = true)
+	
 	tween.set_parallel(true)
-	tween.tween_property(day_slider, "modulate:a", 0.0, 0.5)
-	tween.tween_property(anfora_rota, "modulate:a", 1.0, 0.5)
+	tween.tween_property(day_slider, "modulate:a", 0.0, 0.5).set_trans(Tween.TRANS_SINE)
+	tween.tween_property(anfora_rota, "modulate:a", 1.0, 0.5).set_trans(Tween.TRANS_SINE)
 	
 	return tween
 func _animate_lose_transition() -> void:
@@ -875,3 +967,70 @@ func _animate_lose_transition() -> void:
 	
 	# 4. Mostrar botón
 	t.chain().tween_callback(reveal_next_day_button)
+## ------------------------------------------------------------------
+## INTRO COMIC SIMPLIFICADA
+## ------------------------------------------------------------------
+
+## ------------------------------------------------------------------
+## INTRO COMIC (Versión Final: TextureRect + CanvasLayer)
+## ------------------------------------------------------------------
+
+func _play_simple_intro():
+	# 1. Activamos la capa superior para ver la intro
+	comic_root.visible = true
+	
+	# Aseguramos que el fondo y las viñetas sean opacos al empezar
+	if comic_fondo: comic_fondo.modulate.a = 1.0
+	
+	# Bloqueamos la tienda de fondo para no clicar sin querer
+	buttonShop.disabled = true 
+	
+	# 2. Guardamos posiciones finales (donde las colocaste en el editor)
+	var pos1 = Comic1.position
+	var pos2 = Comic2.position
+	var pos3 = Comic3.position
+	
+	# 3. Posiciones de inicio (Fuera de la pantalla)
+	var screen_size = get_viewport_rect().size
+	
+	Comic1.position.x = -Comic1.size.x - 50      # Fuera Izquierda
+	Comic2.position.x = screen_size.x + 50       # Fuera Derecha
+	Comic3.position.y = screen_size.y + 50       # Fuera Abajo
+	
+	# 4. Secuencia de animación
+	var t = create_tween()
+	
+	# Viñeta 1 (Izquierda -> Centro) - Frena suave
+	t.tween_property(Comic1, "position", pos1, 0.7).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_interval(1) 
+	
+	# Viñeta 2 (Derecha -> Centro)
+	t.tween_property(Comic2, "position", pos2, 0.7).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_interval(1) 
+	
+	# Viñeta 3 (Abajo -> Centro)
+	t.tween_property(Comic3, "position", pos3, 0.7).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	t.tween_interval(1) 
+	
+	# Aparece el botón (Fade In)
+	t.tween_callback(func(): 
+		if start_button:
+			start_button.visible = true
+			start_button.modulate.a = 0.0
+	)
+	if start_button:
+		t.tween_property(start_button, "modulate:a", 1.0, 0.5)
+
+func _on_start_button_pressed():
+	buttonShop.disabled = false
+	
+	var t = create_tween()
+	t.set_parallel(true) 
+	
+	if comic_fondo: 
+		t.tween_property(comic_fondo, "modulate:a", 0.0, 0.5) 
+	
+	if start_button: 
+		t.tween_property(start_button, "modulate:a", 0.0, 0.5)
+	
+	t.chain().tween_callback(func(): comic_root.visible = false)

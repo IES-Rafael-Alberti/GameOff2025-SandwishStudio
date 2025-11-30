@@ -734,7 +734,7 @@ func show_npc_tooltip(unit: npc) -> void:
 	sell_price_label.hide()
 
 	# Aumentado a 340 para que quepan los textos largos tipo "x1.50 (+0.50)"
-	custom_minimum_size = Vector2(340, 0)
+	custom_minimum_size = Vector2(320, 0)
 	
 	show()
 	await get_tree().process_frame
