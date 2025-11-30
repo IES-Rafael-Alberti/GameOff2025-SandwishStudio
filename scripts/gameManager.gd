@@ -90,7 +90,7 @@ var blink_interval_min := 2.0
 var blink_interval_max := 5.0
 var blink_time := 0.1
 var options_scene: PackedScene = preload("res://scenes/options.tscn")
-var options_instance: Control = null
+var options_instance: CanvasLayer = null
 var options_animating: bool = false
 var is_tended = true
 var original_positions = {}
@@ -708,7 +708,7 @@ func pausar() -> void:
 	print("PAUSAR() llamada -> creando options como menú de pausa")
 	options_animating = true
 
-	options_instance = options_scene.instantiate() as Control
+	options_instance = options_scene.instantiate() as CanvasLayer
 	options_instance.name = "OptionsPause"
 
 	var root := get_tree().root

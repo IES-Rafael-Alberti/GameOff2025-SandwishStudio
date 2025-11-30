@@ -12,10 +12,10 @@ z_index = 11
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
-offset_left = 408.0
-offset_top = -324.0
-offset_right = 776.0
-offset_bottom = 316.0
+offset_left = -265.0
+offset_top = -682.0
+offset_right = 103.0
+offset_bottom = -42.0
 grow_vertical = 2
 texture = ExtResource("2_1sggn")
 expand_mode = 1
@@ -139,14 +139,12 @@ bus = &"SFX"
 
 [node name="bg" type="ColorRect" parent="."]
 z_index = 9
-anchors_preset = -1
-anchor_top = -0.001
-anchor_bottom = -0.001
-offset_top = -3.24
-offset_right = 1165.0
-offset_bottom = 763.76
+offset_left = -640.0
+offset_top = -378.0
+offset_right = 511.0
+offset_bottom = 372.0
 mouse_filter = 2
-color = Color(0, 0, 0, 0.36862746)
+color = Color(0, 0, 0, 0.22352941)
 
 [connection signal="value_changed" from="Papiro/Sonidos/SfxControl" to="Papiro/Sonidos/SfxControl" method="_on_value_changed"]
 [connection signal="value_changed" from="Papiro/Sonidos/MasterControl" to="Papiro/Sonidos/MasterControl" method="_on_value_changed"]
