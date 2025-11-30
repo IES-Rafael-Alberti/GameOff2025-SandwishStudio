@@ -305,8 +305,9 @@ func _on_combat_finished(player_won: bool = false, loot_from_combat: int = 0):
 		current_round += 1
 		print("--- Empezando Ronda %d ---" % current_round)
 		_update_ui_labels()
-		set_state(GameState.SHOP)
+		
 		store.start_new_round()
+		set_state(GameState.SHOP)
 		if player_won and combat_scene and combat_scene.has_method("spawn_enemy_one"):
 			combat_scene.spawn_enemy_one()
 
