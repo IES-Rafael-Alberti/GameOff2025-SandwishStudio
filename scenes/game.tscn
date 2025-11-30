@@ -64,7 +64,7 @@ frame_10/duration = 1.0
 script = ExtResource("1_lbhrr")
 tex_grab = ExtResource("3_264po")
 tex_click = ExtResource("4_1kice")
-gold_round_base = 2
+gold_round_base = 3
 gladiators_per_day = 4
 max_days = 3
 

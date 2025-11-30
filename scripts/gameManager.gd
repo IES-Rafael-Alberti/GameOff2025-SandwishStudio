@@ -444,7 +444,8 @@ func _decide_post_summary_flow() -> void:
 # NUEVA FUNCIÓN: Maneja la transición suave de elementos a WinLabel
 func _animate_win_transition() -> void:
 	var t = create_tween()
-	
+	if fuego: fuego.visible = false
+	if estrellas: estrellas.visible = true
 	# 1. Desvanecer elementos del resumen
 	t.set_parallel(true)
 	if info_label: t.tween_property(info_label, "modulate:a", 0.0, 1.0)

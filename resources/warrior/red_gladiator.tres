@@ -3,8 +3,8 @@
 [ext_resource type="SpriteFrames" uid="uid://rjwlxoj38qir" path="res://resources/warrior/red_gladiator_animation.tres" id="1_05mma"]
 [ext_resource type="Script" uid="uid://bd1qpluesymyw" path="res://scripts/npc_res.gd" id="2_lexq0"]
 [ext_resource type="AudioStream" uid="uid://bp4tqvvkchmlr" path="res://assets/Sfx/Gladiaror_Attack_2.wav" id="3_48e5f"]
-[ext_resource type="AudioStream" uid="uid://cymjc0lrj1w2x" path="res://assets/Sfx/gladiadores/Laugh1.wav" id="3_lsjxy"]
 [ext_resource type="AudioStream" uid="uid://dy8ubcgjaengx" path="res://assets/Sfx/Gladiator_Death_4.wav" id="4_vbgsc"]
+[ext_resource type="AudioStream" uid="uid://drnr3lt5bucpv" path="res://assets/Sfx/Laugh2.wav" id="5_48e5f"]
 
 [resource]
 script = ExtResource("2_lexq0")
@@ -44,7 +44,7 @@ critical_damage = 1.25
 raza = "Europeas"
 gold = 3
 health_bar_offset = Vector2(-40, -180)
-sfx_spawn = ExtResource("3_lsjxy")
+sfx_spawn = ExtResource("5_48e5f")
 sfx_attack = ExtResource("3_48e5f")
 sfx_death = ExtResource("4_vbgsc")
 metadata/_custom_type_script = "uid://bd1qpluesymyw"
