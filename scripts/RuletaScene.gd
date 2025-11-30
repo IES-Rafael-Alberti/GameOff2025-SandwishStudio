@@ -84,7 +84,7 @@ var target_zoom: Vector2 = Vector2.ONE
 var last_ratchet_angle: float = 0.0
 
 @export_group("Sound Effects")
-@export var sfx_lever_pull: AudioStream  # Sonido "Clack/Golpe" al soltar la palanca
+@export var sfx_lever_pulled: AudioStream  # Sonido "Clack/Golpe" al soltar la palanca
 @export var sfx_ticker_hit: AudioStream  # Sonido al chocar con eslabones
 @export var sfx_win_piece: AudioStream   # Sonido de victoria
 @export var sfx_lose_spin: AudioStream   # Sonido de fallo
@@ -122,7 +122,7 @@ func _ready() -> void:
 	
 # --- AUDIO SETUP ---
 	general_audio_player = AudioStreamPlayer.new()
-	general_audio_player.bus = "SFX"   # <--- AÑADIR ESTA LÍNEA AQUÍ
+	general_audio_player.bus = "SFX"  
 	add_child(general_audio_player)
 	
 	# Si hemos asignado un sonido de ticker específico
@@ -200,13 +200,10 @@ func update_lever_drag():
 
 func release_lever():
 	is_dragging_lever = false
-	
 	var percentage_pulled = current_lever_rotation / lever_max_angle
-	
 	if percentage_pulled >= activation_threshold:
-		# --- AQUÍ VA EL SONIDO DE LA PALANCA ---
-		if sfx_lever_pull:
-			general_audio_player.stream = sfx_lever_pull
+		if sfx_lever_pulled:
+			general_audio_player.stream = sfx_lever_pulled
 			general_audio_player.pitch_scale = randf_range(0.95, 1.05)
 			general_audio_player.play()
 		# ---------------------------------------

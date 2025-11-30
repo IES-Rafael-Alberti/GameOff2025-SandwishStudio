@@ -106,6 +106,7 @@ prob_epico = 13
 z_index = 4
 position = Vector2(132, 361.00003)
 scale = Vector2(0.8845031, 0.8845031)
+sfx_lever_pull = null
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(902, 590)

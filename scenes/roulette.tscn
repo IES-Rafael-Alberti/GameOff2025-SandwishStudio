@@ -41,7 +41,7 @@ colors = PackedColorArray(1, 1, 1, 1, 0.99215686, 0.47058824, 0, 1, 1, 0, 0, 1)
 
 [node name="Roulette" type="Node2D"]
 script = ExtResource("1_jyskt")
-sfx_lever_pull = ExtResource("2_lp4gq")
+sfx_lever_pulled = ExtResource("2_lp4gq")
 sfx_ticker_hit = ExtResource("3_waas3")
 sfx_win_piece = ExtResource("4_lp4gq")
 sfx_lose_spin = ExtResource("5_waas3")
