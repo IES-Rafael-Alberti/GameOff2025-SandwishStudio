@@ -1,8 +1,10 @@
-[gd_resource type="Resource" script_class="npcRes" load_steps=4 format=3 uid="uid://btb28eu76jyan"]
+[gd_resource type="Resource" script_class="npcRes" load_steps=6 format=3 uid="uid://btb28eu76jyan"]
 
 [ext_resource type="SpriteFrames" uid="uid://binkgvqygxeqd" path="res://resources/warrior/purple_gladiator_animation.tres" id="1_kgmlj"]
 [ext_resource type="Script" uid="uid://bd1qpluesymyw" path="res://scripts/npc_res.gd" id="2_36jfr"]
-[ext_resource type="AudioStream" uid="uid://cymjc0lrj1w2x" path="res://assets/Sfx/gladiadores/Laugh1.wav" id="3_1e03v"]
+[ext_resource type="AudioStream" uid="uid://dgj275a5vipxi" path="res://assets/Sfx/gladiadores/Gladiaror_Attack_5.wav" id="3_1s88v"]
+[ext_resource type="AudioStream" uid="uid://bgtd6j6ibsio6" path="res://assets/Sfx/gladiadores/Gladiator_Death_4 (1).wav" id="4_jnc16"]
+[ext_resource type="AudioStream" uid="uid://box2n68ms8jcv" path="res://assets/audios/Gladiators/Laugh3.wav" id="5_0tbto"]
 
 [resource]
 script = ExtResource("2_36jfr")
@@ -42,5 +44,7 @@ critical_damage = 1.25
 description = "The easiest enemy"
 gold = 3
 health_bar_offset = Vector2(-40, -180)
-sfx_spawn = ExtResource("3_1e03v")
+sfx_spawn = ExtResource("5_0tbto")
+sfx_attack = ExtResource("3_1s88v")
+sfx_death = ExtResource("4_jnc16")
 metadata/_custom_type_script = "uid://bd1qpluesymyw"
