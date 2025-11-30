@@ -1,10 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://bcbwubibdy7an"]
+[gd_scene load_steps=3 format=3 uid="uid://bcbwubibdy7an"]
 
 [ext_resource type="Script" uid="uid://fxaw6plqdeiu" path="res://scripts/options.gd" id="1_2iy26"]
 [ext_resource type="Texture2D" uid="uid://h3wjlov8ppq4" path="res://assets/help/PapiroVertical.png" id="2_1sggn"]
-[ext_resource type="Script" uid="uid://0pff7ugxf2r7" path="res://scripts/audio_control.gd" id="2_yjkok"]
-[ext_resource type="Script" uid="uid://ciwosb514mrs5" path="res://scripts/sfx_control.gd" id="4_1sggn"]
-[ext_resource type="AudioStream" uid="uid://ch0hnly1m0mxu" path="res://music/casino-lottery-casino-gambling-music-406445.mp3" id="4_kv8mn"]
 
 [node name="Menu" type="Control"]
 process_mode = 3
@@ -69,17 +66,17 @@ offset_right = -22.0
 offset_bottom = 45.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 26
-text = "Audio"
+text = "Music"
 
 [node name="SFX" type="Label" parent="Papiro/Sonidos"]
 layout_mode = 0
-offset_left = -56.0
-offset_top = 48.0
-offset_right = -11.0
-offset_bottom = 93.0
+offset_left = -98.0
+offset_top = 47.0
+offset_right = -26.0
+offset_bottom = 92.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 26
-text = "Sfx"
+text = "Effects"
 
 [node name="SfxControl" type="HSlider" parent="Papiro/Sonidos"]
 layout_mode = 0
@@ -90,9 +87,8 @@ max_value = 1.0
 step = 0.05
 value = 1.0
 tick_count = 50
-script = ExtResource("4_1sggn")
 
-[node name="AudioControl2" type="HSlider" parent="Papiro/Sonidos"]
+[node name="MasterControl" type="HSlider" parent="Papiro/Sonidos"]
 layout_mode = 0
 offset_top = -40.0
 offset_right = 144.0
@@ -100,9 +96,8 @@ max_value = 1.0
 step = 0.05
 value = 1.0
 tick_count = 50
-script = ExtResource("2_yjkok")
 
-[node name="AudioControl" type="HSlider" parent="Papiro/Sonidos"]
+[node name="MusicControl" type="HSlider" parent="Papiro/Sonidos"]
 layout_mode = 0
 offset_top = 16.0
 offset_right = 144.0
@@ -111,7 +106,6 @@ max_value = 1.0
 step = 0.05
 value = 1.0
 tick_count = 50
-script = ExtResource("2_yjkok")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Papiro"]
 custom_minimum_size = Vector2(1, 0)
@@ -141,7 +135,6 @@ text = "Back
 "
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("4_kv8mn")
 autoplay = true
 bus = &"Music"
 
@@ -149,6 +142,6 @@ bus = &"Music"
 bus = &"SFX"
 
 [connection signal="value_changed" from="Papiro/Sonidos/SfxControl" to="Papiro/Sonidos/SfxControl" method="_on_value_changed"]
-[connection signal="value_changed" from="Papiro/Sonidos/AudioControl2" to="Papiro/Sonidos/AudioControl2" method="_on_value_changed"]
-[connection signal="value_changed" from="Papiro/Sonidos/AudioControl" to="Papiro/Sonidos/AudioControl" method="_on_value_changed"]
+[connection signal="value_changed" from="Papiro/Sonidos/MasterControl" to="Papiro/Sonidos/MasterControl" method="_on_value_changed"]
+[connection signal="value_changed" from="Papiro/Sonidos/MusicControl" to="Papiro/Sonidos/MusicControl" method="_on_value_changed"]
 [connection signal="pressed" from="Papiro/VBoxContainer/Back" to="." method="_on_back_pressed"]

@@ -104,9 +104,8 @@ var daily_gold_loot: int = 0
 ## ------------------------------------------------------------------
 
 func _ready():
-	# IMPORTANTE: Añadir al grupo para que SynergyIcon pueda encontrarnos
 	add_to_group("game_manager")
-	
+	MusicManager.play_gameplay()
 	_apply_default_cursors()
 	
 	if buttonShop: buttonShop.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
@@ -314,7 +313,12 @@ func _show_day_finished_view() -> void:
 	if not day_finished_view:
 		_advance_to_next_day()
 		return
-
+	if is_game_over_state:
+		MusicManager.play_lose()
+	elif current_day >= max_days:
+		MusicManager.play_win()
+	else:
+		MusicManager.play_day_finished()
 	day_finished_view.visible = true
 	buttonShop.disabled = true
 	
@@ -456,6 +460,7 @@ func _show_win_view() -> void:
 		push_error("GameManager: No se encontró el nodo 'Win'.")
 
 func _advance_to_next_day() -> void:
+	MusicManager.play_gameplay()
 	print("Iniciando Día %d..." % (current_day + 1))
 	current_day += 1
 	current_round = 1
@@ -944,7 +949,6 @@ func animate_amphora_break():
 	return tween
 func _animate_lose_transition() -> void:
 	var t = create_tween()
-	
 	# 1. Ocultar elementos del resumen
 	t.set_parallel(true)
 	if info_label: t.tween_property(info_label, "modulate:a", 0.0, 1.0)

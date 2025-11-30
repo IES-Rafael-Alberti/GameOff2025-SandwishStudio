@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="npcRes" load_steps=3 format=3 uid="uid://bsecr6d6j63jr"]
+[gd_resource type="Resource" script_class="npcRes" load_steps=4 format=3 uid="uid://bsecr6d6j63jr"]
 
 [ext_resource type="SpriteFrames" uid="uid://dxylk5lisg7lo" path="res://resources/warrior/armor_gladiator_animation.tres" id="1_73cgy"]
 [ext_resource type="Script" uid="uid://bd1qpluesymyw" path="res://scripts/npc_res.gd" id="2_2xtdc"]
+[ext_resource type="AudioStream" uid="uid://cymjc0lrj1w2x" path="res://assets/Sfx/gladiadores/Laugh1.wav" id="3_fb0en"]
 
 [resource]
 script = ExtResource("2_2xtdc")
@@ -41,4 +42,5 @@ critical_damage = 1.25
 raza = "Japonesas"
 gold = 3
 health_bar_offset = Vector2(-20, -180)
+sfx_spawn = ExtResource("3_fb0en")
 metadata/_custom_type_script = "uid://bd1qpluesymyw"

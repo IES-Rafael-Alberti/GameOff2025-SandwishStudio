@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://ca7fg3inekahd"
+path="res://.godot/imported/Valquire_Death.wav-b354c2f05422161a6169493e63af0758.sample"
+
+[deps]
+
+source_file="res://assets/audios/Mythological Creatures/Valquire/Valquire_Death.wav"
+dest_files=["res://.godot/imported/Valquire_Death.wav-b354c2f05422161a6169493e63af0758.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

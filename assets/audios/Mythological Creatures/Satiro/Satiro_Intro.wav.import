@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://cejdaevq7s31n"
+path="res://.godot/imported/Satiro_Intro.wav-872c8b6fd72e72b8688c999d28b7b99d.sample"
+
+[deps]
+
+source_file="res://assets/audios/Mythological Creatures/Satiro/Satiro_Intro.wav"
+dest_files=["res://.godot/imported/Satiro_Intro.wav-872c8b6fd72e72b8688c999d28b7b99d.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

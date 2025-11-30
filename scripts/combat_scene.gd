@@ -313,7 +313,14 @@ func _spawn_npc(team: int, pos: Vector2, res_override: npcRes = null) -> npc:
 				push_warning("NPC no tiene metodo apply_synergies")
 	
 	get_node("npcs").add_child(n)
-
+	
+	if n.npc_res and n.npc_res.sfx_spawn:
+		if team == npc.Team.ENEMY:
+			# Cada vez que aparece un nuevo gladiador
+			n.play_sfx(n.npc_res.sfx_spawn)
+		elif team == npc.Team.ALLY and not ally_spawn_sfx_played:
+			ally_spawn_sfx_played = true
+			n.play_sfx(n.npc_res.sfx_spawn)
 	# APLICAR BONUS A ENEMIGOS
 	if team == npc.Team.ENEMY:
 		n.gold_pool = int(n.npc_res.gold)
@@ -407,14 +414,14 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 	
 	if team == npc.Team.ALLY:
 		num_copies = _get_piece_copies_owned(piece)
-		print(_get_piece_copies_owned(piece))
+		print("Número de copias de la pieza en inventario: ", num_copies)
 
 	var pack: Dictionary = PieceAdapter.to_npc_res(piece, num_copies, gold_per_enemy)
 	var npc_template: npcRes = pack["res"]
 	var members: int = int(pack["members"])
 
 	if team == npc.Team.ALLY:
-		ally_spawn_sfx_played = false   # 🔹 reseteamos por tirada
+		ally_spawn_sfx_played = false
 
 		var free_slots_limit := ALLY_LIMIT - ally_npcs.size()
 		if free_slots_limit <= 0:
@@ -440,10 +447,10 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 			if n:
 				ally_npcs.append(n)
 
-				# 🔊 Solo el PRIMER aliado reproduce el sfx_spawn
 				if (not ally_spawn_sfx_played) and n.npc_res and n.npc_res.sfx_spawn:
 					ally_spawn_sfx_played = true
-					n.play_sfx(n.npc_res.sfx_spawn)
+					print("[SPAWN ALLY] Reproduciendo sfx_spawn del kappa")
+					n.play_sfx(n.npc_res.sfx_spawn, "spawn_ally")
 
 				var order_index := ally_spawn_order_counter
 				ally_spawn_order_counter += 1
@@ -457,8 +464,7 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 			pre_battle_wait_time = 0.5
 		return
 
-	# Enemigos igual que antes
-	var e := _spawn_npc(team, enemy_spawn.position, npc_template)
+	var e: npc = _spawn_npc(team, enemy_spawn.position, npc_template)
 	if e:
 		enemy_npcs.append(e)
 

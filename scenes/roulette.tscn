@@ -1,11 +1,15 @@
-[gd_scene load_steps=23 format=3 uid="uid://bv3r20c0gu33v"]
+[gd_scene load_steps=27 format=3 uid="uid://bv3r20c0gu33v"]
 
 [ext_resource type="Script" uid="uid://dtl8tlso00w8f" path="res://scripts/RuletaScene.gd" id="1_jyskt"]
 [ext_resource type="Texture2D" uid="uid://dpcgv05fqqjag" path="res://assets/Manivela (1) (1).png" id="2_gils2"]
 [ext_resource type="Texture2D" uid="uid://go30fno5akpc" path="res://assets/ruleta.png" id="2_jyskt"]
+[ext_resource type="AudioStream" uid="uid://betfmoetn63cl" path="res://assets/audios/Ruleta/Lever.mp3" id="2_lp4gq"]
+[ext_resource type="AudioStream" uid="uid://ctdi0ipu2h6tt" path="res://assets/audios/Ruleta/Roulette_Tick.wav" id="3_waas3"]
 [ext_resource type="Script" uid="uid://d1s3pk6cls46q" path="res://scripts/RouletteSlice.gd" id="4_jyskt"]
 [ext_resource type="PackedScene" uid="uid://htgfpif7ey68" path="res://scenes/rouletteSlot.tscn" id="4_k6evh"]
+[ext_resource type="AudioStream" uid="uid://cikxfw6g1xrse" path="res://assets/audios/Ruleta/Roulette success.mp3" id="4_lp4gq"]
 [ext_resource type="Texture2D" uid="uid://qmthj5xqadhq" path="res://assets/Manilla (1).png" id="5_jyskt"]
+[ext_resource type="AudioStream" uid="uid://csqri5yq1y2gd" path="res://assets/audios/Ruleta/Roulette Fail.wav" id="5_waas3"]
 [ext_resource type="Script" uid="uid://bdsnaco1ib6yi" path="res://scripts/SynergyIcon.gd" id="7_ekxsn"]
 [ext_resource type="Texture2D" uid="uid://brk5bpdrbjn2g" path="res://assets/sinergias/Europa0.png" id="8_6wnlc"]
 [ext_resource type="Texture2D" uid="uid://ba3u3ku76qdbh" path="res://assets/sinergias/Europa1.png" id="9_lp4gq"]
@@ -37,6 +41,10 @@ colors = PackedColorArray(1, 1, 1, 1, 0.99215686, 0.47058824, 0, 1, 1, 0, 0, 1)
 
 [node name="Roulette" type="Node2D"]
 script = ExtResource("1_jyskt")
+sfx_lever_pulled = ExtResource("2_lp4gq")
+sfx_ticker_hit = ExtResource("3_waas3")
+sfx_win_piece = ExtResource("4_lp4gq")
+sfx_lose_spin = ExtResource("5_waas3")
 
 [node name="Lever" type="Sprite2D" parent="."]
 position = Vector2(878.9862, 259.94424)

@@ -22,6 +22,7 @@ PlayerData="*res://scripts/PlayerData.gd"
 GlobalSignals="*res://scripts/GlobalSignals.gd"
 Piece_Registry="*res://scripts/piece_Registry.gd"
 GlobalStats="*res://scripts/GlobalStats.gd"
+MusicManager="*res://scripts/MusicManager.gd"
 
 [display]
 
@@ -29,6 +30,10 @@ window/size/viewport_width=1162
 window/size/viewport_height=760
 window/stretch/mode="canvas_items"
 mouse_cursor/custom_image="uid://cf1q24t2cbbxr"
+
+[global]
+
+Music=false
 
 [gui]
 

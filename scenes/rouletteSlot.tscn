@@ -1,10 +1,12 @@
-[gd_scene load_steps=8 format=3 uid="uid://htgfpif7ey68"]
+[gd_scene load_steps=10 format=3 uid="uid://htgfpif7ey68"]
 
 [ext_resource type="Script" uid="uid://b31agultlt6fo" path="res://scripts/slot.gd" id="1_maf36"]
 [ext_resource type="Texture2D" uid="uid://d0al5yh7duq6o" path="res://assets/Cobre.png" id="2_xak2l"]
 [ext_resource type="Texture2D" uid="uid://cppy60udk4jof" path="res://assets/Plata.png" id="3_fwdjn"]
 [ext_resource type="Texture2D" uid="uid://k13roxfvtox4" path="res://assets/Oro.png" id="4_xtxh1"]
 [ext_resource type="Texture2D" uid="uid://cwqtvqvdphf8d" path="res://assets/QuesoVacio9.png" id="5_tvb4g"]
+[ext_resource type="AudioStream" uid="uid://xi0nuqbi2t2e" path="res://assets/audios/Ruleta/Colocar-Pieza-Ruleta.wav" id="5_xtxh1"]
+[ext_resource type="AudioStream" uid="uid://1ydlno5ldcea" path="res://assets/audios/Ruleta/Quitar-Piza-Ruleta.wav" id="6_2u5uu"]
 [ext_resource type="Script" uid="uid://c6rhjw1v1sv7k" path="res://scenes/bitmap.gd" id="6_xak2l"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tvb4g"]
@@ -33,6 +35,8 @@ script = ExtResource("1_maf36")
 tier_bronze_texture = ExtResource("2_xak2l")
 tier_silver_texture = ExtResource("3_fwdjn")
 tier_gold_texture = ExtResource("4_xtxh1")
+sfx_equip_piece = ExtResource("5_xtxh1")
+sfx_unequip_piece = ExtResource("6_2u5uu")
 
 [node name="ItemIcon" type="TextureRect" parent="slot"]
 layout_mode = 0

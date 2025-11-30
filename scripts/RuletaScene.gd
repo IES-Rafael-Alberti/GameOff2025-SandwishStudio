@@ -83,6 +83,12 @@ var shake_trauma: float = 0.0
 var target_zoom: Vector2 = Vector2.ONE
 var last_ratchet_angle: float = 0.0
 
+@export_group("Sound Effects")
+@export var sfx_lever_pulled: AudioStream  # Sonido "Clack/Golpe" al soltar la palanca
+@export var sfx_ticker_hit: AudioStream  # Sonido al chocar con eslabones
+@export var sfx_win_piece: AudioStream   # Sonido de victoria
+@export var sfx_lose_spin: AudioStream   # Sonido de fallo
+var general_audio_player: AudioStreamPlayer
 # --- INICIO ---
 func _ready() -> void:
 	# Configurar material de hover
@@ -113,6 +119,17 @@ func _ready() -> void:
 		
 	if manecilla_area:
 		manecilla_area.area_entered.connect(_on_manecilla_area_entered)
+	
+# --- AUDIO SETUP ---
+	general_audio_player = AudioStreamPlayer.new()
+	general_audio_player.bus = "SFX"  
+	add_child(general_audio_player)
+	
+	# Si hemos asignado un sonido de ticker específico
+	if ticker_audio:
+		ticker_audio.bus = "SFX"       
+		if sfx_ticker_hit:
+			ticker_audio.stream = sfx_ticker_hit
 	
 	# INICIALIZAR LA UI DE SINERGIAS
 	update_ui_synergies()
@@ -183,10 +200,14 @@ func update_lever_drag():
 
 func release_lever():
 	is_dragging_lever = false
-	
 	var percentage_pulled = current_lever_rotation / lever_max_angle
-	
 	if percentage_pulled >= activation_threshold:
+		if sfx_lever_pulled:
+			general_audio_player.stream = sfx_lever_pulled
+			general_audio_player.pitch_scale = randf_range(0.95, 1.05)
+			general_audio_player.play()
+		# ---------------------------------------
+
 		trigger_spin()
 		shake_trauma = 0.6
 		
@@ -210,7 +231,6 @@ func release_lever():
 		t.tween_property(lever_sprite, "scale", Vector2.ONE, 0.3)
 		t.chain().tween_callback(func(): lever_sprite.position = lever_origin_pos)
 		GlobalSignals.emit_signal("roulette_state_changed", true)
-
 # --- LÓGICA CENTRAL ---
 func trigger_spin():
 	_reset()
@@ -283,8 +303,10 @@ func _bounce():
 	spr.modulate = Color(1.5, 1.5, 1.5)
 	
 	if ticker_audio:
+		# Modificamos el pitch según la inercia para dar realismo
 		var pitch = remap(clamp(inertia, 0, 50), 0, 50, 0.7, 1.3)
 		ticker_audio.pitch_scale = pitch
+		# El stream ya se configuró en _ready con sfx_ticker_hit
 		ticker_audio.play()
 	
 	var t = create_tween()
@@ -293,7 +315,6 @@ func _bounce():
 	t.tween_property(spr, "position", orig_pos, bounce_time)
 	t.tween_property(spr, "modulate", Color.WHITE, 0.1)
 	t.chain().tween_callback(func(): bouncing = false)
-
 # --- RECOMPENSAS ---
 func _impact_slot(area: Area2D) -> void:
 	if not "slot_index" in area: return
@@ -347,11 +368,13 @@ func _reward():
 		win_particles.emitting = true
 
 	if not _selected_area or not "slot_index" in _selected_area:
+		_play_result_sound(false) # SONIDO DE PERDER
 		GlobalSignals.emit_signal("combat_requested", null)
 		return
 	
 	var index: int = _selected_area.slot_index
 	if index >= slots_container.get_child_count():
+		_play_result_sound(false) # SONIDO DE PERDER
 		GlobalSignals.emit_signal("combat_requested", null)
 		return
 
@@ -367,9 +390,6 @@ func _reward():
 			t.tween_property(actual_slot, "modulate", final_highlight_color, 0.3)
 			t.chain().tween_property(actual_slot, "modulate", Color.WHITE, 0.5) 
 
-			if winning_slot_root.has_method("kill_highlight_tween"):
-				winning_slot_root.kill_highlight_tween()
-			
 			if winning_slot_root.has_method("kill_highlight_tween"):
 				winning_slot_root.kill_highlight_tween()
 
@@ -388,9 +408,11 @@ func _reward():
 			var piece = actual_slot.current_piece_data
 			if piece and piece.get("piece_origin"):
 				print("¡Pieza obtenida: %s!" % piece.resource_name)
+				_play_result_sound(true) # SONIDO DE GANAR
 				GlobalSignals.emit_signal("combat_requested", piece.piece_origin)
 				return
 	
+	_play_result_sound(false) # SONIDO DE PERDER (Slot vacío)
 	GlobalSignals.emit_signal("combat_requested", null)
 
 func _reset():
@@ -510,3 +532,12 @@ func get_current_synergies() -> Dictionary:
 	elif counts["eur_count"] >= 2: result["eur"] = 1
 	
 	return result
+func _play_result_sound(is_win: bool):
+	if is_win and sfx_win_piece:
+		general_audio_player.stream = sfx_win_piece
+		general_audio_player.pitch_scale = 1.0
+		general_audio_player.play()
+	elif not is_win and sfx_lose_spin:
+		general_audio_player.stream = sfx_lose_spin
+		general_audio_player.pitch_scale = randf_range(0.9, 1.0)
+		general_audio_player.play()
