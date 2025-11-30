@@ -101,6 +101,7 @@ func _on_gui_input(event: InputEvent) -> void:
 	if sfx_unequip_piece:
 		sfx_player.stream = sfx_unequip_piece
 		sfx_player.pitch_scale = randf_range(0.9, 1.1)
+		sfx_player.volume_db = -20
 		sfx_player.play()
 	# ----------------------------------------
 
@@ -135,6 +136,7 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 	if sfx_equip_piece:
 		sfx_player.stream = sfx_equip_piece
 		sfx_player.pitch_scale = randf_range(0.9, 1.1)
+		sfx_player.volume_db = -20
 		sfx_player.play()
 	if "count" in data:
 		current_piece_count = data.count

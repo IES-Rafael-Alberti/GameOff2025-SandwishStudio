@@ -4,6 +4,9 @@ var options_scene: PackedScene = preload("res://scenes/options.tscn")
 var options_instance: Control = null
 var is_animating: bool = false
 
+func _ready() -> void:
+	MusicManager.play_menu()
+
 func _on_play_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/game.tscn")
 
