@@ -65,8 +65,8 @@ script = ExtResource("1_lbhrr")
 tex_grab = ExtResource("3_264po")
 tex_click = ExtResource("4_1kice")
 gold_round_base = 2
-rounds_per_day = 1
-gladiators_per_day = 0
+gladiators_per_day = 4
+max_days = 3
 
 [node name="combat_scene" parent="." instance=ExtResource("3_lnu2h")]
 position = Vector2(36.000004, 39.999996)
@@ -114,18 +114,18 @@ zoom = Vector2(0.7, 0.7)
 
 [node name="RoundLabel" type="Label" parent="."]
 z_index = 4
-offset_left = 905.0
+offset_left = 902.0
 offset_top = 44.0
-offset_right = 1022.0
+offset_right = 1019.0
 offset_bottom = 92.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 28
 
 [node name="TextureRect" type="TextureRect" parent="RoundLabel"]
 layout_mode = 0
-offset_left = -50.0
+offset_left = -45.0
 offset_top = 6.0
-offset_right = 1725.0
+offset_right = 1730.0
 offset_bottom = 1633.0
 scale = Vector2(0.021465681, 0.020558907)
 texture = ExtResource("12_trtic")
