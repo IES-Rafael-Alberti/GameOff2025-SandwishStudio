@@ -69,6 +69,7 @@ scale = Vector2(0.13809647, 0.13680618)
 texture = ExtResource("2_jyskt")
 
 [node name="TickSound" type="AudioStreamPlayer2D" parent="SpriteRuleta"]
+max_polyphony = 30
 
 [node name="SoundWin" type="AudioStreamPlayer2D" parent="SpriteRuleta"]
 

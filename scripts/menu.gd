@@ -1,7 +1,7 @@
 extends Control
 
 var options_scene: PackedScene = preload("res://scenes/options.tscn")
-var options_instance: Control = null
+var options_instance: CanvasLayer = null
 var is_animating: bool = false
 
 func _ready() -> void:

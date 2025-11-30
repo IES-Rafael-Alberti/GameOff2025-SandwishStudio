@@ -244,7 +244,8 @@ func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int 
 		var price_txt = ""
 		
 		if sell_percentage > 0:
-			final_price = int(item_data.price * (sell_percentage / 100.0))
+			final_price = (int(item_data.price * (sell_percentage / 100.0)) * current_count)
+	
 			price_txt = "[font_size=%d][b]SELL[/b]: %d " % [price_font_size, final_price]
 			price_txt += "[img=%dx%d]res://assets/Coin (1).png[/img][/font_size]" % [price_icon_size, price_icon_size]
 		else:

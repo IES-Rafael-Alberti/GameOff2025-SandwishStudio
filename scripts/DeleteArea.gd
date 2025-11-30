@@ -4,7 +4,13 @@ extends Panel
 @onready var sprite: TextureRect = $Sprite2D
 @onready var coin_up: TextureRect = $CoinUp 
 
+# --- CONFIGURACIÓN DE AUDIO (NUEVO) ---
+@export_group("Audio")
+@export var sfx_sell_item: AudioStream # Asigna aquí tu sonido .wav o .ogg
+@export var sfx_bus_name: String = "SFX" # Nombre del bus (por defecto SFX)
+
 # Configuración del efecto de caída (Item)
+@export_group("Visual Effects")
 @export var fall_duration: float = 0.6
 @export var fall_scale: Vector2 = Vector2(0.1, 0.1)
 @export var fall_rotation: float = 180.0
@@ -17,6 +23,9 @@ var normal_color = Color.WHITE
 var hover_color = Color(1.0, 1.0, 1.0, 0.7)
 var _is_roulette_spinning: bool = false
 
+# Variable interna para el reproductor de sonido
+var _sfx_player: AudioStreamPlayer
+
 func _ready() -> void:
 	if sprite:
 		sprite.modulate = normal_color
@@ -25,10 +34,20 @@ func _ready() -> void:
 		coin_up.visible = false
 		coin_up.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	
+	# --- SETUP AUDIO ---
+	_setup_audio_player()
+	
 	mouse_exited.connect(_on_mouse_exited)
 	
 	if GlobalSignals:
 		GlobalSignals.roulette_state_changed.connect(_on_roulette_state_changed)
+
+# Crea el reproductor de sonido dinámicamente
+func _setup_audio_player() -> void:
+	_sfx_player = AudioStreamPlayer.new()
+	_sfx_player.name = "SellSFXPlayer"
+	_sfx_player.bus = sfx_bus_name # Asigna el bus SFX
+	add_child(_sfx_player)
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_DRAG_END:
@@ -65,14 +84,24 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 	# 1. Vender (Lógica inmediata)
 	GlobalSignals.item_deleted.emit(item)
 	
+	# --- REPRODUCIR SONIDO ---
+	_play_sell_sound()
+	
 	# 2. Intentar Animación de Caída
-	# La función devuelve true si la animación comenzó, false si no pudo (por falta de sprites, etc.)
 	var animation_started = _play_drop_effect(item)
 	
-	# 3. Fallback: Si no hubo animación de caída, mostramos la moneda ya.
-	# Si SI hubo animación, la moneda saldrá al final del Tween (ver _play_drop_effect).
+	# 3. Fallback visual
 	if not animation_started:
 		_play_coin_pop()
+
+# --- FUNCIONES DE AUDIO ---
+
+func _play_sell_sound() -> void:
+	if sfx_sell_item and _sfx_player:
+		_sfx_player.stream = sfx_sell_item
+		# Pequeña variación de tono para "jugosidad" (0.9 a 1.1)
+		_sfx_player.pitch_scale = randf_range(0.9, 1.1)
+		_sfx_player.play()
 
 # --- EFECTOS VISUALES ---
 
@@ -113,7 +142,6 @@ func _play_drop_effect(item: Resource) -> bool:
 	t.tween_property(falling_sprite, "modulate", Color(0.5, 0.5, 0.5, 0.0), fall_duration)
 
 	# --- CADENA DE FINALIZACIÓN ---
-	# Aquí ocurre la magia: Usamos chain() para esperar a que termine lo anterior
 	t.chain().tween_callback(falling_sprite.queue_free)
 	
 	# Y justo después, activamos la moneda

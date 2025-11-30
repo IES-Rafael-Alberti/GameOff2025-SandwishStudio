@@ -3,39 +3,30 @@
 [ext_resource type="Script" uid="uid://fxaw6plqdeiu" path="res://scripts/options.gd" id="1_2iy26"]
 [ext_resource type="Texture2D" uid="uid://h3wjlov8ppq4" path="res://assets/help/PapiroVertical.png" id="2_1sggn"]
 
-[node name="Menu" type="Control"]
+[node name="Menu" type="CanvasLayer"]
 process_mode = 3
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 648.0
-offset_top = 384.0
-offset_right = -514.0
-offset_bottom = -291.0
-grow_horizontal = 2
-grow_vertical = 2
 script = ExtResource("1_2iy26")
 
 [node name="Papiro" type="TextureRect" parent="."]
-layout_mode = 1
+z_index = 11
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
-offset_left = -569.0
-offset_top = -257.5
-offset_right = -201.0
-offset_bottom = 382.5
+offset_left = 395.0
+offset_top = -281.0
+offset_right = 763.0
+offset_bottom = 359.0
 grow_vertical = 2
 texture = ExtResource("2_1sggn")
 expand_mode = 1
 stretch_mode = 4
 
 [node name="Label" type="Label" parent="Papiro"]
+z_index = 11
 layout_mode = 0
-offset_left = 88.0
+offset_left = 81.0
 offset_top = 48.0
-offset_right = 288.0
+offset_right = 281.0
 offset_bottom = 134.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 50
@@ -43,6 +34,7 @@ text = "Options"
 horizontal_alignment = 1
 
 [node name="Sonidos" type="Control" parent="Papiro"]
+z_index = 11
 anchors_preset = 0
 offset_left = 160.0
 offset_top = 240.0
@@ -79,6 +71,7 @@ theme_override_font_sizes/font_size = 26
 text = "Effects"
 
 [node name="SfxControl" type="HSlider" parent="Papiro/Sonidos"]
+z_index = 11
 layout_mode = 0
 offset_top = 64.0
 offset_right = 144.0
@@ -89,6 +82,7 @@ value = 1.0
 tick_count = 50
 
 [node name="MasterControl" type="HSlider" parent="Papiro/Sonidos"]
+z_index = 11
 layout_mode = 0
 offset_top = -40.0
 offset_right = 144.0
@@ -98,6 +92,7 @@ value = 1.0
 tick_count = 50
 
 [node name="MusicControl" type="HSlider" parent="Papiro/Sonidos"]
+z_index = 11
 layout_mode = 0
 offset_top = 16.0
 offset_right = 144.0
@@ -115,9 +110,9 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -88.0
+offset_left = -100.0
 offset_top = 104.0
-offset_right = 112.0
+offset_right = 100.0
 offset_bottom = 152.0
 grow_horizontal = 2
 grow_vertical = 2
@@ -128,6 +123,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 
 [node name="Back" type="Button" parent="Papiro/VBoxContainer"]
+z_index = 11
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_font_sizes/font_size = 20
@@ -140,6 +136,17 @@ bus = &"Music"
 
 [node name="SfxStreamPlayer" type="AudioStreamPlayer" parent="."]
 bus = &"SFX"
+
+[node name="bg" type="ColorRect" parent="."]
+z_index = 9
+anchors_preset = -1
+anchor_top = -0.001
+anchor_bottom = -0.001
+offset_top = -3.24
+offset_right = 1165.0
+offset_bottom = 763.76
+mouse_filter = 2
+color = Color(0, 0, 0, 0.6901961)
 
 [connection signal="value_changed" from="Papiro/Sonidos/SfxControl" to="Papiro/Sonidos/SfxControl" method="_on_value_changed"]
 [connection signal="value_changed" from="Papiro/Sonidos/MasterControl" to="Papiro/Sonidos/MasterControl" method="_on_value_changed"]

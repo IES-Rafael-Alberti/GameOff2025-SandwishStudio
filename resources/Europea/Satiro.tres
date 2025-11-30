@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=5 format=3 uid="uid://cy77sggbt1g0n"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=6 format=3 uid="uid://cy77sggbt1g0n"]
 
 [ext_resource type="SpriteFrames" uid="uid://cnh48p4hva1em" path="res://resources/allies_Frames/satiro.tres" id="1_7uwfu"]
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_xfa5c"]
+[ext_resource type="AudioStream" uid="uid://bdcxsf63f5shl" path="res://assets/audios/Mythological Creatures/Satiro/Satiro_Attack_4.wav" id="3_7syr4"]
 [ext_resource type="AudioStream" uid="uid://civb3l4pby51w" path="res://assets/audios/Mythological Creatures/Satiro/Satiro_Death.wav" id="3_ecjce"]
 [ext_resource type="AudioStream" uid="uid://cejdaevq7s31n" path="res://assets/audios/Mythological Creatures/Satiro/Satiro_Intro.wav" id="4_7syr4"]
 
@@ -11,6 +12,7 @@ id = "european.satiro"
 display_name = "satiro"
 health_bar_offset = Vector2(-10, -170)
 sfx_spawn = ExtResource("4_7syr4")
+sfx_attack = ExtResource("3_7syr4")
 sfx_death = ExtResource("3_ecjce")
 frames = ExtResource("1_7uwfu")
 stats = {

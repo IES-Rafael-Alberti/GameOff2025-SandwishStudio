@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://b3k5p6ykwbjsg"
+path="res://.godot/imported/Quarterstaff Splinter C.mp3-57524ff5d352b85ae9653e3c80357a38.mp3str"
+
+[deps]
+
+source_file="res://assets/audios/Mythological Creatures/Tengu/Quarterstaff Splinter C.mp3"
+dest_files=["res://.godot/imported/Quarterstaff Splinter C.mp3-57524ff5d352b85ae9653e3c80357a38.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

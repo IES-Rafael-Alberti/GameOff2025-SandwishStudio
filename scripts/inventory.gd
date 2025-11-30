@@ -29,6 +29,9 @@ signal item_sold(refund_amount: int)
 @export_group("Passive Logic")
 @export var empty_slot_bonus_per_slot: float = 1.0 
 
+@export_group("Audio")
+@export var sfx_merge_item: AudioStream # Asigna aquí el sonido de "Fusión/LevelUp"
+@export var sfx_bus_name: String = "SFX"
 ## ------------------------------------------------------------------
 ## Datos del Inventario
 ## ------------------------------------------------------------------
@@ -43,12 +46,14 @@ var passive_nodes_map: Dictionary = {}
 ## ------------------------------------------------------------------
 ## Funciones de Godot
 ## ------------------------------------------------------------------
-
+var _sfx_player: AudioStreamPlayer
 func _ready() -> void:
 	GlobalSignals.item_deleted.connect(remove_item)
 	GlobalSignals.item_return_to_inventory_requested.connect(_on_item_return_requested)
-
-	# Conexiones para actualizar stats cuando la ruleta cambia
+	_sfx_player = AudioStreamPlayer.new()
+	_sfx_player.name = "InventorySFX"
+	_sfx_player.bus = sfx_bus_name
+	add_child(_sfx_player)
 	GlobalSignals.piece_placed_on_roulette.connect(_on_piece_placed)
 	GlobalSignals.piece_returned_from_roulette.connect(_on_piece_returned)
 	
@@ -359,7 +364,7 @@ func add_item_visually_delayed(data: Resource, from_pos: Vector2) -> bool:
 					
 					# Llamamos a la función pasando el color
 					_play_levelup_particles(final_pos, burst_color)
-				
+					_play_merge_sound()
 				if target_slot_node.has_node("TextureButton"):
 					target_slot_node.get_node("TextureButton").disabled = false
 			)
@@ -813,3 +818,9 @@ func _play_levelup_particles(pos: Vector2, target_color: Color = Color(0.95, 0.8
 	var t = create_tween()
 	t.tween_interval(1.5)
 	t.tween_callback(particles.queue_free)
+func _play_merge_sound() -> void:
+	if sfx_merge_item and _sfx_player:
+		_sfx_player.stream = sfx_merge_item
+		# Variación ligera de tono para que sea más agradable (0.9 a 1.1)
+		_sfx_player.pitch_scale = randf_range(0.9, 1.1)
+		_sfx_player.play()

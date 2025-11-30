@@ -15,7 +15,7 @@ const ENEMY_LIMIT := 1
 var current_wave_attacks: int = 0 
 var jap_wave_counter: int = 0     
 var round_gold_loot: int = 0
-const BASE_ROUND_GOLD := 2
+const BASE_ROUND_GOLD := 0
 
 # --- CONFIGURACIÓN DE AUDIO (SATURACIÓN) ---
 # Tiempos mínimos en milisegundos entre sonidos del mismo tipo
