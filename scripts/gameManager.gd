@@ -94,6 +94,7 @@ var is_tended = true
 var original_positions = {}
 var blink_tween: Tween = null
 var max_distance: float = 100
+var is_shop_transitioning: bool = false
 
 # Variable acumuladora para el oro ganado EXCLUSIVAMENTE en el día
 var daily_gold_salary: int = 0
@@ -255,6 +256,8 @@ func set_state(new_state: GameState):
 ## ------------------------------------------------------------------
 
 func _on_shop_button_pressed():
+	if is_shop_transitioning: 
+		return
 	if anim.is_playing():
 		return
 		
@@ -509,9 +512,12 @@ func _set_hand_cursor_recursively(node: Node):
 		if child.get_child_count() > 0:
 			_set_hand_cursor_recursively(child)
 
-
 func _toggle_store(close_store: bool):
-	if anim.is_playing(): return
+	if is_shop_transitioning: return # Bloqueo de seguridad extra
+	
+	# 1. ACTIVAMOS EL BLOQUEO
+	is_shop_transitioning = true 
+	
 	is_tended = close_store
 	_update_eye_state()
 	
@@ -523,20 +529,36 @@ func _toggle_store(close_store: bool):
 	if not is_tended: roulette.visible = false
 
 	var anim_duration = 1.0 
+	
 	if is_tended:
+		# --- CERRANDO TIENDA ---
 		_simple_items_fade(0.0, 0.2)
 		await get_tree().create_timer(0.2).timeout
+		
 		anim.play("roll")
 		var tween = create_tween()
 		tween.tween_property(mat, "shader_parameter/roll_amount", 1.0, anim_duration)
+		
 		tween.tween_callback(func(): store.visible = false)
+		
+		# 2. DESBLOQUEAMOS AL TERMINAR EL TWEEN
+		tween.finished.connect(func(): is_shop_transitioning = false)
+		
 	else:
+		# --- ABRIENDO TIENDA ---
 		store.visible = true
 		_reset_items_visibility() 
 		anim.play("unroll")
+		
 		var tween = create_tween()
 		tween.tween_property(mat, "shader_parameter/roll_amount", 0.0, anim_duration).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+		
 		tween.chain().tween_callback(_animate_items_entry)
+		
+		# 2. DESBLOQUEAMOS AL TERMINAR EL TWEEN
+		# Nota: Esto desbloquea cuando el rollo se despliega. 
+		# Los items pueden seguir cayendo un poco después, pero el estado ya es seguro.
+		tween.finished.connect(func(): is_shop_transitioning = false)
 		
 func _animate_items_entry():
 	var tween = create_tween().set_parallel(true)
