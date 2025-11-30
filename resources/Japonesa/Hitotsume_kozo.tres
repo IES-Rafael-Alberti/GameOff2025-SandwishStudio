@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=5 format=3 uid="uid://cvsjailwqkvlf"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=6 format=3 uid="uid://cvsjailwqkvlf"]
 
 [ext_resource type="SpriteFrames" uid="uid://cq1jiipx7vdys" path="res://resources/allies_Frames/kozo.tres" id="1_1ohcj"]
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_ui1fk"]
+[ext_resource type="AudioStream" uid="uid://ce35t1j4hs45d" path="res://assets/audios/Mythological Creatures/Kozo/Kozo_Attack_4 (2).wav" id="3_8nfp6"]
 [ext_resource type="AudioStream" uid="uid://quknntfva582" path="res://assets/audios/Mythological Creatures/Kozo/Kozo_Death.wav" id="3_ibakb"]
 [ext_resource type="AudioStream" uid="uid://dlhux2y3k1fmw" path="res://assets/audios/Mythological Creatures/Kozo/Kozo_Intro.wav" id="4_8nfp6"]
 
@@ -13,6 +14,7 @@ race = 1
 rarity = 1
 health_bar_offset = Vector2(0, -160)
 sfx_spawn = ExtResource("4_8nfp6")
+sfx_attack = ExtResource("3_8nfp6")
 sfx_death = ExtResource("3_ibakb")
 frames = ExtResource("1_1ohcj")
 stats = {
