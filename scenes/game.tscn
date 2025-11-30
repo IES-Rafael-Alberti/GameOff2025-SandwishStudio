@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://dd8wqmfs2cj1j"]
+[gd_scene load_steps=36 format=3 uid="uid://dd8wqmfs2cj1j"]
 
 [ext_resource type="Script" uid="uid://bpnxk43sopml" path="res://scripts/gameManager.gd" id="1_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://hbcgudcjh0wn" path="res://scenes/inventory.tscn" id="2_lbhrr"]
@@ -33,6 +33,7 @@
 [ext_resource type="Texture2D" uid="uid://cvyyy373bgrcn" path="res://assets/trellas55.png" id="24_v2yb1"]
 [ext_resource type="Texture2D" uid="uid://bca7kf7c23occ" path="res://assets/trellas80.png" id="25_js0lu"]
 [ext_resource type="Texture2D" uid="uid://wryei3elf457" path="res://assets/trellas100.png" id="26_gxtfn"]
+[ext_resource type="Texture2D" uid="uid://di2o4x03m4fry" path="res://assets/fuego (1).png" id="32_js0lu"]
 
 [sub_resource type="AnimatedTexture" id="AnimatedTexture_twgab"]
 frames = 11
@@ -106,7 +107,6 @@ prob_epico = 13
 z_index = 4
 position = Vector2(132, 361.00003)
 scale = Vector2(0.8845031, 0.8845031)
-sfx_lever_pull = null
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(902, 590)
@@ -152,6 +152,7 @@ expand_mode = 1
 stretch_mode = 4
 
 [node name="Comic" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="Fondo" type="ColorRect" parent="Comic"]
 z_index = 10
@@ -280,6 +281,14 @@ z_index = 4
 offset_right = 1162.0
 offset_bottom = 430.0
 texture = SubResource("AnimatedTexture_twgab")
+
+[node name="Fuego" type="TextureRect" parent="DayFinished"]
+z_index = 4
+offset_left = -2.0
+offset_top = -64.0
+offset_right = 1160.0
+offset_bottom = 758.0
+texture = ExtResource("32_js0lu")
 
 [node name="WinLabel" type="Label" parent="DayFinished"]
 z_index = 5
