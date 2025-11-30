@@ -1,13 +1,19 @@
-[gd_resource type="Resource" script_class="PieceRes" load_steps=3 format=3 uid="uid://bofvibofokgrl"]
+[gd_resource type="Resource" script_class="PieceRes" load_steps=6 format=3 uid="uid://bofvibofokgrl"]
 
 [ext_resource type="Script" uid="uid://cxyfaki7gjiby" path="res://scripts/piece_res.gd" id="1_1f5fn"]
 [ext_resource type="SpriteFrames" uid="uid://drxe6ftchok7c" path="res://resources/allies_Frames/trasgu.tres" id="1_c8iob"]
+[ext_resource type="AudioStream" uid="uid://cnlidc1fbqyri" path="res://assets/audios/Mythological Creatures/Trasgu/Trasgu_Attack_4 (3).wav" id="3_ayhy8"]
+[ext_resource type="AudioStream" uid="uid://cunks04kpf2bb" path="res://assets/audios/Mythological Creatures/Trasgu/Trasgu_death.wav" id="4_l6qjv"]
+[ext_resource type="AudioStream" uid="uid://b4ldgwm8tivut" path="res://assets/audios/Mythological Creatures/Trasgu/Trasgu_intro (1).wav" id="5_e371m"]
 
 [resource]
 script = ExtResource("1_1f5fn")
 id = "european.Duende"
 display_name = "duende"
 health_bar_offset = Vector2(-80, -100)
+sfx_spawn = ExtResource("5_e371m")
+sfx_attack = ExtResource("3_ayhy8")
+sfx_death = ExtResource("4_l6qjv")
 frames = ExtResource("1_c8iob")
 stats = {
 "BRONCE": {
