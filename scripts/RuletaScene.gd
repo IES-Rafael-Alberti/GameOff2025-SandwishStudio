@@ -237,9 +237,10 @@ func trigger_spin():
 	_reset()
 	state = State.SPINNING
 	_selected_area = null
-	var pull_factor = current_lever_rotation / lever_max_angle
-	var base_force = min_impulse_force * pull_factor
+	$SpriteRuleta.rotation_degrees += randf_range(0.0, 360.0)
+	var base_force = min_impulse_force 
 	var random_multiplier = randf_range(min_impulse_random_range.x, min_impulse_random_range.y)
+	
 	inertia = base_force * random_multiplier
 	roulette_spin_started.emit()
 
