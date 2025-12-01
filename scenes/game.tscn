@@ -1,4 +1,4 @@
-[gd_scene load_steps=36 format=3 uid="uid://dd8wqmfs2cj1j"]
+[gd_scene load_steps=39 format=3 uid="uid://dd8wqmfs2cj1j"]
 
 [ext_resource type="Script" uid="uid://bpnxk43sopml" path="res://scripts/gameManager.gd" id="1_lbhrr"]
 [ext_resource type="PackedScene" uid="uid://hbcgudcjh0wn" path="res://scenes/inventory.tscn" id="2_lbhrr"]
@@ -34,6 +34,8 @@
 [ext_resource type="Texture2D" uid="uid://bca7kf7c23occ" path="res://assets/trellas80.png" id="25_js0lu"]
 [ext_resource type="Texture2D" uid="uid://wryei3elf457" path="res://assets/trellas100.png" id="26_gxtfn"]
 [ext_resource type="Texture2D" uid="uid://di2o4x03m4fry" path="res://assets/fuego (1).png" id="32_js0lu"]
+[ext_resource type="Shader" uid="uid://0gvrjar422gt" path="res://shaders/store.gdshader" id="35_twgab"]
+[ext_resource type="Texture2D" uid="uid://vylhtxlqfnkc" path="res://assets/TiendaRec (1).png" id="36_02fa5"]
 
 [sub_resource type="AnimatedTexture" id="AnimatedTexture_twgab"]
 frames = 11
@@ -59,6 +61,12 @@ frame_9/texture = ExtResource("22_qouja")
 frame_9/duration = 1.0
 frame_10/texture = ExtResource("21_sgl2t")
 frame_10/duration = 1.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_nepv3"]
+shader = ExtResource("35_twgab")
+shader_parameter/roll_amount = 0.0
+shader_parameter/radius = 50.0
+shader_parameter/max_lift = 0.12
 
 [node name="game" type="Node2D"]
 script = ExtResource("1_lbhrr")
@@ -323,5 +331,16 @@ visible = false
 
 [node name="elJetas" parent="." instance=ExtResource("13_trtic")]
 z_index = 4
+
+[node name="Sprite2D2" type="TextureRect" parent="."]
+z_index = 2
+material = SubResource("ShaderMaterial_nepv3")
+offset_left = 872.0
+offset_top = 389.0
+offset_right = 4308.0
+offset_bottom = 2229.0
+scale = Vector2(0.43709475, 0.3450477)
+pivot_offset = Vector2(930.4768, 266.21936)
+texture = ExtResource("36_02fa5")
 
 [connection signal="pressed" from="DayFinished/NextDayButton" to="." method="_advance_to_next_day"]

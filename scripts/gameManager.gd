@@ -41,6 +41,7 @@ var gladiators_defeated: int = 0
 @onready var fondo_texto: TextureRect = $DayFinished/FondoTexto
 @onready var anfora_rota: TextureRect = $DayFinished/AnforaRota
 var is_game_over_state: bool = false
+@onready var sprite_alfombra: TextureRect = $Sprite2D2
 @onready var comic_root: CanvasLayer = $Comic
 @onready var Comic1: TextureRect = $Comic/Fondo/Frag1
 @onready var Comic2: TextureRect = $Comic/Fondo/Frag2
@@ -161,8 +162,10 @@ func _ready():
 		set_state(GameState.ROULETTE)
 		# --- CAMBIO AQUI: Forzamos la animación de entrada al inicio ---
 		if el_jetas_anim: el_jetas_anim.play("intro")
+		if sprite_alfombra: sprite_alfombra.visible = true
 	else:
 		set_state(GameState.SHOP)
+		
 	if win_restart_button:
 		win_restart_button.pressed.connect(_restart_game)
 	else:
@@ -545,9 +548,10 @@ func _toggle_store(close_store: bool):
 	
 	if is_tended:
 		if el_jetas_anim: el_jetas_anim.play("return_up")
+		if sprite_alfombra: sprite_alfombra.visible = false
 	else:
 		if el_jetas_anim: el_jetas_anim.play("hide_down")
-
+		if sprite_alfombra: sprite_alfombra.visible = false
 	if not is_tended: roulette.visible = false
 
 	var anim_duration = 1.0 
@@ -564,8 +568,10 @@ func _toggle_store(close_store: bool):
 		tween.tween_callback(func(): store.visible = false)
 		
 		# 2. DESBLOQUEAMOS AL TERMINAR EL TWEEN
-		tween.finished.connect(func(): is_shop_transitioning = false)
-		
+		tween.finished.connect(func(): 
+			is_shop_transitioning = false
+			if sprite_alfombra: sprite_alfombra.visible = true 
+		)
 	else:
 		# --- ABRIENDO TIENDA ---
 		store.visible = true
