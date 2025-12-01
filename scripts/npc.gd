@@ -61,8 +61,8 @@ var default_bar_style: StyleBox = null
 
 func _ready() -> void:
 	# --- SFX de spawn (solo GLADIADOR) ---
-	if npc_res and npc_res.sfx_spawn and team == Team.ENEMY:
-		play_sfx(npc_res.sfx_spawn, "spawn_enemy")
+	#if npc_res and npc_res.sfx_spawn and team == Team.ENEMY:
+	#	play_sfx(npc_res.sfx_spawn, "spawn_enemy")
 	
 
 	if has_node("MouseArea"):
@@ -262,7 +262,6 @@ func _recalculate_stats_live():
 	_update_healthbar()
 	_apply_bar_visuals()
 
-# --- APLICAR GLOBAL STATS ---
 func apply_passive_bonuses(p_health: float, p_damage: float, p_speed: float, p_crit_c: float, p_crit_d: float):
 	bonus_health = p_health
 	bonus_damage = p_damage
@@ -429,24 +428,22 @@ func _setup_healthbar_z() -> void:
 
 func play_sfx(stream: AudioStream, debug_tag: String = "") -> void:
 	if stream == null:
-		print("ERROR: Intenté reproducir un sonido pero el Resource es NULL. Tag: ", debug_tag)
-		return
-	if audio_player == null:
-		print("ERROR: No encuentro el nodo $AudioPlayer en el NPC. Tag: ", debug_tag)
 		return
 
-	audio_player.stream = stream
-	audio_player.play()
+	var temp_player = AudioStreamPlayer2D.new()
+	temp_player.stream = stream
+	
+	# Variación ligera de tono para evitar sonido robótico si se repite rápido
+	temp_player.pitch_scale = randf_range(0.95, 1.05)
+	
+	# Añadirlo a la escena
+	add_child(temp_player)
+	temp_player.play()
 
-	# DEBUG
-	var npc_name := ""
-	if npc_res and npc_res.resource_path != "":
-		npc_name = npc_res.resource_path.get_file().get_basename()
+	# Limpieza automática al terminar
+	temp_player.finished.connect(func(): temp_player.queue_free())
 
-	var tag_text := debug_tag if debug_tag != "" else "generic"
-	var team_text := "ALLY" if team == Team.ALLY else "ENEMY"
-
-	print("[SFX]", tag_text, "| NPC:", npc_name, "| Team:", team_text)
+	print("[NPC SFX] ", debug_tag)
 
 func charge_jap_synergy() -> void:
 	if synergy_jap_tier > 0:
