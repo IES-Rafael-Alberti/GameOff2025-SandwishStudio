@@ -31,13 +31,17 @@ var gladiators_defeated: int = 0
 @onready var inventory: Control = $inventory
 @onready var roulette: Node2D = $Roulette
 @onready var combat_scene: Node2D = $combat_scene
-@onready var announcement_label: Label = $AnnouncementLabel
-@onready var help_overlay: Control = $HelpOverLay
-@onready var help_button: Button = $HelpOverLay/HelpButton
-@onready var win_restart_button = $Win/RestartButton
-@onready var lose_restart_button = $Lose/RestartButton
-@onready var win_label: Label = $DayFinished/WinLabel
-@onready var lose_label: Label = $DayFinished/LoseLabel
+
+# --- NODOS CORREGIDOS CON get_node_or_null PARA EVITAR CRASHES ---
+@onready var announcement_label: Label = get_node_or_null("AnnouncementLabel")
+@onready var help_overlay: Control = get_node_or_null("CanvasLayer/HelpOverLay")
+@onready var help_button: Button = get_node_or_null("CanvasLayer/HelpOverLay/HelpButton")
+@onready var win_restart_button: Button = get_node_or_null("Win/RestartButton")
+@onready var lose_restart_button: Button = get_node_or_null("GameOver/RestartButton")
+@onready var win_label: Label = get_node_or_null("DayFinished/WinLabel")
+@onready var lose_label: Label = get_node_or_null("DayFinished/LoseLabel")
+# -----------------------------------------------------------------
+
 @onready var fondo_texto: TextureRect = $DayFinished/FondoTexto
 @onready var anfora_rota: TextureRect = $DayFinished/AnforaRota
 var is_game_over_state: bool = false
@@ -67,14 +71,14 @@ var is_game_over_state: bool = false
 
 # --- UI LABELS ---
 @onready var round_label: Label = $RoundLabel
-@onready var day_label: Label = $DayLabel
+@onready var day_label: Label = get_node_or_null("DayLabel")
 @onready var gladiator_label: Label = $GladiatorLabel
 
 # --- VISTAS (UI) ---
 @onready var day_finished_view: CanvasLayer = $DayFinished
 @onready var next_day_image: TextureRect = $DayFinished/NextDayImage 
-@onready var game_over_view: CanvasLayer = $Lose
-@onready var win_view: CanvasLayer = $Win
+@onready var game_over_view: CanvasLayer = get_node_or_null("GameOver")
+@onready var win_view: CanvasLayer = get_node_or_null("Win")
 
 # --- Referencias NUEVAS para DayFinished ---
 @onready var next_day_label: Label = $DayFinished/NextDayLabel
@@ -141,10 +145,12 @@ func _ready():
 	buttonShop.connect("pressed", Callable(self, "_on_shop_button_pressed"))
 	buttonShop.connect("mouse_entered", Callable(self, "_on_shop_hover"))
 	buttonShop.connect("mouse_exited", Callable(self, "_on_shop_exit"))
+	
 	if help_button:
 		help_button.pressed.connect(_on_help_button_pressed)
 	else:
-		push_error("HelpButton no encontrado en HelpOverLay")
+		# Ya no dará error rojo, solo un print informativo si no está
+		print("Info: HelpButton no encontrado o desactivado.")
 
 	PlayerData.currency_changed.connect(_on_PlayerData_currency_changed)
 	if inventory.has_signal("item_sold"):
@@ -163,15 +169,13 @@ func _ready():
 		if el_jetas_anim: el_jetas_anim.play("intro")
 	else:
 		set_state(GameState.SHOP)
+		
 	if win_restart_button:
 		win_restart_button.pressed.connect(_restart_game)
-	else:
-		print("Aviso: No se encontró Win/RestartButton")
 
 	if lose_restart_button:
 		lose_restart_button.pressed.connect(_restart_game)
-	else:
-		print("Aviso: No se encontró Lose/RestartButton")
+
 	if start_button:
 		start_button.pressed.connect(_on_start_button_pressed)
 		start_button.visible = false # Oculto al principio
@@ -182,15 +186,16 @@ func _ready():
 		if comic_root: comic_root.visible = true
 		if comic_fondo: comic_fondo.modulate.a = 1.0
 	else:
-		comic_root.visible = false
+		if comic_root: comic_root.visible = false
+		
 	if NextDayButton:
 			NextDayButton.disabled = false
 	if transition_rect:
 			transition_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	# Gestionamos el temporizador del parpadeo
-	blink_timer -= delta
+	blink_timer -= _delta
 	
 	# Solo mostramos/movemos la pupila si el ojo está ABIERTO (textura original)
 	if sprite_show.texture == original_eye_texture:
@@ -216,7 +221,6 @@ func _update_ui_labels() -> void:
 		gladiator_label.text = "%d/%d" % [gladiators_defeated, gladiators_per_day]
 	
 	if is_instance_valid(round_label):
-
 		var state_text = ""	
 		round_label.text = "Wave %d/%d" % [current_round, rounds_per_day]
 
