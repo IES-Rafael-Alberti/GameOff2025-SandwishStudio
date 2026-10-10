@@ -1,6 +1,5 @@
 extends PanelContainer
 
-# References to nodes
 @onready var name_label: Label = $VBoxContainer/NameLabel
 @onready var description_label: RichTextLabel = $VBoxContainer/DescriptionLabel
 @onready var sell_price_label: RichTextLabel = $VBoxContainer/SellPriceLabel
@@ -14,19 +13,17 @@ extends PanelContainer
 @export var icon_size: int = 20 
 
 @export_group("Tooltip Text Settings")
-@export var title_font_size: int = 26      # Título principal
-@export var subtitle_font_size: int = 16   # Subtítulos
-@export var body_font_size: int = 18       # Texto general
-@export var bar_font_size: int = 20        # Barras de nivel
-@export var table_font_size: int = 18      # Texto tablas stats
-@export var footer_font_size: int = 14     # Texto pie de página
-@export var price_font_size: int = 18      # Tamaño fuente del precio
-@export var price_icon_size: int = 16      # Tamaño de la moneda en el precio
+@export var title_font_size: int = 26     
+@export var subtitle_font_size: int = 16   
+@export var body_font_size: int = 18       
+@export var bar_font_size: int = 20        
+@export var table_font_size: int = 18      
+@export var footer_font_size: int = 14     
+@export var price_font_size: int = 18      
+@export var price_icon_size: int = 16      
 
-# Referencia al propio panel
 @onready var tooltip: PanelContainer = self 
 
-# Estilo dinámico
 var card_style: StyleBoxFlat
 var units_grid: HBoxContainer = null
 
@@ -39,8 +36,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	top_level = true
 	z_index = 4096
-	
-	# --- ESTILO VISUAL BASE ---
+
 	card_style = StyleBoxFlat.new()
 	card_style.bg_color = Color(0.08, 0.08, 0.1, 0.98)
 	card_style.border_width_left = 2
@@ -54,26 +50,23 @@ func _ready() -> void:
 	card_style.shadow_color = Color(0, 0, 0, 0.5)
 	card_style.shadow_size = 10
 	card_style.shadow_offset = Vector2(4, 4)
-	card_style.content_margin_left = 12  # Márgenes laterales reducidos ligeramente
+	card_style.content_margin_left = 12 
 	card_style.content_margin_right = 12
 	card_style.content_margin_top = 10
 	card_style.content_margin_bottom = 10
-	
 	add_theme_stylebox_override("panel", card_style)
-	
-	# --- CAMBIO IMPORTANTE: Ancho reducido para pegar stats al margen ---
+
 	custom_minimum_size.x = 250 
-	
 	description_label.fit_content = true
 	description_label.bbcode_enabled = true
 	
 	if has_node("VBoxContainer/ItemIcon"):
 		get_node("VBoxContainer/ItemIcon").hide()
-
 	_ensure_units_grid_exists()
 
 func _ensure_units_grid_exists():
-	if units_grid and is_instance_valid(units_grid): return
+	if units_grid and is_instance_valid(units_grid):
+		return
 	if has_node("VBoxContainer/UnitsGrid"):
 		units_grid = $VBoxContainer/UnitsGrid
 	else:
@@ -97,49 +90,103 @@ func _process(_delta: float) -> void:
 			tooltip_pos.x = mouse_pos.x - tooltip_size.x - 24
 		if tooltip_pos.y + tooltip_size.y > viewport_size.y:
 			tooltip_pos.y = mouse_pos.y - tooltip_size.y - 24
+			
 		global_position = tooltip_pos
 
 func hide_tooltip() -> void:
 	hide()
 
-# ==============================================================================
-# 1. TOOLTIP ESTÁNDAR (Objeto individual)
-# ==============================================================================
-
-func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int = 0) -> void:
-	if not item_data: return
-	
-	# 1. LIMPIEZA INICIAL
+func show_modifier_tooltip(modifier: Dictionary) -> void:
 	custom_minimum_size = Vector2.ZERO
 	size = Vector2.ZERO
-	
 	if units_grid:
-			for child in units_grid.get_children():
-				child.queue_free()
+		for child in units_grid.get_children():
+			child.queue_free()
+			
+	# --- INGLES ---
+	var title_text = modifier.get("name", "Magic Aura")
+	var mod_color = modifier.get("color", Color.WHITE)
 	
-	var is_upgrade = false 
+	name_label.text = title_text.to_upper()
+	var ls := LabelSettings.new()
+	ls.font = get_theme_default_font()
+	ls.font_color = mod_color
+	ls.font_size = title_font_size
+	ls.outline_size = 6
+	ls.outline_color = Color.BLACK
+	name_label.label_settings = ls
+	
+	if card_style:
+		card_style.border_color = mod_color
+		card_style.bg_color = mod_color.darkened(0.85)
+		card_style.bg_color.a = 0.95
+		
+	var text = "[center][color=#cccccc][font_size=%d]Slot Modifier[/font_size][/color][/center]\n\n" % subtitle_font_size
+	text += "[font_size=%d][color=#aaaaaa]Pieces placed here gain:[/color][/font_size]\n\n" % body_font_size
+	text += "[font_size=%d][table=2]" % table_font_size
+	
+	if modifier.has("stat") and modifier.has("mult"):
+		text += _build_modifier_row(modifier.stat, modifier.mult)
+	if modifier.has("stat2") and modifier.has("mult2"):
+		text += _build_modifier_row(modifier.stat2, modifier.mult2)
+		
+	text += "[/table][/font_size]\n"
+	
+	description_label.text = text
+	sell_price_label.hide()
+	
+	custom_minimum_size = Vector2(250, 0)
+	show()
+	await get_tree().process_frame
+	size = Vector2.ZERO
 
-	# --- A. BASIC DATA ---
-	var title_text = "Item"
-	if item_data.resource_name: title_text = item_data.resource_name
-	if "piece_name" in item_data and not item_data.piece_name.is_empty(): title_text = item_data.piece_name
-	elif "name_passive" in item_data and not item_data.name_passive.is_empty(): title_text = item_data.name_passive
+func _build_modifier_row(stat: String, mult: float) -> String:
+	var icon = ""
+	var stat_name = ""
+	match stat:
+		"hp": icon = icon_health; stat_name = "Health"
+		"dmg": icon = icon_damage; stat_name = "Damage"
+		"aps": icon = icon_speed; stat_name = "Atk. Spd"
 	
-	# --- B. COLORS ---
+	var percent = round(abs(mult - 1.0) * 100)
+	var sign_str = "+" if mult >= 1.0 else "-"
+	var val_color = "#00ff00" if mult >= 1.0 else "#ff0000"
+	
+	var row = "[cell][color=#cccccc] %s %s[/color][/cell]" % [_get_icon_tag(icon), stat_name]
+	row += "[cell][p align=right][color=%s][b]%s%d%%[/b][/color][/p][/cell]" % [val_color, sign_str, percent]
+	return row
+
+func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int = 0, modifier: Dictionary = {}) -> void:
+	if not item_data: return
+	
+	custom_minimum_size = Vector2.ZERO
+	size = Vector2.ZERO
+	if units_grid:
+		for child in units_grid.get_children():
+			child.queue_free()
+			
+	var is_upgrade = false 
+	var title_text = "Item"
+	
+	if item_data.resource_name: title_text = item_data.resource_name
+	if "piece_name" in item_data and not item_data.piece_name.is_empty():
+		title_text = item_data.piece_name
+	elif "name_passive" in item_data and not item_data.name_passive.is_empty():
+		title_text = item_data.name_passive
+
 	var rarity_color = Color.WHITE
 	var subtitle = ""
 	var bg_tint = Color(0.05, 0.05, 0.07, 0.95)
 	
 	if item_data is PieceData and item_data.piece_origin:
 		rarity_color = _get_rarity_color(item_data.piece_origin.rarity)
-		subtitle = "%s • %s" % [_get_race_name(item_data.piece_origin.race), _get_rarity_name(item_data.piece_origin.rarity)]
+		subtitle = "%s   %s" % [_get_race_name(item_data.piece_origin.race), _get_rarity_name(item_data.piece_origin.rarity)]
 		bg_tint = rarity_color.darkened(0.85); bg_tint.a = 0.95
 	elif item_data is PassiveData:
 		rarity_color = Color("#FFD700") 
-		subtitle = "✦ Passive Upgrade ✦"
+		subtitle = "  Passive Upgrade  "
 		bg_tint = Color(0.1, 0.1, 0.05, 0.95)
 
-	# --- C. STYLES ---
 	name_label.text = title_text.to_upper()
 	var theme_font := get_theme_default_font() 
 	var ls := LabelSettings.new()
@@ -159,22 +206,20 @@ func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int 
 		card_style.border_color = rarity_color
 		card_style.bg_color = bg_tint
 
-	# --- D. CONTENT ---
 	var text = ""
 	text += "[center][color=#cccccc][font_size=%d]%s[/font_size][/color][/center]\n" % [subtitle_font_size, subtitle]
-	text += "[center][color=#444444]━━━━━━━━━━━━━━━━━━[/color][/center]\n"
-
+	text += "[center][color=#444444] [/color][/center]\n"
+	
 	if item_data is PieceData and item_data.piece_origin:
 		var origin = item_data.piece_origin
 		var current_tier_idx = clampi(current_count, 1, 3) - 1 
 		if current_count == 0: current_tier_idx = 0 
 		var next_tier_idx = current_tier_idx
 		
-		# Lógica de upgrade
 		if sell_percentage == 0 and current_count > 0 and current_count < 3:
 			next_tier_idx = current_tier_idx + 1
 			is_upgrade = true
-		
+			
 		var tier_keys = ["BRONCE", "PLATA", "ORO"]
 		var tier_colors = ["#cd7f32", "#c0c0c0", "#ffd700"]
 		var current_stats = origin.stats[tier_keys[current_tier_idx]]
@@ -183,40 +228,35 @@ func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int 
 		text += "[font_size=%d]" % body_font_size
 		if is_upgrade:
 			var tier_display = tier_keys[next_tier_idx].replace("BRONCE", "BRONZE").replace("PLATA", "SILVER").replace("ORO", "GOLD")
-			text += "[center][wave amp=25 freq=5][color=%s]★ UPGRADE TO %s ★[/color][/wave][/center]" % [tier_colors[next_tier_idx], tier_display]
+			text += "[center][wave amp=25 freq=5][color=%s]  UPGRADE TO %s  [/color][/wave][/center]" % [tier_colors[next_tier_idx], tier_display]
 		else:
 			var tier_display = tier_keys[current_tier_idx].replace("BRONCE", "BRONZE").replace("PLATA", "SILVER").replace("ORO", "GOLD")
 			text += "[center][color=%s]LEVEL: %s[/color][/center]" % [tier_colors[current_tier_idx], tier_display]
-
+			
 		var bar_visual = ""
 		for i in range(3):
-			if i < current_count: bar_visual += "[color=%s]◼[/color] " % tier_colors[current_tier_idx]
-			else: bar_visual += "[color=#333333]◻[/color] "
-		
+			if i < current_count: bar_visual += "[color=%s] [/color] " % tier_colors[current_tier_idx]
+			else: bar_visual += "[color=#333333] [/color] "
 		text += "[center][font_size=%d]%s[/font_size][/center]\n" % [bar_font_size, bar_visual]
-		
-		# --- TABLA DE UNIDADES Y USOS ---
+
 		text += "[font_size=%d][table=2]" % table_font_size
-		
 		var cur_uses = item_data.uses
 		var max_uses = item_data.get_meta("max_uses") if item_data.has_meta("max_uses") else cur_uses
 		var members = current_stats.get("members", 1)
 		var next_members = next_stats.get("members", members)
-
-		text += "[cell][color=#aaaaaa] 👥 [b]Units[/b][/color][/cell]"
-		if is_upgrade and members != next_members: text += "[cell][color=#ffffff]%d[/color] [color=#00ff00]➞ %d[/color][/cell]" % [members, next_members]
-		else: text += "[cell][b]%d[/b][/cell]" % members
+		
+		text += "[cell][color=#aaaaaa]   [b]Units[/b][/color][/cell]"
+		if is_upgrade and members != next_members:
+			text += "[cell][color=#ffffff]%d[/color] [color=#00ff00]  %d[/color][/cell]" % [members, next_members]
+		else:
+			text += "[cell][b]%d[/b][/cell]" % members
 			
 		var u_color = "#ffffff"
-		if cur_uses <= 1:
-			u_color = "#ff5555"
-
-		text += "[cell][color=#aaaaaa][b]🔋 Uses[/b][/color][/cell]"
+		if cur_uses <= 1: u_color = "#ff5555"
+		text += "[cell][color=#aaaaaa][b]  Uses[/b][/color][/cell]"
 		text += "[cell][color=%s][b]%d[/b] / [b]%d[/b][/color][/cell]" % [u_color, cur_uses, max_uses]
 		text += "[/table][/font_size]\n"
 
-		# --- TABLA DE STATS ---
-		# Añadimos espacios "     " al final de los nombres para separar visualmente la columna 1 de la 2
 		text += "[font_size=%d][table=3]" % table_font_size
 		text += _row_table("%s Damage     " % _get_icon_tag(icon_damage), current_stats["dmg"], next_stats["dmg"], is_upgrade, "#ff7675", table_font_size)
 		text += _row_table("%s Health     " % _get_icon_tag(icon_health), current_stats["hp"], next_stats["hp"], is_upgrade, "#55efc4", table_font_size)
@@ -227,25 +267,34 @@ func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int 
 		if next_stats["crit_mult"] > 1.0:
 			text += _row_table("%s Crit Dmg   " % _get_icon_tag(icon_crit_damage), "x" + str(current_stats["crit_mult"]), "x" + str(next_stats["crit_mult"]), is_upgrade, "#ff9f43", table_font_size)
 		text += "[/table][/font_size]\n"
-	
+		
+		if not modifier.is_empty():
+			var mod_color_hex = modifier.get("color", Color.WHITE).to_html(false)
+			# --- INGLES ---
+			text += "\n[center][color=#%s]✦ %s ✦[/color][/center]\n" % [mod_color_hex, modifier.get("name", "Modifier")]
+			text += "[font_size=%d][table=2]" % table_font_size
+			
+			if modifier.has("stat") and modifier.has("mult"):
+				text += _build_modifier_row(modifier.stat, modifier.mult)
+			if modifier.has("stat2") and modifier.has("mult2"):
+				text += _build_modifier_row(modifier.stat2, modifier.mult2)
+				
+			text += "[/table][/font_size]\n"
+
 	elif item_data is PassiveData:
 		text += "[font_size=%d]\n" % body_font_size
 		var buff_text = _get_passive_stats_string(item_data)
 		text += "[font_size=%d][color=#ffffff]%s[/color][/font_size]\n" % [body_font_size, buff_text]
-
-	if "description" in item_data and not item_data.description.is_empty():
-		text += "[font_size=%d][color=#888888][i]%s[/i][/color][/font_size]" % [subtitle_font_size, item_data.description]
-
+		if "description" in item_data and not item_data.description.is_empty():
+			text += "[font_size=%d][color=#888888][i]%s[/i][/color][/font_size]" % [subtitle_font_size, item_data.description]
+			
 	description_label.text = text
 
-	# --- E. PRICE ---
 	if "price" in item_data and item_data.price > 0:
 		var final_price = item_data.price
 		var price_txt = ""
-		
 		if sell_percentage > 0:
 			final_price = (int(item_data.price * (sell_percentage / 100.0)) * current_count)
-	
 			price_txt = "[font_size=%d][b]SELL[/b]: %d " % [price_font_size, final_price]
 			price_txt += "[img=%dx%d]res://assets/Coin (1).png[/img][/font_size]" % [price_icon_size, price_icon_size]
 		else:
@@ -262,40 +311,29 @@ func show_tooltip(item_data: Resource, sell_percentage: int, current_count: int 
 			else:
 				price_txt = "[font_size=%d][b]COST[/b]: %d " % [price_font_size, cost]
 				price_txt += "[img=%dx%d]res://assets/Coin (1).png[/img][/font_size]" % [price_icon_size, price_icon_size]
-		
 		sell_price_label.text = price_txt
 		sell_price_label.show()
 	else:
 		sell_price_label.hide()
 
-	# --- AJUSTE DE TAMAÑO ---
-	var min_width = 330 # Subido un poco el base por los espacios extra
-	
+	var min_width = 330 
 	if item_data is PieceData:
-		if is_upgrade:
-			min_width = 270 
-		else:
-			min_width = 220 # Más ancho que antes para que quepan los espacios
-			
+		if is_upgrade: min_width = 270  
+		else: min_width = 220 
 	elif item_data is PassiveData:
 		var name_length = 0
-		if item_data.resource_name:
-			name_length = item_data.resource_name.length()
+		if item_data.resource_name: name_length = item_data.resource_name.length()
 		elif "name_passive" in item_data and not item_data.name_passive.is_empty():
 			name_length = item_data.name_passive.length()
 		min_width = clamp(name_length * 12, 250, 500)
 		
 	custom_minimum_size = Vector2(min_width, 0)
-	
 	show()
 	await get_tree().process_frame
 	size = Vector2.ZERO
-# ==============================================================================
-# 2. TOOLTIP DE SINERGIAS
-# ==============================================================================
+
 func show_synergy_tooltip(race_name: String, current_count: int, max_count: int, bonuses: Array, color_theme: Color, all_pieces: Array = [], active_ids: Array = []) -> void:
 	_ensure_units_grid_exists()
-	
 	name_label.text = race_name.to_upper()
 	var theme_font := get_theme_default_font()
 	var ls := LabelSettings.new()
@@ -311,29 +349,29 @@ func show_synergy_tooltip(race_name: String, current_count: int, max_count: int,
 	if card_style:
 		card_style.border_color = color_theme
 		card_style.bg_color = Color(0.08, 0.08, 0.1, 0.98) 
-
+		
 	var text = ""
 	var count_color = "#ffffff" if current_count > 0 else "#777777"
-	
 	text += "[font_size=%d][center][color=#aaaaaa]Active synergies:[/color] [color=%s][b]%d / %d[/b] Units[/color][/center][/font_size]\n" % [body_font_size, count_color, current_count, max_count]
-	text += "[center][color=#444444]━━━━━━━━━━━━━━━━━━[/color][/center]\n"
-	
+	text += "[center][color=#444444] [/color][/center]\n"
 	text += "[font_size=%d][table=1]" % body_font_size
+	
 	for i in range(bonuses.size()):
 		var bonus_data = bonuses[i] 
 		var req = bonus_data["required"]
 		var desc = bonus_data["desc"]
 		if current_count >= req:
-			text += "[cell][color=%s]✔ [b](%d) %s[/b][/color][/cell]" % [color_theme.to_html(), req, desc]
+			text += "[cell][color=%s]  [b](%d) %s[/b][/color][/cell]" % [color_theme.to_html(), req, desc]
 		else:
-			text += "[cell][color=#555555]🔒 (%d) %s[/color][/cell]" % [req, desc]
+			text += "[cell][color=#555555]  (%d) %s[/color][/cell]" % [req, desc]
+			
 	text += "[/table][/font_size]"
-	
 	text += "\n[center][i][font_size=%d][color=#666666]Colección:[/color][/font_size][/i][/center]" % footer_font_size
 	description_label.text = text
 	
-	for child in units_grid.get_children(): child.queue_free()
-	
+	for child in units_grid.get_children():
+		child.queue_free()
+		
 	if not all_pieces.is_empty():
 		var processed_ids = {}
 		for piece_res in all_pieces:
@@ -342,19 +380,19 @@ func show_synergy_tooltip(race_name: String, current_count: int, max_count: int,
 			if p_id != null:
 				if p_id in processed_ids: continue
 				processed_ids[p_id] = true
-			
+				
 			var card_frame = PanelContainer.new()
 			card_frame.custom_minimum_size = Vector2(48, 48)
-			
 			var rarity = 0
 			if "rarity" in piece_res: rarity = piece_res.rarity
 			var rarity_col = _get_rarity_color(rarity)
-			
 			var is_active = false
+			
 			if p_id != null:
 				for act_id in active_ids:
-					if str(act_id) == str(p_id): is_active = true; break
-			
+					if str(act_id) == str(p_id):
+						is_active = true; break
+						
 			var frame_style = StyleBoxFlat.new()
 			frame_style.bg_color = Color(0, 0, 0, 0.5)
 			frame_style.border_width_left = 2; frame_style.border_width_top = 2
@@ -368,7 +406,7 @@ func show_synergy_tooltip(race_name: String, current_count: int, max_count: int,
 			else:
 				frame_style.border_color = Color(0.3, 0.3, 0.3, 1)
 				card_frame.modulate = Color(0.4, 0.4, 0.4, 0.8)
-
+				
 			card_frame.add_theme_stylebox_override("panel", frame_style)
 			
 			var icon_rect = TextureRect.new()
@@ -377,33 +415,27 @@ func show_synergy_tooltip(race_name: String, current_count: int, max_count: int,
 			icon_rect.custom_minimum_size = Vector2(40, 40)
 			
 			var final_texture = null
-			
 			var p_name = piece_res.get("display_name")
 			if p_name == null: p_name = piece_res.get("piece_name")
-			
 			if p_name:
 				var path_attempt = "res://assets/piezas/blanco/" + p_name + ".png"
-				if ResourceLoader.exists(path_attempt):
-					final_texture = load(path_attempt)
-				else:
-					print("Tooltip: No se encontró imagen 'blanco' para: ", p_name)
-
-			if final_texture: 
-				icon_rect.texture = final_texture
+				if ResourceLoader.exists(path_attempt): final_texture = load(path_attempt)
+				else: print("Tooltip: No se encontró imagen 'blanco' para: ", p_name)
+				
+			if final_texture:  icon_rect.texture = final_texture
 			else:
 				var placeholder = PlaceholderTexture2D.new()
 				placeholder.size = Vector2(40,40)
 				icon_rect.texture = placeholder
 				icon_rect.modulate = Color(1, 0, 0, 0.2)
-
+				
 			var margin = MarginContainer.new()
 			margin.add_theme_constant_override("margin_top", 4); margin.add_theme_constant_override("margin_bottom", 4)
 			margin.add_theme_constant_override("margin_left", 4); margin.add_theme_constant_override("margin_right", 4)
-			
 			margin.add_child(icon_rect)
 			card_frame.add_child(margin)
 			units_grid.add_child(card_frame)
-
+			
 	sell_price_label.hide()
 	show()
 	await get_tree().process_frame
@@ -412,7 +444,6 @@ func show_synergy_tooltip(race_name: String, current_count: int, max_count: int,
 func show_passive_list_tooltip(active_passives: Dictionary) -> void:
 	_ensure_units_grid_exists()
 	for child in units_grid.get_children(): child.queue_free()
-	
 	name_label.text = "STATS"
 	var theme_font := get_theme_default_font()
 	var ls := LabelSettings.new()
@@ -428,30 +459,24 @@ func show_passive_list_tooltip(active_passives: Dictionary) -> void:
 	if card_style:
 		card_style.border_color = Color("#FFD700")
 		card_style.bg_color = Color(0.08, 0.08, 0.1, 0.98)
-
+		
 	var text = ""
-	
 	if active_passives.is_empty():
 		text += "\n[center][color=#666666][i]Inventario vacío[/i][/color][/center]\n"
 	else:
 		text += "[center][color=#aaaaaa]Bonificaciones actuales:[/color][/center]\n"
-		text += "[color=#444444]━━━━━━━━━━━━━━━━━━[/color]\n"
-		
+		text += "[color=#444444] [/color]\n"
 		text += "[table=3]"
-		
 		var keys = active_passives.keys()
 		keys.sort()
-		
 		for key in keys:
 			var entry = active_passives[key]
 			var p_data = entry["data"]
 			var count = entry["count"]
-			
 			if not p_data: continue
 			
 			var icon_path = ""
 			var name_color = "#ffffff"
-			
 			match p_data.type:
 				PassiveData.PassiveType.HEALTH_INCREASE: 
 					icon_path = "res://assets/inventario/VIDA.png"
@@ -468,12 +493,10 @@ func show_passive_list_tooltip(active_passives: Dictionary) -> void:
 				PassiveData.PassiveType.BASE_DAMAGE_INCREASE: 
 					icon_path = "res://assets/inventario/ADMG.png"
 					name_color = "#ee5253" 
-			
+					
 			var icon_bbcode = ""
-			if ResourceLoader.exists(icon_path):
-				icon_bbcode = "[img=24]%s[/img]" % icon_path 
-			else:
-				icon_bbcode = "🔸" 
+			if ResourceLoader.exists(icon_path): icon_bbcode = "[img=24]%s[/img]" % icon_path 
+			else: icon_bbcode = " "
 			
 			text += "[cell][font_size=%d][color=%s] %s %s  [/color][/font_size][/cell]" % [table_font_size, name_color, icon_bbcode, p_data.name_passive]
 			text += "[cell][center][color=#666666]x[/color][b][font_size=%d][color=#ffffff]%d[/color][/font_size][/b][/center][/cell]" % [table_font_size, count]
@@ -481,35 +504,24 @@ func show_passive_list_tooltip(active_passives: Dictionary) -> void:
 			var base_val = float(p_data.value)
 			var total_val = base_val * count
 			var val_str = ""
+			if p_data.type == PassiveData.PassiveType.CRITICAL_CHANCE_INCREASE: val_str = "+%d%%" % int(total_val)
+			elif floor(total_val) == total_val: val_str = "+%d" % int(total_val)
+			else: val_str = "+%.1f" % total_val
 			
-			if p_data.type == PassiveData.PassiveType.CRITICAL_CHANCE_INCREASE:
-				val_str = "+%d%%" % int(total_val)
-			elif floor(total_val) == total_val:
-				val_str = "+%d" % int(total_val)
-			else:
-				val_str = "+%.1f" % total_val
-				
 			text += "[cell][p align=right][b][font_size=%d][color=#55efc4]%s[/color][/font_size][/b][/p][/cell]" % [table_font_size, val_str]
-			
 		text += "[/table]"
-		text += "\n[color=#444444]━━━━━━━━━━━━━━━━━━[/color]"
-
+		text += "\n[color=#444444] [/color]"
+		
 	description_label.text = text
 	sell_price_label.hide()
 	show()
 
 # --- HELPERS ---
 func _row_table(label: String, val_old, val_new, show_upg: bool, color_hex: String, font_size: int) -> String:
-	# Columna 1: Etiqueta (Icono + Nombre)
 	var row = "[cell][font_size=%d][color=%s] %s[/color][/font_size][/cell]" % [font_size, color_hex, label]
-	
-	# Columna 2: Espaciador central invisible.
-	# Con el ancho reducido del panel, menos espacios son necesarios, pero mantenemos uno pequeño.
 	row += "[cell]  [/cell]"
-	
-	# Columna 3: Valor (Alineado a la derecha)
 	if show_upg and str(val_old) != str(val_new):
-		row += "[cell][p align=right][font_size=%d][color=#cccccc][b]%s[/b][/color] [color=#00ff00]➞ [b]%s[/b][/color][/font_size][/p][/cell]" % [font_size, str(val_old), str(val_new)]
+		row += "[cell][p align=right][font_size=%d][color=#cccccc][b]%s[/b][/color] [color=#00ff00]  [b]%s[/b][/color][/font_size][/p][/cell]" % [font_size, str(val_old), str(val_new)]
 	else:
 		row += "[cell][p align=right][font_size=%d][b]%s[/b][/font_size][/p][/cell]" % [font_size, str(val_new)]
 	return row
@@ -531,7 +543,7 @@ func _get_race_name(race_enum: int) -> String:
 		1: return "Japanese"
 		2: return "European"
 		_: return "Class"
-		
+
 func _get_rarity_name(rarity_enum: int) -> String:
 	match rarity_enum:
 		0: return "Common"
@@ -540,7 +552,6 @@ func _get_rarity_name(rarity_enum: int) -> String:
 		3: return "Legendary"
 		_: return ""
 
-# --- PASSIVE STATS WITH ICONS ---
 func _get_passive_stats_string(data: PassiveData) -> String:
 	var val = data.value
 	match data.type:
@@ -553,7 +564,6 @@ func _get_passive_stats_string(data: PassiveData) -> String:
 
 func show_passive_summary(passive_counts: Dictionary, multiplier: float) -> void:
 	if passive_counts.is_empty(): return 
-
 	name_label.text = "UPGRADES SUMMARY"
 	var theme_font := get_theme_default_font() 
 	var ls := LabelSettings.new()
@@ -569,13 +579,11 @@ func show_passive_summary(passive_counts: Dictionary, multiplier: float) -> void
 	if card_style:
 		card_style.border_color = Color("#FFD700")
 		card_style.bg_color = Color(0.1, 0.1, 0.05, 0.98) 
-
+		
 	var text = ""
-	var mult_color = "#ffffff"
-	if multiplier > 1.0: mult_color = "#00ff00"
-	
+	var mult_color = "#ffffff" if multiplier > 1.0 else "#00ff00"
 	text += "[font_size=%d][center][color=#aaaaaa]Empty Slot Multiplier:[/color] [b][color=%s]x%.2f[/color][/b][/center][/font_size]\n" % [body_font_size, mult_color, multiplier]
-	text += "[center][color=#444444]━━━━━━━━━━━━━━━━━━[/color][/center]\n"
+	text += "[center][color=#444444] [/color][/center]\n"
 	text += "[font_size=%d]" % body_font_size
 	
 	for id in passive_counts:
@@ -587,9 +595,8 @@ func show_passive_summary(passive_counts: Dictionary, multiplier: float) -> void
 		var total_value = (data.value * count) * multiplier
 		var name_str = data.name_passive if not data.name_passive.is_empty() else "Passive"
 		var stat_str = _get_passive_stat_label(data.type, total_value)
-		
-		text += "• [color=#ffcc00]%s[/color] [color=#888888](x%d)[/color]\n" % [name_str, count]
-		text += "   └ %s\n" % stat_str
+		text += "  [color=#ffcc00]%s[/color] [color=#888888](x%d)[/color]\n" % [name_str, count]
+		text += "     %s\n" % stat_str
 		
 	text += "[/font_size]"
 	description_label.text = text
@@ -599,39 +606,28 @@ func show_passive_summary(passive_counts: Dictionary, multiplier: float) -> void
 func _get_passive_stat_label(type: int, total_val: float) -> String:
 	var val_str = str(snapped(total_val, 0.1))
 	match type:
-		PassiveData.PassiveType.HEALTH_INCREASE:
-			return "[color=#4ecdc4]%s +%s Max Health[/color]" % [_get_icon_tag(icon_health), val_str]
-		PassiveData.PassiveType.CRITICAL_DAMAGE_INCREASE:
-			return "[color=#ff9f43]%s +%s Crit Damage[/color]" % [_get_icon_tag(icon_crit_damage), val_str]
-		PassiveData.PassiveType.CRITICAL_CHANCE_INCREASE:
-			return "[color=#ff9f43]%s +%s%% Crit Chance[/color]" % [_get_icon_tag(icon_crit_chance), val_str]
-		PassiveData.PassiveType.ATTACK_SPEED_INCREASE:
-			return "[color=#ffe66d]%s +%s Attack Speed[/color]" % [_get_icon_tag(icon_speed), val_str]
-		PassiveData.PassiveType.BASE_DAMAGE_INCREASE:
-			return "[color=#ff6b6b]%s +%s Base Damage[/color]" % [_get_icon_tag(icon_damage), val_str]
+		PassiveData.PassiveType.HEALTH_INCREASE: return "[color=#4ecdc4]%s +%s Max Health[/color]" % [_get_icon_tag(icon_health), val_str]
+		PassiveData.PassiveType.CRITICAL_DAMAGE_INCREASE: return "[color=#ff9f43]%s +%s Crit Damage[/color]" % [_get_icon_tag(icon_crit_damage), val_str]
+		PassiveData.PassiveType.CRITICAL_CHANCE_INCREASE: return "[color=#ff9f43]%s +%s%% Crit Chance[/color]" % [_get_icon_tag(icon_crit_chance), val_str]
+		PassiveData.PassiveType.ATTACK_SPEED_INCREASE: return "[color=#ffe66d]%s +%s Attack Speed[/color]" % [_get_icon_tag(icon_speed), val_str]
+		PassiveData.PassiveType.BASE_DAMAGE_INCREASE: return "[color=#ff6b6b]%s +%s Base Damage[/color]" % [_get_icon_tag(icon_damage), val_str]
 	return ""
 
 func _get_icon_tag(texture: Texture2D) -> String:
-	if texture:
-		return "[img=%dx%d]%s[/img]" % [icon_size, icon_size, texture.resource_path]
+	if texture: return "[img=%dx%d]%s[/img]" % [icon_size, icon_size, texture.resource_path]
 	return ""
+
 func show_npc_tooltip(unit: npc) -> void:
 	if not is_instance_valid(unit) or not unit.npc_res: return
-
-	# 1. Limpieza
 	custom_minimum_size = Vector2.ZERO
 	size = Vector2.ZERO
 	if units_grid:
-		for child in units_grid.get_children():
-			child.queue_free()
-
-	# 2. Configuración Visual
+		for child in units_grid.get_children(): child.queue_free()
+		
 	var title_text = "GLADIATOR"
-	var rarity_color = Color(1.0, 0.3, 0.3) 
+	var rarity_color = Color(1.0, 0.3, 0.3)  
 	var bg_tint = Color(0.15, 0.05, 0.05, 0.98)
-
 	name_label.text = title_text
-	
 	var ls = name_label.label_settings
 	if not ls: ls = LabelSettings.new()
 	ls.font_color = rarity_color
@@ -639,104 +635,72 @@ func show_npc_tooltip(unit: npc) -> void:
 	ls.outline_size = 4
 	ls.outline_color = Color.BLACK
 	name_label.label_settings = ls
-
+	
 	if card_style:
 		card_style.border_color = rarity_color
 		card_style.bg_color = bg_tint
-
-	# 3. Construcción del Texto
+		
 	var text = ""
 	var subtitle = unit.npc_res.rareza if unit.npc_res.rareza != "" else "Enemy Unit"
 	text += "[center][color=#cccccc][font_size=%d]%s[/font_size][/color][/center]\n" % [subtitle_font_size, subtitle]
-	text += "[center][color=#aa4444]━━━━━━━━━━━━━━━━━━[/color][/center]\n"
-
+	text += "[center][color=#aa4444] [/color][/center]\n"
 	text += "[font_size=%d][table=3]" % table_font_size
 	
-	# --- CÁLCULO DE STATS ---
-	
-	# 1. DAÑO
 	var base_dmg = unit.npc_res.damage
-	var total_dmg = unit.npc_res.damage + unit.bonus_damage # O usar unit.get_damage(null) si quieres aplicar lógica de habilidades
+	var total_dmg = unit.npc_res.damage + unit.bonus_damage 
 	var bonus_dmg = total_dmg - base_dmg
-	
 	var dmg_str = "[b]%d[/b]" % total_dmg
-	if bonus_dmg > 0:
-		dmg_str += " [color=#77ff77][font_size=%d](+%d)[/font_size][/color]" % [footer_font_size, int(bonus_dmg)]
-
-	# 2. VIDA (Actual / MaxTotal)
+	if bonus_dmg > 0: dmg_str += " [color=#77ff77][font_size=%d](+%d)[/font_size][/color]" % [footer_font_size, int(bonus_dmg)]
+	
 	var hp_current = int(unit.health)
 	var hp_max_total = int(unit.max_health)
 	var hp_base = int(unit.npc_res.max_health)
 	var hp_bonus = hp_max_total - hp_base
-	
 	var hp_str = "[b]%d / %d[/b]" % [hp_current, hp_max_total]
-	if hp_bonus > 0:
-		hp_str += " [color=#77ff77][font_size=%d](+%d)[/font_size][/color]" % [footer_font_size, hp_bonus]
-
-	# 3. VELOCIDAD
+	if hp_bonus > 0: hp_str += " [color=#77ff77][font_size=%d](+%d)[/font_size][/color]" % [footer_font_size, hp_bonus]
+	
 	var spd_base = unit.npc_res.atack_speed
 	var spd_total = unit.get_attack_speed()
 	var spd_bonus = spd_total - spd_base
-	
 	var spd_str = "[b]%.2f[/b]" % spd_total
-	if spd_bonus > 0.01:
-		spd_str += " [color=#77ff77][font_size=%d](+%.2f)[/font_size][/color]" % [footer_font_size, spd_bonus]
-
-	# 4. CRIT CHANCE
+	if spd_bonus > 0.01: spd_str += " [color=#77ff77][font_size=%d](+%.2f)[/font_size][/color]" % [footer_font_size, spd_bonus]
+	
 	var crit_c_base = unit.npc_res.critical_chance
 	var crit_c_total = unit.get_crit_chance(null)
 	var crit_c_bonus = crit_c_total - crit_c_base
-	
 	var crit_c_str = "[b]%d%%[/b]" % crit_c_total
-	if crit_c_bonus > 0:
-		crit_c_str += " [color=#77ff77][font_size=%d](+%d%%)[/font_size][/color]" % [footer_font_size, crit_c_bonus]
-
-	# 5. CRIT DAMAGE (Multiplicador)
+	if crit_c_bonus > 0: crit_c_str += " [color=#77ff77][font_size=%d](+%d%%)[/font_size][/color]" % [footer_font_size, crit_c_bonus]
+	
 	var crit_d_base = unit.npc_res.critical_damage
 	var crit_d_total = unit.get_crit_mult(null)
 	var crit_d_bonus = crit_d_total - crit_d_base
-	
 	var crit_d_str = "[b]x%.2f[/b]" % crit_d_total
-	if crit_d_bonus > 0.01:
-		crit_d_str += " [color=#77ff77][font_size=%d](+%.2f)[/font_size][/color]" % [footer_font_size, crit_d_bonus]
-
-	# --- RENDERIZADO TABLA ---
+	if crit_d_bonus > 0.01: crit_d_str += " [color=#77ff77][font_size=%d](+%.2f)[/font_size][/color]" % [footer_font_size, crit_d_bonus]
 	
-	# Fila 1: Daño
 	text += "[cell][font_size=%d][color=#ff7675] %s Damage[/color][/font_size][/cell]" % [table_font_size, _get_icon_tag(icon_damage)]
 	text += "[cell]  [/cell]"
 	text += "[cell][p align=right][font_size=%d]%s[/font_size][/p][/cell]" % [table_font_size, dmg_str]
-
-	# Fila 2: Vida
 	text += "[cell][font_size=%d][color=#55efc4] %s Health[/color][/font_size][/cell]" % [table_font_size, _get_icon_tag(icon_health)]
 	text += "[cell]  [/cell]"
 	text += "[cell][p align=right][font_size=%d]%s[/font_size][/p][/cell]" % [table_font_size, hp_str]
-
-	# Fila 3: Velocidad
 	text += "[cell][font_size=%d][color=#ffeaa7] %s Atk. Spd[/color][/font_size][/cell]" % [table_font_size, _get_icon_tag(icon_speed)]
 	text += "[cell]  [/cell]"
 	text += "[cell][p align=right][font_size=%d]%s[/font_size][/p][/cell]" % [table_font_size, spd_str]
-
-	# Fila 4: Crit Rate
+	
 	if crit_c_total > 0:
 		text += "[cell][font_size=%d][color=#ff9f43] %s Crit Rate[/color][/font_size][/cell]" % [table_font_size, _get_icon_tag(icon_crit_chance)]
 		text += "[cell]  [/cell]"
 		text += "[cell][p align=right][font_size=%d]%s[/font_size][/p][/cell]" % [table_font_size, crit_c_str]
-
-	# Fila 5: Crit Damage
 	if crit_d_total > 1.0:
 		text += "[cell][font_size=%d][color=#ff9f43] %s Crit Dmg[/color][/font_size][/cell]" % [table_font_size, _get_icon_tag(icon_crit_damage)]
 		text += "[cell]  [/cell]"
 		text += "[cell][p align=right][font_size=%d]%s[/font_size][/p][/cell]" % [table_font_size, crit_d_str]
-
+		
 	text += "[/table][/font_size]\n"
-
 	description_label.text = text
 	sell_price_label.hide()
-
-	# Aumentado a 340 para que quepan los textos largos tipo "x1.50 (+0.50)"
-	custom_minimum_size = Vector2(320, 0)
 	
+	custom_minimum_size = Vector2(320, 0)
 	show()
 	await get_tree().process_frame
 	size = Vector2.ZERO

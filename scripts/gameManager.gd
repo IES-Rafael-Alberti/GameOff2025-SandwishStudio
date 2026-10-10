@@ -19,7 +19,6 @@ var gladiators_defeated: int = 0
 @onready var buttonShop: Button = $elJetas/ButtonShop
 @onready var sprite_show: Sprite2D = $elJetas/ButtonShop/EyeSprite
 @onready var pupil: Sprite2D = $elJetas/ButtonShop/EyeSprite/Pupil
-# Referencia al AnimationPlayer de elJetas
 @onready var el_jetas_anim: AnimationPlayer = $elJetas/AnimationPlayer
 @onready var piece_label: Label = $Store/piece_label
 @onready var passive_label: Label = $Store/passive_label
@@ -32,7 +31,6 @@ var gladiators_defeated: int = 0
 @onready var roulette: Node2D = $Roulette
 @onready var combat_scene: Node2D = $combat_scene
 
-# --- NODOS CORREGIDOS CON get_node_or_null PARA EVITAR CRASHES ---
 @onready var announcement_label: Label = get_node_or_null("AnnouncementLabel")
 @onready var help_overlay: Control = get_node_or_null("CanvasLayer/HelpOverLay")
 @onready var help_button: Button = get_node_or_null("CanvasLayer/HelpOverLay/HelpButton")
@@ -40,7 +38,6 @@ var gladiators_defeated: int = 0
 @onready var lose_restart_button: Button = get_node_or_null("GameOver/RestartButton")
 @onready var win_label: Label = get_node_or_null("DayFinished/WinLabel")
 @onready var lose_label: Label = get_node_or_null("DayFinished/LoseLabel")
-# -----------------------------------------------------------------
 
 @onready var fondo_texto: TextureRect = $DayFinished/FondoTexto
 @onready var anfora_rota: TextureRect = $DayFinished/AnforaRota
@@ -54,13 +51,11 @@ var is_game_over_state: bool = false
 @onready var fuego: TextureRect = $DayFinished/Fuego
 @onready var estrellas: TextureRect = $DayFinished/Estrellas
 
-# --- CURSORES PERSONALIZADOS ---
 @export_group("Cursores Personalizados")
-@export var tex_grab: Texture2D  ## Arrastra 'Grab.png' (Arrastrar/Agarrar)
-@export var tex_click: Texture2D ## Arrastra 'Point.png' (Al hacer click)
-@export var cursor_hotspot: Vector2 = Vector2(0, 0) ## Ajusta la punta del cursor
+@export var tex_grab: Texture2D  
+@export var tex_click: Texture2D 
+@export var cursor_hotspot: Vector2 = Vector2(0, 0) 
 
-# CONFIGURACIÓN
 @export var gold_round_base: int = 100
 @export var gold_day_mult: float = 1
 @export var rounds_per_day: int = 10
@@ -68,19 +63,15 @@ var is_game_over_state: bool = false
 @export var gladiators_mult: int = 1
 @export var max_days: int = 2
 
-
-# --- UI LABELS ---
 @onready var round_label: Label = $RoundLabel
 @onready var day_label: Label = get_node_or_null("DayLabel")
 @onready var gladiator_label: Label = $GladiatorLabel
 
-# --- VISTAS (UI) ---
 @onready var day_finished_view: CanvasLayer = $DayFinished
 @onready var next_day_image: TextureRect = $DayFinished/NextDayImage 
 @onready var game_over_view: CanvasLayer = get_node_or_null("GameOver")
 @onready var win_view: CanvasLayer = get_node_or_null("Win")
 
-# --- Referencias NUEVAS para DayFinished ---
 @onready var next_day_label: Label = $DayFinished/NextDayLabel
 @onready var day_slider: TextureProgressBar = $DayFinished/HSlider
 @onready var info_label: RichTextLabel = $DayFinished/InfoLabel
@@ -102,13 +93,8 @@ var blink_tween: Tween = null
 var max_distance: float = 100
 var is_shop_transitioning: bool = false
 
-# Variable acumuladora para el oro ganado EXCLUSIVAMENTE en el día
 var daily_gold_salary: int = 0
 var daily_gold_loot: int = 0
-
-## ------------------------------------------------------------------
-## Funciones de Godot
-## ------------------------------------------------------------------
 
 func _ready():
 	add_to_group("game_manager")
@@ -130,7 +116,6 @@ func _ready():
 			original_positions[child] = child.position
 			child.modulate.a = 1.0
 
-	# --- Conexiones ---
 	if roulette.has_signal("roulette_spin_started"):
 		roulette.roulette_spin_started.connect(_on_roulette_spin_started)
 	
@@ -149,7 +134,6 @@ func _ready():
 	if help_button:
 		help_button.pressed.connect(_on_help_button_pressed)
 	else:
-		# Ya no dará error rojo, solo un print informativo si no está
 		print("Info: HelpButton no encontrado o desactivado.")
 
 	PlayerData.currency_changed.connect(_on_PlayerData_currency_changed)
@@ -165,7 +149,6 @@ func _ready():
 	if current_round == 1:
 		_give_initial_piece()
 		set_state(GameState.ROULETTE)
-		# --- CAMBIO AQUI: Forzamos la animación de entrada al inicio ---
 		if el_jetas_anim: el_jetas_anim.play("intro")
 	else:
 		set_state(GameState.SHOP)
@@ -178,9 +161,8 @@ func _ready():
 
 	if start_button:
 		start_button.pressed.connect(_on_start_button_pressed)
-		start_button.visible = false # Oculto al principio
+		start_button.visible = false
 
-	# Si es el día 1, lanzamos la intro visual encima del juego
 	if current_day == 1 and current_round == 1:
 		_play_simple_intro()
 		if comic_root: comic_root.visible = true
@@ -194,18 +176,13 @@ func _ready():
 			transition_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	
 func _process(_delta: float) -> void:
-	# Gestionamos el temporizador del parpadeo
 	blink_timer -= _delta
-	
-	# Solo mostramos/movemos la pupila si el ojo está ABIERTO (textura original)
 	if sprite_show.texture == original_eye_texture:
 		pupil.visible = true
 		_update_pupil_position()
 	else:
-		# Si está parpadeando (textura cerrada), ocultamos la pupila
 		pupil.visible = false
 
-	# Ejecutar parpadeo aleatorio cuando toca
 	if blink_timer <= 0.0 and sprite_show.visible:
 		await _toggle_eye_parpadeo()
 		blink_timer = randf_range(blink_interval_min, blink_interval_max)
@@ -216,18 +193,10 @@ func _process(_delta: float) -> void:
 func _update_ui_labels() -> void:
 	if is_instance_valid(day_label):
 		day_label.text = "Day " + str(current_day) + " / " + str(max_days)
-	
 	if is_instance_valid(gladiator_label):
 		gladiator_label.text = "%d/%d" % [gladiators_defeated, gladiators_per_day]
-	
 	if is_instance_valid(round_label):
-		var state_text = ""	
 		round_label.text = "Wave %d/%d" % [current_round, rounds_per_day]
-
-
-## ------------------------------------------------------------------
-## Máquina de Estados
-## ------------------------------------------------------------------
 
 func set_state(new_state: GameState):
 	if current_state == new_state: return
@@ -256,15 +225,9 @@ func set_state(new_state: GameState):
 			inventory.set_interactive(false)
 			roulette.set_interactive(false)
 
-## ------------------------------------------------------------------
-## Lógica Principal
-## ------------------------------------------------------------------
-
 func _on_shop_button_pressed():
-	if is_shop_transitioning: 
-		return
-	if anim.is_playing():
-		return
+	if is_shop_transitioning: return
+	if anim.is_playing(): return
 		
 	if current_state == GameState.SHOP:
 		set_state(GameState.ROULETTE)
@@ -274,8 +237,7 @@ func _on_shop_button_pressed():
 func _on_roulette_spin_started():
 	set_state(GameState.SPINNING)
 
-
-func _on_combat_requested(piece_resource: Resource):
+func _on_combat_requested(piece_resource: Resource, modifier: Dictionary = {}):
 	if piece_resource and piece_resource is PieceRes:
 		set_state(GameState.COMBAT)
 	else:
@@ -283,8 +245,10 @@ func _on_combat_requested(piece_resource: Resource):
 		_on_combat_finished(false)
 
 func _on_combat_finished(player_won: bool = false, loot_from_combat: int = 0):
+	if roulette.has_method("reset_modifiers_state"):
+		roulette.reset_modifiers_state()
+		
 	var round_income = int(gold_round_base * gold_day_mult)
-
 	PlayerData.add_currency(round_income)
 	
 	daily_gold_salary += round_income
@@ -295,19 +259,14 @@ func _on_combat_finished(player_won: bool = false, loot_from_combat: int = 0):
 	if player_won:
 		gladiators_defeated += 1
 	
-	# COMPROBAMOS SI SE ACABÓ EL DÍA
 	if current_round >= rounds_per_day:
 		print("¡Fin del Día %d! Verificando cuota..." % current_day)
-		
-		# Verificamos si CUMPLIÓ o FALLÓ
 		if gladiators_defeated >= gladiators_per_day:
-			is_game_over_state = false # Ganó el día
+			is_game_over_state = false 
 			print("Cuota cumplida. Mostrando resumen.")
 		else:
-			is_game_over_state = true # Perdió el día
+			is_game_over_state = true 
 			print("Cuota NO cumplida. GAME OVER (Modo Resumen).")
-
-		# En ambos casos mostramos la misma vista, la lógica interna cambiará
 		_show_day_finished_view()
 	else:
 		current_round += 1
@@ -324,13 +283,9 @@ func _show_day_finished_view() -> void:
 		_advance_to_next_day()
 		return
 		
-	# --- LÓGICA DE AUDIO ---
-	if is_game_over_state:
-		MusicManager.play_lose()
-	elif current_day >= max_days:
-		MusicManager.play_win()
-	else:
-		MusicManager.play_day_finished()
+	if is_game_over_state: MusicManager.play_lose()
+	elif current_day >= max_days: MusicManager.play_win()
+	else: MusicManager.play_day_finished()
 		
 	day_finished_view.visible = true
 	buttonShop.disabled = true
@@ -339,31 +294,21 @@ func _show_day_finished_view() -> void:
 		NextDayButton.visible = false
 		NextDayButton.disabled = true 
 
-	# -----------------------------------------------------------
-	# NUEVO: AJUSTE VISUAL (FUEGO VS ESTRELLAS) 
-	# -----------------------------------------------------------
 	if is_game_over_state:
-		# Modo Derrota: Fuego visible, Estrellas ocultas
 		if estrellas: estrellas.visible = false
 		if fuego: fuego.visible = true
 	else:
-		# Modo Normal/Victoria: Estrellas visibles, Fuego oculto
 		if estrellas: estrellas.visible = true
 		if fuego: fuego.visible = false
 
-	# -----------------------------------------------------------
-	# 1. SETUP INICIAL UI
-	# -----------------------------------------------------------
-	
 	if transition_rect: 
 		transition_rect.visible = true 
-		transition_rect.modulate.a = 0.0 # Empezamos transparente
+		transition_rect.modulate.a = 0.0 
 	
 	var ui_elements = [fondo_texto, next_day_image, next_day_label, info_label, win_label, lose_label, day_slider, anfora_rota]
 	for elem in ui_elements:
-		if elem: elem.modulate.a = 0.0 # Ocultamos todo el contenido UI
+		if elem: elem.modulate.a = 0.0 
 
-	# Preparamos los textos
 	if win_label: win_label.visible_characters = 0
 	if lose_label: lose_label.visible_characters = 0
 	
@@ -375,135 +320,102 @@ func _show_day_finished_view() -> void:
 	if day_slider:
 		day_slider.step = 0.0 
 		day_slider.max_value = max_days
-		# Si pierdes el día 2, el slider se queda lleno hasta el 1.
 		day_slider.value = current_day - 1 
 
 	if next_day_label:
 		next_day_label.text = "Day %d Failed" % current_day if is_game_over_state else "Day %d Finished" % current_day
 
-	# -----------------------------------------------------------
-	# 2. SECUENCIA DE ENTRADA
-	# -----------------------------------------------------------
 	var t = create_tween()
-	
-	# PASO A: Fundido a NEGRO (Solo el fondo negro primero)
 	if transition_rect:
-		# Duración de 1.0 segundo para ir a negro
 		t.tween_property(transition_rect, "modulate:a", 1.0, 1.0).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	
-	# PASO B: Aparece la Interfaz (Encadenado DESPUÉS del negro)
 	t.chain()
-	
-	# Ahora animamos todos los elementos de la UI a la vez
 	t.set_parallel(true)
 	
 	var fade_in_list = [fondo_texto, next_day_image, next_day_label, info_label]
+	if day_slider: fade_in_list.append(day_slider)
 	
-	# Añadimos SIEMPRE el slider para que se vea el progreso actual antes de romperse
-	if day_slider:
-		fade_in_list.append(day_slider)
-	
-	# Hacemos aparecer la UI sobre el fondo negro
 	for elem in fade_in_list:
 		if elem: t.tween_property(elem, "modulate:a", 1.0, 0.5)
 	
-	# 3. ANIMACIONES LÓGICAS (Barra de progreso / Ánfora)
 	t.chain().tween_callback(func():
 		var animation_tween : Tween
-		
-		if is_game_over_state:
-			animation_tween = animate_amphora_break()
-		else:
-			animation_tween = animate_day_progressbar()
+		if is_game_over_state: animation_tween = animate_amphora_break()
+		else: animation_tween = animate_day_progressbar()
 
-		if animation_tween:
-			animation_tween.finished.connect(_start_text_animation)
-		else:
-			_start_text_animation()
+		if animation_tween: animation_tween.finished.connect(_start_text_animation)
+		else: _start_text_animation()
 	)
-# Función auxiliar para iniciar el texto (más limpio)
+
 func _start_text_animation():
 	var t2 = animate_info_text()
-	if t2:
-		t2.finished.connect(_wait_and_decide_flow)
-	else:
-		_wait_and_decide_flow()
+	if t2: t2.finished.connect(_wait_and_decide_flow)
+	else: _wait_and_decide_flow()
+
 func _wait_and_decide_flow() -> void:
-	# Si es fin de juego (victoria o derrota), esperamos más tiempo
 	if is_game_over_state or current_day >= max_days:
 		print("Esperando para mostrar resultado final...")
-		# 3.0 segundos de espera para leer el resumen
 		get_tree().create_timer(3.0).timeout.connect(_decide_post_summary_flow)
 	else:
-		# Si es un día normal, pasamos directamente (o con una micro espera si quieres)
 		_decide_post_summary_flow()
 
 func _decide_post_summary_flow() -> void:
-	if is_game_over_state:
-		_animate_lose_transition() # Transición a LoseLabel
-	elif current_day >= max_days:
-		_animate_win_transition()  # Transición a WinLabel
-	else:
-		reveal_next_day_button()   # Continuar al siguiente día
-# NUEVA FUNCIÓN: Maneja la transición suave de elementos a WinLabel
+	if is_game_over_state: _animate_lose_transition() 
+	elif current_day >= max_days: _animate_win_transition()  
+	else: reveal_next_day_button()   
+
 func _animate_win_transition() -> void:
 	var t = create_tween()
 	if fuego: fuego.visible = false
 	if estrellas: estrellas.visible = true
-	# 1. Desvanecer elementos del resumen
 	t.set_parallel(true)
 	if info_label: t.tween_property(info_label, "modulate:a", 0.0, 1.0)
 	if day_slider: t.tween_property(day_slider, "modulate:a", 0.0, 1.0)
 	if next_day_label: t.tween_property(next_day_label, "modulate:a", 0.0, 1.0)
 	if fondo_texto: t.tween_property(fondo_texto, "modulate:a", 0.0, 1.0) 
 	
-	# 2. Preparar WinLabel (Secuencial)
 	t.chain().tween_callback(func():
 		if win_label:
-			win_label.visible_characters = 0 # <--- PRIMERO: Caracteres a 0
-			win_label.modulate.a = 1.0       # <--- SEGUNDO: Hacer visible el contenedor
+			win_label.visible_characters = 0 
+			win_label.modulate.a = 1.0       
 	)
 	
-	# 3. Animar texto de Victoria
 	if win_label:
 		t.tween_property(win_label, "visible_characters", win_label.get_total_character_count(), 2.0)
 	
-	# 4. Mostrar botón
 	t.chain().tween_callback(reveal_next_day_button)
+
 func _show_game_over_view() -> void:
 	if game_over_view:
 		game_over_view.visible = true
 		buttonShop.disabled = true
-	else:
-		push_error("GameManager: No se encontró el nodo 'GameOver'.")
+	else: push_error("GameManager: No se encontró el nodo 'GameOver'.")
 
 func _show_win_view() -> void:
 	if win_view:
 		win_view.visible = true
 		buttonShop.disabled = true
-	else:
-		push_error("GameManager: No se encontró el nodo 'Win'.")
+	else: push_error("GameManager: No se encontró el nodo 'Win'.")
 
 func _advance_to_next_day() -> void:
+	if roulette.has_method("reset_modifiers_state"):
+		roulette.reset_modifiers_state()
+		
 	MusicManager.play_gameplay()
 	print("Iniciando Día %d..." % (current_day + 1))
 	current_day += 1
 	current_round = 1
 	gladiators_defeated = 0 
-	
 	daily_gold_salary = 0
 	daily_gold_loot = 0
 	
-	if day_finished_view:
-		day_finished_view.visible = false
-	
+	if day_finished_view: day_finished_view.visible = false
 	buttonShop.disabled = false
 	
 	_update_ui_labels()
 	set_state(GameState.SHOP)
 	store.start_new_round()
 	
-	# Al pasar de día, reseteamos el gladiador y creamos uno nuevo
 	if combat_scene and combat_scene.has_method("reset_for_new_day"):
 		combat_scene.reset_for_new_day()
 
@@ -514,21 +426,18 @@ func _give_initial_piece():
 		inventory.add_item(initial_piece)
 		
 func _apply_default_cursors():
-	if tex_click:
-		Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_POINTING_HAND, cursor_hotspot)
+	if tex_click: Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_POINTING_HAND, cursor_hotspot)
 	if tex_grab:
 		Input.set_custom_mouse_cursor(tex_grab, Input.CURSOR_DRAG, cursor_hotspot)
 		Input.set_custom_mouse_cursor(tex_grab, Input.CURSOR_CAN_DROP, cursor_hotspot)
 
 func _update_cursor_on_click():
 	if _is_clicking:
-		# AL CLICAR: Forzamos TODO a ser 'tex_click' (Point.png)
 		if tex_click:
 			Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_ARROW, cursor_hotspot)
 			Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_POINTING_HAND, cursor_hotspot)
 			Input.set_custom_mouse_cursor(tex_click, Input.CURSOR_DRAG, cursor_hotspot)
 	else:
-		# AL SOLTAR: Restauramos los roles normales
 		_apply_default_cursors()
 
 func _set_hand_cursor_recursively(node: Node):
@@ -539,9 +448,7 @@ func _set_hand_cursor_recursively(node: Node):
 			_set_hand_cursor_recursively(child)
 
 func _toggle_store(close_store: bool):
-	if is_shop_transitioning: return # Bloqueo de seguridad extra
-	
-	# 1. ACTIVAMOS EL BLOQUEO
+	if is_shop_transitioning: return 
 	is_shop_transitioning = true 
 	
 	is_tended = close_store
@@ -555,35 +462,29 @@ func _toggle_store(close_store: bool):
 	if not is_tended: roulette.visible = false
 
 	var anim_duration = 1.0 
-	
 	if is_tended:
-		# --- CERRANDO TIENDA ---
 		_simple_items_fade(0.0, 0.2)
 		await get_tree().create_timer(0.2).timeout
-		
 		anim.play("roll")
 		var tween = create_tween()
 		tween.tween_property(mat, "shader_parameter/roll_amount", 1.0, anim_duration)
-		
 		tween.tween_callback(func(): store.visible = false)
 		
-		# 2. DESBLOQUEAMOS AL TERMINAR EL TWEEN
-		tween.finished.connect(func(): is_shop_transitioning = false)
-		
+		tween.finished.connect(func(): 
+			is_shop_transitioning = false
+			# Evitamos tirar las magias si el cómic está en pantalla (Día 1, Ronda 1)
+			if comic_root and comic_root.visible:
+				return
+			if roulette.has_method("check_and_roll_modifiers"):
+				roulette.check_and_roll_modifiers()
+		)
 	else:
-		# --- ABRIENDO TIENDA ---
 		store.visible = true
 		_reset_items_visibility() 
 		anim.play("unroll")
-		
 		var tween = create_tween()
 		tween.tween_property(mat, "shader_parameter/roll_amount", 0.0, anim_duration).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
-		
 		tween.chain().tween_callback(_animate_items_entry)
-		
-		# 2. DESBLOQUEAMOS AL TERMINAR EL TWEEN
-		# Nota: Esto desbloquea cuando el rollo se despliega. 
-		# Los items pueden seguir cayendo un poco después, pero el estado ya es seguro.
 		tween.finished.connect(func(): is_shop_transitioning = false)
 		
 func _animate_items_entry():
@@ -604,12 +505,10 @@ func _animate_items_entry():
 			current_delay += delay_step
 		
 func _reset_items_visibility():
-	# Pone todo transparente y resetea la escala por si acaso
 	for item in _get_animatable_store_items():
 		if is_instance_valid(item):
 			item.modulate.a = 0.0
-			item.scale = Vector2.ONE # Reseteamos escala por seguridad
-			# Restauramos posición original si existe
+			item.scale = Vector2.ONE 
 			if original_positions.has(item):
 				item.position = original_positions[item]
 
@@ -641,14 +540,9 @@ func _on_PlayerData_currency_changed(new_amount: int) -> void:
 	if gold_label: gold_label.text = str(new_amount)
 
 func _toggle_eye_parpadeo() -> void:
-	# Parpadeo: Cambio textura a cerrada y oculto pupila temporalmente
-	# NOTA: Hemos quitado el chequeo "if not is_tended" para que parpadee siempre
 	sprite_show.texture = eye_closed_texture
 	pupil.visible = false
-	
 	await get_tree().create_timer(0.07).timeout
-	
-	# Restaurar ojo abierto y pupila
 	sprite_show.texture = original_eye_texture
 	pupil.visible = true
 
@@ -660,7 +554,6 @@ func _update_pupil_position():
 	pupil.position = pupil_offset + dir
 
 func _on_shop_hover():
-	# Mantenemos este efecto visual de parpadeo (alpha) al pasar el ratón
 	if blink_tween and blink_tween.is_valid(): blink_tween.kill()
 	blink_tween = create_tween()
 	blink_tween.tween_property(sprite_show, "modulate:a", 0.5, 0.12)
@@ -671,7 +564,6 @@ func _on_shop_exit():
 	sprite_show.modulate.a = 1.0
 
 func _update_eye_state():
-	# Estado base: Ojo abierto y pupila visible (para vigilar)
 	sprite_show.texture = original_eye_texture
 	pupil.visible = true
 
@@ -700,9 +592,7 @@ func animate_store(hide: bool, callback: Callable = Callable()):
 func _on_store_hidden(): store.visible = false
 
 func pausar() -> void:
-	if options_animating:
-		return
-
+	if options_animating: return
 	if is_instance_valid(options_instance):
 		options_animating = true
 		options_instance.close_with_anim()
@@ -712,13 +602,10 @@ func pausar() -> void:
 
 	print("PAUSAR() llamada -> creando options como menú de pausa")
 	options_animating = true
-
 	options_instance = options_scene.instantiate() as CanvasLayer
 	options_instance.name = "OptionsPause"
-
 	var root := get_tree().root
 	root.add_child(options_instance)
-
 	root.move_child(options_instance, root.get_child_count() - 1)
 
 	if options_instance.has_method("set_as_pause_menu"):
@@ -737,232 +624,160 @@ func get_inventory_piece_count(resource_to_check: Resource) -> int:
 
 func _on_help_button_pressed() -> void:
 	print("HELP BUTTON PULSADO")
-	if not is_instance_valid(help_overlay):
-		return
+	if not is_instance_valid(help_overlay): return
 	help_overlay.toggle_overlay()
 
-# SISTEMA DE SINERGIAS
 func get_active_unit_ids_for_race(target_race_enum: int) -> Array:
 	var active_ids = []
-	
 	if not roulette or not roulette.has_node("SpriteRuleta/SlotsContainer"):
 		return []
 
 	var slots_container = roulette.get_node("SpriteRuleta/SlotsContainer")
-	
 	for slot_root in slots_container.get_children():
 		if not slot_root.has_node("slot"): continue
 		var actual_slot = slot_root.get_node("slot")
-		
 		if "current_piece_data" in actual_slot and actual_slot.current_piece_data:
 			var piece = actual_slot.current_piece_data
 			if "piece_origin" in piece and piece.piece_origin:
 				var origin = piece.piece_origin
-				# Comprobamos si es la raza que buscamos
 				if origin.race == target_race_enum:
-					# Evitamos duplicados (si tienes 2 sátiros, solo cuenta 1 para la lista visual)
 					if not active_ids.has(origin.id):
 						active_ids.append(origin.id)
-	
 	return active_ids
 
-# Obtener todas las piezas de una raza (para el tooltip) 
 func get_all_pieces_for_race(race_name: String) -> Array:
 	var list = []
-	# Instanciamos el registro para consultar el mapa
-	# Asumimos que PieceRegistry es un script accesible.
 	var registry_script = load("res://scripts/piece_Registry.gd")
-	if not registry_script:
-		return []
+	if not registry_script: return []
 	
 	var registry = registry_script.new()
 	var prefix = race_name.to_lower() + "."
-	# Iteramos sobre las claves del mapa (ej: "europea.satiro")
 	for key in registry._map.keys():
 		if key.begins_with(prefix):
 			var path = registry._map[key]
 			var res = load(path)
-			if res:
-				list.append(res)
+			if res: list.append(res)
 	
 	registry.free()
 	return list
 
 func get_race_enum_from_name(race_name: String) -> int:
 	match race_name:
-		"European": return 2 # PieceRes.PieceRace.EUROPEA
-		"Japanese": return 1 # PieceRes.PieceRace.JAPONESA
-		"Nordic": return 0 # PieceRes.PieceRace.NORDICA
+		"European": return 2 
+		"Japanese": return 1 
+		"Nordic": return 0 
 	return -1
 	
 func get_active_synergies() -> Dictionary:
-	var result = {
-		"jap": 0, # Tier Japonés
-		"nor": 0, # Tier Nórdico
-		"eur": 0  # Tier Europeo
-	}
-	
+	var result = { "jap": 0, "nor": 0, "eur": 0 }
 	if not roulette or not roulette.has_node("SpriteRuleta/SlotsContainer"):
 		push_warning("GameManager: No se encontró el contenedor de slots en la ruleta.")
 		return result
 
 	var slots_container = roulette.get_node("SpriteRuleta/SlotsContainer")
-	
 	var unique_ids_jap = {}
 	var unique_ids_nor = {}
 	var unique_ids_eur = {}
 	
 	for slot_root in slots_container.get_children():
-		if not slot_root.has_node("slot"):
-			continue
-			
+		if not slot_root.has_node("slot"): continue
 		var actual_slot = slot_root.get_node("slot")
-		
 		if "current_piece_data" in actual_slot and actual_slot.current_piece_data:
 			var piece_data = actual_slot.current_piece_data
-			
 			if "piece_origin" in piece_data and piece_data.piece_origin is PieceRes:
 				var res = piece_data.piece_origin
 				var id = res.id
-				
 				match res.race:
-					PieceRes.PieceRace.JAPANESE:
-						unique_ids_jap[id] = true
-					PieceRes.PieceRace.NORDIC:
-						unique_ids_nor[id] = true
-					PieceRes.PieceRace.EUROPEAN:
-						unique_ids_eur[id] = true
-					
-					
+					PieceRes.PieceRace.JAPANESE: unique_ids_jap[id] = true
+					PieceRes.PieceRace.NORDIC: unique_ids_nor[id] = true
+					PieceRes.PieceRace.EUROPEAN: unique_ids_eur[id] = true
 
-	# --- CÁLCULO DE TIERS ---
 	var count_jap = unique_ids_jap.size()
-	if count_jap >= 4:
-		result["jap"] = 2
-	elif count_jap >= 2:
-		result["jap"] = 1
+	if count_jap >= 4: result["jap"] = 2
+	elif count_jap >= 2: result["jap"] = 1
 		
 	var count_nor = unique_ids_nor.size()
-	if count_nor >= 4:
-		result["nor"] = 2
-	elif count_nor >= 2:
-		result["nor"] = 1
+	if count_nor >= 4: result["nor"] = 2
+	elif count_nor >= 2: result["nor"] = 1
 		
 	var count_eur = unique_ids_eur.size()
-	if count_eur >= 4:
-		result["eur"] = 2
-	elif count_eur >= 2:
-		result["eur"] = 1
+	if count_eur >= 4: result["eur"] = 2
+	elif count_eur >= 2: result["eur"] = 1
 	
 	return result
+
 func animate_day_progressbar():
-	if not day_slider:
-		return null
-	
-	# El slider YA debería estar visible y en (current_day - 1) gracias al setup anterior.
+	if not day_slider: return null
 	var target_value = current_day
-	
 	var tween := create_tween()
-	
-	# Pequeña pausa inicial para que el ojo del jugador ubique la barra antes de que se mueva
 	tween.tween_interval(0.3)
-	
-	# Animación fluida hacia el nuevo día
-	tween.tween_property(day_slider, "value", target_value, 2.0)\
-		.set_trans(Tween.TRANS_CUBIC)\
-		.set_ease(Tween.EASE_OUT)
-
+	tween.tween_property(day_slider, "value", target_value, 2.0).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	return tween
-func animate_info_text():
-	if not info_label:
-		return
 
+func animate_info_text():
+	if not info_label: return
 	info_label.visible_characters = 0
 	var tween := create_tween()
 	tween.tween_property(info_label, "visible_characters", info_label.get_total_character_count(), 1)
 	return tween
+
 func reveal_next_day_button():
-	if not NextDayButton:
-		return
-		
-	# Conexión limpia
-	if NextDayButton.pressed.is_connected(_advance_to_next_day):
-		NextDayButton.pressed.disconnect(_advance_to_next_day)
-	if not NextDayButton.pressed.is_connected(_on_next_day_button_pressed):
-		NextDayButton.pressed.connect(_on_next_day_button_pressed)
+	if not NextDayButton: return
+	if NextDayButton.pressed.is_connected(_advance_to_next_day): NextDayButton.pressed.disconnect(_advance_to_next_day)
+	if not NextDayButton.pressed.is_connected(_on_next_day_button_pressed): NextDayButton.pressed.connect(_on_next_day_button_pressed)
 		
 	NextDayButton.visible = true
 	NextDayButton.modulate.a = 0.0
-	
 	NextDayButton.move_to_front()
 	NextDayButton.disabled = false 
 	NextDayButton.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	
 	var tween := create_tween()
 	tween.tween_property(NextDayButton, "modulate:a", 1.0, 1.0)
+
 func build_day_summary_text() -> String:
 	var rounds_count = rounds_per_day
 	var round_unit_price = daily_gold_salary / rounds_count if rounds_count > 0 else 0
-
 	var glad_count = gladiators_defeated
 	var glad_unit_price = daily_gold_loot / glad_count if glad_count > 0 else 0
-
 	var total_day = daily_gold_salary + daily_gold_loot
 
 	var text := ""
 	text += "[center][b]SUMMARY OF THE DAY[/b][/center]\n\n"
-
 	text += "[img=24x24]res://assets/Coin (1).png[/img]  "
 	text += "[b]Rounds:[/b] %d × %d = [b]%d gold[/b]\n" % [round_unit_price, rounds_count, daily_gold_salary]
-
 	text += "[img=24x24]res://assets/GladsIcon (1).png[/img]  "
 	text += "[b]Gladiators:[/b] %d × %d = [b]%d gold[/b]\n" % [glad_unit_price, glad_count, daily_gold_loot]
-
 	text += "\n\n"
-
 	text += "[center][b]TOTAL: %d gold[/b][/center]" % total_day
-
 	return text
+
 func _restart_game() -> void:
 	print("Volviendo al menú principal...")
 	get_tree().paused = false
 	PlayerData.reset_player_data()
-	if has_node("/root/GlobalStats"):
-		GlobalStats.update_stats({}) 
-	
+	if has_node("/root/GlobalStats"): GlobalStats.update_stats({}) 
 	get_tree().change_scene_to_file("res://scenes/menu.tscn")
 	
 func _on_next_day_button_pressed() -> void:
 	NextDayButton.disabled = true
-	
-	# CASO 1: FIN DEL JUEGO (Ir al Menú / Reiniciar para ver Cómic)
 	if is_game_over_state or current_day >= max_days:
 		var t = create_tween()
 		t.set_parallel(true)
-		
-		# 1. Aseguramos que el TransitionRect se vuelva NEGRO OPACO
 		if transition_rect: 
 			transition_rect.visible = true
 			transition_rect.color = Color.BLACK 
-			# Forzamos alpha 1.0 (Opaco)
-			t.tween_property(transition_rect, "modulate:a", 1.0, 1.5) # 1.5 segundos para apreciar el negro
+			t.tween_property(transition_rect, "modulate:a", 1.0, 1.5) 
 			
-		# 2. Ocultamos la UI para que solo quede el negro
 		var ui_to_hide = [fondo_texto, next_day_label, info_label, win_label, lose_label, day_slider, anfora_rota, NextDayButton, next_day_image]
 		for elem in ui_to_hide:
 			if elem: t.tween_property(elem, "modulate:a", 0.0, 0.5)
 			
-		# 3. IMPORTANTE: Esperamos a que termine el fundido antes de cambiar de escena
 		await t.finished
-		
 		_restart_game()
-
-	# CASO 2: SIGUIENTE DÍA (Juego normal)
 	else:
 		var t = create_tween()
 		t.set_parallel(true)
-		
-		# Desvanecemos TODO (incluido el fondo negro) para ver la tienda
 		for child in day_finished_view.get_children():
 			if child is CanvasItem:
 				t.tween_property(child, "modulate:a", 0.0, 0.5)
@@ -971,96 +786,59 @@ func _on_next_day_button_pressed() -> void:
 			NextDayButton.disabled = false 
 			_advance_to_next_day()
 		)
+
 func animate_amphora_break():
-	if not day_slider or not anfora_rota:
-		return null
-	
-	# Aseguramos que el slider muestra el progreso hasta el día anterior
+	if not day_slider or not anfora_rota: return null
 	day_slider.max_value = max_days
 	day_slider.value = current_day - 1
-	
 	var tween = create_tween()
-	
 	tween.tween_interval(1.0)
-	
-
 	tween.tween_callback(func(): anfora_rota.visible = true)
-	
 	tween.set_parallel(true)
 	tween.tween_property(day_slider, "modulate:a", 0.0, 0.5).set_trans(Tween.TRANS_SINE)
 	tween.tween_property(anfora_rota, "modulate:a", 1.0, 0.5).set_trans(Tween.TRANS_SINE)
-	
 	return tween
+
 func _animate_lose_transition() -> void:
 	var t = create_tween()
-	# 1. Ocultar elementos del resumen
 	t.set_parallel(true)
 	if info_label: t.tween_property(info_label, "modulate:a", 0.0, 1.0)
 	if next_day_label: t.tween_property(next_day_label, "modulate:a", 0.0, 1.0)
 	if fondo_texto: t.tween_property(fondo_texto, "modulate:a", 0.0, 1.0)
-	
 	if anfora_rota: t.tween_property(anfora_rota, "modulate:a", 0.0, 1.0)
 	if day_slider: t.tween_property(day_slider, "modulate:a", 0.0, 1.0)
 	
-	# 2. Preparar LoseLabel
 	t.chain().tween_callback(func():
 		if lose_label:
-			lose_label.visible_characters = 0 # <--- PRIMERO: Caracteres a 0
-			lose_label.modulate.a = 1.0       # <--- SEGUNDO: Hacer visible
+			lose_label.visible_characters = 0 
+			lose_label.modulate.a = 1.0       
 	)
-	
-	# 3. Animar texto de Derrota
 	if lose_label:
 		t.tween_property(lose_label, "visible_characters", lose_label.get_total_character_count(), 2.0)
-	
-	# 4. Mostrar botón
 	t.chain().tween_callback(reveal_next_day_button)
-## ------------------------------------------------------------------
-## INTRO COMIC SIMPLIFICADA
-## ------------------------------------------------------------------
-
-## ------------------------------------------------------------------
-## INTRO COMIC (Versión Final: TextureRect + CanvasLayer)
-## ------------------------------------------------------------------
 
 func _play_simple_intro():
-	# 1. Activamos la capa superior para ver la intro
 	comic_root.visible = true
-	
-	# Aseguramos que el fondo y las viñetas sean opacos al empezar
 	if comic_fondo: comic_fondo.modulate.a = 1.0
-	
-	# Bloqueamos la tienda de fondo para no clicar sin querer
 	buttonShop.disabled = true 
 	
-	# 2. Guardamos posiciones finales (donde las colocaste en el editor)
 	var pos1 = Comic1.position
 	var pos2 = Comic2.position
 	var pos3 = Comic3.position
-	
-	# 3. Posiciones de inicio (Fuera de la pantalla)
 	var screen_size = get_viewport_rect().size
 	
-	Comic1.position.x = -Comic1.size.x - 50      # Fuera Izquierda
-	Comic2.position.x = screen_size.x + 50       # Fuera Derecha
-	Comic3.position.y = screen_size.y + 50       # Fuera Abajo
+	Comic1.position.x = -Comic1.size.x - 50      
+	Comic2.position.x = screen_size.x + 50       
+	Comic3.position.y = screen_size.y + 50       
 	
-	# 4. Secuencia de animación
 	var t = create_tween()
-	
-	# Viñeta 1 (Izquierda -> Centro) - Frena suave
 	t.tween_property(Comic1, "position", pos1, 0.7).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	t.tween_interval(1) 
-	
-	# Viñeta 2 (Derecha -> Centro)
 	t.tween_property(Comic2, "position", pos2, 0.7).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	t.tween_interval(1) 
-	
-	# Viñeta 3 (Abajo -> Centro)
 	t.tween_property(Comic3, "position", pos3, 0.7).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	t.tween_interval(1) 
 	
-	# Aparece el botón (Fade In)
 	t.tween_callback(func(): 
 		if start_button:
 			start_button.visible = true
@@ -1071,14 +849,13 @@ func _play_simple_intro():
 
 func _on_start_button_pressed():
 	buttonShop.disabled = false
-	
 	var t = create_tween()
 	t.set_parallel(true) 
-	
-	if comic_fondo: 
-		t.tween_property(comic_fondo, "modulate:a", 0.0, 0.5) 
-	
-	if start_button: 
-		t.tween_property(start_button, "modulate:a", 0.0, 0.5)
-	
-	t.chain().tween_callback(func(): comic_root.visible = false)
+	if comic_fondo: t.tween_property(comic_fondo, "modulate:a", 0.0, 0.5) 
+	if start_button: t.tween_property(start_button, "modulate:a", 0.0, 0.5)
+	t.chain().tween_callback(func(): 
+		comic_root.visible = false
+		# AQUÍ CAEN LAS MAGIAS AL CERRAR LA INTRODUCCIÓN
+		if roulette.has_method("check_and_roll_modifiers"):
+			roulette.check_and_roll_modifiers()
+	)

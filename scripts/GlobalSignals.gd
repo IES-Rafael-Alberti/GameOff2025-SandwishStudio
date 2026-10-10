@@ -5,9 +5,9 @@ signal item_deleted(item_data: Resource)
 signal item_attached(item_data: Resource)
 signal item_return_to_inventory_requested(item_data: Resource, on_complete_callback: Callable)
 
-# --- AÑADE ESTA LÍNEA ---
-# Señal para cuando la ruleta otorga una pieza e inicia un combate.
-signal combat_requested(piece_resource: Resource)
+# --- MODIFICADO: Ahora transporta un diccionario con el modificador (fruta/trampa) ---
+signal combat_requested(piece_resource: Resource, modifier: Dictionary)
+# -----------------------------------------------------------------------------------
 
 # --- ¡NUEVAS SEÑALES PARA EL SISTEMA DE USOS! ---
 

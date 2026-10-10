@@ -33,6 +33,9 @@ signal roulette_spin_started
 @export var impact_squash_scale: Vector2 = Vector2(1.15, 0.9) 
 @export var sun_reflection_color: Color = Color(4.0, 3.5, 3.0, 1.0) 
 
+@export_group("Tiempos de Ruleta")
+@export var post_spin_delay_ms: int = 1500 
+
 @export_subgroup("Particle References")
 @export var lever_release_particles: GPUParticles2D
 @export var win_particles: GPUParticles2D
@@ -48,37 +51,29 @@ signal roulette_spin_started
 @onready var manecilla_area: Area2D = $Manecilla
 @onready var manecilla_sprite: Sprite2D = $Manecilla/SpriteManecilla
 @onready var ticker_audio: AudioStreamPlayer = $Manecilla/AudioStreamPlayer
-@export_group("Tiempos de Ruleta")
-@export var post_spin_delay_ms: int = 1500 
 
-# REFERENCIAS A LOS ICONOS DE SINERGIA
 @onready var icon_japonesa = $Japonesa
 @onready var icon_nordica = $Nordica
 @onready var icon_europea = $Europea
 
-# --- SHADER ---
 const OUTLINE_SHADER = preload("res://shaders/outline_highlight.gdshader")
 var highlight_material: ShaderMaterial
 
-# --- MEMORIA DE POSICIONES ---
 @onready var lever_origin_pos: Vector2 = $Lever.position
 @onready var roulette_origin_pos: Vector2 = $SpriteRuleta.position
 var camera_origin_zoom: Vector2 = Vector2.ONE
 var lever_origin_rotation: float = 0.0 
 
-# --- ESTADOS ---
 enum State { IDLE, SPINNING }
 var state: State = State.IDLE
 var is_interactive: bool = true
 
-# Variables lógica
 var is_dragging_lever: bool = false
 var current_lever_rotation: float = 0.0
 var inertia: float = 0.0
 var _selected_area: Area2D = null
 var bouncing: bool = false
 
-# Variables FX
 var shake_trauma: float = 0.0
 var target_zoom: Vector2 = Vector2.ONE
 var last_ratchet_angle: float = 0.0
@@ -91,15 +86,42 @@ var last_ratchet_angle: float = 0.0
 
 var general_audio_player: AudioStreamPlayer
 
-# --- INICIO ---
+# --- SISTEMA DE MODIFICADORES POR CATEGORÍA ---
+
+const BUFFS = [
+	{"name": "Light of Power", "color": Color(0.2, 1.0, 0.2, 1.5), "stat": "dmg", "mult": 1.4},
+	{"name": "Light of Vitality", "color": Color(0.4, 1.0, 0.4, 1.5), "stat": "hp", "mult": 1.4},
+	{"name": "Light of Swiftness", "color": Color(0.6, 1.0, 0.2, 1.5), "stat": "aps", "mult": 1.3},
+	{"name": "Light of the Colossus", "color": Color(0.0, 1.0, 0.5, 1.5), "stat": "hp", "mult": 1.8},
+	{"name": "Light of the Assassin", "color": Color(0.3, 0.9, 0.4, 1.5), "stat": "dmg", "mult": 1.75}
+]
+
+const MIXED_PACTS = [
+	{"name": "Scorching Pact", "color": Color(1.0, 0.5, 0.0, 1.5), "stat": "dmg", "mult": 1.5, "stat2": "hp", "mult2": 0.6},
+	{"name": "Berserker Pact", "color": Color(1.0, 0.6, 0.2, 1.5), "stat": "aps", "mult": 1.5, "stat2": "hp", "mult2": 0.6},
+	{"name": "Titan Pact", "color": Color(0.9, 0.4, 0.0, 1.5), "stat": "hp", "mult": 1.6, "stat2": "dmg", "mult2": 0.5},
+	{"name": "Glass Cannon Pact", "color": Color(1.0, 0.7, 0.0, 1.5), "stat": "dmg", "mult": 2.0, "stat2": "hp", "mult2": 0.25},
+	{"name": "Heavyweight Pact", "color": Color(1.0, 0.4, 0.1, 1.5), "stat": "dmg", "mult": 1.4, "stat2": "aps", "mult2": 0.5}
+]
+
+const CURSES = [
+	{"name": "Piercing Curse", "color": Color(1.0, 0.2, 0.2, 1.5), "stat": "hp", "mult": 0.5},
+	{"name": "Sluggish Curse", "color": Color(0.8, 0.0, 0.0, 1.5), "stat": "aps", "mult": 0.5},
+	{"name": "Weakening Curse", "color": Color(1.0, 0.0, 0.3, 1.5), "stat": "dmg", "mult": 0.5},
+	{"name": "Curse of the Fragile", "color": Color(0.9, 0.1, 0.1, 1.5), "stat": "hp", "mult": 0.25},
+	{"name": "Curse of the Pacifist", "color": Color(1.0, 0.4, 0.4, 1.5), "stat": "dmg", "mult": 0.25}
+]
+
+var modifiers_rolled_this_round: bool = false
+# ------------------------------------------
+
 func _ready() -> void:
 	highlight_material = ShaderMaterial.new()
 	highlight_material.shader = OUTLINE_SHADER
 	highlight_material.set_shader_parameter("width", 8.0) 
 	highlight_material.set_shader_parameter("color", Color.GOLDENROD)
 	
-	if has_node("/root/GlobalStats"):
-		GlobalStats.roulette_scene_ref = self
+	if has_node("/root/GlobalStats"): GlobalStats.roulette_scene_ref = self
 		
 	lever_origin_pos = lever_sprite.position
 	roulette_origin_pos = $SpriteRuleta.position
@@ -121,7 +143,6 @@ func _ready() -> void:
 	if manecilla_area:
 		manecilla_area.area_entered.connect(_on_manecilla_area_entered)
 		
-	# --- AUDIO SETUP ---
 	general_audio_player = AudioStreamPlayer.new()
 	general_audio_player.bus = "SFX"  
 	add_child(general_audio_player)
@@ -129,25 +150,115 @@ func _ready() -> void:
 	if ticker_audio:
 		ticker_audio.bus = "SFX"
 		ticker_audio.max_polyphony = 12       
-		if sfx_ticker_hit:
-			ticker_audio.stream = sfx_ticker_hit
+		if sfx_ticker_hit: ticker_audio.stream = sfx_ticker_hit
 			
 	update_ui_synergies()
 
-# --- INPUT Y PALANCA ---
+func reset_modifiers_state():
+	modifiers_rolled_this_round = false
+	for slot_root in slots_container.get_children():
+		if slot_root.has_node("slot"):
+			var actual_slot = slot_root.get_node("slot")
+			if actual_slot.has_method("clear_modifier"):
+				actual_slot.clear_modifier()
+
+func check_and_roll_modifiers() -> void:
+	if not modifiers_rolled_this_round:
+		modifiers_rolled_this_round = true
+		var delay = 0.0
+		
+		var children = slots_container.get_children()
+		children.shuffle()
+		
+		# --- NUEVO: SISTEMA DE DISTRIBUCIÓN PONDERADA (RARITY CURVE) ---
+		var num_effects_to_drop = _get_weighted_number_of_effects()
+		
+		print("[RULETA] Van a caer ", num_effects_to_drop, " efectos mágicos.")
+		
+		for i in range(children.size()):
+			var slot_root = children[i]
+			if slot_root.has_node("slot"):
+				var actual_slot = slot_root.get_node("slot")
+				
+				if i < num_effects_to_drop:
+					var mod = _pick_weighted_modifier()
+					get_tree().create_timer(delay).timeout.connect(func():
+						if is_instance_valid(actual_slot) and actual_slot.has_method("apply_modifier"):
+							actual_slot.apply_modifier(mod)
+					)
+					delay += 0.15 
+# -----------------------------------------------
+
+# --- CÁLCULO DE PROBABILIDAD DE CANTIDAD ---
+# --- CÁLCULO DE PROBABILIDAD (ESCULPIDO A MANO PARA 3 DÍAS) ---
+func _get_weighted_number_of_effects() -> int:
+	var current_day = 1
+	var gm = get_tree().get_first_node_in_group("game_manager")
+	if gm and "current_day" in gm:
+		current_day = gm.current_day
+		
+	var weights = []
+	
+	match current_day:
+		1:
+			# DÍA 1 (Calmado pero activo): Lo normal es que caiga al menos 1 o 2 magias.
+			# Que caigan 0 es posible, pero muy raro (aprox 5%).
+			weights = [
+				[0,  5], [1, 40], [2, 30], [3, 15], [4,  5],
+				[5,  2], [6,  1], [7,  0], [8,  0], [9,  0]
+			]
+		2:
+			# DÍA 2 (Tensión): Empiezan a caer bastantes magias (lo normal es 2, 3 o 4).
+			# Que caigan 9 ya es posible, pero es casi un milagro (0.7%).
+			weights = [
+				[0, 10], [1, 25], [2, 30], [3, 25], [4, 15],
+				[5, 10], [6,  5], [7,  2], [8,  1], [9,  1]
+			]
+		_:
+			# DÍA 3 (Clímax total): Lo raro es que no caiga nada. La pantalla se llenará de auras (4, 5 o 6 es lo normal).
+			# Que caigan 9 tiene exactamente un 5% de probabilidad (1 de cada 20 rondas).
+			weights = [
+				[0,  5], [1, 10], [2, 15], [3, 20], [4, 25],
+				[5, 30], [6, 20], [7, 15], [8, 10], [9,  8]
+			]
+	
+	# Sumamos todos los boletos para el "bombo"
+	var total_weight = 0
+	for w in weights:
+		total_weight += w[1]
+		
+	# Tiramos un dado exacto
+	var roll = randi() % total_weight
+	var current_weight = 0
+	
+	# Repartimos el premio
+	for w in weights:
+		current_weight += w[1]
+		if roll < current_weight:
+			return w[0]
+			
+	return 0
+# --------------------------------------------------------------
+# --- GESTOR DE PROBABILIDADES ---
+func _pick_weighted_modifier() -> Dictionary:
+	var roll = randi() % 100 + 1 # Tira un dado del 1 al 100
+	
+	# AQUÍ CONTROLAS EL BALANCE EXACTO DE TU JUEGO:
+	if roll <= 45:
+		return BUFFS.pick_random()        # 45% de que sea algo puramente BUENO
+	elif roll <= 75:
+		return MIXED_PACTS.pick_random()  # 30% de que sea un RIESGO MIXTO (Pacto)
+	else:
+		return CURSES.pick_random()       # 25% de que sea algo puramente MALO
 func _on_lever_input_event(_viewport, event, _shape_idx):
 	if not is_interactive or state != State.IDLE: return
-	
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		if event.pressed:
-			start_dragging()
+		if event.pressed: start_dragging()
 
 func _on_lever_mouse_entered() -> void:
-	if is_interactive and state == State.IDLE:
-		lever_sprite.material = highlight_material
+	if is_interactive and state == State.IDLE: lever_sprite.material = highlight_material
 
-func _on_lever_mouse_exited() -> void:
-	lever_sprite.material = null
+func _on_lever_mouse_exited() -> void: lever_sprite.material = null
 
 func _input(event):
 	if is_dragging_lever:
@@ -163,8 +274,7 @@ func start_dragging():
 	var t = create_tween()
 	t.tween_property(lever_sprite, "scale", Vector2(1.1, 1.1), 0.1).set_trans(Tween.TRANS_BACK)
 
-func is_moving():
-	return state != State.IDLE
+func is_moving(): return state != State.IDLE
 
 func update_lever_drag(mouse_delta_y: float):
 	var target_angle_offset = current_lever_rotation + (mouse_delta_y * drag_sensitivity)
@@ -178,7 +288,6 @@ func update_lever_drag(mouse_delta_y: float):
 		
 	var progress = current_lever_rotation / lever_max_angle
 	lever_sprite.modulate = Color.WHITE.lerp(tension_color, progress)
-	
 	var stretch = 1.0 + (progress * 0.15)
 	var squash = 1.0 - (progress * 0.05)
 	lever_sprite.scale = Vector2(squash, stretch)
@@ -192,7 +301,6 @@ func update_lever_drag(mouse_delta_y: float):
 func release_lever():
 	is_dragging_lever = false
 	var percentage_pulled = current_lever_rotation / lever_max_angle
-	
 	if percentage_pulled >= activation_threshold:
 		if sfx_lever_pulled:
 			general_audio_player.stream = sfx_lever_pulled
@@ -223,17 +331,14 @@ func release_lever():
 		
 	GlobalSignals.emit_signal("roulette_state_changed", true)
 
-# --- LÓGICA CENTRAL ---
 func trigger_spin():
 	_reset()
 	state = State.SPINNING
 	_selected_area = null
 	$SpriteRuleta.rotation_degrees += randf_range(0.0, 360.0)
-	
 	var base_force = min_impulse_force 
 	var random_multiplier = randf_range(min_impulse_random_range.x, min_impulse_random_range.y)
 	inertia = base_force * random_multiplier
-	
 	roulette_spin_started.emit()
 
 func _process(delta: float) -> void:
@@ -241,17 +346,13 @@ func _process(delta: float) -> void:
 		_spin(delta)
 		_process_zoom(delta)
 		
-	if shake_trauma > 0:
-		shake_trauma = max(shake_trauma - delta * 2.0, 0)
-		
+	if shake_trauma > 0: shake_trauma = max(shake_trauma - delta * 2.0, 0)
 	if state == State.IDLE:
 		shake_trauma = 0
 		$SpriteRuleta.position = roulette_origin_pos
 		
-	if game_camera:
-		game_camera.zoom = camera_origin_zoom
-	else:
-		_apply_screen_shake()
+	if game_camera: game_camera.zoom = camera_origin_zoom
+	else: _apply_screen_shake()
 
 func _spin(_delta: float):
 	$SpriteRuleta.rotation_degrees += inertia
@@ -259,7 +360,6 @@ func _spin(_delta: float):
 	$SpriteRuleta.modulate = Color.WHITE.lerp(speed_glow_color, glow_amount)
 	
 	inertia *= friction
-	
 	if abs(inertia) < 0.05:
 		inertia = 0
 		$SpriteRuleta.modulate = Color.WHITE 
@@ -279,7 +379,6 @@ func _apply_screen_shake():
 	var offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * screen_shake_force * amount
 	$SpriteRuleta.position = roulette_origin_pos + offset
 
-# --- MANECILLA ---
 func _on_manecilla_area_entered(area: Area2D) -> void:
 	if state != State.SPINNING: return
 	_selected_area = area
@@ -294,23 +393,19 @@ func _bounce():
 		
 	if bouncing: return
 	bouncing = true
-	
 	var spr = $Manecilla/SpriteManecilla
 	var orig_pos = spr.position
 	var orig_rot = spr.rotation_degrees
-	
 	spr.rotation_degrees = -bounce_angle
 	spr.position.y -= 4
 	spr.modulate = Color(1.5, 1.5, 1.5)
 	
-	var t = create_tween()
-	t.set_parallel(true)
+	var t = create_tween().set_parallel(true)
 	t.tween_property(spr, "rotation_degrees", orig_rot, bounce_time)
 	t.tween_property(spr, "position", orig_pos, bounce_time)
 	t.tween_property(spr, "modulate", Color.WHITE, 0.1)
 	t.chain().tween_callback(func(): bouncing = false)
 
-# --- RECOMPENSAS ---
 func _impact_slot(area: Area2D) -> void:
 	if not "slot_index" in area: return
 	var slot_index: int = area.slot_index
@@ -321,8 +416,7 @@ func _impact_slot(area: Area2D) -> void:
 	if slot_root and slot_root.has_node("slot"):
 		var actual_slot = slot_root.get_node("slot")
 		if actual_slot is CanvasItem:
-			if slot_root.has_method("kill_highlight_tween"):
-				slot_root.kill_highlight_tween()
+			if slot_root.has_method("kill_highlight_tween"): slot_root.kill_highlight_tween()
 			actual_slot.material = null
 			var t = create_tween()
 			t.set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT)
@@ -354,58 +448,57 @@ func _reward():
 		win_particles.emitting = true
 		
 	var piece_won: Resource = null
+	var modifier_won: Dictionary = {}
 	var is_win: bool = false
 	
-	# 1. Comprobar dónde ha caído
-	if _selected_area and "slot_index" in _selected_area:
-		var index: int = _selected_area.slot_index
-		if index < slots_container.get_child_count():
-			var winning_slot_root = slots_container.get_child(index)
-			if winning_slot_root and winning_slot_root.has_node("slot"):
-				var actual_slot = winning_slot_root.get_node("slot")
-				if actual_slot is CanvasItem:
+	if not _selected_area or not "slot_index" in _selected_area:
+		_play_result_sound(false)
+		GlobalSignals.emit_signal("combat_requested", null, {}) 
+		return
+		
+	var index: int = _selected_area.slot_index
+	if index >= slots_container.get_child_count():
+		_play_result_sound(false)
+		GlobalSignals.emit_signal("combat_requested", null, {}) 
+		return
+		
+	var winning_slot_root = slots_container.get_child(index)
+	if winning_slot_root and winning_slot_root.has_node("slot"):
+		var actual_slot = winning_slot_root.get_node("slot")
+		if actual_slot is CanvasItem:
+			if "current_piece_data" in actual_slot and actual_slot.current_piece_data:
+				var piece = actual_slot.current_piece_data
+				if piece and piece.get("piece_origin"):
+					piece_won = piece.piece_origin
+					is_win = true
 					
-					# Revisamos si hay pieza ANTES de la espera
-					if "current_piece_data" in actual_slot:
-						var piece = actual_slot.current_piece_data
-						if piece and piece.get("piece_origin"):
-							piece_won = piece.piece_origin
-							is_win = true
-							
-					# Lanzamos la animación visual sin bloquear la lógica
-					var final_highlight_color = highlight_color * final_highlight_intensity
-					var t = create_tween()
-					t.set_trans(Tween.TRANS_ELASTIC)
-					t.tween_property(actual_slot, "modulate", final_highlight_color, 0.3)
-					t.chain().tween_property(actual_slot, "modulate", Color.WHITE, 0.5) 
+			if "current_modifier" in actual_slot and not actual_slot.current_modifier.is_empty():
+				modifier_won = actual_slot.current_modifier
 					
-					if winning_slot_root.has_method("kill_highlight_tween"):
-						winning_slot_root.kill_highlight_tween()
-						
-					t.set_loops(3)
-					t.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-					t.tween_property(actual_slot, "modulate", winner_highlight_color, 0.15)
-					t.tween_property(actual_slot, "modulate", Color.WHITE, 0.15)
-					
-					t.finished.connect(func(): 
-						actual_slot.modulate = Color(1.2, 1.1, 1.0)
-					)
+			var final_highlight_color = highlight_color * final_highlight_intensity
+			var t = create_tween()
+			t.set_trans(Tween.TRANS_ELASTIC)
+			t.tween_property(actual_slot, "modulate", final_highlight_color, 0.3)
+			t.chain().tween_property(actual_slot, "modulate", Color.WHITE, 0.5) 
+			
+			if winning_slot_root.has_method("kill_highlight_tween"):
+				winning_slot_root.kill_highlight_tween()
+				
+			t.set_loops(3)
+			t.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+			t.tween_property(actual_slot, "modulate", winner_highlight_color, 0.15)
+			t.tween_property(actual_slot, "modulate", Color.WHITE, 0.15)
+			t.finished.connect(func(): actual_slot.modulate = Color(1.2, 1.1, 1.0))
 
-	# 2. Reproducir el sonido correspondiente inmediatamente al detenerse
 	_play_result_sound(is_win)
 	if is_win:
 		print("¡Pieza obtenida: %s!" % piece_won.resource_name)
 		
-	# 3. ESPERA CONTROLADA POR EL INSPECTOR (Convertimos ms a segundos)
 	await get_tree().create_timer(post_spin_delay_ms / 1000.0).timeout
+	if not is_inside_tree(): return
 	
-	# Seguridad por si cerramos el juego o cambiamos de escena mientras esperábamos
-	if not is_inside_tree():
-		return
-		
-	# 4. Enviar la señal final para empezar combate (o saltarlo si es null)
-	GlobalSignals.emit_signal("combat_requested", piece_won)
-	
+	GlobalSignals.emit_signal("combat_requested", piece_won, modifier_won)
+
 func _reset():
 	_selected_area = null
 	inertia = 0.0
@@ -417,20 +510,16 @@ func _reset():
 	lever_sprite.position = lever_origin_pos
 	lever_sprite.rotation_degrees = lever_origin_rotation 
 	lever_sprite.material = null 
-	
-	current_lever_rotation = 0.0 # Reset de la rotación acumulada
+	current_lever_rotation = 0.0
 	
 	for slot_root in slots_container.get_children():
 		if slot_root.has_node("slot"):
 			var actual_slot = slot_root.get_node("slot")
 			if actual_slot is CanvasItem:
-				if slot_root.has_method("kill_highlight_tween"):
-					slot_root.kill_highlight_tween()
+				if slot_root.has_method("kill_highlight_tween"): slot_root.kill_highlight_tween()
 				actual_slot.modulate = Color.WHITE
 				
-	if win_particles:
-		win_particles.emitting = false
-		
+	if win_particles: win_particles.emitting = false
 	if game_camera:
 		var t = create_tween()
 		t.tween_property(game_camera, "zoom", camera_origin_zoom, 0.5).set_trans(Tween.TRANS_CUBIC)
@@ -445,8 +534,7 @@ func reset_rotation_to_zero():
 
 func set_interactive(interactive: bool):
 	is_interactive = interactive
-	if lever_sprite:
-		lever_sprite.modulate = Color.WHITE if interactive else Color(0.5, 0.5, 0.5)
+	if lever_sprite: lever_sprite.modulate = Color.WHITE if interactive else Color(0.5, 0.5, 0.5)
 
 func _on_piece_type_deleted(piece_data: PieceData):
 	if not piece_data: return
@@ -459,18 +547,15 @@ func _on_piece_type_deleted(piece_data: PieceData):
 					slot.clear_slot()
 					update_ui_synergies()
 
-# --- SISTEMA DE SINERGIAS CENTRALIZADO ---
 func _calculate_counts() -> Dictionary:
 	var unique_ids_jap = {}
 	var unique_ids_nor = {}
 	var unique_ids_eur = {}
-	
 	if not slots_container: return {"jap_count":0, "nor_count":0, "eur_count":0}
 	
 	for slot_root in slots_container.get_children():
 		if not slot_root.has_node("slot"): continue
 		var actual_slot = slot_root.get_node("slot")
-		
 		if "current_piece_data" in actual_slot and actual_slot.current_piece_data:
 			var data = actual_slot.current_piece_data
 			if "piece_origin" in data and data.piece_origin is PieceRes:
@@ -481,36 +566,25 @@ func _calculate_counts() -> Dictionary:
 					PieceRes.PieceRace.NORDIC: unique_ids_nor[id] = true
 					PieceRes.PieceRace.EUROPEAN: unique_ids_eur[id] = true
 					
-	return {
-		"jap_count": unique_ids_jap.size(),
-		"nor_count": unique_ids_nor.size(),
-		"eur_count": unique_ids_eur.size()
-	}
+	return { "jap_count": unique_ids_jap.size(), "nor_count": unique_ids_nor.size(), "eur_count": unique_ids_eur.size() }
 
 func update_ui_synergies():
 	var counts = _calculate_counts()
-	if icon_japonesa and icon_japonesa.has_method("update_synergy_count"):
-		icon_japonesa.update_synergy_count(counts["jap_count"])
-	if icon_nordica and icon_nordica.has_method("update_synergy_count"):
-		icon_nordica.update_synergy_count(counts["nor_count"])
-	if icon_europea and icon_europea.has_method("update_synergy_count"):
-		icon_europea.update_synergy_count(counts["eur_count"])
+	if icon_japonesa and icon_japonesa.has_method("update_synergy_count"): icon_japonesa.update_synergy_count(counts["jap_count"])
+	if icon_nordica and icon_nordica.has_method("update_synergy_count"): icon_nordica.update_synergy_count(counts["nor_count"])
+	if icon_europea and icon_europea.has_method("update_synergy_count"): icon_europea.update_synergy_count(counts["eur_count"])
 
 func get_current_synergies() -> Dictionary:
 	var counts = _calculate_counts()
 	update_ui_synergies()
-	
 	var result = {"jap": 0, "nor": 0, "eur": 0}
 	
 	if counts["jap_count"] >= 4: result["jap"] = 2
 	elif counts["jap_count"] >= 2: result["jap"] = 1
-	
 	if counts["nor_count"] >= 4: result["nor"] = 2
 	elif counts["nor_count"] >= 2: result["nor"] = 1
-	
 	if counts["eur_count"] >= 4: result["eur"] = 2
 	elif counts["eur_count"] >= 2: result["eur"] = 1
-	
 	return result
 
 func _play_result_sound(is_win: bool):

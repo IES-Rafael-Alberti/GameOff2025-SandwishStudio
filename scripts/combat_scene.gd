@@ -151,9 +151,9 @@ func _play_controlled_sfx(stream: AudioStream, type: String, pos: Vector2 = Vect
 	player.play()
 # --------------------------------------------------------------------------
 
-func on_roulette_combat_requested(piece_resource: Resource) -> void:
+func on_roulette_combat_requested(piece_resource: Resource, modifier: Dictionary = {}) -> void:
 	if not piece_resource or not piece_resource is PieceRes:
-		print("La ruleta ha caído en vacío o no hay resource. No se spawnea aliado.")
+		print("La ruleta ha caído en vacío. No se spawnea aliado.")
 		_cleanup_allies_and_reset()
 		if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 			var g: npc = enemy_npcs[0]
@@ -161,9 +161,11 @@ func on_roulette_combat_requested(piece_resource: Resource) -> void:
 		return
 		
 	print("Señal de combate global recibida. Aliado: ", piece_resource.get("display_name"))
+	if not modifier.is_empty():
+		print("¡Modificador activo! ", modifier.get("name", "Desconocido"))
 	
 	_cleanup_allies_and_reset()
-	spawn_piece(npc.Team.ALLY, piece_resource as PieceRes)
+	spawn_piece(npc.Team.ALLY, piece_resource as PieceRes, modifier)
 	
 	var enemy_alive: bool = false
 	for e in enemy_npcs:
@@ -205,12 +207,13 @@ func _stop_combat() -> void:
 		if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 			_move_with_tween_global(enemy_npcs[0], enemy_wait_slot.global_position, 0.5)
 			
+	# Protegemos contra reinicios
 	if not is_inside_tree():
 		return
 		
 	await get_tree().create_timer(1.0).timeout
 	
-	# Seguridad extra post-espera
+	# Segunda protección post-espera
 	if not is_inside_tree():
 		return
 	
@@ -373,7 +376,7 @@ func _get_piece_copies_owned(piece_data: Resource) -> int:
 		return int(max(1.0, float(game_manager.get_inventory_piece_count(piece_data))))
 	return 1
 
-func spawn_piece(team: int, piece: PieceRes) -> void:
+func spawn_piece(team: int, piece: PieceRes, modifier: Dictionary = {}) -> void:
 	if piece == null: return
 	var num_copies: int = 1
 	var gold_per_enemy: int = 0
@@ -384,6 +387,14 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 	var pack: Dictionary = PieceAdapter.to_npc_res(piece, num_copies, gold_per_enemy)
 	var npc_template: npcRes = pack["res"] as npcRes
 	var members: int = int(pack["members"])
+	
+	# --- APLICAR MODIFICADOR AL TEMPLATE ANTES DE SPAWNEAR (Buffs/Debuffs) ---
+	if team == npc.Team.ALLY and not modifier.is_empty():
+		if modifier.has("stat") and modifier.has("mult"):
+			_modify_template_stat(npc_template, modifier.stat, modifier.mult)
+		if modifier.has("stat2") and modifier.has("mult2"):
+			_modify_template_stat(npc_template, modifier.stat2, modifier.mult2)
+	# -------------------------------------------------------------------------
 	
 	if team == npc.Team.ALLY:
 		ally_spawn_sfx_played = false
@@ -422,6 +433,18 @@ func spawn_piece(team: int, piece: PieceRes) -> void:
 	var e: npc = _spawn_npc(team, enemy_spawn.position, npc_template)
 	if e:
 		enemy_npcs.append(e)
+
+# --- FUNCIÓN QUE ESCALA LAS ESTADÍSTICAS ---
+func _modify_template_stat(template: npcRes, stat: String, mult: float) -> void:
+	match stat:
+		"hp":
+			template.max_health *= mult
+			template.health = template.max_health
+		"dmg":
+			template.damage *= mult
+		"aps":
+			template.atack_speed *= mult
+	print("[RUEDA DEL DESTINO] Stat '%s' alterada un x%.2f" % [stat, mult])
 
 func _place_ally_in_slot_with_tween(n: npc, final_pos: Vector2, order_index: int) -> void:
 	n.global_position = ally_entry_spawn.global_position
@@ -483,9 +506,8 @@ func _on_npc_died(n: npc) -> void:
 			n.gold_pool = 0
 
 func _on_npc_exited(n: npc) -> void:
-	if not is_inside_tree():
-		return
-		
+	if not is_inside_tree(): return
+	
 	if n.team == npc.Team.ALLY:
 		ally_npcs.erase(n)
 	else:
