@@ -60,8 +60,10 @@ frame_9/duration = 1.0
 frame_10/texture = ExtResource("21_sgl2t")
 frame_10/duration = 1.0
 
-[node name="game" type="Node2D"]
+[node name="game" type="Node2D" node_paths=PackedStringArray("ultimate_bar", "ultimate_button")]
 script = ExtResource("1_lbhrr")
+ultimate_bar = NodePath("UltimateBar")
+ultimate_button = NodePath("UltimateButton")
 tex_grab = ExtResource("3_264po")
 tex_click = ExtResource("4_1kice")
 gold_round_base = 3
@@ -323,5 +325,23 @@ visible = false
 
 [node name="elJetas" parent="." instance=ExtResource("13_trtic")]
 z_index = 4
+
+[node name="UltimateButton" type="Button" parent="."]
+z_index = 999
+offset_left = 442.0
+offset_top = 397.0
+offset_right = 589.0
+offset_bottom = 441.0
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 21
+text = "Emperor's Fury
+"
+
+[node name="UltimateBar" type="ProgressBar" parent="."]
+z_index = 999
+offset_left = 434.0
+offset_top = 444.0
+offset_right = 596.0
+offset_bottom = 471.0
 
 [connection signal="pressed" from="DayFinished/NextDayButton" to="." method="_advance_to_next_day"]

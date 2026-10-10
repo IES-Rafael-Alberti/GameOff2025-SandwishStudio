@@ -207,13 +207,11 @@ func _stop_combat() -> void:
 		if enemy_npcs.size() > 0 and is_instance_valid(enemy_npcs[0]):
 			_move_with_tween_global(enemy_npcs[0], enemy_wait_slot.global_position, 0.5)
 			
-	# Protegemos contra reinicios
 	if not is_inside_tree():
 		return
 		
 	await get_tree().create_timer(1.0).timeout
 	
-	# Segunda protección post-espera
 	if not is_inside_tree():
 		return
 	
@@ -388,13 +386,11 @@ func spawn_piece(team: int, piece: PieceRes, modifier: Dictionary = {}) -> void:
 	var npc_template: npcRes = pack["res"] as npcRes
 	var members: int = int(pack["members"])
 	
-	# --- APLICAR MODIFICADOR AL TEMPLATE ANTES DE SPAWNEAR (Buffs/Debuffs) ---
 	if team == npc.Team.ALLY and not modifier.is_empty():
 		if modifier.has("stat") and modifier.has("mult"):
 			_modify_template_stat(npc_template, modifier.stat, modifier.mult)
 		if modifier.has("stat2") and modifier.has("mult2"):
 			_modify_template_stat(npc_template, modifier.stat2, modifier.mult2)
-	# -------------------------------------------------------------------------
 	
 	if team == npc.Team.ALLY:
 		ally_spawn_sfx_played = false
@@ -434,7 +430,6 @@ func spawn_piece(team: int, piece: PieceRes, modifier: Dictionary = {}) -> void:
 	if e:
 		enemy_npcs.append(e)
 
-# --- FUNCIÓN QUE ESCALA LAS ESTADÍSTICAS ---
 func _modify_template_stat(template: npcRes, stat: String, mult: float) -> void:
 	match stat:
 		"hp":
@@ -648,10 +643,6 @@ func _do_attack_async(attacker: npc, defender: npc) -> void:
 		
 	if attacker.team == npc.Team.ALLY:
 		_process_ally_wave_logic()
-		
-	var crit_text: String = " (no crit)"
-	if crit: crit_text = " CRIT x" + _num(mult)
-	print("[HIT] ", _team_to_str(attacker.team), " -> ", _team_to_str(defender.team), " | final=", _num(dmg), crit_text)
 
 func _who(n: npc) -> String:
 	if not is_instance_valid(n): return "[null]"
@@ -705,9 +696,13 @@ func _process_ally_wave_logic() -> void:
 			
 	if living_allies_count == 0: return
 	
+	# CUANDO TODA LA OLEADA HA ATACADO (COMBATE SIMULTÁNEO COMPLETADO)
 	if current_wave_attacks >= living_allies_count:
 		current_wave_attacks = 0
 		jap_wave_counter += 1
+		
+		# --- NUEVO: CARGAR LA BARRA ULTIMATE DEL JUGADOR ---
+		get_tree().call_group("game_manager", "add_ultimate_charge")
 		
 		if jap_wave_counter % 3 == 0:
 			for a in ally_npcs:
@@ -719,3 +714,42 @@ func _move_with_tween_global(n: npc, target_pos: Vector2, duration: float = 1.8)
 	if not is_instance_valid(n): return
 	var tween: Tween = create_tween()
 	tween.tween_property(n, "global_position", target_pos, duration).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+# --- NUEVO: LÓGICA DEL ATAQUE DEFINITIVO VISUAL ---
+func execute_player_ultimate(dmg: float) -> void:
+	var target: npc = null
+	for e in enemy_npcs:
+		if is_instance_valid(e) and e.health > 0:
+			target = e
+			break
+			
+	if not target: return
+	
+	print("[ULTIMATE] ¡Ataque divino lanzado sobre el Gladiador!")
+	
+	# Efecto visual: Relámpago celestial gigante
+	var smite = ColorRect.new()
+	smite.color = Color(0.2, 0.9, 1.0, 1.0) # Azul cian brillante (puedes cambiarlo a dorado)
+	smite.size = Vector2(150, 3000)
+	smite.position = target.position - Vector2(75, 3000)
+	smite.z_index = 100
+	get_node("npcs").add_child(smite)
+	
+	var t = create_tween()
+	t.tween_property(smite, "position:y", target.position.y - 3000, 0.1) # Cae casi al instante
+	t.parallel().tween_property(smite, "modulate:a", 0.0, 0.6).set_trans(Tween.TRANS_EXPO)
+	t.tween_callback(smite.queue_free)
+	
+	# Temblor de pantalla agresivo
+	var original_pos = position
+	var shake = create_tween()
+	for i in range(6):
+		shake.tween_property(self, "position", original_pos + Vector2(randf_range(-20, 20), randf_range(-20, 20)), 0.05)
+	shake.tween_property(self, "position", original_pos, 0.05)
+	
+	# Aplicamos el daño masivo (Forzamos "crit" en true para que el texto salte y sea vistoso)
+	var attacker = ally_npcs[0] if ally_npcs.size() > 0 else null
+	if target.has_method("take_damage"):
+		target.take_damage(dmg, attacker, true)
+	else:
+		target.health -= dmg

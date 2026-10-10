@@ -15,6 +15,17 @@ var current_day: int = 1
 var gladiators_defeated: int = 0 
 @onready var NextDayButton: TextureButton = $DayFinished/NextDayButton
 
+# --- HABILIDAD ULTIMATE DEL JUGADOR ---
+@export_group("Habilidad Ultimate")
+@export var ultimate_max_charge: float = 100.0
+@export var ultimate_charge_per_wave: float = 5.0 
+@export var ultimate_damage: float = 150.0 
+@export var ultimate_bar: Range          
+@export var ultimate_button: BaseButton  
+
+var current_ultimate_charge: float = 0.0
+# ---------------------------------------------
+
 # Nodos
 @onready var buttonShop: Button = $elJetas/ButtonShop
 @onready var sprite_show: Sprite2D = $elJetas/ButtonShop/EyeSprite
@@ -145,6 +156,12 @@ func _ready():
 	
 	store.start_new_round()
 	_update_ui_labels()
+	
+	# --- CONEXIÓN DEL ULTIMATE ---
+	if ultimate_button:
+		ultimate_button.pressed.connect(_on_ultimate_button_pressed)
+	_update_ultimate_ui()
+	# -----------------------------
 
 	if current_round == 1:
 		_give_initial_piece()
@@ -174,6 +191,42 @@ func _ready():
 			NextDayButton.disabled = false
 	if transition_rect:
 			transition_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+# --- FUNCIONES DE LA BARRA ULTIMATE ---
+func add_ultimate_charge() -> void:
+	if current_state != GameState.COMBAT: return
+	
+	current_ultimate_charge += ultimate_charge_per_wave
+	if current_ultimate_charge > ultimate_max_charge:
+		current_ultimate_charge = ultimate_max_charge
+		
+	_update_ultimate_ui()
+
+func _update_ultimate_ui() -> void:
+	if ultimate_bar:
+		ultimate_bar.max_value = ultimate_max_charge
+		var tw = create_tween()
+		tw.tween_property(ultimate_bar, "value", current_ultimate_charge, 0.2).set_trans(Tween.TRANS_SINE)
+		
+	if ultimate_button:
+		if current_ultimate_charge >= ultimate_max_charge:
+			ultimate_button.disabled = false
+			ultimate_button.modulate = Color(1.5, 1.5, 1.5) # Glow de que está listo
+			ultimate_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		else:
+			ultimate_button.disabled = true
+			ultimate_button.modulate = Color(0.6, 0.6, 0.6) # Apagado
+			ultimate_button.mouse_default_cursor_shape = Control.CURSOR_ARROW
+
+func _on_ultimate_button_pressed() -> void:
+	if current_state != GameState.COMBAT: return
+	if current_ultimate_charge >= ultimate_max_charge:
+		current_ultimate_charge = 0.0
+		_update_ultimate_ui()
+		
+		if combat_scene and combat_scene.has_method("execute_player_ultimate"):
+			combat_scene.execute_player_ultimate(ultimate_damage)
+# --------------------------------------
 	
 func _process(_delta: float) -> void:
 	blink_timer -= _delta
@@ -472,7 +525,6 @@ func _toggle_store(close_store: bool):
 		
 		tween.finished.connect(func(): 
 			is_shop_transitioning = false
-			# Evitamos tirar las magias si el cómic está en pantalla (Día 1, Ronda 1)
 			if comic_root and comic_root.visible:
 				return
 			if roulette.has_method("check_and_roll_modifiers"):
@@ -855,7 +907,6 @@ func _on_start_button_pressed():
 	if start_button: t.tween_property(start_button, "modulate:a", 0.0, 0.5)
 	t.chain().tween_callback(func(): 
 		comic_root.visible = false
-		# AQUÍ CAEN LAS MAGIAS AL CERRAR LA INTRODUCCIÓN
 		if roulette.has_method("check_and_roll_modifiers"):
 			roulette.check_and_roll_modifiers()
 	)
